@@ -389,6 +389,30 @@ return
 			gosub *redraw_dock
 		next
 	}
+	if(mode_list3(screen_shot_type) == "工廠画面"){
+		buffer kTempBufferID, 11, 16
+		dim number, 6
+		for i, 0, kDocks
+			gsel kFlashBufferID
+			bdock_hour(i) = 0
+			bdock_minute(i) = 0
+			bdock_second(i) = 0
+			if(NearColor(730, bypos(i), 204, 128, 73)){	//ドックに艦娘がいるかを判定
+				for j, 0, 6
+					gsel kTempBufferID
+					gcopy kFlashBufferID, bxpos(j), bypos(i), 11, 16
+					number(j) = limit(MatchNumber(170, FALSE), 0, 9)
+					if(j == 0) :number(j) = limit(number(j), 0, 5)
+					if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
+				next
+				bdock_hour(i)   = number(0) * 10 + number(1)
+				bdock_minute(i) = number(2) * 10 + number(3)
+				bdock_second(i) = number(4) * 10 + number(5)
+			}
+			gsel kDockWindowID
+			gosub *redraw_dock
+		next
+	}
 return
 //インクリメント
 *increment_dock
@@ -401,6 +425,17 @@ return
 				if(dock_minute(k) < 0){
 					dock_minute(k) += 60
 					dock_hour(k) --
+				}
+			}
+		}
+		if((bdock_hour(k) != 0) || (bdock_minute(k) != 0) || (bdock_second(k) != 0)){
+			bdock_second(k)--
+			if(bdock_second(k) < 0){
+				bdock_second(k) += 60
+				bdock_minute(k)--
+				if(bdock_minute(k) < 0){
+					bdock_minute(k) += 60
+					bdock_hour(k) --
 				}
 			}
 		}
@@ -419,6 +454,17 @@ return
 			objprm k * 2 + 1, strf("%02d:%02d:%02d", now_hour, now_minute, now_second)
 		}else{
 			objprm k * 2 + 1, ""
+		}
+		objprm k * 2 + 8, strf("%02d:%02d:%02d", bdock_hour(k), bdock_minute(k), bdock_second(k))
+		if((bdock_hour(k) != 0) || (bdock_minute(k) != 0) || (bdock_second(k) != 0)){
+			now_hour   = gettime(4) + bdock_hour(k)
+			now_minute = gettime(5) + bdock_minute(k)
+			now_second = gettime(6) + bdock_second(k)
+			if(now_second >= 60) :now_minute += now_second / 60 :now_second \= 60
+			if(now_minute >= 60) :now_hour += now_minute / 60 :now_minute \= 60
+			objprm k * 2 + 9, strf("%02d:%02d:%02d", now_hour, now_minute, now_second)
+		}else{
+			objprm k * 2 + 9, ""
 		}
 	next
 return
@@ -541,6 +587,92 @@ return
 //資材グラフを閉じる
 *close_graph
 	gsel kSupplyGraphID, -1
+return
+//資材グラフを作成する
+*make_graph
+	// 日付の最小値・最大値を取り出す
+	day_first = ConvertDay(supply_log_int(0, 0))
+	day_last  = ConvertDay(supply_log_int(supply_log_size - 1, 0))
+	// 資源の最小値・最大値を取り出す
+	max_param = supply_log_int(0, 2)
+	min_param = supply_log_int(0, 2)
+	for n, 0, supply_log_size
+		for k, 2, 5
+			if(max_param < supply_log_int(n, k)) :max_param = supply_log_int(n, k)
+			if(min_param > supply_log_int(n, k)) :min_param = supply_log_int(n, k)
+		next
+	next
+	max_param = ((max_param / 1000) + 1) * 1000
+	min_param = ((min_param / 1000) - 1) * 1000 :if(min_param < 0) :min_param = 0
+	diff_param = max_param - min_param
+	// グラフを作成する
+	//グラフ線
+	buffer kGraphBufferID, (day_last - day_first + 1) * kGraphWX, kGraphWY
+	for n, 0, supply_log_size - 1
+		for k, 2, 6
+			switch k
+				case 2	;燃料
+					color $00,$80,$00
+					swbreak
+				case 3	;弾薬
+					color $66,$33,$00
+					swbreak
+				case 4	;鋼材
+					color $A0,$A0,$A0
+					swbreak
+				case 5	;ボーキ
+					color $CC,$33,$00
+					swbreak
+			swend
+			p1 = (ConvertDay(supply_log_int(n, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n, 1)) * kGraphWX
+			p2 = kGraphWY - 1.0 * (supply_log_int(n, k) - min_param) / diff_param * kGraphWY
+			p3 = (ConvertDay(supply_log_int(n + 1, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n + 1, 1)) * kGraphWX
+			p4 = kGraphWY - 1.0 * (supply_log_int(n + 1, k) - min_param) / diff_param * kGraphWY
+			line p1, p2, p3, p4
+		next
+	next
+	//縦線
+	font msgothic, kGraphFontSize
+	for k, 0, (day_last - day_first + 1) * 12
+		color $C0,$C0,$C0
+		line k * kGraphStepX, 0, k * kGraphStepX, kGraphWY
+		color 0, 0, 255
+		pos k * kGraphStepX, kGraphWY - kGraphFontSize * 2
+		mes strf("%02dh", (k \ 12) * 2)
+	next
+	//日付
+	color 0, 0, 255
+	for k, 0, (day_last - day_first + 1)
+		pos k * kGraphWX, kGraphFontSize
+		mes ConvertDay2(day_first + k)
+	next
+	// 表示座標を初期化
+	plot_graph_px = (day_last - day_first + 1) * kGraphWX - kGraphWX
+return
+//資材グラフを表示する
+*plot_graph
+	gsel kSupplyGraphID
+	redraw 0
+		;画像
+		color $FF, $FF, $FF
+		boxf
+		pos 0, 0
+		gcopy kGraphBufferID, plot_graph_px, 0, kGraphWX, kGraphWY
+		;文字
+		font msgothic, kGraphFontSize
+		color
+		pos 0, 0
+		mes max_param
+		pos 0, kGraphWY - kGraphFontSize
+		mes min_param
+	redraw 1
+return
+//資材グラフのスクショを保存
+*save_graph
+	gsel kSupplyGraphID
+	cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
+	cvputimg kCaptureBufferID
+	cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCaptureBufferID
 return
 
 //資源画像を保存

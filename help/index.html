@@ -14,7 +14,7 @@
 	</head>
 	<body>
 <!-- タイトル -->
-		<h1>おりこうさんな秘書 Ver.2.0.3</h1>
+		<h1>おりこうさんな秘書 Ver.2.0.4</h1>
 		<a href="http://www.vector.co.jp/soft/win95/game/se509326.html">http://www.vector.co.jp/soft/win95/game/se509326.html</a>
 		<hr>
 
@@ -56,10 +56,11 @@
 			<li>改装画面でのスクショを利用した<strong>「装備まとめ画像作成機能」</strong></li>
 			<li>母港・マップ・戦闘画面において<strong>「BGMを自動で流せる機能」</strong></li>
 			<li>必要経験値や周回数を計算する<strong>「経験値計算機」</strong></li>
-			<li>入渠画面を画像で読み取り、自動でカウントする<strong>「入渠タイマー」</strong></li>
+			<li>入渠・建造画面を画像で読み取り、自動でカウントする<strong>「各種タイマー」</strong></li>
 			<li>あ・い・ろ号のカウントを支援する<strong>「○号カウンター」</strong></li>
 			<li>編成画面でのソート一覧を見やすくまとめる<strong>「ソートまとめ画像作成機能」</strong></li>
 			<li>大破出撃や大破進撃を未然に防ぐ<strong>「大破チェック機能」</strong></li>
+			<li>資源状況をグラフ表示する<strong>「資源グラフ機能」</strong></li>
 		</ul>
 		<p>　最新の開発状況や更新情報は、次のスレにまとめているので一度覗いてみてください。</p>
 		<div>【艦これ】おりこうさんな秘書【スクショ】<br>
@@ -118,22 +119,22 @@
 		<h2><a name="window">画面構成</a></h2>
 			<p>　気になる箇所をクリックしてみてください。説明する箇所へと飛びます。</p>
 			<h3><a name="main_window">メイン画面(境界を<span style="color: #ff0000; background-color: #FFFFFF">赤い線</span>で図示)</a></h3>
-			<img src="./images/main_window.png" alt="メイン画面" usemap="#map_mw" width="200" height="378">
+			<img src="./images/main_window.png" alt="メイン画面" usemap="#map_mw" width="200" height="407">
 			<map name="map_mw">
 				<area shape="rect" href="#getpos"    alt="座標取得"                 accesskey="G" coords="8,30,191,65">
 				<area shape="poly" href="#showmode"  alt="表示モード"               accesskey="M" coords="8,67,99,67,99,98,191,98,191,125,8,125">
 				<area shape="rect" href="#save_cap"  alt="画像保存(スクショ)"       accesskey="C" coords="101,67,191,96">
 				<area shape="rect" href="#save_cap"  alt="画像保存(装備まとめ画像)" accesskey="W" coords="8,127,191,157">
 				<area shape="rect" href="#auto_bgm"  alt="BGM機能"                  accesskey="B" coords="8,159,191,249">
-				<area shape="poly" href="#tools"     alt="各種ツール"               accesskey="T" coords="8,251,191,251,191,308,8,308">
-				<area shape="rect" href="#save_cap"  alt="画像保存(資源まとめ画像)" accesskey="H" coords="8,310,99,336">
-				<area shape="rect" href="#save_data" alt="セーブについて"           accesskey="S" coords="101,310,191,336">
-				<area shape="rect" href="#option"    alt="オプション"               accesskey="O" coords="8,338,99,369">
-				<area shape="rect" href="#about"     alt="その他"                   accesskey="A" coords="101,338,191,369">
+				<area shape="poly" href="#tools"     alt="各種ツール"               accesskey="T" coords="8,251,191,251,191,308,99,308,99,336,8,336">
+				<area shape="rect" href="#save_cap"  alt="画像保存(資源まとめ画像)" accesskey="H" coords="101,310,191,336">
+				<area shape="rect" href="#save_data" alt="セーブについて"           accesskey="S" coords="101,338,191,369">
+				<area shape="rect" href="#option"    alt="オプション"               accesskey="O" coords="8,338,99,398">
+				<area shape="rect" href="#about"     alt="その他"                   accesskey="A" coords="101,367,191,398">
 			</map>
 			<h3><a name="sub_window">サブ画面</a></h3>
 			<a href="#showmode"><img src="./images/sub_window.png" alt="サブ画面" width="416" height="302"></a>
-			<h3>経験値計算機・入渠タイマー・○号カウンター・ソート一覧</h3>
+			<h3>経験値計算機・各種タイマー・○号カウンター・ソート一覧・資源グラフ</h3>
 			<p>　<a href="#tools">各種ツール</a>の項に掲載しています。</p>
 			<h3>オプション画面</h3>
 			<p>　<a href="#option">オプション</a>の項に掲載しています。</p>
@@ -255,6 +256,10 @@
 					<td>補給時の場面</td>
 				</tr>
 				<tr>
+					<td>夜戦マス</td>
+					<td>夜戦マスの場面(夜戦画面とは別扱い)</td>
+				</tr>
+				<tr>
 					<td>編成画面</td>
 					<td>編成の場面。第1～第4艦隊まで対応</td>
 				</tr>
@@ -264,10 +269,10 @@
 				</tr>
 				<tr>
 					<td>戦闘画面</td>
-					<td>昼戦画面or夜戦場面</td>
+					<td>昼戦画面or夜戦場面or夜戦マス</td>
 				</tr>
 			</table>
-			<p>　なお、それぞれについて、<span class="underline">最後に記録した日時がサブ画面下のステータスバーに表示されます</span>。<br>
+			<p>　なお、それぞれについて、<span class="underline">最後に記録した日時がサブ画面下のステータスバーに表示されます</span>。オプションで非表示にもできますが。<br>
 			　また、<strong>大破艦が存在する場合はその警告</strong>、そうでない場合は<strong>各艦隊毎の艦娘数</strong>が、日時の横に表示されます(認識してない場合は0)。</p>
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="save_cap">画像保存</a></h2>
@@ -323,12 +328,12 @@
 			<p>　Lv.XからLv.Yまで上げる際にどれだけの経験値が必要かを計算します。<br>
 			　レベリングで稼ぐとした場合、どれだけ周回する必要があるかも計算できます。</p>
 			<img src="./images/exp_calc.png" alt="経験値計算機" width="240" height="214">
-			<h3>入渠タイマー</h3>
-			<p>　艦これの画面を入渠画面にした上で「更新」ボタンを押すと、艦これの画面を読み取ってカウントしてくれます。<br>
+			<h3>各種タイマー</h3>
+			<p>　艦これの画面を入渠画面か建造画面にした上で「更新」ボタンを押すと、艦これの画面を読み取ってカウントしてくれます。<br>
 			　向かって左が残り時間、右が終了予定時刻です。なお、<strong>ゲームの画像素材は認識に一切使用していません</strong>。全て自前です。</p>
-			<img src="./images/dock.png" alt="入渠タイマー" width="208" height="186">
+			<img src="./images/dock.png" alt="各種タイマー" width="376" height="207">
 			<h3>○号カウンター</h3>
-			<p>　各ボタンでカウント、リセットボタンで0回にリセットされます。カウントはちゃんと<a href="save_data">セーブ</a>されるのでご心配なく。</p>
+			<p>　各ボタンでカウント、リセットボタンで0回にリセットされます。カウントはちゃんと<a href="#save_data">セーブ</a>されるのでご心配なく。</p>
 			<img src="./images/counter.png" alt="○号カウンター" width="344" height="170">
 			<h3>ソート一覧作成機能</h3>
 			<p>　まず艦これの画面を編成画面にした後、ゲーム画面の方で変更ボタンを押すと艦娘のリストが表示されますね？<br>
@@ -338,6 +343,11 @@
 			　後は出力する際の列数を指定して「作成」ボタンを押せば、ソート一覧画像が保存されます。<br>
 			　なお、<strong>ソート一覧には艦船名およびレベルしか表示されません</strong>。</p>
 			<img src="./images/sort_list.png" alt="ソート一覧作成機能" width="360" height="310">
+			<h3>資源グラフ機能</h3>
+			<p>　資材ログ(<a href="#option">オプション</a>参照)を元に、グラフを表示する機能です。<br>
+			　カーソルキー左右で2時間・上下で1日毎にスクロールします。青字が日付および時間で、黒字がグラフ上下の最大・最小量です。<br>
+			　なお、画像保存ボタンを押すとグラフが保存できますが、ボタン自体は写りませんのでご安心を。</p>
+			<img src="./images/supply_graph.png" alt="資源グラフ機能" width="616" height="339">
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="save_data">セーブについて</a></h2>
 			<p>　このソフトウェアの設定および内部で記録された画像は、ソフト終了時および手動でセーブ<strong>できます</strong>。<br>
@@ -347,7 +357,7 @@
 			　(もちろん、<a href="../format.txt">format.txt</a>を読みつつちまちま修正すればいいのですが)
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="option">オプション</a></h2>
-			<img src="./images/option.png" alt="オプション画面" width="288" height="214">
+			<img src="./images/option.png" alt="オプション画面" width="288" height="215">
 			<p>　各項目について解説します。</p>
 			<table border="1" summary="オプションの各項目についての説明">
 				<tr>
@@ -394,6 +404,10 @@
 					記録ファイル(<a href="../supply.csv">supply.csv</a>)は、1行目が説明、2行目以降がカンマ区切りの記録となっています。<br>
 					このチェックの右のコンボボックスの指定通り、指定時間の間隔で自動ロギングされます。<br>
 					なお、ソフト起動時や、指定時間経過後に出撃していた時は、<strong>最初に資材量が見えた際に即座に記録を開始します</strong>。</td>
+				</tr>
+				<tr>
+					<td>更新日時</td>
+					<td>サブ画面に更新日時を表示するかを切り替えます。<strong>OFFにしていても、内部で記録され続けています</strong>。</td>
 				</tr>
 				<tr>
 					<td>fps</td>
@@ -519,11 +533,19 @@
 				<th abbr="変更箇所">変更箇所</th>
 			</tr>
 			<tr>
+				<td>Ver.2.0.4</td>
+				<td>2015/07/18</td>
+				<td>・夜戦マップで夜戦と認識してくれない不具合を修正。と言うか夜戦マスの項目を追加した。<br>
+				・赤疲労まるゆ中破を大破と勘違いする不具合を修正した。<br>
+				・改装画面での認識ミスを修正した。<br>
+				<strong>・資源グラフ機能を追加した。</strong><br>
+				・タイマー機能で建造時間も記録するようにした。</td>
+			</tr>
+			<tr>
 				<td>Ver.2.0.3</td>
 				<td>2015/05/12</td>
 				<td>・資材ログ機能で、画像認識の精度を上げた。<br>
 				・Win8において、なんかランタイムエラーが出てしまうバグを修正。<br>
-<!--				・資材グラフを表示する機能を追加した -->
 				・sourceフォルダにもcursor.pngを置いた。でないとデバッグしづらいのよね……。</td>
 			</tr>
 			<tr>
@@ -652,12 +674,12 @@
 <!-- 著作権について -->
 		<h1><a name="copyright">著作権について</a></h1>
 		<div><dl>
-			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.2.0.2</dd>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.2.0.4</dd>
 			<dt>種別</dt><dd>フリーウェア</dd>
 			<dt>種類</dt><dd>攻略・プレイ支援</dd>
 			<dt>開発者</dt><dd>YSR</dd>
 			<dt>動作環境</dt><dd>Microsoft Windows 98,Me,2000,XP(NT4.0以降を含む),Vista,7,8,8.1</dd>
-			<dt>開発言語</dt><dd>Hot Soup Processor ver.3.4beta</dd>
+			<dt>開発言語</dt><dd>Hot Soup Processor ver.3.5</dd>
 			<dt>連絡先</dt><dd><a href="mailto:ysr.ken@gmail.com">ysr.ken@gmail.com</a></dd>
 			<dt>Webページ</dt><dd><a href="http://www.vector.co.jp/vpack/browse/person/an050622.html">http://www.vector.co.jp/vpack/browse/person/an050622.html</a></dd>
 			<dt>転載</dt><dd>自由です。ただし、私の名前も一緒に乗せてください。</dd>
@@ -669,7 +691,7 @@
 
 <!-- コメント -->
 		<h1><a name="comment">コメント</a></h1>
-		<p>　Romaも矢矧も磯風も掘ったッ！勝ったッ！第3部完！</p>
+		<p>　次イベが楽しみだなー……なお資源に不安が残る模様</p>
 		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 

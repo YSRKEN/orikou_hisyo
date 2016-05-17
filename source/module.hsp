@@ -292,18 +292,27 @@
 				for k, 0, kUnitNum
 					;‘å”j
 					if(NearColor(482, 137 + 50 * k, 251, 114, 94)){
-						flg = TRUE
-						_break
+						;ê“–‚½‚è“I‚È‘Îô(Ô”æ˜J’†”j‚Ü‚é‚ä‘Îô)
+						if(NearColor(503, 171 + 50 * k, 251, 57, 28) == FALSE){
+							flg = TRUE
+							_break
+						}
 					}
 					;ò”æ˜J+‘å”j
 					if(NearColor(482, 137 + 50 * k, 250, 99, 53)){
-						flg = TRUE
-						_break
+						;ê“–‚½‚è“I‚È‘Îô(Ô”æ˜J’†”j‚Ü‚é‚ä‘Îô)
+						if(NearColor(503, 171 + 50 * k, 251, 57, 28) == FALSE){
+							flg = TRUE
+							_break
+						}
 					}
 					;Ô”æ˜J+‘å”j
 					if(NearColor(482, 137 + 50 * k, 251, 58, 54)){
-						flg = TRUE
-						_break
+						;ê“–‚½‚è“I‚È‘Îô(Ô”æ˜J’†”j‚Ü‚é‚ä‘Îô)
+						if(NearColor(503, 171 + 50 * k, 251, 57, 28) == FALSE){
+							flg = TRUE
+							_break
+						}
 					}
 				next
 				return flg
@@ -398,6 +407,7 @@
 			output += "SaveFolderPath\t" + pic_save_path@(1) + "\n"
 			output += "SupplyLogging\t"  + auto_supply_flg@ + "\n"
 			output += "LoggingTime\t" + (logging_index@ + 1) + "\n"
+			output += "ShowLastDate\t"   + show_date_flg@ + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -526,6 +536,9 @@
 					if(temp(0) == "SupplyLogging") :auto_supply_flg@ = limit(int(temp(1)), 0, 1)
 					if(temp(0) == "LoggingTime")   :logging_index@  = limit(int(temp(1)), 1, 10) - 1
 				}
+				if(read_ver >= 204){
+					if(temp(0) == "ShowLastDate") :show_date_flg@ = limit(int(temp(1)), 0, 1)
+				}
 			next
 			;”÷C³
 			for k, 0, 3
@@ -644,6 +657,69 @@
 			supply_list_(2) = steel
 			supply_list_(3) = bauxite
 		return
+		// ƒƒO‚ğ“Ç‚İ‚Ş
+		#defcfunc LoadLog var supply_log, array supply_log_int
+			notesel supply_log
+			dim supply_log_int, notemax, 2 + 4
+			supply_log_size = 0
+			for k, 1, notemax
+				noteget get, k
+				split get, ",", temp
+				if(stat < 5) :_continue
+				strrep temp(0), "-", ""
+				strrep temp(0), " ", ""
+				strrep temp(0), ".", ""
+				supply_log_int(supply_log_size, 0) = int(strmid(temp(0), 0, 8))
+				supply_log_int(supply_log_size, 1) = int(strmid(temp(0), 8, 9))
+				supply_log_int(supply_log_size, 2) = int(temp(1))
+				supply_log_int(supply_log_size, 3) = int(temp(2))
+				supply_log_int(supply_log_size, 4) = int(temp(3))
+				supply_log_int(supply_log_size, 5) = int(temp(4))
+				supply_log_size++
+			next
+		return supply_log_size
+		// “ú•t‚ğ“ˆê“ú•t‚ÉƒRƒ“ƒo[ƒg‚·‚é
+		#defcfunc ConvertDay int day
+			year_ = day / 10000
+			month_ = (day \ 10000) / 100
+			day_ = day \ 100
+
+			leap_years = (year_ - 1) / 4 - (year_ - 1) / 100 + (year_ - 1) / 400
+			day2 = (year_ - leap_years - 1) * 365 + leap_years * 366
+			leap_flg = (year_ \ 4 == 0) - (year_ \ 100 == 0) + (year_ \ 400 == 0)
+			day2 += yearplus@(month_ - 1, leap_flg) + day_
+		return day2
+		// ŠÔ‚ğ“ú•tŠî€‚ÅƒRƒ“ƒo[ƒg‚·‚é
+		#defcfunc ConvertTime int time
+			hour = time / 10000000
+			minute = (time \ 10000000) / 100000
+			second = (time \ 100000) / 1000
+			milli = time \ 1000
+		return ((((1.0 * milli / 1000) + second) / 60 + minute) / 60 + hour) / 24
+		// “ˆê“ú•t‚ğ“ú•t‚ÉƒRƒ“ƒo[ƒg‚·‚é
+		#defcfunc ConvertDay2 int day2_
+			day2__ = day2_
+			sdim day_, 1024
+			day3 = 0
+			for y, 1, 2100
+				leap_flg = (y \ 4 == 0) - (y \ 100 == 0) + (y \ 400 == 0)
+				if(day3 + 365 + leap_flg >= day2__){
+					day_ += strf("%04d", y) + "/"
+					day2__ -= day3
+					for m, 0, 12
+						if(yearplus@(m + 1, leap_flg) >= day2__){
+							day_ += strf("%02d", m + 1) + "/"
+							day2__ -= yearplus@(m, leap_flg)
+							day_ += strf("%02d", day2__)
+							_break
+						}
+					next
+					_break
+				}else{
+					day3 += 365 + leap_flg
+				}
+			next
+		return day_
 	#global
 	#module get_num
 		#deffunc DrawSquare int px_, int py_, int wx_, int wy_

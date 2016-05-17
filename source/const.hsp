@@ -25,6 +25,7 @@
 	#enum kCountWindowID	;○号カウンター
 	#enum kSortListWindowID	;ソート一覧
 	#enum kSupplyGraphID	;資源グラフ
+	#enum kGraphBufferID
 	#enum kMatchBufferID	;マッチング用の捨てID
 	#enum kDeadZoneWindowID	;大破進撃を阻止するための画面
 	;バッファ用
@@ -88,13 +89,18 @@
 	#const kLargeFontSize 30
 	#const kStatusBarFontSize kStatusBarY - 4
 	#const kStatusBarOffset (kStatusBarY - kStatusBarFontSize) / 2
+	#const kGraphFontSize 12
 	;メイン画面のサイズ
 	#const kMainWX kObjSpace + kObjSpaceX * 2
-;	#const kMainWY kObjSpace * 4 + kObjSpaceY * 12
-	#const kMainWY kObjSpace * 4 + kObjSpaceY * 11
+	#const kMainWY kObjSpace * 4 + kObjSpaceY * 12
+;	#const kMainWY kObjSpace * 4 + kObjSpaceY * 11
 	;カウンター画面
 	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
 	#const kCounterY 60
+	;資源グラフのサイズ
+	#const kGraphWX 600
+	#const kGraphWY 300
+	#const kGraphStepX kGraphWX / 12
 	// キーボード・マウス操作
 	#const kStickEscKey 128
 	#const kStickMouse  256
@@ -102,6 +108,21 @@
 	#const global kPoints 3	;3点に対して、
 	#const global kParams 5	;xy座標+RGBの5つの数字でチェックする
 	#const global kMatchSize 64	;認識時のブロックサイズ
+
+	dim yearplus,13,2
+	yearplus(0,0)=0		:yearplus(0,1)=0
+	yearplus(1,0)=31	:yearplus(1,1)=31
+	yearplus(2,0)=59	:yearplus(2,1)=60
+	yearplus(3,0)=90	:yearplus(3,1)=91
+	yearplus(4,0)=120	:yearplus(4,1)=121
+	yearplus(5,0)=151	:yearplus(5,1)=152
+	yearplus(6,0)=181	:yearplus(6,1)=182
+	yearplus(7,0)=212	:yearplus(7,1)=213
+	yearplus(8,0)=243	:yearplus(8,1)=244
+	yearplus(9,0)=273	:yearplus(9,1)=274
+	yearplus(10,0)=304	:yearplus(10,1)=305
+	yearplus(11,0)=334	:yearplus(11,1)=335
+	yearplus(12,0)=365	:yearplus(12,1)=366
 
 // 変数初期化
 	// コンボボックスの内容
@@ -165,7 +186,8 @@
 	a_s_win_count = 0			;あ号S勝利
 	r_count = 0					;ろ号
 	i_count = 0					;い号
-	;入渠タイマー
+	;各種タイマー
+	;入渠
 	dock1_time1 = "00:00:00" :dock1_time2 = ""
 	dock2_time1 = "00:00:00" :dock2_time2 = ""
 	dock3_time1 = "00:00:00" :dock3_time2 = ""
@@ -175,6 +197,16 @@
 	dim dock_second, kDocks
 	xpos.0 = 623, 634, 652, 663, 680, 691
 	ypos.0 = 136, 216, 298, 380
+	;建造
+	bdock1_time1 = "00:00:00" :bdock1_time2 = ""
+	bdock2_time1 = "00:00:00" :bdock2_time2 = ""
+	bdock3_time1 = "00:00:00" :bdock3_time2 = ""
+	bdock4_time1 = "00:00:00" :bdock4_time2 = ""
+	dim bdock_hour,   kDocks
+	dim bdock_minute, kDocks
+	dim bdock_second, kDocks
+	bxpos.0 = 402, 414, 433, 445, 464, 476
+	bypos.0 = 185, 263, 341, 419
 	gosub *match_init
 	;ソート一覧
 	sdim sort_list, 1024
@@ -184,9 +216,12 @@
 	if(strsize != -1){
 		notesel supply_log
 		noteload "supply.csv"
+		dim supply_log_int, 100, 2 + 4	;2は日時の部分
+		supply_log_size = LoadLog(supply_log, supply_log_int)
 	}else{
 		sdim supply_log, 32000
 		supply_log = "時間,燃料,弾薬,鋼材,ボーキ\n"
+		supply_log_size = 0
 	}
 	supply_last_time = -1
 	logging_index = 9
@@ -201,7 +236,8 @@
 	auto_supply_flg   = TRUE
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
 	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
-	get_handle_flg = TRUE		;ズレ補正時だけOFFになる
+	get_handle_flg    = TRUE	;ズレ補正時だけOFFになる
+	show_date_flg     = TRUE	;最終更新日時を表示するか否か
 	auto_get_pos_flg  = FALSE	;座標取得を利用した時のみTRUEになる
 	exit_flg = FALSE			;終了時にONになる(Win8対策)
 	;その他
@@ -248,6 +284,7 @@
 	buffer kNumGetBufferID, kMatchSize, kMatchSize
 
 	ReadSaveData
+	gosub *init_bgm_list
 	goto *main1
 
 *init_bgm_list
@@ -261,6 +298,7 @@
 		}
 		exist bgm_list_filename(k)
 		if(strsize != -1){
+			mmload bgm_list_filename(k), k, 1
 			bgm_list += getpath(bgm_list_filename(k), 1 + 8) + ")\n"
 		}else{
 			bgm_list += "<NONE>)\n"

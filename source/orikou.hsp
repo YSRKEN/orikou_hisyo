@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.2.0.3 */
+/* おりこうさんな秘書 Ver.2.0.4 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.2.0.3"
-	#define kSoftVer2       "203"
-	#define kSoftLastUpdate "2015/05/12"
+	#define kSoftVer        "Ver.2.0.4"
+	#define kSoftVer2       "204"
+	#define kSoftLastUpdate "2015/07/18"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -43,6 +43,8 @@
 			chkbox "資源ログ(分)",     auto_supply_flg
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 4
 			combox logging_index,,"1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 4
+			chkbox "更新日時",     show_date_flg
 		pos kObjSpace                 , kObjSpace + kObjSpaceY * 5
 			combox fps_index,,fps_list
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 5
@@ -132,32 +134,56 @@
 			button gosub "閉じる", *close_counter
 	gosub *redraw_counter
 
-	//入渠タイマー
-	screen kDockWindowID, kObjSpace * 2 + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5, 4
+	//各種タイマー
+	screen kDockWindowID, kObjSpace + kObjSpaceX * 4, kObjSpace * 2 + kObjSpaceY * 5 + kSmallFontSize, 4
 	gsel kDockWindowID, -1
-	title "入渠時間"
-	objsize kObjX, kObjY
+	title "各種時間"
+	font msgothic, kSmallFontSize
 		pos kObjSpace, kObjSpace
+			mes "【入渠時間】"
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace
+			mes "【建造時間】"
+	objsize kObjX, kObjY
+		;入渠時間
+		pos kObjSpace, kObjSpace + kSmallFontSize
 			input dock1_time1
-		pos kObjSpace + kObjSpaceX, kObjSpace
+		pos kObjSpace + kObjSpaceX, kObjSpace + kSmallFontSize
 			input dock1_time2
-		pos kObjSpace, kObjSpace + kObjSpaceY
+		pos kObjSpace, kObjSpace + kObjSpaceY + kSmallFontSize
 			input dock2_time1
-		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY + kSmallFontSize
 			input dock2_time2
-		pos kObjSpace, kObjSpace + kObjSpaceY * 2
+		pos kObjSpace, kObjSpace + kObjSpaceY * 2 + kSmallFontSize
 			input dock3_time1
-		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 2
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 2 + kSmallFontSize
 			input dock3_time2
-		pos kObjSpace, kObjSpace + kObjSpaceY * 3
+		pos kObjSpace, kObjSpace + kObjSpaceY * 3 + kSmallFontSize
 			input dock4_time1
-		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 3
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 3 + kSmallFontSize
 			input dock4_time2
-		pos kObjSpace, kObjSpace + kObjSpaceY * 4
+		;建造時間
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kSmallFontSize
+			input bdock1_time1
+		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kSmallFontSize
+			input bdock1_time2
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY + kSmallFontSize
+			input bdock2_time1
+		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY + kSmallFontSize
+			input bdock2_time2
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 2 + kSmallFontSize
+			input bdock3_time1
+		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 2 + kSmallFontSize
+			input bdock3_time2
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 3 + kSmallFontSize
+			input bdock4_time1
+		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 3 + kSmallFontSize
+			input bdock4_time2
+		;
+		pos kObjSpace, kObjSpace + kObjSpaceY * 4 + kSmallFontSize
 			button gosub "更新", *get_dock
-		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 4
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 4 + kSmallFontSize
 			button gosub "閉じる", *close_dock
-	repeat 8
+	repeat 16
 		objenable cnt, 0
 	loop
 
@@ -189,11 +215,19 @@
 				sort_index_id = stat
 	sort_index = -1
 
-	//資材グラフ
-	screen kSupplyGraphID, 600, 300
+	//資源グラフ
+	screen kSupplyGraphID, kGraphWX, kGraphWY, 4
 	gsel kSupplyGraphID, -1
-	title "資材グラフ"
-	button gosub "閉じる", *close_graph
+	title "資源グラフ"
+	objsize kObjX, kObjY
+		pos kGraphWX - kObjSpaceX, kGraphWY - kObjSpaceY - kGraphFontSize * 2
+		button gosub "閉じる", *close_graph
+		pos kGraphWX - kObjSpaceX * 2, kGraphWY - kObjSpaceY - kGraphFontSize * 2
+		button gosub "画像保存", *save_graph
+	if(supply_log_size != 0){
+		gosub *make_graph
+		gosub *plot_graph
+	}
 
 	//メイン画面・サブ画面
 	//(ウィンドウを隣接して配置したいので表示位置を計算している)
@@ -243,13 +277,13 @@
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 7
 			button gosub "経験値計算", *calc_exp
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 7
-			button gosub "入渠タイマー", *dock_timer
+			button gosub "各種タイマー", *dock_timer
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 8
 			button gosub "○号カウンター", *count_task
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 8
 			button gosub "ソート一覧", *show_sort_list
-/*		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
-			button gosub "資材グラフ", *show_graph
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
+			button gosub "資源グラフ", *show_graph
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 9
 			button gosub "【資源画像】", *save_stock
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 10
@@ -257,15 +291,15 @@
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 11
 			button gosub "オプション...", *show_option
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 11
-			button gosub "情報...", *about*/
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
+			button gosub "情報...", *about
+/*		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
 			button gosub "【資源画像】", *save_stock
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 9
 			button gosub "手動セーブ", *save_soft_data
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 10
 			button gosub "オプション...", *show_option
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 10
-			button gosub "情報...", *about
+			button gosub "情報...", *about*/
 
 	objsize kObjSpace + kObjX * 2, kObjY
 		pos kObjSpace             , kObjSpace * 3 + kObjSpaceY * 4
@@ -288,6 +322,10 @@
 	now_bgm = -1
 	;ソート一覧
 	sort_index_ = sort_index
+	;資源グラフ
+	mouse_button_flg = FALSE
+	;最終更新日時
+	show_date_flg_ = show_date_flg
 	//ループしつつ監視
 	repeat
 		if(exit_flg) :end
@@ -306,8 +344,8 @@
 			gsel kCaptureBufferID + screen_shot_type - 1
 			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
 			if(screen_shot_type <= kSceneListSize){
-				;戦闘画面(昼戦画面と夜戦画面)ならば再度コピーする
-				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面")){
+				;戦闘画面(昼戦画面と夜戦画面と夜戦マス)ならば再度コピーする
+				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面") || (mode_list3(screen_shot_type) == "夜戦マス")){
 					gsel kBattleBufferID
 					gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
 				}
@@ -330,10 +368,11 @@
 		}
 		// アプリの状態に合わせ表示を変更する
 		//サブ画面のサイズを変更する
-		if(zooming_index_ != zooming_index){
-			screen kPutWindowID, zooming_num(zooming_index) * kFlashWX / 100, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarY, 4
+		if((zooming_index_ != zooming_index) || (show_date_flg_ != show_date_flg)){
+			screen kPutWindowID, zooming_num(zooming_index) * kFlashWX / 100, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarY * show_date_flg, 4
 			gsel kPutWindowID, 2
 			zooming_index_ = zooming_index
+			show_date_flg_ = show_date_flg
 		}
 		//サブ画面用バッファに画像を転送する
 		gsel kPutTempWindowID
@@ -474,6 +513,7 @@
 			if(mode_list3(screen_shot_type) == "マップ画面") :bgm_type = 1
 			if(mode_list3(screen_shot_type) == "昼戦画面")   :bgm_type = 2
 			if(mode_list3(screen_shot_type) == "夜戦画面")   :bgm_type = 2
+			if(mode_list3(screen_shot_type) == "夜戦マス")   :bgm_type = 2
 			if(mode_list3(screen_shot_type) == "交戦結果")   :bgm_type = 3
 			if(mode_list3(screen_shot_type) == "戦果報告")   :bgm_type = 3
 		}
@@ -558,7 +598,7 @@
 		}else{
 			SetLastUpdate screen_shot_type - 1
 			if(screen_shot_type <= kSceneListSize){
-				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面")){
+				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面") || (mode_list3(screen_shot_type) == "夜戦マス")){
 					for k, 0, 7
 						last_up_date(kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum, k) = last_up_date(screen_shot_type - 1, k)
 					next
@@ -608,9 +648,23 @@
 					GetSupply kFlashBufferID, supply_list
 					supply_log += NowTime() + "," + supply_list(0) + "," + supply_list(1) + "," + supply_list(2) + "," + supply_list(3) + "\n"
 					notesel supply_log :notesave "supply.csv"
+					supply_log_size = LoadLog(supply_log, supply_log_int)
+					gosub *make_graph
+					gosub *plot_graph
 					gsel kMainWindowID
 				}
 			}
+		}
+		// 資源グラフをスクロールする
+		if(ginfo_act == kSupplyGraphID){
+			// キー操作を検知する
+			stick ky, 1 + 2 + 4 + 8, 1
+			;左右キーで2時間毎のスクロール
+			if(ky & 1) :plot_graph_px -= kGraphStepX :gosub *plot_graph
+			if(ky & 4) :plot_graph_px += kGraphStepX :gosub *plot_graph
+			;上下キーで1日毎のスクロール
+			if(ky & 2) :plot_graph_px -= kGraphWX :gosub *plot_graph
+			if(ky & 8) :plot_graph_px += kGraphWX :gosub *plot_graph
 		}
 		// ウェイト
 		await 1000 / fps_num(fps_index)
