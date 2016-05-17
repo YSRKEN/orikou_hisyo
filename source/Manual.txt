@@ -67,19 +67,21 @@ cursor.png……カーソルアイコン画像
 　　kSelectWindowID      手動指定用画面       4
 　　kDeskBufferID        スクショ用           5
 　　kFlashBufferID       検索用               6
-　　kExpCalcWindowID     経験値計算機         7
-　　kDockWindowID        入渠タイマー         8
-　　kCountWindowID       ○号カウンター       9
-　　kSortListWindowID    ソート一覧           10
-　　kMatchBufferID       マッチング用の捨てID 11
-　　kNumGetBufferID1     数字認識用(64x64)    12
-　　kNumGetBufferID2     数字認識用(32x32)    13
-　　kCursorBufferID      カーソル用           14
-　　kBattleBufferID      戦闘画面(特殊)       15
-　　kCaptureBufferID以降 シーン保存用         16～16 + 保存シーン数 - 1
-　　kFleetIdOffset以降   編成画面用           16 + 保存シーン数～16 + 保存シーン数 + (4 - 1)
-　　kUnitIdOffset以降    改装画面用           16 + 保存シーン数 + 4～16 + 保存シーン数 + 4 + (4 * 6 - 1)
-　　kSortIdOffset以降    ソート画面用         16 + 保存シーン数 + 4 + 4 * 6～
+　　kOptionWindowID      オプション画面       7
+　　kExpCalcWindowID     経験値計算機         8
+　　kDockWindowID        入渠タイマー         9
+　　kCountWindowID       ○号カウンター       10
+　　kSortListWindowID    ソート一覧           11
+　　kMatchBufferID       マッチング用の捨てID 12
+　　kDeadZoneWindowID    大破進撃阻止用画面   13
+　　kNumGetBufferID1     数字認識用(64x64)    14
+　　kNumGetBufferID2     数字認識用(32x32)    15
+　　kCursorBufferID      カーソル用           16
+　　kBattleBufferID      戦闘画面(特殊)       17
+　　kCaptureBufferID以降 シーン保存用         18～18 + 保存シーン数 - 1
+　　kFleetIdOffset以降   編成画面用           18 + 保存シーン数～18 + 保存シーン数 + (4 - 1)
+　　kUnitIdOffset以降    改装画面用           18 + 保存シーン数 + 4～18 + 保存シーン数 + 4 + (4 * 6 - 1)
+　　kSortIdOffset以降    ソート画面用         18 + 保存シーン数 + 4 + 4 * 6～
 ・const.hsp
 　#enumで定義された定数群……
 　　画面IDを決定するためのもの。具体的には、IDがkCaptureBufferID
@@ -103,6 +105,9 @@ cursor.png……カーソルアイコン画像
 　get_handle_flg……
 　　要するに、ズレ補正で毎回艦これを開いているブラウザをアクティブにするなんか
 　　面倒にも程があるので。
+　pic_save_path……
+　　画像を保存するフォルダ。pic_save_path(0)は従来のcurrent_dirと同じ、
+　　pic_save_path(1)は自分で変更できてセーブもされる部分。
 　bgm_listやその周辺の変数……
 　　現在は「母港」「マップ」「戦闘」の3通りしか想定していないので、
 　　増やそうと思えば増やせる。アルゴリズムとしては、
@@ -138,6 +143,9 @@ cursor.png……カーソルアイコン画像
 　　「800x480な灰色画像」をマッチングさせることで艦これの座標が分かる。
 　　前Verまでは黒色画像だったが、それだとマルチディスプレイの時に困る
 　　(黒領域が多くなるため)ので灰色になった。
+　　……と書いていたが、「流星観測機」の制作経験を踏まえて、マッチングさせる
+　　画像を「802x482の白画像の中央に800x480の灰色画像を置いた画像」にした。
+　　これにより認識精度が上がる、はず。
 　NearColorとFarColor……
 　　要は、座標とRGB値を引数に入れると、その座標のRGB値を取得し、
 　　それが離れすぎているか否かで判定してくれる。このソフトにおける

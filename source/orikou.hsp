@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.1.9 */
+/* おりこうさんな秘書 Ver.2.0 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.1.9"
-	#define kSoftVer2       "19"
-	#define kSoftLastUpdate "2015/04/30"
+	#define kSoftVer        "Ver.2.0"
+	#define kSoftVer2       "20"
+	#define kSoftLastUpdate "2015/05/02"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -15,8 +15,39 @@
 
 /* メインルーチン */
 // ウィンドウ周りを初期設定
+	//オプション画面
+	screen kOptionWindowID, kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 5, 4
+	gsel kOptionWindowID, -1
+	title "オプション"
+	font msgothic, kSmallFontSize
+		pos kObjSpace                 , kObjSpace + kObjSpaceY * 3 + kObjOffset
+			mes pic_save_path(1)
+	objsize kObjX, kObjY
+		pos kObjSpace                 , kObjSpace
+			chkbox "名前隠し",     name_disable_flg
+		pos kObjSpace + kObjSpaceX    , kObjSpace
+			chkbox "カーソル",     cursor_flg
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace
+			chkbox "大破チェック", dead_zone_flg
+		pos kObjSpace                 , kObjSpace + kObjSpaceY
+			chkbox "画面クロップ", cap_crop_flg
+		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY
+			chkbox "ズレ補正",     auto_set_flg
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY
+			chkbox "終了セーブ",   auto_save_flg
+		pos kObjSpace                 , kObjSpace + kObjSpaceY * 2
+			chkbox "フォルダ指定", my_folder_flg
+		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 2
+			button gosub "参照...", *browse_folder
+		pos kObjSpace                 , kObjSpace + kObjSpaceY * 4
+			combox fps_index,,fps_list
+		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 4
+			combox zooming_index,,zooming_list
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 4
+			button gosub "閉じる", *close_option
+
 	//経験値計算機
-	screen kExpCalcWindowID ,kObjSpace * 4 + kSmallFontSize * 8 + 0.6 * kObjX * 2, kObjSpace + kObjSpaceY * 6
+	screen kExpCalcWindowID ,kObjSpace * 4 + kSmallFontSize * 8 + 0.6 * kObjX * 2, kObjSpace + kObjSpaceY * 6, 4
 	gsel kExpCalcWindowID, -1
 	title "経験値計算機"
 	font msgothic, kSmallFontSize
@@ -61,7 +92,7 @@
 	gosub *exp_calc
 
 	//○号カウンター
-	screen kCountWindowID, kObjSpace * 6 + kSmallFontSize * 2 + 0.8 * kObjX * 4, kObjSpace * 2 + kObjSpaceY * 2 + kCounterY
+	screen kCountWindowID, kObjSpace * 6 + kSmallFontSize * 2 + 0.8 * kObjX * 4, kObjSpace * 2 + kObjSpaceY * 2 + kCounterY, 4
 	gsel kCountWindowID, -1
 	title "○号カウンター"
 	pos kObjSpace * 2 + kSmallFontSize * 2 + kObjSpaceX, kObjSpace + kObjSpaceY
@@ -98,7 +129,7 @@
 	gosub *redraw_counter
 
 	//入渠タイマー
-	screen kDockWindowID, kObjSpace * 2 + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5
+	screen kDockWindowID, kObjSpace * 2 + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5, 4
 	gsel kDockWindowID, -1
 	title "入渠時間"
 	objsize kObjX, kObjY
@@ -127,7 +158,7 @@
 	loop
 
 	//ソート一覧
-	screen kSortListWindowID, kObjSpace * 3 + (kObjX * 2) * 2, kObjSpace * 4 + (kObjY * 10) + kObjY * 2
+	screen kSortListWindowID, kObjSpace * 3 + (kObjX * 2) * 2, kObjSpace * 4 + (kObjY * 10) + kObjY * 2, 4
 	gsel kSortListWindowID, -1
 	title "ソート一覧"
 	objsize 0.6 * kObjX, kObjY
@@ -152,7 +183,6 @@
 		pos kObjSpace, kObjSpace
 			listbox sort_index, 0, sort_list
 				sort_index_id = stat
-	//DrawSquare kObjSpace * 2 + kObjX * 2, kObjSpace, kObjX * 2, kObjY * 10
 	sort_index = -1
 
 	//メイン画面・サブ画面
@@ -201,32 +231,20 @@
 			button gosub "強制停止", *stop_bgm
 		;4段目
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 7
-			chkbox "名前隠し",     name_disable_flg
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 8
-			chkbox "カーソル",     cursor_flg
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
-			chkbox "大破チェック", dead_zone_flg
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 10
-			chkbox "画面クロップ", cap_crop_flg
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 11
-			chkbox "ズレ補正",     auto_set_flg
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 12
-			chkbox "終了セーブ",   auto_save_flg
-		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 7
 			button gosub "経験値計算", *calc_exp
-		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 8
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 7
 			button gosub "入渠タイマー", *dock_timer
-		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 9
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 8
 			button gosub "○号カウンター", *count_task
-		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 10
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 8
 			button gosub "ソート一覧", *show_sort_list
-		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 11
-			combox fps_index,,fps_list
-		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 12
-			combox zooming_index,,zooming_list
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 13
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
+			button gosub "【資源画像】", *save_stock
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 9
 			button gosub "手動セーブ", *save_soft_data
-		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 13
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 10
+			button gosub "オプション...", *show_option
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 10
 			button gosub "情報...", *about
 
 	objsize kObjSpace + kObjX * 2, kObjY
@@ -266,7 +284,7 @@
 		if(screen_shot_type != kTypeUnknown){
 			gsel kCaptureBufferID + screen_shot_type - 1
 			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
-			if(screen_shot_type < kSceneListSize){
+			if(screen_shot_type <= kSceneListSize){
 				;戦闘画面(昼戦画面と夜戦画面)ならば再度コピーする
 				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面")){
 					gsel kBattleBufferID
@@ -343,12 +361,16 @@
 		PutWindowSet kPutWindowID, kPutTempWindowID
 		//大破チェッカー機能
 		;dead_zone_flg_に関する処理
-		if(screen_shot_type < kSceneListSize){
-			if((CheckDeadZone(kFlashBufferID)) && (mode_list3(screen_shot_type) == "戦果報告")){
-				dead_zone_flg_ = TRUE
+		if(screen_shot_type <= kSceneListSize){
+			if(CheckDeadZone(kFlashBufferID, screen_shot_type)){
+				if((mode_list3(screen_shot_type) == "出撃画面") || (mode_list3(screen_shot_type) == "戦果報告")){
+					dead_zone_flg_ = TRUE
+				}
 			}
-			if((screen_shot_type != kTypeUnknown) && (mode_list3(screen_shot_type) != "戦果報告")){
-				dead_zone_flg_ = FALSE
+			if(screen_shot_type != kTypeUnknown){
+				if((mode_list3(screen_shot_type) != "出撃画面") && (mode_list3(screen_shot_type) != "戦果報告")){
+					dead_zone_flg_ = FALSE
+				}
 			}
 		}
 		;dead_zone_flg__に関する処理
@@ -363,6 +385,16 @@
 						font msgothic, 36
 						pos 10, 10
 						mes "大破した\n 艦娘が\nいます！"
+						dead_zone_flg__ = TRUE
+					}
+					if(CheckSelect2(kFlashBufferID)){
+						//大破進撃阻止用画面
+						bgscr kDeadZoneWindowID, 180, 50, , flash_px + 540, flash_py + 420
+						gsel kDeadZoneWindowID, 2
+						color 255, 0, 0
+						font msgothic, 36
+						pos 10, 10
+						mes "大破した艦娘がいます！"
 						dead_zone_flg__ = TRUE
 					}
 				}
@@ -380,6 +412,16 @@
 							font msgothic, 36
 							pos 10, 10
 							mes "大破した\n 艦娘が\nいます！"
+							dead_zone_flg__ = TRUE
+						}
+						if(CheckSelect2(kFlashBufferID)){
+							//大破進撃阻止用画面
+							bgscr kDeadZoneWindowID, 180, 50, , flash_px + 540, flash_py + 420
+							gsel kDeadZoneWindowID, 2
+							color 255, 0, 0
+							font msgothic, 32
+							pos 10, 10
+							mes "大破艦あり"
 							dead_zone_flg__ = TRUE
 						}
 					}
@@ -407,7 +449,7 @@
 		;現在の状況を診断
 		bgm_type = -1
 		if(CheckHomeFlg(kFlashBufferID)) :bgm_type = 0
-		if(screen_shot_type < kSceneListSize){
+		if(screen_shot_type <= kSceneListSize){
 			if(mode_list3(screen_shot_type) == "マップ画面") :bgm_type = 1
 			if(mode_list3(screen_shot_type) == "昼戦画面")   :bgm_type = 2
 			if(mode_list3(screen_shot_type) == "夜戦画面")   :bgm_type = 2
@@ -460,6 +502,7 @@
 				}
 				swbreak
 			case 2
+				if(other_get_pos_flg == FALSE) :swbreak
 				if(get_pos_flg){						;一回以上座標補正を利用した場合のみ発動
 					if(auto_set_time != gettime(6)){	;1秒毎にズレ判定を行う
 						if(auto_set_flg){				;ズレ補正にチェックが入っていた場合のみ発動
@@ -493,7 +536,7 @@
 		if(screen_shot_type == kTypeUnknown){
 		}else{
 			SetLastUpdate screen_shot_type - 1
-			if(screen_shot_type < kSceneListSize){
+			if(screen_shot_type <= kSceneListSize){
 				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面")){
 					for k, 0, 7
 						last_up_date(44, k) = last_up_date(screen_shot_type - 1, k)

@@ -19,6 +19,7 @@
 	#enum kDeskBufferID		;スクショ用
 	#enum kFlashBufferID	;検索用
 	;ツール用
+	#enum kOptionWindowID	;オプション画面
 	#enum kExpCalcWindowID	;経験値計算機
 	#enum kDockWindowID		;入渠タイマー
 	#enum kCountWindowID	;○号カウンター
@@ -71,6 +72,17 @@
 	;ソートのオフセット座標
 	#const kSortPX 398
 	#const kSortPY 154
+	;資源画像用のパラメータ
+	#const kStockAllWX 229	;全体のサイズ
+	#const kStockAllWY 60
+	#const kStockTimePX 9	;時刻部分の左上座標
+	#const kStockTimePY 407
+	#const kStockTimeWX 86	;時刻部分のサイズ
+	#const kStockTimeWY kStockAllWY	
+	#const kStockOtherPX 657	;資源部分の左上座標
+	#const kStockOtherPY 9
+	#const kStockOtherWX kStockAllWX - kStockTimeWX	;資源部分のサイズ
+	#const kStockOtherWY kStockAllWY
 	;フォントサイズ
 	#const kSmallFontSize 12
 	#const kLargeFontSize 30
@@ -78,7 +90,7 @@
 	#const kStatusBarOffset (kStatusBarY - kStatusBarFontSize) / 2
 	;メイン画面のサイズ
 	#const kMainWX kObjSpace + kObjSpaceX * 2
-	#const kMainWY kObjSpace * 4 + kObjSpaceY * 14
+	#const kMainWY kObjSpace * 4 + kObjSpaceY * 11
 	;カウンター画面
 	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
 	#const kCounterY 60
@@ -116,7 +128,7 @@
 		bgm_list_filename.0 = "<NONE>", "<NONE>", "<NONE>"
 		gosub *init_bgm_list
 	sdim fps_list, 1024	//fps一覧
-		fps_num.0 = 30, 20, 10, 5, 3, 2, 1
+		fps_num.0 = 30, 20, 15, 10, 5, 3, 2, 1
 		for k, 0, length(fps_num)
 			fps_list += "" + fps_num(k) + "fps\n"
 		next
@@ -133,8 +145,9 @@
 		gosub *area_init
 	// その他設定
 	;カレントディレクトリを記憶
-	sdim current_dir, 260		;カレントディレクトリ
-		current_dir = dir_cur
+	sdim pic_save_path, 260, 2
+		pic_save_path(0) = dir_cur
+		pic_save_path(1) = pic_save_path(0)
 	;経験値計算機
 	now_level = 0
 	goal_level = 24
@@ -171,6 +184,7 @@
 	cap_crop_flg      = FALSE
 	auto_set_flg      = TRUE
 	auto_save_flg     = TRUE
+	my_folder_flg     = FALSE
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
 	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
 	get_handle_flg = TRUE		;ズレ補正時だけOFFになる
@@ -193,9 +207,9 @@
 // バッファ初期化
 	//マウスカーソル
 	buffer kCursorBufferID
-	exist current_dir + "\\cursor.png"
+	exist pic_save_path(0) + "\\cursor.png"
 	if(strsize == -1) :end
-	picload current_dir + "\\cursor.png", 0
+	picload pic_save_path(0) + "\\cursor.png", 0
 	cursor_x = ginfo_sx :cursor_y = ginfo_sy
 
 	//保存用バッファ

@@ -57,13 +57,14 @@
 			gsel window_id_
 			cvbuffer window_id_, ginfo_sx, ginfo_sy
 			cvputimg window_id_
-			//バッファ2:灰色の800x480の画像
-			buffer output_buffer_id_, kFlashWX, kFlashWY
-			color 100, 100, 100 :boxf
+			//バッファ2:802x482の白画像の中央に800x480の灰色画像を置いた画像
+			buffer output_buffer_id_, kFlashWX + 2, kFlashWY + 2
+			color 100, 100, 100 :boxf 1, 1, kFlashWX, kFlashWY
 			cvbuffer output_buffer_id_, kFlashWX, kFlashWY
 			cvputimg output_buffer_id_
 			//マッチング処理を行う
 			cvmatch px_, py_, CV_TM_SQDIFF, output_buffer_id_, window_id_
+			px_ = px_ + 1 :py_ = py_ + 1
 		return
 		//艦これ画面がずれていないかを調べる
 		#defcfunc CheckAutoSet
@@ -76,9 +77,11 @@
 				//デバイスコンテキストを削除する
 				DeleteDC hdc_screen
 			}else{
-				hdc_browser = GetWindowDC(handle@)
-				BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_browser, flash_px@ - rect@(0) - 1, flash_py@ - rect@(1) - 1, SRCCOPY | CAPTUREBLT
-				ReleaseDC handle@, hdc_browser
+				if(other_get_pos_flg@){
+					hdc_browser = GetWindowDC(handle@)
+					BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_browser, flash_px@ - rect@(0) - 1, flash_py@ - rect@(1) - 1, SRCCOPY | CAPTUREBLT
+					ReleaseDC handle@, hdc_browser
+				}
 			}
 			//四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
 			pget 0, 0
@@ -279,16 +282,30 @@
 			}
 		return FALSE
 		//「大破した艦娘」がいるかどうかを判定する
-		#defcfunc CheckDeadZone int flash_id_
-			gsel flash_id_
-			flg = FALSE
-			for k, 0, kUnitNum
-				if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
-					flg = TRUE
-					_break
-				}
-			next
-		return flg
+		#defcfunc CheckDeadZone int flash_id_, int screen_shot_type_
+			if(mode_list3@(screen_shot_type_) == "出撃画面"){
+				gsel flash_id_
+				flg = FALSE
+				for k, 0, kUnitNum
+					if(NearColor(482, 137 + 50 * k, 251, 114, 94)){
+						flg = TRUE
+						_break
+					}
+				next
+				return flg
+			}
+			if(mode_list3@(screen_shot_type_) == "戦果報告"){
+				gsel flash_id_
+				flg = FALSE
+				for k, 0, kUnitNum
+					if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
+						flg = TRUE
+						_break
+					}
+				next
+				return flg
+			}
+		return FALSE
 		//選択画面かを判定する
 		#defcfunc CheckSelect int flash_id_
 			gsel flash_id_
@@ -296,6 +313,12 @@
 			if(NearColor(164, 217,  93, 182, 226) == FALSE) :flg = FALSE
 			if(NearColor(268, 249, 239, 248, 247) == FALSE) :flg = FALSE
 			if(NearColor(398, 240,  81, 201, 251) == FALSE) :flg = FALSE
+		return flg
+		#defcfunc CheckSelect2 int flash_id_
+			gsel flash_id_
+			flg = TRUE
+			if(NearColor(607, 124,  62,  62,  62) == FALSE) :flg = FALSE
+			if(NearColor(726, 381, 255, 246, 242) == FALSE) :flg = FALSE
 		return flg
 		// 艦隊ごとの艦娘数を更新する
 		#deffunc GetUnits int flash_id_, int screen_shot_type_, array unit_count__
@@ -305,15 +328,11 @@
 				unit_k = (screen_shot_type_ - (kSceneListSize@ + kFleetNum + 1)) / kUnitNum
 				unit_count__(unit_k) = 0
 				for k, kUnitNum - 1, -1, -1
-					if(NearColor(137, 150 + 54 * k, 234, 217, 202) == FALSE){
-						if(NearColor(288, 150 + 54 * k, 233, 216, 199) == FALSE){
-							if(NearColor(137, 181 + 54 * k, 234, 220, 204) == FALSE){
-								if(NearColor(288, 181 + 54 * k, 242, 233, 221) == FALSE){
-									//艦娘がいた時点でカウントを終了させる
-									unit_count__(unit_k) = k + 1
-									_break
-								}
-							}
+					if(NearColor(160, 180 + 54 * k, 235, 218, 203) == FALSE){
+						if(NearColor(260, 180 + 54 * k, 234, 217, 202) == FALSE){
+							//艦娘がいた時点でカウントを終了させる
+							unit_count__(unit_k) = k + 1
+							_break
 						}
 					}
 				next
@@ -331,6 +350,12 @@
 				next
 			}
 		return
+		// フォルダパスについての判定
+		#defcfunc CheckSaveFolder str path_
+			sdim path, 260
+			path = path_
+			dirlist xx, path, 5
+		return stat
 		// ソフトのデータをセーブする
 		#deffunc WriteSaveData
 			gsel kPutWindowID@, 2
@@ -355,6 +380,8 @@
 			output += "CaptureCrop\t"    + cap_crop_flg@ + "\n"
 			output += "AutoPosSet\t"     + auto_set_flg@ + "\n"
 			output += "ShutdownSave\t"   + auto_save_flg@ + "\n"
+			output += "MySaveFolder\t"   + my_folder_flg@ + "\n"
+			output += "SaveFolderPath\t" + pic_save_path@(1) + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -374,7 +401,7 @@
 				output += "LastUpdate" + (k + 1) + "\t" + strf("%04d%02d%02d%02d%02d%02d%03d", last_up_date@(k, 0), last_up_date@(k, 1), last_up_date@(k, 2), last_up_date@(k, 3), last_up_date@(k, 4), last_up_date@(k, 5), last_up_date@(k, 6)) + "\n"
 			next
 			notesel output
-			notesave current_dir@ + "\\save.txt"
+			notesave pic_save_path@(0) + "\\save.txt"
 			// 画像
 			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 1)
 			for k, 0, kSceneListSize@
@@ -395,14 +422,14 @@
 			next
 			cvbuffer kCaptureBufferID@, ginfo_sx, ginfo_sy
 			cvputimg kCaptureBufferID@
-			cvsave current_dir@ + "\\save.png", kCaptureBufferID@
+			cvsave pic_save_path@(0) + "\\save.png", kCaptureBufferID@
 		return
 		// ソフトのデータをロードする
 		#deffunc ReadSaveData
 			// テキスト
-			exist current_dir@ + "\\save.txt"
+			exist pic_save_path@(0) + "\\save.txt"
 			if(strsize == -1) :return
-			notesel text_buffer :noteload current_dir@ + "\\save.txt"
+			notesel text_buffer :noteload pic_save_path@(0) + "\\save.txt"
 			;とりあえずバージョンを取得する
 			read_ver = -1
 			for k, 0, notemax
@@ -453,7 +480,7 @@
 						unit_count@(k) = f
 					}
 					if(strmid(temp(0), 0, 10) == "LastUpdate"){
-						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, 44)
+						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, 45)
 						last_up_date@(t, 0) = limit(int(strmid(temp(1),  0, 4)), 0, 9999)
 						last_up_date@(t, 1) = limit(int(strmid(temp(1),  4, 2)), 0, 12)
 						last_up_date@(t, 2) = limit(int(strmid(temp(1),  6, 2)), 0, 31)
@@ -462,7 +489,12 @@
 						last_up_date@(t, 5) = limit(int(strmid(temp(1), 12, 2)), 0, 59)
 						last_up_date@(t, 6) = limit(int(strmid(temp(1), 14, 3)), 0, 999)
 					}
-					
+				}
+				if(read_ver >= 20){
+					if(temp(0) == "MySaveFolder")   :my_folder_flg@ = int(temp(1))
+					if(temp(0) == "SaveFolderPath") :pic_save_path@(1) = temp(1)
+					;セーブデータについて判定を行う
+					if(CheckSaveFolder(pic_save_path@(1)) == FALSE) :pic_save_path@(1) = ""
 				}
 			next
 			;微修正
@@ -474,10 +506,10 @@
 				}
 			next
 			// 画像
-			exist current_dir@ + "\\save.png"
+			exist pic_save_path@(0) + "\\save.png"
 			if(strsize == -1) :return
 			buffer kTempBufferID@
-			picload current_dir@ + "\\save.png"
+			picload pic_save_path@(0) + "\\save.png"
 			for k, 0, kSceneListSize@
 				gsel kCaptureBufferID@ + k
 				pos 0, 0
