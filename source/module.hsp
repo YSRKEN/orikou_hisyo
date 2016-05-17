@@ -305,11 +305,15 @@
 				unit_k = (screen_shot_type_ - (kSceneListSize@ + kFleetNum + 1)) / kUnitNum
 				unit_count__(unit_k) = 0
 				for k, kUnitNum - 1, -1, -1
-					if(NearColor(160, 160 + 54 * k, 235, 218, 203) == FALSE){
-						if(NearColor(260, 180 + 54 * k, 234, 217, 202) == FALSE){
-							//艦娘がいた時点でカウントを終了させる
-							unit_count__(unit_k) = k + 1
-							_break
+					if(NearColor(137, 150 + 54 * k, 234, 217, 202) == FALSE){
+						if(NearColor(288, 150 + 54 * k, 233, 216, 199) == FALSE){
+							if(NearColor(137, 181 + 54 * k, 234, 220, 204) == FALSE){
+								if(NearColor(288, 181 + 54 * k, 242, 233, 221) == FALSE){
+									//艦娘がいた時点でカウントを終了させる
+									unit_count__(unit_k) = k + 1
+									_break
+								}
+							}
 						}
 					}
 				next

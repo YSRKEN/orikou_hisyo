@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.1.8 */
+/* おりこうさんな秘書 Ver.1.9 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.1.8"
-	#define kSoftVer2       "18"
-	#define kSoftLastUpdate "2015/04/28"
+	#define kSoftVer        "Ver.1.9"
+	#define kSoftVer2       "19"
+	#define kSoftLastUpdate "2015/04/30"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -100,7 +100,7 @@
 	//入渠タイマー
 	screen kDockWindowID, kObjSpace * 2 + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5
 	gsel kDockWindowID, -1
-	title "入渠タイマー"
+	title "入渠時間"
 	objsize kObjX, kObjY
 		pos kObjSpace, kObjSpace
 			input dock1_time1
@@ -529,6 +529,11 @@
 				pos kStatusBarOffset + kStatusBarFontSize * 12, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarOffset
 				color 255, 0, 0
 				mes "※大破艦あり※"
+			}else{
+				;大破艦がいない場合は艦隊毎の艦娘数を表示
+				pos kStatusBarOffset + kStatusBarFontSize * 12, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarOffset
+				color 0, 0, 0
+				mes "[" + unit_count(0) + "," + unit_count(1) + "," + unit_count(2) + "," + unit_count(3) + "]"
 			}
 		redraw 1
 		// ウェイト
