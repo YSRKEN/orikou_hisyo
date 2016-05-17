@@ -38,6 +38,150 @@
 	dialog about_info
 return
 
+//*
+*make_main_window
+	switch main_width_index
+	case 0
+		// 3列表示
+		if(main_pulldown_flg){
+			screen kMainWindowID, POS_X(3), POS_Y(12)
+		}else{
+			screen kMainWindowID, POS_X(3), POS_Y(9)
+		}
+		title kSoftName
+		gsel kMainWindowID, 2
+		if(main_pulldown_flg){
+			POS_XY 0, 7
+		}else{
+			POS_XY 0, 4
+		}
+			mesbox soft_log, SIZE_X(3), SIZE_Y(5), 4
+			hMesBox = objinfo(stat, 2)
+		objsize SIZE_X(1), SIZE_Y(1)
+			POS_XY 0, 0
+				combox get_pos_mode,,"オート\nクリック\nクロップ\nマニュアル"
+					get_pos_mode_id = stat
+			POS_XY 1, 0
+				button gosub "座標取得", *get_pos
+			POS_XY 2, 0
+				button gosub "【画像保存】", *save_picture
+			POS_XY 2, 1
+				button gosub "【トリミング】", *save_picture_trim
+			POS_XY 0, 2
+				button gosub "オプション...", *show_option
+			POS_XY 1, 2
+				combox save_fleet_index,,"第１艦隊\n第２艦隊\n第３艦隊\n第４艦隊\n連合艦隊\n支援艦隊"
+			POS_XY 2, 2
+				button gosub "【艦隊画像】", *save_fleet
+			POS_XY 1, 3
+				chkbox "戦闘画面", show_battle_flg
+			POS_XY 2, 3
+				button gosub "各種情報", *about
+			if(main_pulldown_flg){
+				POS_XY 0, 3
+					button gosub "↑↑↑↑", *change_pulldown
+				POS_XY 0, 4
+					button gosub "各種タイマー", *show_timer
+				POS_XY 1, 4
+					button gosub "ソート一覧", *show_sort_list
+				POS_XY 2, 4
+					button gosub "資材グラフ", *show_supply_graph
+				POS_XY 0, 5
+					button gosub "経験値計算機", *show_exp_calc
+				POS_XY 1, 5
+					button gosub "○号カウンタ", *show_counter
+				POS_XY 2, 5
+					button gosub "cond値メータ", *show_cond_meter
+				POS_XY 0, 6
+					button gosub "BGM機能", *show_bgm_window
+				POS_XY 1, 6
+					button gosub "内蔵ブラウザ", *show_browser
+			}else{
+				POS_XY 0, 3
+					button gosub "↓↓↓↓", *change_pulldown
+			}
+		objsize SIZE_X(2), SIZE_Y(1)
+			POS_XY 0, 1
+				combox scene_list_index,,scene_list_str
+					scene_list_id = stat
+		hwnd_window(kMainWindowID) = hwnd
+		show_window(kMainWindowID) = TRUE
+		swbreak
+	case 1
+		// 2列表示
+		if(main_pulldown_flg){
+			screen kMainWindowID, POS_X(2), POS_Y(15)
+		}else{
+			screen kMainWindowID, POS_X(2), POS_Y(11)
+		}
+		title kSoftName
+		gsel kMainWindowID, 2
+		if(main_pulldown_flg){
+			POS_XY 0, 10
+		}else{
+			POS_XY 0, 6
+		}
+			mesbox soft_log, SIZE_X(2), SIZE_Y(5), 4
+			hMesBox = objinfo(stat, 2)
+		objsize SIZE_X(1), SIZE_Y(1)
+			POS_XY 0, 0
+				combox get_pos_mode,,"オート\nクリック\nクロップ\nマニュアル"
+					get_pos_mode_id = stat
+			POS_XY 1, 0
+				button gosub "座標取得", *get_pos
+			POS_XY 0, 2
+				button gosub "【トリミング】", *save_picture_trim
+			POS_XY 1, 2
+				button gosub "【画像保存】", *save_picture
+			POS_XY 0, 3
+				combox save_fleet_index,,"第１艦隊\n第２艦隊\n第３艦隊\n第４艦隊\n連合艦隊\n支援艦隊"
+			POS_XY 1, 3
+				button gosub "【艦隊画像】", *save_fleet
+			POS_XY 0, 4
+				button gosub "オプション...", *show_option
+			POS_XY 1, 4
+				chkbox "戦闘画面", show_battle_flg
+			POS_XY 1, 5
+				button gosub "各種情報", *about
+			if(main_pulldown_flg){
+				POS_XY 0, 5
+					button gosub "↑↑↑↑", *change_pulldown
+				POS_XY 0, 6
+					button gosub "各種タイマー", *show_timer
+				POS_XY 1, 6
+					button gosub "ソート一覧", *show_sort_list
+				POS_XY 0, 7
+					button gosub "資材グラフ", *show_supply_graph
+				POS_XY 1, 7
+					button gosub "経験値計算機", *show_exp_calc
+				POS_XY 0, 8
+					button gosub "○号カウンタ", *show_counter
+				POS_XY 1, 8
+					button gosub "cond値メータ", *show_cond_meter
+				POS_XY 0, 9
+					button gosub "BGM機能", *show_bgm_window
+				POS_XY 1, 9
+					button gosub "内蔵ブラウザ", *show_browser
+			}else{
+				POS_XY 0, 5
+					button gosub "↓↓↓↓", *change_pulldown
+			}
+		objsize SIZE_X(2), SIZE_Y(1)
+			POS_XY 0, 1
+				combox scene_list_index,,scene_list_str
+					scene_list_id = stat
+		hwnd_window(kMainWindowID) = hwnd
+		show_window(kMainWindowID) = TRUE
+		swbreak
+	swend
+return
+
+//*プルダウン表示の切り替え
+*change_pulldown
+	main_pulldown_flg = 1 - main_pulldown_flg
+	gosub *make_main_window
+return
+
 //*シーンが切り替わった際に行う処理
 *check_scene_change
 	// ○号カウンタ
@@ -64,11 +208,19 @@ return
 			}
 		}
 	}
+	// 音声通知
+	if((scene_result(0) == "出撃経過") && (scene_result(1) == "夜戦確認")){
+		if(sound_alert_flg) :PlayAlert "alert_sel.wav"
+	}
+	if((scene_result(0) == "出撃経過") && (scene_result(1) == "戦闘判定")){
+		if(sound_alert_flg) :PlayAlert "alert_res.wav"
+	}
 return
 
 //*サブ画面下の表示を更新する
 *redraw_status_bar
 	if(show_status_flg == FALSE) :return
+	gsel kSubWindowID
 	redraw 0
 		// 消去する
 		color $FF, $FF, $FF
@@ -157,7 +309,7 @@ return
 	}
 return
 
-//*大破・消耗チェック
+//*大破・消耗・特殊チェック
 *check_stopper
 	ShowStopperWindow stopper_type	//ウィンドウ表示
 	if(show_stopper_flg1){
@@ -173,13 +325,24 @@ return
 				show_stopper_flg2 = FALSE
 				gsel kStopperWindowID, -1
 			}
+			if((check_special_flg == FALSE) && (stopper_type == kStopperSpecial)){
+				show_stopper_flg1 = FALSE
+				show_stopper_flg2 = FALSE
+				gsel kStopperWindowID, -1
+			}
 			if((CheckStopperType() == 0) && (scene_result(1) != "進撃確認")){
 				show_stopper_flg1 = FALSE
 				show_stopper_flg2 = FALSE
 				gsel kStopperWindowID, -1
 			}
 		}else{
-			if(((check_deadzone_flg) && (stopper_type == kStopperDeadZone)) || ((check_exhausted_flg) && (stopper_type == kStopperExhausted))){
+			if((check_deadzone_flg) && (stopper_type == kStopperDeadZone)){
+				ShowStopperWindow stopper_type
+			}
+			if((check_exhausted_flg) && (stopper_type == kStopperExhausted)){
+				ShowStopperWindow stopper_type
+			}
+			if((check_special_flg) && (stopper_type == kStopperSpecial)){
 				ShowStopperWindow stopper_type
 			}
 		}
@@ -189,7 +352,7 @@ return
 		switch stopper_type
 			case kStopperDeadZone
 				if(check_deadzone_flg){
-					PutLog "【大破・消耗チェック】"
+					PutLog "【大破・消耗・特殊チェック】"
 					PutLog "判定結果：大破状態"
 					TasktrayPopup2 "艦娘が大破しています", kSoftName, 2, 1000
 					show_stopper_flg1 = TRUE
@@ -197,9 +360,17 @@ return
 			swbreak
 			case kStopperExhausted
 				if(check_exhausted_flg){
-					PutLog "【大破・消耗チェック】"
+					PutLog "【大破・消耗・特殊チェック】"
 					PutLog "判定結果：消耗状態"
 					TasktrayPopup2 "艦娘が消耗しています", kSoftName, 2, 1000
+					show_stopper_flg1 = TRUE
+				}
+			swbreak
+			case kStopperSpecial
+				if(check_exhausted_flg){
+					PutLog "【大破・消耗・特殊チェック】"
+					PutLog "判定結果：特殊状態"
+					TasktrayPopup2 "設定により、進撃が中止されました", kSoftName, 2, 1000
 					show_stopper_flg1 = TRUE
 				}
 			swbreak

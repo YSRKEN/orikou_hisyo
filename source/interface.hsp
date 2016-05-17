@@ -17,16 +17,16 @@
 	screen kLockerWindowID, 10, 10 :gsel kLockerWindowID, -1
 
 /* オプション画面 */
-	screen kOptionWindowID, POS_X(4), POS_Y(7), 4 :title "オプション画面"
+	screen kOptionWindowID, POS_X(4), POS_Y(8), 4 :title "オプション画面"
 	gsel kOptionWindowID, -1
 	font msgothic, kSmallFontSize
 		pos POS_X(0), POS_Y(0) + kObjOffset
 			mes "メイン画面"
-		pos POS_X(0), POS_Y(1) + kObjOffset
-			mes "サブ画面"
 		pos POS_X(0), POS_Y(2) + kObjOffset
+			mes "サブ画面"
+		pos POS_X(0), POS_Y(3) + kObjOffset
 			mes "保存設定"
-		pos POS_X(0), POS_Y(4) + kObjOffset
+		pos POS_X(0), POS_Y(5) + kObjOffset
 			mes "その他"
 	objsize SIZE_X(1), SIZE_Y(1)
 		POS_XY 1, 0
@@ -40,34 +40,27 @@
 			chkbox "範囲表示", show_mascot_area_flg
 				show_mascot_area_id = stat
 		POS_XY 1, 1
+			combox main_width_index,,"3列表示\n2列表示"
+				main_width_index_id = stat
+		POS_XY 1, 2
 			combox sub_window_size_index,,sub_window_size_list
 				sub_window_size_id = stat
-		POS_XY 2, 1
+		POS_XY 2, 2
 			combox capture_fps_index,,capture_fps_list
 				capture_fps_id = stat
-		POS_XY 3, 1
+		POS_XY 3, 2
 			chkbox "時刻等表示", show_status_flg
 				show_status_id = stat
-		POS_XY 1, 2
+		POS_XY 1, 3
 			combox pic_save_path_flg,,"デフォルト\n指定フォルダ"
-		POS_XY 2, 2
+				pic_save_path_index_id = stat
+		POS_XY 2, 3
 			button gosub "参照...", *browse_pic
-		POS_XY 3, 2
+		POS_XY 3, 3
 			button gosub "画像フォルダ", *open_pic_folder
-		POS_XY 0, 3
+		POS_XY 0, 4
 			chkbox "名前隠し", name_disable_flg
 				name_disable_id = stat
-		POS_XY 1, 4
-			chkbox "大破チェック", check_deadzone_flg
-				check_deadzone_id = stat
-		POS_XY 2, 4
-			chkbox "消耗チェック", check_exhausted_flg
-				check_exhausted_id = stat
-		POS_XY 3, 4
-			button gosub "資材管理", *show_supply_file_window
-		POS_XY 0, 5
-			chkbox "ズレ補正", check_move_flash_flg
-				check_move_flash_id = stat
 		POS_XY 1, 5
 			chkbox "艦娘ロック", kammusu_lock_flg
 				kammusu_lock_id = stat
@@ -75,13 +68,33 @@
 			chkbox "装備ロック", weapon_lock_flg
 				weapon_lock_id = stat
 		POS_XY 3, 5
+			button gosub "資材管理", *show_supply_file_window
+		POS_XY 1, 6
+			chkbox "ズレ補正", check_move_flash_flg
+				check_move_flash_id = stat
+		POS_XY 2, 6
 			chkbox "音声通知", sound_alert_flg
 				sound_alert_id = stat
-		POS_XY 0, 6
+		POS_XY 3, 6
 			chkbox "座標記憶", position_save_flg
 				position_save_id = stat
+		POS_XY 0, 6
+			chkbox "大破チェック", check_deadzone_flg
+				check_deadzone_id = stat
+		POS_XY 0, 7
+			chkbox "消耗チェック", check_exhausted_flg
+				check_exhausted_id = stat
+		POS_XY 1, 7
+			chkbox "特殊チェック", check_special_flg
+				check_special_id = stat
+
+	objsize SIZE_X(2), SIZE_Y(1)
+		POS_XY 2, 7
+			combox check_special_index,,"A：明石が旗艦\nB：6隻で1-1\nC:A or B"
+				check_special_index_id = stat
+
 	objsize SIZE_X(3), SIZE_Y(1)
-		POS_XY 1, 3
+		POS_XY 1, 4
 			input pic_save_path(1)
 				pic_save_path_id = stat
 	objenable pic_save_path_id, 0
@@ -351,53 +364,31 @@
 			button gosub "CSV読み込み", *load_supply_csv
 		POS_XY 1, 0
 			button gosub "CSV書き出し", *write_supply_csv
-/*		POS_XY 2, 0
-			button gosub "データ修正", *retouch_supply_data*/
+		POS_XY 2, 0
+			button gosub "データ統合", *merge_supply_data
 	hwnd_window(kSupplyFileWindowID) = hwnd
 
+/* 内蔵ブラウザ用画面 */
+	screen kBrowserWindowID, kBrowserX, kBrowserY :title "内蔵ブラウザ"
+//	gsel kBrowserWindowID, -1
+	cls 1
+	objsize SIZE_X(5), SIZE_Y(1)
+		pos 0, 0
+			input browser_url
+	objsize kObjX, kObjY
+		pos kBrowserX - kObjX * 4, 0
+			button gosub "艦これ", *reset_url
+		pos kBrowserX - kObjX * 3, 0
+			button gosub "中央", *scroll_browser
+		pos kBrowserX - kObjX * 2, 0
+			button gosub "中央解除", *unscroll_browser
+		pos kBrowserX - kObjX, 0
+			button gosub "移動", *move_browser
+	pos 0, kObjY
+	axobj ie, "Shell.Explorer.2", kBrowserX, kBrowserY - kObjY
+	ie->"Navigate" browser_url
+	hwnd_window(kBrowserWindowID) = hwnd
+	show_window(kBrowserWindowID) = FALSE
+
 /* メイン画面 */
-	screen kMainWindowID, POS_X(3), POS_Y(11) :title kSoftName
-	gsel kMainWindowID, 2
-	POS_XY 0, 6
-		mesbox soft_log, SIZE_X(3), SIZE_Y(5), 4
-		hMesBox = objinfo(stat, 2)
-	objsize SIZE_X(1), SIZE_Y(1)
-		POS_XY 0, 0
-			combox get_pos_mode,,"オート\nクリック\nクロップ\nマニュアル"
-				get_pos_mode_id = stat
-		POS_XY 1, 0
-			button gosub "座標取得", *get_pos
-		POS_XY 2, 0
-			button gosub "【画像保存】", *save_picture
-		POS_XY 2, 1
-			button gosub "オプション...", *show_option
-		POS_XY 0, 2
-			button gosub "【トリミング】", *save_picture_trim
-		POS_XY 1, 2
-			combox save_fleet_index,,"第１艦隊\n第２艦隊\n第３艦隊\n第４艦隊\n連合艦隊\n支援艦隊"
-		POS_XY 2, 2
-			button gosub "【艦隊画像】", *save_fleet
-		POS_XY 0, 3
-			button gosub "各種タイマー", *show_timer
-		POS_XY 1, 3
-			button gosub "ソート一覧", *show_sort_list
-		POS_XY 2, 3
-			button gosub "資材グラフ", *show_supply_graph
-		POS_XY 0, 4
-			button gosub "経験値計算機", *show_exp_calc
-		POS_XY 1, 4
-			button gosub "○号カウンタ", *show_counter
-		POS_XY 2, 4
-			button gosub "cond値メータ", *show_cond_meter
-		POS_XY 0, 5
-			button gosub "BGM機能", *show_bgm_window
-		POS_XY 1, 5
-			chkbox "戦闘画面", show_battle_flg
-		POS_XY 2, 5
-			button gosub "各種情報", *about
-	objsize SIZE_X(2), SIZE_Y(1)
-		POS_XY 0, 1
-			combox scene_list_index,,scene_list_str
-				scene_list_id = stat
-	hwnd_window(kMainWindowID) = hwnd
-	show_window(kMainWindowID) = TRUE
+	gosub *make_main_window

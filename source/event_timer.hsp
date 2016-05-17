@@ -17,6 +17,19 @@
 			NormalizeTime number
 			d_time = CnvFloatSec(number(0) * 10 + number(1), number(2) * 10 + number(3), number(4) * 10 + number(5), 0)
 			dock_finish_time(k) = GetFloatTime() + d_time
+			// ì¸ãîäÕÇÃÉåÉxÉãÇçXêVÇ∑ÇÈ
+			dim number2, 3
+			gsel kMainBufferID
+			ReadNumber number2, 3, dck_level_pos_x, dck_pos_y(k) - 1, 9, 13, 128, TRUE
+			NormalizeLevel2 number2
+			dock_level(k) = number2(0)
+			if(number2(2) >= 0){
+				dock_level(k) = number2(0) * 100 + number2(1) * 10 + number2(2)
+			}else :if(number2(1) >= 0){
+				dock_level(k) = number2(0) * 10 + number2(1)
+			}else{
+				dock_level(k) = number2(0)
+			}
 		next
 	}
 	// çHè±âÊñ 
@@ -188,7 +201,7 @@ return
 	for k, 0, kDocks
 		time_diff = dock_finish_time(k) - now_time
 		if((dock_finish_time(k) != 0.0) && (time_diff > 0.0)){
-			timer_output += "" + (k + 1) + "Å®" + CnvStrSec2(time_diff)
+			timer_output += "" + (k + 1) + "Å®" + CnvStrSec2(time_diff) + " Lv" + dock_level(k)
 			if(time_diff < 1.0 / 24 / 60){
 				if(dock_finish_flg(k) == 0){
 					dock_finish_flg(k) = 1
@@ -278,4 +291,3 @@ return
 	gsel kTimerWindowID, 2
 	show_window(kTimerWindowID) = TRUE
 return
-

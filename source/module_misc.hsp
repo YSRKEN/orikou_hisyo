@@ -27,6 +27,12 @@
 			objprm weapon_lock_id@, weapon_lock_flg@
 			objprm sound_alert_id@, sound_alert_flg@
 			objprm position_save_id@, position_save_flg@
+
+			objprm main_width_index_id@, main_width_index@
+			objprm check_special_id@, check_special_flg@
+			objprm check_special_index_id@, check_special_index@
+			objprm pic_save_path_index_id@, pic_save_path_flg@
+
 		return
 		// ÉçÉOÇ…í«ãL
 		#deffunc PutLog str message

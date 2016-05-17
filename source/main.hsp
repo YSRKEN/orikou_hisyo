@@ -1,15 +1,31 @@
-/* おりこうさんな秘書 Ver.3.0.6 */
+/* おりこうさんな秘書 Ver.3.0.7 */
 
 /* TODO:
- * ・スレの報告から、IEコンポーネントブラウザを推奨しておくようにする
+ */
+
+/* 実装済:
+ * ○資材ログをCSVから読み込んだ際に、バイナリ形式の資材ログに自動保存するようにした。
+ * ○supply.datの読み込み耐性を強化した。
+ * ○ヘルプのテキストを修正した。
+ * ○簡単なIEコンポーネントブラウザを表示できるようにした。
+ * ○特定編成の場合に出撃警告が出せるようにした。
+ * ○戦闘中、夜戦確認と戦闘判定表示時に音を鳴らすことで注意を向かせる機能を追加した。
+ * ○入渠ドックに入っている艦が何レベルの艦が入っているかを表示するようにした。
+ * ○縦長表示(二列表示)にもできるようにした。
+ * ○資材管理コマンドの中で、複数の資材ログを統合する「資材マージ」機能を追加した。
+ * ○各種ツールの表示をボタン一つで畳めるようにした。
+ * ○その他細かな不具合を修正した。
+ * ×支援任務は母港帰還時に強制終了するように修正しようとしたが、原理的に難しい。
+ * ×トレイアイコンで何かしら操作できるようにしようとしたが、HSPでの制御方法がまだ上手く掴めない。
+ * ×画面取得方法について、旧式の方法を使えるようにしようとしたが、システムを根本から変えることになるので難しい。
  */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.0.6"
-	#define kVerString  "306"
-	#define kLastUpdate "2015/11/12"
+	#define kVersion    "Ver.3.0.7"
+	#define kVerString  "307"
+	#define kLastUpdate "2015/11/24"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -34,6 +50,7 @@
 	LoadSystemData
 	#include "interface.hsp"
 	LoadSoftData
+	gosub *make_main_window
 	onexit gosub *exit
 	onclick gosub *move
 	goto *main
@@ -48,6 +65,7 @@
 	#include "event_supply.hsp"
 	#include "event_bgm.hsp"
 	#include "event_mascot.hsp"
+	#include "event_browser.hsp"
 
 /* メインルーチン */
 *main
@@ -81,6 +99,7 @@
 	desktop_mascot_flg_ = desktop_mascot_flg
 	show_mascot_area_flg_ = show_mascot_area_flg
 	mascot_index_ = mascot_index
+	main_width_index_ = main_width_index
 	// メインループ
 	repeat
 		if(exit_flg) :end
@@ -105,7 +124,7 @@
 			gosub *check_pos
 			// 記録された画像から艦隊数を取得する
 			GetUnits unit_count
-			// 大破・消耗チェック
+			// 大破・消耗・特殊チェック
 			gosub *check_stopper
 			// ロックチェック
 			gosub *check_locker
@@ -269,6 +288,11 @@
 				gosub *show_mascot
 			}
 			mascot_index_ = mascot_index
+		}
+		// メイン画面の幅を変更する
+		if(main_width_index_ != main_width_index){
+			gosub *make_main_window
+			main_width_index_ = main_width_index
 		}
 		// ウェイト
 		await 1000 / capture_fps(capture_fps_index)

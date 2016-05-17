@@ -116,43 +116,12 @@ return
 	next
 	sdim supply_log, supply_log_size * kSupplyLogBlockSize
 	memcpy supply_log, supply_log_, supply_log_size * kSupplyLogBlockSize
+	bsave exe_path + "\\save\\supply.dat", supply_log, supply_log_size * kSupplyLogBlockSize
 	PutLog "読み込み終了"
 return
 
 //*資材ログをCSV形式で書き出す
 *write_supply_csv
-/* 今までのコード(遅い)
-	PutLog "【資材ログ】"
-	sdim text_buffer, 64
-	text_buffer += "日付,燃料,弾薬,鋼材,ボーキ,高速修復材,開発資材,司令部レベル\n"
-	p = 0
-	for k, 0, supply_log_size
-		if(time != gettime(6)){
-			PutLog "出力率：" + strf("%.1f", 100.0 * (k + 1) / supply_log_size) + "％"
-			time = gettime(6)
-		}
-		// 日時
-		text_buffer += strf("%04d-", wpeek(supply_log, p)) :p += 2
-		text_buffer += strf("%02d-",  peek(supply_log, p)) :p += 1
-		text_buffer += strf("%02d ",  peek(supply_log, p)) :p += 1
-		text_buffer += strf("%02d:",  peek(supply_log, p)) :p += 1
-		text_buffer += strf("%02d:",  peek(supply_log, p)) :p += 1
-		text_buffer += strf("%02d,",  peek(supply_log, p)) :p += 1
-		// 燃料・弾薬・鋼材・ボーキ
-		text_buffer += "" + lpeek(supply_log, p) + "," :p += 4
-		text_buffer += "" + lpeek(supply_log, p) + "," :p += 4
-		text_buffer += "" + lpeek(supply_log, p) + "," :p += 4
-		text_buffer += "" + lpeek(supply_log, p) + "," :p += 4
-		// 高速修復材・開発資材・司令部レベル
-		text_buffer += "" + wpeek(supply_log, p) + ","  :p += 2
-		text_buffer += "" + wpeek(supply_log, p) + ","  :p += 2
-		text_buffer += "" +  peek(supply_log, p) + "\n" :p += 1
-	next
-	notesel text_buffer
-	notesave exe_path + "\\save\\supply.csv"
-	PutLog "出力終了"
-	exec exe_path + "\\save\\supply.csv", 16*/
-/* Ver.3.0.4以降のコード(速い) */
 	dialog "csv", 17, "資材ログ"
 	if(stat == 0) :return
 	sdim fname, 260 :fname = refstr
@@ -207,22 +176,22 @@ return
 	p = 0
 	for k, 0, supply_log_size
 		// 日時
-		v1 = wpeek(supply_log, p) :p += 2
-		v2 =  peek(supply_log, p) :p += 1
-		v3 =  peek(supply_log, p) :p += 1
-		v4 =  peek(supply_log, p) :p += 1
-		v5 =  peek(supply_log, p) :p += 1
-		v6 =  peek(supply_log, p) :p += 1
+		v1 = limit(wpeek(supply_log, p), 2013, 9999) :p += 2
+		v2 = limit( peek(supply_log, p), 1, 12) :p += 1
+		v3 = limit( peek(supply_log, p), 1, 31) :p += 1
+		v4 = limit( peek(supply_log, p), 0, 23) :p += 1
+		v5 = limit( peek(supply_log, p), 0, 59) :p += 1
+		v6 = limit( peek(supply_log, p), 0, 60) :p += 1
 		supply_time(k) = 1.0 * CnvFloatDay(v1, v2, v3) + CnvFloatSec(v4, v5, v6, 0.0)
 		// 燃料・弾薬・鋼材・ボーキ
-		supply_value(0, k) = lpeek(supply_log, p) :p += 4
-		supply_value(1, k) = lpeek(supply_log, p) :p += 4
-		supply_value(2, k) = lpeek(supply_log, p) :p += 4
-		supply_value(3, k) = lpeek(supply_log, p) :p += 4
+		supply_value(0, k) = limit(lpeek(supply_log, p),0,300000) :p += 4
+		supply_value(1, k) = limit(lpeek(supply_log, p),0,300000) :p += 4
+		supply_value(2, k) = limit(lpeek(supply_log, p),0,300000) :p += 4
+		supply_value(3, k) = limit(lpeek(supply_log, p),0,300000) :p += 4
 		// 高速修復材・開発資材・司令部レベル
-		supply_value(4, k) = wpeek(supply_log, p) :p += 2
-		supply_value(5, k) = wpeek(supply_log, p) :p += 2
-		supply_value(6, k) =  peek(supply_log, p) :p += 1
+		supply_value(4, k) = limit(wpeek(supply_log, p),0,3000) :p += 2
+		supply_value(5, k) = limit(wpeek(supply_log, p),0,3000) :p += 2
+		supply_value(6, k) = limit( peek(supply_log, p),1,120)  :p += 1
 	next
 	// データを日付順にソートする
 	sortval supply_time
@@ -327,4 +296,109 @@ return
 //*資材管理ウィンドウを表示する
 *show_supply_file_window
 	gsel kSupplyFileWindowID, 2
+return
+
+//*資材ログを統合する
+*merge_supply_data
+	dialog "現在のデータと統合したいデータを選択してください", 0, kSoftName
+// ファイル選択
+	dialog "dat", 16, "資材ログ"
+	if(stat == 0) :return
+// 読み込み処理
+	exist refstr
+	if(strsize <= 0) :return
+	if(strsize \ kSupplyLogBlockSize != 0) :return
+	sdim load_supply_log, strsize
+	bload refstr, load_supply_log, strsize
+	PutLog "【資材ログ】"
+	load_supply_log_size = strsize / kSupplyLogBlockSize
+	supply_log_size2 = supply_log_size + load_supply_log_size
+	ddim load_supply_time, supply_log_size2
+	dim load_supply_value, kSupplyLogKinds, supply_log_size2
+	// 元のデータを解釈する
+	p = 0
+	for k, 0, supply_log_size
+		// 日時
+		v1 = limit(wpeek(supply_log, p), 2013, 9999) :p += 2
+		v2 = limit( peek(supply_log, p), 1, 12) :p += 1
+		v3 = limit( peek(supply_log, p), 1, 31) :p += 1
+		v4 = limit( peek(supply_log, p), 0, 23) :p += 1
+		v5 = limit( peek(supply_log, p), 0, 59) :p += 1
+		v6 = limit( peek(supply_log, p), 0, 60) :p += 1
+		load_supply_time(k) = 1.0 * CnvFloatDay(v1, v2, v3) + CnvFloatSec(v4, v5, v6, 0.0)
+		// 燃料・弾薬・鋼材・ボーキ
+		load_supply_value(0, k) = limit(lpeek(supply_log, p),0,300000) :p += 4
+		load_supply_value(1, k) = limit(lpeek(supply_log, p),0,300000) :p += 4
+		load_supply_value(2, k) = limit(lpeek(supply_log, p),0,300000) :p += 4
+		load_supply_value(3, k) = limit(lpeek(supply_log, p),0,300000) :p += 4
+		// 高速修復材・開発資材・司令部レベル
+		load_supply_value(4, k) = limit(wpeek(supply_log, p),0,3000) :p += 2
+		load_supply_value(5, k) = limit(wpeek(supply_log, p),0,3000) :p += 2
+		load_supply_value(6, k) = limit( peek(supply_log, p),1,120)  :p += 1
+	next
+	// 読み込んだデータを解釈する
+	p = 0
+	for k, supply_log_size, supply_log_size2
+		// 日時
+		v1 = limit(wpeek(load_supply_log, p), 2013, 9999) :p += 2
+		v2 = limit( peek(load_supply_log, p), 1, 12) :p += 1
+		v3 = limit( peek(load_supply_log, p), 1, 31) :p += 1
+		v4 = limit( peek(load_supply_log, p), 0, 23) :p += 1
+		v5 = limit( peek(load_supply_log, p), 0, 59) :p += 1
+		v6 = limit( peek(load_supply_log, p), 0, 60) :p += 1
+		load_supply_time(k) = 1.0 * CnvFloatDay(v1, v2, v3) + CnvFloatSec(v4, v5, v6, 0.0)
+		// 燃料・弾薬・鋼材・ボーキ
+		load_supply_value(0, k) = limit(lpeek(load_supply_log, p),0,300000) :p += 4
+		load_supply_value(1, k) = limit(lpeek(load_supply_log, p),0,300000) :p += 4
+		load_supply_value(2, k) = limit(lpeek(load_supply_log, p),0,300000) :p += 4
+		load_supply_value(3, k) = limit(lpeek(load_supply_log, p),0,300000) :p += 4
+		// 高速修復材・開発資材・司令部レベル
+		load_supply_value(4, k) = limit(wpeek(load_supply_log, p),0,3000) :p += 2
+		load_supply_value(5, k) = limit(wpeek(load_supply_log, p),0,3000) :p += 2
+		load_supply_value(6, k) = limit( peek(load_supply_log, p),1,120)  :p += 1
+	next
+	// データを日付順にソートする
+	sortval load_supply_time
+	dim load_supply_value_, kSupplyLogKinds, supply_log_size2
+	for k, 0, supply_log_size2
+		sortget p, k	;a(k)に入ってる値は元はa(p)にあった
+		memcpy load_supply_value_, load_supply_value, kSupplyLogKinds * 4, k * kSupplyLogKinds * 4, p * kSupplyLogKinds * 4
+	next
+	memcpy load_supply_value, load_supply_value_, kSupplyLogKinds * 4 * supply_log_size2
+	// 重複したデータを削除する
+	ddim new_supply_time, supply_log_size2
+	dim new_supply_value, kSupplyLogKinds, supply_log_size2
+	new_supply_log_size = 0
+	for k, 0, supply_log_size2
+		if(k != supply_log_size2 - 1){
+			if(load_supply_time(k) == load_supply_time(k + 1)) :_continue
+		}
+		new_supply_time(new_supply_log_size) = load_supply_time(k)
+			memcpy new_supply_value, load_supply_value, kSupplyLogKinds * 4, new_supply_log_size * kSupplyLogKinds * 4, k * kSupplyLogKinds * 4
+		new_supply_log_size++
+	next
+	// 元通り書き込み直す
+	supply_log_size = new_supply_log_size
+	sdim supply_log, supply_log_size * kSupplyLogBlockSize
+	p = 0
+	for k, 0, supply_log_size
+		dim time_value, 6
+		CnvStrTime3 new_supply_time(k), time_value
+		wpoke supply_log, p, time_value(0) :p += 2
+		poke  supply_log, p, time_value(1) :p += 1
+		poke  supply_log, p, time_value(2) :p += 1
+		poke  supply_log, p, time_value(3) :p += 1
+		poke  supply_log, p, time_value(4) :p += 1
+		poke  supply_log, p, time_value(5) :p += 1
+		// その他
+		lpoke supply_log, p, new_supply_value(0, k) :p += 4
+		lpoke supply_log, p, new_supply_value(1, k) :p += 4
+		lpoke supply_log, p, new_supply_value(2, k) :p += 4
+		lpoke supply_log, p, new_supply_value(3, k) :p += 4
+		wpoke supply_log, p, new_supply_value(4, k) :p += 2
+		wpoke supply_log, p, new_supply_value(5, k) :p += 2
+		poke  supply_log, p, new_supply_value(6, k):p += 1
+	next
+	bsave exe_path + "\\save\\supply.dat", supply_log, supply_log_size * kSupplyLogBlockSize
+	PutLog "統合終了"
 return

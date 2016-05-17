@@ -154,11 +154,9 @@
 			if((scene_result@(0) == "‰ü‘•‰æ–Ê") && (strmid(scene_result@(1), 0, 2) == "‘æ")){
 				gsel kMainBufferID
 				for k, kUnitNum - 1, -1, -1
-					if(NearColor(160, 180 + 54 * k, 235, 218, 203) == FALSE){
-						if(NearColor(260, 180 + 54 * k, 234, 217, 202) == FALSE){
+					if(NearColor(119, 164 + 54 * k, 25, 20, 4) == FALSE){
 							unit_count((show_scene_list_index@(scene_result_index@) - scene_fleet_offset@) / kUnitNum) = k + 1
 							_break
-						}
 					}
 				next
 			}
@@ -174,7 +172,7 @@
 				next
 			}
 		return
-		// ‘å”jA‚à‚µ‚­‚ÍÁ–Õó‘Ô‚©‚ğ”»’è‚·‚é
+		// ‘å”jEÁ–ÕE“Áêó‘Ô‚©‚ğ”»’è‚·‚é
 		#defcfunc CheckStopperType
 			// í‰Ê•ñ‰æ–Ê(‘å”j”»’è‚Ì‚İ)
 			if(scene_result@(1) == "í‰Ê•ñ"){
@@ -188,11 +186,33 @@
 				next
 				return type
 			}
-			// oŒ‚‰æ–Ê(‘å”jEÁ–Õ”»’è)
+			// oŒ‚‰æ–Ê(‘å”jEÁ–ÕE“Áê”»’è)
 			if((scene_result@(1) == "ŠÍ‘à‘I‘ğ") && (scene_result@(0) != "‰‰KoŒ‚")){
-				// ‘å”j”»’è
+				// Á–Õ”»’è
 				gsel kMainBufferID
 				flg = 0
+				for k, 0, kUnitNum
+					;”R—¿
+					if(NearColor(488, 167 + 50 * k, 255, 222, 0)){
+						flg = kStopperExhausted
+						_break
+					}
+					if(NearColor(488, 167 + 50 * k, 221, 42, 42)){
+						flg = kStopperExhausted
+						_break
+					}
+					;’e–ò
+					if(NearColor(514, 167 + 50 * k, 255, 222, 0)){
+						flg = kStopperExhausted
+						_break
+					}
+					if(NearColor(514, 167 + 50 * k, 221, 42, 42)){
+						flg = kStopperExhausted
+						_break
+					}
+				next
+				if(flg != 0) :return flg
+				// ‘å”j”»’è
 				for k, 0, kUnitNum
 					;‘å”j
 					if(NearColor(482, 137 + 50 * k, 251, 114, 94)){
@@ -216,28 +236,44 @@
 						}
 					}
 				next
-				// Á–Õ”»’è
-				for k, 0, kUnitNum
-					;”R—¿
-					if(NearColor(488, 167 + 50 * k, 255, 222, 0)){
-						flg = kStopperExhausted
-						_break
+				if(flg != 0) :return flg
+				// “Áê”»’è
+				//–¾ÎŠøŠÍ‚©‚ğ”»’è
+				stopper_akashi = FALSE
+				if(NearColor(379,152,137,137,134)){
+					if(NearColor(374,144,80,80,77)){
+						if(NearColor(356,146,247,247,244)){
+							stopper_akashi = TRUE
+						}
 					}
-					if(NearColor(488, 167 + 50 * k, 221, 42, 42)){
-						flg = kStopperExhausted
-						_break
+				}
+				//6Ç‚Å1-1•Ò¬‚©‚ğ”»’è
+				stopper_6units_11 = FALSE
+				;6Ç”»’è
+				if(NearColor(356,417,241,232,220) == FALSE){
+					if(NearColor(369,421,242,233,221) == FALSE){
+						;1-1”»’è
+						if(NearColor(167,445,146,61,9)){
+							if(NearColor(277,188,101,97,91)){
+								if(NearColor(299,124,92,88,83)){
+									stopper_6units_11 = TRUE
+								}
+							}
+						}
 					}
-					;’e–ò
-					if(NearColor(514, 167 + 50 * k, 255, 222, 0)){
-						flg = kStopperExhausted
-						_break
-					}
-					if(NearColor(514, 167 + 50 * k, 221, 42, 42)){
-						flg = kStopperExhausted
-						_break
-					}
-				next
-				return flg
+				}
+				//˜_—‰‰Z
+				switch(check_special_index@)
+				case 0
+					if(stopper_akashi) :return kStopperSpecial
+					swbreak
+				case 1
+					if(stopper_6units_11) :return kStopperSpecial
+					swbreak
+				case 2
+					if(stopper_akashi || stopper_6units_11) :return kStopperSpecial
+					swbreak
+				swend
 			}
 		return 0
 		// ƒXƒgƒbƒp[‰æ–Ê‚ğ•\¦‚·‚é
@@ -260,14 +296,18 @@
 					font msgothic, 32
 					pos 10, 10
 					switch stopper_type
-						case kStopperDeadZone
-							mes "‘å”jŠÍ‚ ‚è"
-							show_stopper_flg2@ = TRUE
-						swbreak
-						case kStopperExhausted
-							mes "Á–ÕŠÍ‚ ‚è"
-							show_stopper_flg2@ = TRUE
-						swbreak
+					case kStopperDeadZone
+						mes "‘å”jŠÍ‚ ‚è"
+						show_stopper_flg2@ = TRUE
+					swbreak
+					case kStopperExhausted
+						mes "Á–ÕŠÍ‚ ‚è"
+						show_stopper_flg2@ = TRUE
+					swbreak
+					case kStopperSpecial
+						mes "iŒ‚’†~"
+						show_stopper_flg2@ = TRUE
+					swbreak
 					swend
 				}
 			}

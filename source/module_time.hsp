@@ -46,7 +46,7 @@
 		#defcfunc CnvStrSec double float_sec
 			sdim output, 64
 			float_sec_ = float_sec
-			if(absf(float_sec_ - 0.04170138) < 0.0001) :assert
+			//if(absf(float_sec_ - 0.04170138) < 0.0001) :assert
 			//Žž
 			float_sec_ *= 24
 			hour_ = int(float_sec_)
@@ -71,7 +71,7 @@
 		#defcfunc CnvStrSec2 double float_sec
 			sdim output, 64
 			float_sec_ = float_sec
-			if(absf(float_sec_ - 0.04170138) < 0.0001) :assert
+			//if(absf(float_sec_ - 0.04170138) < 0.0001) :assert
 			//Žž
 			float_sec_ *= 24
 			hour_ = int(float_sec_)
@@ -97,4 +97,42 @@
 			strrep ret_str, ":", "-"
 			strrep ret_str, ".", "-"
 		return ret_str
+		#deffunc CnvStrTime3 double float_time, array time_value
+			float_day_ = int(float_time)
+			//”N‚ð“Á’è‚·‚é
+			for k, 1, kMaxYear + 1
+				if(year_offset@(k) >= float_day_){
+					time_value(0) = k
+					float_day_ -= year_offset@(k - 1)
+					leap_flg = (k \ 4 == 0) - (k \ 100 == 0) + (k \ 400 == 0)
+					_break
+				}
+			next
+			//ŒŽ‚ð“Á’è‚·‚é
+			for k, 1, 12 + 1
+				if(yearplus@(k, leap_flg) >= float_day_){
+					time_value(1) = k
+					float_day_ -= yearplus@(k - 1, leap_flg)
+					_break
+				}
+			next
+			//“ú‚ð“Á’è‚·‚é
+			time_value(2) = float_day_
+			//Žž
+			float_sec_ = float_time - double(int(float_time))
+			float_sec_ *= 24
+			hour_ = int(float_sec_)
+			time_value(3) = hour_
+			float_sec_ -= double(hour_)
+			//•ª
+			float_sec_ *= 60
+			minute_ = int(float_sec_)
+			time_value(4) = minute_
+			float_sec_ -= double(minute_)
+			//•b
+			float_sec_ *= 60
+			second_ = int(float_sec_ + 0.5)
+			time_value(5) = second_
+			float_sec_ -= double(second_)
+		return
 	#global

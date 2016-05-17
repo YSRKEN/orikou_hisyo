@@ -13,6 +13,7 @@
 	#enum global kCounterWindowID	;○号カウンタのID
 	#enum global kCondMeterWindowID	;cond値メータのID
 	#enum global kBgmWindowID		;BGM機能のID
+	#enum global kBrowserWindowID	;内蔵ブラウザ用のID
 	#enum kMascotWindowID			;マスコット表示用ID
 	#enum kSupplyFileWindowID		;資材管理用のID
 	;↑マウスで動かせるのはここまで
@@ -121,6 +122,9 @@
 	// キーボード・マウス操作
 	#const kStickEscKey 128
 	#const kStickMouse  256
+	// 内蔵ブラウザ
+	#const kBrowserX kFlashWX + 30
+	#const kBrowserY kFlashWY + 30 + kObjY
 
 /* その他の定数 */
 	// 基本
@@ -149,8 +153,12 @@
 	#const kSortStrLength 40	;艦種データの長さ
 	#const kUnitMarkLength1 8 * 5	;艦名データ(編成画面)の長さ 入力
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
+	// 内蔵ブラウザ
+	#define DIID_DWebBrowserEvents2  "{34A715A0-6587-11D0-924A-0020AFC7AC4D}"
+	#const DISPID_NAVIGATECOMPLETE2 252
+	#define kKanColleURL "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/"
 	// その他
-	#const global kSavePositions kBgmWindowID + 1
+	#const global kSavePositions kBrowserWindowID + 1
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
 	#const global kMaxSelectScenes 10	;1カテゴリにおける最大シーン数
 	#const global kFleetNum 4	;艦隊数
@@ -159,6 +167,7 @@
 	#const global kMaxYear 2099	;サポートする最大年
 	#const global kStopperDeadZone  1	;ストッパー機能
 	#const global kStopperExhausted 2
+	#const global kStopperSpecial   3
 	#const global kLockerKammusu 1	;ロック機能
 	#const global kLockerWeapon  2
 	#const kBattleType 2	;戦闘の種類(昼戦・夜戦)
@@ -238,6 +247,7 @@
 	// 各種タイマー
 	ddim dock_finish_time, kDocks + kDocks + (kFleetNum - 1)	;入渠・建造・遠征終了時刻
 	dim dock_finish_flg, kDocks + kDocks + (kFleetNum - 1)		;ラスト1分を切ったかを判定する
+	dim dock_level, kDocks										;入渠における艦のレベル
 	dim expedition_kind, (kFleetNum - 1)						;遠征における遠征の種類
 	sdim timer_output, 1024	;各種タイマーを表示するためのバッファ
 	//明石タイマー機能
@@ -248,6 +258,7 @@
 	fleet_2byte_num = "１,２,３,４"
 	//認識に使用する座標
 	dck_pos_x.0 = 623, 634, 652, 663, 680, 691
+	dck_level_pos_x.0 = 497, 507, 517
 	dck_pos_y.0 = 136, 216, 298, 380
 	bld_pos_x.0 = 402, 414, 433, 445, 464, 476
 	bld_pos_y.0 = 185, 263, 341, 419
@@ -404,6 +415,8 @@
 	battle_bgm_text = "交戦形態 昼戦画面 夜戦画面 砲撃・連撃 対空カットイン 昼カットイン 昼カットイン 魚雷カットイン 主砲カットイン 砲雷カットイン 中破画面 大破画面"
 	home_bgm_text1 = "母港画面 母港画面 編成画面 改装画面 工廠画面 入渠画面 補給画面 戦績表示 アイテム 任務画面 遠征出撃"
 	home_bgm_text2 = "演習個別 艦隊選択"
+	// 内蔵ブラウザ
+	sdim browser_url, 512 :browser_url = kKanColleURL
 	// その他の初期設定
 	sdim soft_log, 32000
 	exe_path = dir_cur

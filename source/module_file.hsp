@@ -16,11 +16,15 @@
 			show_status_flg@       = TRUE
 			check_deadzone_flg@    = TRUE
 			check_exhausted_flg@   = TRUE
+			check_special_flg@     = TRUE
 			kammusu_lock_flg@      = TRUE
 			weapon_lock_flg@       = TRUE
 			sound_alert_flg@       = FALSE
 			position_save_flg@     = FALSE
+			main_pulldown_flg@     = TRUE
 			sub_window_size_index@ = 3
+			main_width_index@      = 0
+			check_special_index@   = 0
 			for k, 0, kCounterType
 				auto_count_flg@(k) = TRUE
 				count_num@(k) = 0
@@ -74,6 +78,10 @@
 					}
 					if(param_name_first == "dock_finish_time"){
 						dock_finish_time@(param_name_second) = double(param_value)
+						_continue
+					}
+					if(param_name_first == "dock_level"){
+						dock_level@(param_name_second) = limit(int(param_value), 1, 150)
 						_continue
 					}
 					if(param_name_first == "expedition_kind"){
@@ -154,6 +162,10 @@
 					if(param_name == "weapon_lock") :weapon_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "sound_alert") :sound_alert_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "position_save") :position_save_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "main_width_index") :main_width_index@ = limit(int(param_value), 0, 1) :_continue
+					if(param_name == "main_pulldown") :main_pulldown_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_special") :check_special_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_special_index") :check_special_index@ = limit(int(param_value), 0, 2) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -250,6 +262,9 @@
 			for k, 0, kDocks * 2 + (kFleetNum - 1)
 				text_buffer += "dock_finish_time_" + k + "=" + strf("%.16g", dock_finish_time@(k)) + "\n"
 			next
+			for k, 0, kDocks
+				text_buffer += "dock_level_" + k + "=" + dock_level@(k) + "\n"
+			next
 			for k, 0, (kFleetNum - 1)
 				text_buffer += "expedition_kind_" + k + "=" + expedition_kind@(k) + "\n"
 			next
@@ -291,6 +306,10 @@
 			text_buffer += "kammusu_lock=" + kammusu_lock_flg@ + "\n"
 			text_buffer += "weapon_lock=" + weapon_lock_flg@ + "\n"
 			text_buffer += "sound_alert=" + sound_alert_flg@ + "\n"
+			text_buffer += "main_width_index=" + main_width_index@ + "\n"
+			text_buffer += "main_pulldown=" + main_pulldown_flg@ + "\n"
+			text_buffer += "check_special=" + check_special_flg@ + "\n"
+			text_buffer += "check_special_index=" + check_special_index@ + "\n"
 			notesel text_buffer
 			notesave exe_path@ + "\\save\\setting.ini"
 			// pngƒtƒ@ƒCƒ‹‚ð•Û‘¶
