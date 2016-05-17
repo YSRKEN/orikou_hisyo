@@ -99,6 +99,7 @@ return
 //*オプション画面を表示する
 *show_option
 	gsel kOptionWindowID, 2
+	show_window(kOptionWindowID) = TRUE
 return
 
 //*画像の保存パスを指定する

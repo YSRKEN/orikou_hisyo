@@ -40,19 +40,35 @@
 	if(scene_result(1) == "遠征詳細"){
 		for k, 0, kExpPagePer
 			gsel kMainBufferID
+			if(NearColor(131, 172 + k * 30, 119, 190, 181)){
+				exp_select_flg = TRUE
+			}else{
+				exp_select_flg = FALSE
+			}
 			// まず旗が立っているかを判別する
-			if(NearColor(517,180 + k * 30,76,168,168) == FALSE) :_continue
+			if(exp_select_flg){
+				if(NearColor(517,180 + k * 30,47,158,157) == FALSE) :_continue
+			}else{
+				if(NearColor(517,180 + k * 30,76,168,168) == FALSE) :_continue
+			}
 			// 次に、右上の遠征名とリストの遠征名が一致しているかを調べる
 			// 「名前が一致している」か「全くリスト外の新遠征である」場合のみ認識対象とする
-			exp_small_name = GetExpSmallName(k)
+			exp_small_name = GetExpSmallName(k, exp_select_flg)
 			exp_large_name = GetExpLargeName()
 			if((exp_small_name != exp_large_name) && (exp_small_name != -1) && (exp_large_name != -1)) :_continue
 			// そして、旗の番号を判別する
 			// 遠征対象が第(unit_number + 1)艦隊となることに注意
 			unit_number = 0
-			if(NearColor(525,180 + k * 30,224,230,227) && NearColor(523,180 + k * 30, 84,176,174)) :unit_number = 1
-			if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,236,228,215)) :unit_number = 2
-			if(NearColor(525,180 + k * 30,237,229,217) && NearColor(523,180 + k * 30,239,231,219)) :unit_number = 3
+			if(exp_select_flg){
+				if(NearColor(525,180 + k * 30,224,230,227) && NearColor(523,180 + k * 30, 49,164,163)) :unit_number = 1
+				if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,234,226,213)) :unit_number = 2
+				if(NearColor(525,180 + k * 30,117,188,179) && NearColor(523,180 + k * 30,117,188,178)) :unit_number = 3
+			}else{
+				if(NearColor(525,180 + k * 30,224,230,227) && NearColor(523,180 + k * 30, 84,176,174)) :unit_number = 1
+				if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,236,228,215)) :unit_number = 2
+				if(NearColor(525,180 + k * 30,237,229,217) && NearColor(523,180 + k * 30,239,231,219)) :unit_number = 3
+			}
+			logmes "" + k + " " + exp_small_name + " " + exp_large_name + " " + unit_number
 			if(unit_number == 0) :_continue
 			// 各桁の数字を読み取って、配列に代入する
 			dock_finish_time(unit_number - 1 + kDocks * 2) = 0.0
@@ -180,7 +196,7 @@ return
 					PutLog "入渠―第" + (k + 1) + "ドック"
 					gsel kMainWindowID
 					TasktrayPopup2 "第" + (k + 1) + "ドックの\n入渠がまもなく完了します。", kSoftName, 1, 1000
-					if(sound_alert_flg) :PlayAlert
+					if(sound_alert_flg) :PlayAlert "alert_dck.wav"
 				}
 				timer_output += "☆"
 			}
@@ -202,7 +218,7 @@ return
 					PutLog "建造―第" + (k + 1) + "ドック"
 					gsel kMainWindowID
 					TasktrayPopup2 "第" + (k + 1) + "ドックの\n建造がまもなく完了します。", kSoftName, 1, 1000
-					if(sound_alert_flg) :PlayAlert
+					if(sound_alert_flg) :PlayAlert "alert_bld.wav"
 				}
 				timer_output += "☆"
 			}
@@ -228,7 +244,7 @@ return
 					}
 					gsel kMainWindowID
 					TasktrayPopup2 "第" + (k + 2) + "艦隊の\n遠征がまもなく完了します。", kSoftName, 1, 1000
-					if(sound_alert_flg) :PlayAlert
+					if(sound_alert_flg) :PlayAlert "alert_exp.wav"
 				}
 				timer_output += "☆"
 			}else{
@@ -260,5 +276,6 @@ return
 //*各種タイマーを表示する
 *show_timer
 	gsel kTimerWindowID, 2
+	show_window(kTimerWindowID) = TRUE
 return
 

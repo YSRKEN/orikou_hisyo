@@ -150,6 +150,7 @@
 	#const kUnitMarkLength1 8 * 5	;艦名データ(編成画面)の長さ 入力
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
 	// その他
+	#const global kSavePositions kBgmWindowID + 1
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
 	#const global kMaxSelectScenes 10	;1カテゴリにおける最大シーン数
 	#const global kFleetNum 4	;艦隊数
@@ -409,6 +410,8 @@
 	sdim scene_result, 64, kPosDim
 	save_buffer_turn = 10	;セーブデータにおける縦の最大枚数
 	dim hwnd_window, kSelectWindowID	;マウスで動かせるようにするウィンドウのハンドル
+	dim show_window, kSavePositions	;ウィンドウの表示可否
+	sub_window_posx = 0 :sub_window_posy = 0	;サブ画面だけ特別扱い
 	dim unit_count, kFleetNum			;各艦隊の艦娘数
 	sdim status_bar_str, 1024			;ステータスバーに表示する文字列
 	dim battle_index, kBattleType		;各画面のインデックス

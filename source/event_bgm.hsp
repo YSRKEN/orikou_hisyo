@@ -3,6 +3,7 @@
 //*BGM‹@”\‚Ì‰æ–Ê‚ğo‚·
 *show_bgm_window
 	gsel kBgmWindowID, 2
+	show_window(kBgmWindowID) = TRUE
 return
 
 *redraw_bgm_window

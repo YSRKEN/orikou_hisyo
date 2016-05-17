@@ -3,6 +3,7 @@
 //*計算機の画面を表示する
 *show_exp_calc
 	gsel kExpCalcWindowID, 2
+	show_window(kExpCalcWindowID) = TRUE
 return
 
 //*経験値を計算し、反映する

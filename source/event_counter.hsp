@@ -3,6 +3,7 @@
 //*○号カウンタを表示する
 *show_counter
 	gsel kCounterWindowID, 2
+	show_window(kCounterWindowID) = TRUE
 return
 
 //*○号カウンタを更新する

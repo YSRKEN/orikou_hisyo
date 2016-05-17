@@ -26,6 +26,7 @@
 			objprm kammusu_lock_id@, kammusu_lock_flg@
 			objprm weapon_lock_id@, weapon_lock_flg@
 			objprm sound_alert_id@, sound_alert_flg@
+			objprm position_save_id@, position_save_flg@
 		return
 		// ログに追記
 		#deffunc PutLog str message
@@ -47,11 +48,10 @@
 		#defcfunc GetUnitID int fleet_num, int unit_num
 		return kSceneBufferID + scene_fleet_offset@ + fleet_num * kUnitNum + unit_num
 		// アラートを鳴らす
-		#deffunc PlayAlert
-			assert
-			exist exe_path@ + "\\alert.wav"
+		#deffunc PlayAlert str alert_name
+			exist exe_path@ + "\\" + alert_name
 			if(strsize == -1) :return
-			mmload exe_path@ + "\\alert.wav", 1, 0
+			mmload exe_path@ + "\\" + alert_name, 1, 0
 			mmplay 1
 		return
 	#global

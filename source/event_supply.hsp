@@ -193,6 +193,7 @@ return
 //*資材グラフを表示する
 *show_supply_graph
 	gsel kSupplyGraphWindowID, 2
+	show_window(kSupplyGraphWindowID) = TRUE
 	// 描画処理
 	gosub *draw_supply_graph
 return
@@ -327,8 +328,3 @@ return
 *show_supply_file_window
 	gsel kSupplyFileWindowID, 2
 return
-
-//*資材データを修正する
-/**retouch_supply_data
-	assert
-return*/

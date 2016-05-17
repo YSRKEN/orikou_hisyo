@@ -3,6 +3,7 @@
 //*cond値メータを表示する
 *show_cond_meter
 	gsel kCondMeterWindowID, 2
+	show_window(kCondMeterWindowID) = TRUE
 return
 
 //*cond値メータを更新する

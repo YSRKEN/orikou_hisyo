@@ -3,6 +3,7 @@
 //*ソート一覧を表示する
 *show_sort_list
 	gsel kSortListWindowID, 2
+	show_window(kSortListWindowID) = TRUE
 return
 
 //*ソート一覧に追加する

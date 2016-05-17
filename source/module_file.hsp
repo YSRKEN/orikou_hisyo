@@ -19,6 +19,7 @@
 			kammusu_lock_flg@      = TRUE
 			weapon_lock_flg@       = TRUE
 			sound_alert_flg@       = FALSE
+			position_save_flg@     = FALSE
 			sub_window_size_index@ = 3
 			for k, 0, kCounterType
 				auto_count_flg@(k) = TRUE
@@ -121,6 +122,30 @@
 						objprm kBgmKinds + p, bgm_flg@(p)
 						_continue
 					}
+					if(param_name_first == "pos_winow"){
+						split param_value, ",", temp
+						if(stat < 3) :_continue
+						id = limit(param_name_second, 0, kSavePositions - 1)
+						wx1 = int(temp(0))
+						wx2 = int(temp(1))
+						show_flg = limit(int(temp(2)), FALSE, TRUE)
+						if(position_save_flg@){
+							if(id != kSubWindowID){
+								gsel id
+								width ,,wx1, wx2
+								if(show_flg){
+									gsel id, 2
+									show_window@(id) = TRUE
+								}else{
+									gsel id, -1
+									show_window@(id) = FALSE
+								}
+							}else{
+								sub_window_posx@ = wx1
+								sub_window_posy@ = wx2
+							}
+						}
+					}
 					if(param_name == "show_status") :show_status_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_deadzone") :check_deadzone_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_exhausted") :check_exhausted_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
@@ -128,6 +153,7 @@
 					if(param_name == "kammusu_lock") :kammusu_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "weapon_lock") :weapon_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "sound_alert") :sound_alert_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "position_save") :position_save_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -250,6 +276,12 @@
 			next
 			for i, 0, kBgmKinds
 				text_buffer += "bgm_flg_" + i + "=" + bgm_flg@(i) + "\n"
+			next
+			;
+			text_buffer += "position_save=" + position_save_flg@ + "\n"
+			for i, 0, kSavePositions
+				gsel i
+				text_buffer += "pos_winow_" + i + "=" + ginfo_wx1 + "," + ginfo_wy1 + ","  +show_window@(i) + "\n"
 			next
 			;
 			text_buffer += "show_status=" + show_status_flg@ + "\n"

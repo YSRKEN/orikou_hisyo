@@ -104,3 +104,10 @@ return
 	PicSave file_name
 	PutLog "ファイル名：" + file_name
 return
+
+//*画像フォルダを開く
+*open_pic_folder
+	if(PathIsDirectory@file(pic_save_path(pic_save_path_flg)) != 0){
+		exec pic_save_path(pic_save_path_flg), 16
+	}
+return
