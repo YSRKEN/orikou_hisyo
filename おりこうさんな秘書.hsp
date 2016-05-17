@@ -1,11 +1,7 @@
-/* おりこうさんな秘書改三
- * 参考：sakura氏のhttp://hspnext.com/hspkura/hspkura02.htm
- * 備考：ぶっちゃけBGMの仕様決めるのがややこしかった。
- * 　　　道中は「最初に道中と判定される～戦闘開始」まで、
- * 　　　戦闘は「最初に戦闘と判定される～戦果報告画面」まで流すから……
+/* おりこうさんな秘書 改四
  */
 
-	#packopt name "おりこうさんな秘書"
+	#packopt name "おりこうさんな秘書改四"
 	#include "hspcv.as"		;画像処理でOpenCVを使うためのライブラリ
 
 // 通常の定数
@@ -13,25 +9,25 @@
 	#const global TRUE  1
 	#const global FALSE 0
 	// 画面ID
-	#const kMainWindowID  0	;操作画面
-	#const kSubWindowID   1	;手動指定用画面
-	#const kDeskBufferID  2	;スクショ用
-	#const kFlashBufferID 3	;検索用
-	#const kTempBufferID  4	;テンポラリ用
+	#enum kMainWindowID = 0	;操作画面
+	#enum kPutWindowID		;画像表示用画面
+	#enum kPutTempWindowID	;kPutWindowID用バッファ
+	#enum kSubWindowID		;手動指定用画面
+	#enum kDeskBufferID		;スクショ用
+	#enum kFlashBufferID	;検索用
+	#enum kTempBufferID		;テンポラリ用
+	#const kOffsetBufferID 10
 	// OpenCV用ID
 	#const kCVDeskBufferID  0
-	#const kCVFlashBufferID 1
+	#const kPutBufferID     1
 	#const kCVTempBufferID  2
 	// サイズ定義
 	;デスクトップ全体のサイズ
-	#define global kDispX   ginfo_dispx
-	#define global kDispY   ginfo_dispy
+	#define global kDispX ginfo_dispx
+	#define global kDispY ginfo_dispy
 	;Flash画面のサイズ
 	#const  global kFlashWX 800
 	#const  global kFlashWY 480
-	;ソフト画面のサイズ
-	#const kMainWX 800
-	#const kMainWY 600
 	;編成画面のサイズ
 	#const kUnitWX 455
 	#const kUnitWY 365
@@ -39,138 +35,81 @@
 	#const kUnitPX 330
 	#const kUnitPY 100
 	;フォントサイズ
-	#const kFontSize 30
+	#const kLargeFontSize 30
 	;オブジェクト関係
 	#const kObjX 80
 	#const kObjY 20
-	#const kObjSpace 9
+	#const kObjSpace 10
 	#const kObjSpaceX kObjSpace + kObjX
 	#const kObjSpaceY kObjSpace + kObjY
 	// キーボード・マウス操作
 	#const kStickEscKey 128
 	#const kStickMouse  256
+	// パラメータ
+	#const global kFleetNum 4	;艦隊数
+	#const global kUnitNum 6	;艦隊毎の艦娘数
 	// 画面状態(type_strと対応)
-	#const global kTypeUnknown 0
-	#const global kTypeResult  1
-	#const global kTypeHome    2
-	#const global kTypeInfo    3
-	#const global kTypeTeam1   4
-	#const global kTypeTeam2   5
-	#const global kTypeTeam3   6
-	#const global kTypeTeam4   7
-	#const global kTypeUnit11  8
-	#const global kTypeUnit12  9
-	#const global kTypeUnit13  10
-	#const global kTypeUnit14  11
-	#const global kTypeUnit15  12
-	#const global kTypeUnit16  13
-	#const global kTypeUnit21  14
-	#const global kTypeUnit22  15
-	#const global kTypeUnit23  16
-	#const global kTypeUnit24  17
-	#const global kTypeUnit25  18
-	#const global kTypeUnit26  19
-	#const global kTypeFactory 20
-	#const global kTypeRoot    21
-	#const global kTypeBattle  22
-	#const global kTypeResult_ 23
+	#enum global  kTypeUnknown = 0
+	#enum global  kTypeHome		;母港画面
+	#enum global  kTypeInfo		;戦績表示
+	#enum global  kTypeFactory	;工廠画面
+	#enum global  kTypeMap		;マップ画面
+	#enum global  kTypeBattle	;戦闘画面
+	#enum global  kTypeResult1	;戦果報告(交戦結果)
+	#enum global  kTypeResult2	;戦果報告(経験値・MVP表示)
+	#enum global  kTypeFleet	;編成画面
+	kTypeUnit = kTypeFleet + kFleetNum	;改装画面
 	// アプリ機能(mode_strと対応)
-	#const kModeNow     0
-	#const kModeReslut  kTypeResult
-	#const kModeHome    kTypeHome  
-	#const kModeInfo    kTypeInfo  
-	#const kModeTeam1   kTypeTeam1 
-	#const kModeTeam2   kTypeTeam2 
-	#const kModeTeam3   kTypeTeam3 
-	#const kModeTeam4   kTypeTeam4 
-	#const kModeUnit11  kTypeUnit11
-	#const kModeUnit12  kTypeUnit12
-	#const kModeUnit13  kTypeUnit13
-	#const kModeUnit14  kTypeUnit14
-	#const kModeUnit15  kTypeUnit15
-	#const kModeUnit16  kTypeUnit16
-	#const kModeUnit21  kTypeUnit21
-	#const kModeUnit22  kTypeUnit22
-	#const kModeUnit23  kTypeUnit23
-	#const kModeUnit24  kTypeUnit24
-	#const kModeUnit25  kTypeUnit25
-	#const kModeUnit26  kTypeUnit26
-	#const kModeFactory kTypeFactory
-	// タスクトレイ機能
-	#define WM_LBUTTONDOWN  $00000201
-	#define NOTIFY_TRAYICON $00001400
+	#enum global  kModeNow = 0
+	#enum global  kModeHome		;母港画面
+	#enum global  kModeInfo		;戦績表示
+	#enum global  kModeFactory	;工廠画面
+	#enum global  kModeMap		;マップ画面
+	#enum global  kModeBattle	;戦闘画面
+	#enum global  kModeResult1	;戦果報告(交戦結果)
+	#enum global  kModeResult2	;戦果報告(経験値・MVP表示)
+	#enum global  kModeFleet		;編成画面
+	kModeUnit = kModeFleet + kFleetNum	;改装画面
 	// その他フラグなど
-	#define kSoftName "おりこうさんな秘書(仮)"
-	#const kOffsetY kMainWY - kFlashWY
-	type_str.0 = "不明",     "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)", "改装画面(1-1)", "改装画面(1-2)", "改装画面(1-3)", "改装画面(1-4)", "改装画面(1-5)", "改装画面(1-6)", "改装画面(2-1)", "改装画面(2-2)", "改装画面(2-3)", "改装画面(2-4)", "改装画面(2-5)", "改装画面(2-6)", "工廠画面", "道中画面", "戦闘画面", "戦果報告_"
-	mode_str.0 = "現在状況", "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)", "改装画面(1-1)", "改装画面(1-2)", "改装画面(1-3)", "改装画面(1-4)", "改装画面(1-5)", "改装画面(1-6)", "改装画面(2-1)", "改装画面(2-2)", "改装画面(2-3)", "改装画面(2-4)", "改装画面(2-5)", "改装画面(2-6)", "工廠画面", "道中画面", "戦闘画面", "戦果報告_"
-	sdim root_bgm_path, 260
-	sdim battle_bgm_path, 260
-	auto_getpos_flg  = TRUE
-	auto_capture_flg = FALSE
-	name_disable_flg = FALSE
-	tasktray_flg     = FALSE
-	root_bgm_flg     = FALSE
-	battle_bgm_flg   = FALSE
-	root_bgm_flg2    = FALSE
-	battle_bgm_flg2  = FALSE
-	screen_shot_type = kTypeUnknown
-	application_mode = kModeNow
-
-	#uselib "user32.dll"
-		#func IsIconic "IsIconic" sptr
+	#define kSoftName "おりこうさんな秘書 改四"	;ソフト名
+	#const kMainWX kObjX * 2 + kObjSpace * 3	;メイン画面のサイズ
+	#const kMainWY kObjY * 14 + kObjSpace * 18
+	sdim current_dir, 260		;カレントディレクトリ
+		//current_dir = dir_cur	;デバッグ用
+		current_dir = dir_exe	;実行用
+	;コンボボックスの内容
+	sdim fleets_list, 1024
+		for k, 1, kFleetNum + 1
+			fleets_list += "第" + k + "艦隊\n"
+		next
+	sdim units_list, 10240
+		for i, 1, kFleetNum + 1
+			for j, 1, kUnitNum + 1
+				units_list += "第" + i + "-" + j + "番艦\n"
+			next
+		next
+	sdim commands_list, 1024
+		for k, 1, kFleetNum + 1
+			commands_list += "第" + k + "艦隊\n"
+		next
+		commands_list += "連合艦隊\n"
+		commands_list += "支援艦隊\n"
+	sdim home_bgm_path, 260		;母港BGM
+	sdim map_bgm_path, 260		;マップBGM
+	sdim battle_bgm_path, 260	;戦闘BGM
+	auto_getpos_flg = TRUE		;座標取得モード
+	fleets_index = 0			;艦隊の番号
+	units_index = 0				;艦娘の番号
+	commands_index = 0			;保存したい艦隊の種類
+	zooming_index = 0			;サブ画面の倍率
+	home_bgm_flg = FALSE		;母港画面でのBGM
+	map_bgm_flg = FALSE			;マップ画面でのBGM
+	battle_bgm_flg = FALSE		;戦闘画面でのBGM
+	name_disable_flg = FALSE	;名前を隠すか
+	most_front_flg = FALSE		;最前面表示
+	flash_px = 0 :flash_py = 0	;Flashの左上座標
 
 // モジュール
-	#module tasktray
-		// API呼び出し
-		#uselib "kernel32.dll"
-			#func GetModuleFileName "GetModuleFileNameA" int,var,int
-		#uselib "shell32.DLL"
-			#func ExtractIconEx "ExtractIconExA" var,int,var,var,int
-			#func Shell_NotifyIcon "Shell_NotifyIcon" int,var
-		// API用の定数
-		#const NIM_ADD     $00000000
-		#const NIM_DELETE  $00000002
-		#const NIM_MODIFY  $00000001
-		#const NIF_ICON    $00000002
-		#const NIF_MESSAGE $00000001
-		#const NIF_TIP     $00000004
-		// タスクトレイにアイコン格納
-		#defcfunc taskicoput str tooltip_text_
-			// ツールチップに表示するテキストを取得
-			tooltip_text = tooltip_text_
-			if(strlen(tooltip_text) == 0) :tooltip_text = ""
-			// 自分自身のファイル名を取得
-			sdim lpFileName, 260
-			GetModuleFileName hModule, lpFileName, 260
-			SelfName = lpFileName
-			icobig = 0
-			ExtractIconEx SelfName, 0, icobig, icosmall, 1
-			hIcon = icosmall
-			// NOTIFYICONDATA 構造体
-			dim IcoData, 22
-			IcoData(0) = 88
-			IcoData(1) = hwnd
-			IcoData(2) = 1
-			IcoData(3) = NIF_MESSAGE | NIF_ICON | NIF_TIP
-			IcoData(4) = $00001400	//なんでglobalな#constじゃダメなんだよクソが！
-			IcoData(5) = hIcon
-			poke IcoData, 24, tooltip_text
-			// タスクトレイにアイコンを追加
-			Shell_NotifyIcon NIM_ADD, IcoData
-		return hIcon
-		// タスクトレイアイコンを削除
-		#deffunc taskicoclr
-			// NOTIFYICONDATA 構造体
-			dim IcoData, 22
-			IcoData(0) = 88
-			IcoData(1) = hwnd
-			IcoData(2) = 1
-			IcoData(3) = NIF_ICON
-			// タスクトレイのアイコンを削除
-			Shell_NotifyIcon NIM_DELETE, IcoData
-		return 0
-	#global
 	#module misc
 		// API呼び出し
 		#uselib "gdi32.dll"
@@ -182,10 +121,25 @@
 		#const SRCCOPY    0x00CC0020
 		#const CAPTUREBLT 0x40000000
 		// 各種関数定義
+		//サブ画面にコピー
+		#deffunc PutWindowSet int window_id_, int buffer_id_
+			gsel window_id_
+			redraw 0
+				switch zooming_index@
+					case 0	;100％
+						gcopy buffer_id_, 0, 0, kFlashWX, kFlashWY
+						swbreak
+					case 1	;75％
+						gzoom 0.75 * kFlashWX, 0.75 * kFlashWY, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
+						swbreak
+					case 2	;50％
+						gzoom 0.5 * kFlashWX, 0.5 * kFlashWY, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
+						swbreak
+				swend
+			redraw 1
+		return
 		//デスクトップキャプチャ
 		#deffunc GetDesktopWindow int window_id_
-			now_id = ginfo_sel
-			gsel now_id, -1	//メイン画面を非表示にする
 			buffer window_id_, kDispX, kDispY
 			//デスクトップのデバイスコンテキストを作成する
 			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
@@ -194,7 +148,6 @@
 			//デバイスコンテキストを削除する
 			DeleteDC hdc_screen
 			redraw 1
-			gsel now_id, 1	//画面を再表示する
 		return
 		//デスクトップの一部をキャプチャ
 		#deffunc GetFlashWindow int buffer_id_, int flash_px_, int flash_py_
@@ -260,7 +213,41 @@
 		return file_name + "_" + number + ".png"
 		//タイトルバーの文字列を設定
 		#deffunc SetTitle
-			title kSoftName@ + " - " + mode_str@(application_mode@) + " - (" + flash_px@ + ","  +flash_py@ + ") - " + type_str@(screen_shot_type@)
+			mode_str.0 = "現在状況", "母港画面", "戦績表示", "工廠画面", "マップ画面", "戦闘画面", "交戦結果", "戦果報告", "編成画面", "改装画面"
+			type_str.0 = "不明",     "母港画面", "戦績表示", "工廠画面", "マップ画面", "戦闘画面", "交戦結果", "戦果報告", "編成画面", "改装画面"
+			sdim title_str, 1024
+			title_str = kSoftName@ + " - "
+			//表示モード
+			if(application_mode@ < kTypeFleet){
+				//通常
+				title_str += mode_str(application_mode@)
+			}else{
+				if(application_mode@ < kTypeUnit@){
+					//編成画面
+					title_str += mode_str(kTypeFleet)
+				}else{
+					//改装画面
+					title_str += mode_str(kTypeFleet + 1)
+				}
+			}
+			//艦これ画面の座標
+			title_str += " - (" + flash_px@ + ","  +flash_py@ + ") - "
+			//判定結果
+			if(screen_shot_type@ < kModeFleet){
+				//通常
+				title_str += type_str(screen_shot_type@)
+			}else{
+				if(screen_shot_type@ < kModeUnit@){
+					//編成画面
+					title_str += type_str(kModeFleet)
+				}else{
+					//改装画面
+					title_str += type_str(kModeFleet + 1)
+				}
+			}
+			gsel kPutWindowID@
+			title title_str
+			gsel kMainWindowID@
 		return
 		//色判定
 		#defcfunc NearColor int px_, int py_, int clr_r_, int clr_g_, int clr_b_
@@ -269,61 +256,31 @@
 			diff_g = ginfo_g - clr_g_
 			diff_b = ginfo_b - clr_b_
 			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
-			if(diff < 100) :return TRUE
+			if(diff < 500) :return TRUE
 		return FALSE
 		//状況を判別する
 		#defcfunc JudgeSituation int flash_id_
 			gsel flash_id_
-			//戦果報告
-			;提督・艦隊名の左に出ている白縦棒
-			if(NearColor(51, 77, 255, 246, 242)){
-				;中央の白縦棒(上下)
-				if(NearColor(395, 77, 255, 246, 242)){
-					if(NearColor(37, 461, 33, 36, 38)){
-						return kTypeResult
-					}
-				}
-			}
 			//母港画面
 			;中央下の履歴ボタン
-			if(NearColor(379, 464, 74, 202, 205)) :return kTypeHome	;通常
-			if(NearColor(379, 464, 66, 182, 184)) :return kTypeHome	;帰投時
+			if(NearColor(379, 464, 74, 202, 205)){	;通常
+				if(NearColor(175, 270, 255, 226, 120)){
+					return kTypeHome
+				}
+			}
+			if(NearColor(379, 464, 66, 182, 184)){	;帰投時
+				if(NearColor(175, 270, 230, 203, 108)){
+					return kTypeHome
+				}
+			}
 			//戦績表示
 			;勝率表示部分の真ん中の縦棒
 			if(NearColor(306, 276, 84, 84, 84)){
 				if(NearColor(251, 203, 35, 158, 159)){
-					return kTypeInfo
-				}
-			}
-			//編成画面
-			;随伴艦一括解除ボタン
-			if(NearColor(420, 118, 195, 180, 169)){
-				;左上の旗
-				if(NearColor(123, 126, 33, 150, 151)) :return kTypeTeam1
-				if(NearColor(153, 126, 33, 150, 151)) :return kTypeTeam2
-				if(NearColor(183, 126, 33, 150, 151)) :return kTypeTeam3
-				if(NearColor(213, 126, 33, 150, 151)) :return kTypeTeam4
-			}
-			//改装画面
-			;枠の柱
-			if(NearColor(300, 172, 241, 191, 119)){
-				;左上の旗
-				if(NearColor(136, 122, 33, 150, 151)){
-					offset = 0
-				}else{
-					if(NearColor(166, 122, 33, 150, 151)){
-						offset = 6
-					}else{
-						return kTypeUnknown
+					if(NearColor(272, 479, 159, 155, 61)){
+						return kTypeInfo
 					}
 				}
-				;枠
-				if(NearColor(294, 145, 255, 102, 29)) :return kTypeunit11 + offset
-				if(NearColor(294, 199, 255, 102, 29)) :return kTypeunit12 + offset
-				if(NearColor(294, 253, 255, 102, 29)) :return kTypeunit13 + offset
-				if(NearColor(294, 307, 255, 102, 29)) :return kTypeunit14 + offset
-				if(NearColor(294, 361, 255, 102, 29)) :return kTypeunit15 + offset
-				if(NearColor(294, 415, 255, 102, 29)) :return kTypeunit16 + offset
 			}
 			//工廠画面
 			;建造ボタンと開発ボタン(通常時と数値設定時とで二種類存在することに注意)
@@ -337,228 +294,260 @@
 					return kTypeFactory
 				}
 			}
-			//道中画面
-			if(NearColor(221, 448, 21, 69, 93)) :return kTypeRoot
 			//戦闘画面(夜戦込み)
 			if(NearColor(388, 4, 89, 201, 212)) :return kTypeBattle	;昼戦
 			if(NearColor(388, 4, 89, 177, 220)) :return kTypeBattle	;夜戦
-			//戦果報告(直後)
+			//マップ画面
+			if(NearColor(221, 448, 21, 69, 93)){
+				if(NearColor(64, 301, 147, 122, 40)){
+					return kTypeMap
+				}
+			}
+			//戦果報告交戦結果
 			;提督・艦隊名の左に出ている白縦棒
 			if(NearColor(87, 77, 255, 246, 242)){
 				;中央の白縦棒(上下)
 				if(NearColor(409, 77, 255, 246, 242)){
-					return kTypeResult_
+					return kTypeResult1
 				}
 			}
+			//戦果報告
+			;提督・艦隊名の左に出ている白縦棒
+			if(NearColor(51, 77, 255, 246, 242)){
+				;中央の白縦棒(上中)
+				if(NearColor(395, 77, 255, 246, 242)){
+					if(NearColor(395, 289, 255, 246, 242)){
+						;左下(ガシャン対策)
+						if(NearColor(37, 461, 33, 36, 38)){
+							return kTypeResult2
+						}
+					}
+				}
+			}
+			//編成画面
+			;随伴艦一括解除ボタン
+			if(NearColor(420, 118, 195, 180, 169)){
+				;左上の旗
+				for k, 0, kFleetNum
+					if(NearColor(123 + 30 * k, 126, 33, 150, 151)) :return kTypeFleet + k
+				next
+			}
+			//改装画面
+			;枠の柱
+			if(NearColor(300, 172, 241, 191, 119)){
+				;左上の旗
+				offset = -1
+				for k, 0, kFleetNum
+					if(NearColor(136 + 30 * k, 122, 33, 150, 151)){
+						offset = k * kUnitNum
+						_break
+					}
+				next
+				if(offset < 0) :return kTypeUnknown
+				;枠
+				for k, 0, kUnitNum
+					if(NearColor(294, 145 + 54 * k, 255, 102, 29)) :return kTypeUnit@ + offset + k
+				next
+			}
 		return kTypeUnknown
+		//「母港画面」かどうかを判定する(BGM・名前隠し用)
+		#defcfunc CheckHomeFlg int flash_id_
+			;通常時
+			if(NearColor(665, 42, 83, 159, 73)){		;バケツアイコン
+				if(NearColor(736, 61, 172, 128, 95)){	;ボーキアイコン
+					return TRUE
+				}
+			}
+			;帰投時
+			if(NearColor(669, 61, 150, 139, 98)){	;弾薬アイコン
+				if(NearColor(737, 62, 83, 64, 49)){	;ボーキアイコン
+					return TRUE
+				}
+			}
+		return FALSE
 	#global
+
+	onexit gosub *exit
 
 // ウィンドウ周りを初期設定
 	//保存用バッファ
 	buffer kFlashBufferID,  kFlashWX, kFlashWY
-	for k, kTypeResult, kTypeFactory + 1
-		buffer 5 + k, kFlashWX, kFlashWY
+	for k, kTypeHome, kTypeUnit + kFleetNum * kUnitNum + 1
+		buffer kOffsetBufferID + k, kFlashWX, kFlashWY
 	next
+	buffer kPutTempWindowID, kFlashWX, kFlashWY
 	//メインウィンドウ
+	screen kPutWindowID, kFlashWX, kFlashWY, 4
+	title kSoftName
 	screen kMainWindowID, kMainWX, kMainWY
-	oncmd gosub *OnMotificmd, NOTIFY_TRAYICON
+	title kSoftName
+	gsel kMainWindowID, 2
+	color
+		line 0, kObjSpace     + kObjSpaceY    , kMainWX, kObjSpace     + kObjSpaceY
+		line 0, kObjSpace * 2 + kObjSpaceY * 6, kMainWX, kObjSpace * 2 + kObjSpaceY * 6
+		line 0, kObjSpace * 3 + kObjSpaceY * 9, kMainWX, kObjSpace * 3 + kObjSpaceY * 9
 	objsize kObjX, kObjY
-		pos kObjSpace, kObjSpace
+		pos kObjSpace             , kObjSpace
 			combox auto_getpos_flg,,"手動設定\n自動設定"
 		pos kObjSpace + kObjSpaceX, kObjSpace
 			button gosub "座標取得", *get_pos
-		pos kObjSpace + kObjSpaceX * 2, kObjSpace
-			button gosub "画像保存", *save_picture
-		pos kObjSpace + kObjSpaceX * 3, kObjSpace
-			chkbox "自動更新", auto_capture_flg
-		pos kObjSpace + kObjSpaceX * 4, kObjSpace
-			chkbox "名前隠し", name_disable_flg
-		pos kObjSpace + kObjSpaceX * 5, kObjSpace
-			chkbox "タスクトレイ", tasktray_flg
 
-		pos kObjSpace, kObjSpace + kObjSpaceY
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY
 			button gosub "現在状況", *mode_now
-		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY
-			button gosub "戦果報告", *mode_result
-		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY
 			button gosub "母港画面", *mode_home
-		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 2
 			button gosub "戦績表示", *mode_info
-		pos kObjSpace + kObjSpaceX * 8, kObjSpace + kObjSpaceY
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 2
 			button gosub "工廠画面", *mode_factory
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 3
+			button gosub "マップ画面", *mode_map
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 3
+			button gosub "戦闘画面", *mode_battle
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 4
+			button gosub "交戦結果", *mode_result1
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 4
+			button gosub "戦果報告", *mode_result2
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 5
+			button gosub "【画像保存】", *save_picture
 
-		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY
-			button gosub "編成画面1", *mode_team1
-		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY
-			button gosub "編成画面2", *mode_team2
-		pos kObjSpace + kObjSpaceX * 6, kObjSpace + kObjSpaceY
-			button gosub "編成画面3", *mode_team3
-		pos kObjSpace + kObjSpaceX * 7, kObjSpace + kObjSpaceY
-			button gosub "編成画面4", *mode_team4
-			
-		pos kObjSpace, kObjSpace + kObjSpaceY * 2
-			button gosub "装備(1-1)", *mode_unit11
-		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 2
-			button gosub "装備(1-2)", *mode_unit12
-		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 2
-			button gosub "装備(1-3)", *mode_unit13
-		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 2
-			button gosub "装備(1-4)", *mode_unit14
-		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY * 2
-			button gosub "装備(1-5)", *mode_unit15
-		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY * 2
-			button gosub "装備(1-6)", *mode_unit16
-		pos kObjSpace, kObjSpace + kObjSpaceY * 3
-			button gosub "装備(2-1)", *mode_unit21
-		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 3
-			button gosub "装備(2-2)", *mode_unit22
-		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 3
-			button gosub "装備(2-3)", *mode_unit23
-		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 3
-			button gosub "装備(2-4)", *mode_unit24
-		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY * 3
-			button gosub "装備(2-5)", *mode_unit25
-		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY * 3
-			button gosub "装備(2-6)", *mode_unit26
+		pos kObjSpace             , kObjSpace * 3 + kObjSpaceY * 6
+			combox fleets_index,,fleets_list
+		pos kObjSpace + kObjSpaceX, kObjSpace * 3 + kObjSpaceY * 6
+			button gosub "編成画面", *mode_fleet
+		pos kObjSpace             , kObjSpace * 3 + kObjSpaceY * 7
+			combox units_index,,units_list
+		pos kObjSpace + kObjSpaceX, kObjSpace * 3 + kObjSpaceY * 7
+			button gosub "改装画面", *mode_unit
+		pos kObjSpace             , kObjSpace * 3 + kObjSpaceY * 8
+			combox commands_index,,commands_list
+		pos kObjSpace + kObjSpaceX, kObjSpace * 3 + kObjSpaceY * 8
+			button gosub "【○○艦隊】", *save_fleets
 
-		pos kObjSpace + kObjSpaceX * 6, kObjSpace
-			button gosub "第1艦隊",  *save_team1
-		pos kObjSpace + kObjSpaceX * 7, kObjSpace
-			button gosub "第2艦隊",  *save_team2
-		pos kObjSpace + kObjSpaceX * 8, kObjSpace
-			button gosub "連合艦隊", *save_team12
-
-		pos kObjSpace + kObjSpaceX * 6, kObjSpace + kObjSpaceY * 2
-			chkbox "道中BGM", root_bgm_flg
-		pos kObjSpace + kObjSpaceX * 6, kObjSpace + kObjSpaceY * 3
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
+			chkbox "名前隠し", name_disable_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 9
+			combox zooming_index,,"倍率100％\n倍率75％\n倍率50％"
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 10
+			chkbox "母港BGM", home_bgm_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 10
+			button gosub "参照...", *browse_home_bgm
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 11
+			chkbox "マップBGM", map_bgm_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 11
+			button gosub "参照...", *browse_map_bgm
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 12
 			chkbox "戦闘BGM", battle_bgm_flg
-
-	objsize kObjX / 2, kObjY
-		pos kObjSpace + kObjSpaceX * 7, kObjSpace + kObjSpaceY * 2
-			button gosub "参照...",  *browse_root_bgm
-		pos kObjSpace + kObjSpaceX * 7, kObjSpace + kObjSpaceY * 3
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 12
 			button gosub "参照...", *browse_battle_bgm
-
-	objsize kObjX, kObjY
-		pos kObjSpace * 2 + kObjSpaceX * 7 + kObjX / 2, kObjSpace + kObjSpaceY * 2
-			input root_bgm_path,,,260
-		pos kObjSpace * 2 + kObjSpaceX * 7 + kObjX / 2, kObjSpace + kObjSpaceY * 3
-			input battle_bgm_path,,,260
-
-	objsize kObjX / 2, kObjY + kObjSpaceY
-		pos kObjSpace + kObjSpaceX * 8 + kObjX / 2, kObjSpace + kObjSpaceY * 2
-			button gosub "停止", *bgm_stop
-
-	SetTitle
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 13
+			button gosub "BGM停止", *stop_bgm
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 13
+			button gosub "情報...", *about
 
 // 自動更新を行う
-	root_bgm_flg_ = FALSE
+	zooming_index_ = zooming_index
+	most_front_flg_ = most_front_flg
+	home_bgm_flg_   = FALSE
+	map_bgm_flg_    = FALSE
 	battle_bgm_flg_ = FALSE
 	repeat
-		// 自動更新を行う
-		if(auto_capture_flg){
-			redraw 0
-				SetTitle
-				GetFlashWindow kFlashBufferID, flash_px, flash_py
-				gsel kMainWindowID
-			redraw 1
-		}else{
-			SetTitle
-		}
-		// 現在の状況を自動判定する
+		SetTitle
+		// Flash画面を自動取得
+		GetFlashWindow kFlashBufferID, flash_px, flash_py
+		// 結果を判定し、自動で格納する
 		screen_shot_type = JudgeSituation(kFlashBufferID)
 		if(screen_shot_type != kTypeUnknown){
-			if(screen_shot_type <= kTypeFactory){
-				gsel 5 + screen_shot_type
-				gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
-			}
+			gsel kOffsetBufferID + screen_shot_type
+			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
 		}
-		gsel kMainWindowID
 		// アプリの状態に合わせ表示を変更する
-		redraw 0
-			switch application_mode
-				case kModeNow
-					if(auto_capture_flg){
-						pos 0, kOffsetY
-						gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
-					}
-				swbreak
-				case kModeReslut
-					pos 0, kOffsetY
-					gcopy 5 + kTypeResult, 0, 0, kFlashWX, kFlashWY
-					if(name_disable_flg){
-						color :boxf 56, 82 + kOffsetY, 228, 106 + kOffsetY
-					}
-				swbreak
-				case kModeHome
-					pos 0, kOffsetY
-					gcopy 5 + kTypeHome, 0, 0, kFlashWX, kFlashWY
-					if(name_disable_flg){
-						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
-					}
-				swbreak
-				case kModeInfo
-					pos 0, kOffsetY
-					gcopy 5 + kTypeInfo, 0, 0, kFlashWX, kFlashWY
-					if(name_disable_flg){
-						;二箇所消す必要が有ることに注意
-						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
-						color :boxf 201, 123 + kOffsetY, 496, 153 + kOffsetY
-					}
-				swbreak
-				case kModeFactory
-					pos 0, kOffsetY
-					gcopy 5 + kTypeFactory, 0, 0, kFlashWX, kFlashWY
-					if(name_disable_flg){
-						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
-					}
-				swbreak
+		// (どうでもいいけどなんでHSPには「else if」って記法がないんだよ！)
+		//サブ画面のサイズを変更する
+		if(zooming_index_ != zooming_index){
+			switch zooming_index
+				case 0	;100％
+					screen kPutWindowID, kFlashWX, kFlashWY, 4
+					swbreak
+				case 1	;75％
+					screen kPutWindowID, 0.75 * kFlashWX, 0.75 * kFlashWY, 4
+					swbreak
+				case 2	;50％
+					screen kPutWindowID, 0.5 * kFlashWX, 0.5 * kFlashWY, 4
+					swbreak
 			swend
-			if(limit(application_mode, kModeTeam1, kTypeUnit26) == application_mode){
-				pos 0, kOffsetY
-				gcopy 5 + application_mode, 0, 0, kFlashWX, kFlashWY
-				if(name_disable_flg){
-					color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
-				}
+			zooming_index_ = zooming_index
+		}
+		//サブ画面用のバッファに画像を転送する
+		gsel kPutTempWindowID
+		if(application_mode == kModeNow){
+			//現在状況
+			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+		}else{
+			//それ以外
+			if(application_mode == kModeFleet){
+				gcopy kOffsetBufferID + application_mode + fleets_index, 0, 0, kFlashWX, kFlashWY
+			}else{if(application_mode == kModeUnit){
+				gcopy kOffsetBufferID + application_mode + units_index, 0, 0, kFlashWX, kFlashWY
+			}else{
+				gcopy kOffsetBufferID + application_mode, 0, 0, kFlashWX, kFlashWY
+			}}
+		}
+		//サブ画面のバッファに名前隠し処理を行う
+		if(name_disable_flg){
+			if(CheckHomeFlg(kPutTempWindowID)){	;要するに左上の歯車のすぐ右
+				color :boxf 111, 0, 273, 25
 			}
-		redraw 1
-		// 最小化を検知して、タスクトレイに格納するかを決める
-		IsIconic hwnd
-		if(stat == 1){
-			// 最小化しているのでタスクトレイに格納可能
-			if(tasktray_flg){
-				gsel kMainWindowID, -1
-				tooltext = kSoftName
-				hIcon = taskicoput(tooltext)
-				repeat
-					IsIconic hwnd
-					if(stat == 0) :break
-					wait 10
-				loop
+			if(JudgeSituation(kPutTempWindowID) == kTypeInfo){	;戦績表示ではでっかく提督名が載る
+				color :boxf 201, 123, 496, 153
+			}
+			if(JudgeSituation(kPutTempWindowID) == kTypeResult1){	;交戦結果
+				color :boxf 92, 82, 264, 106
+			}
+			if(JudgeSituation(kPutTempWindowID) == kTypeResult2){	;戦果報告
+				color :boxf 56, 82, 228, 106
 			}
 		}
+		PutWindowSet kPutWindowID, kPutTempWindowID
 		//BGMフラグに合わせ演奏する
-		if(screen_shot_type == kTypeRoot){
-			if(root_bgm_flg){
-				if(root_bgm_flg_ == FALSE){
-					mmplay 0
-					root_bgm_flg_ = TRUE
+		;母港BGM
+		if(CheckHomeFlg(kFlashBufferID)){
+			if(home_bgm_flg){
+				if(home_bgm_flg_ == FALSE){
+					if(application_mode == kModeNow){
+						mmplay 0
+						home_bgm_flg_ = TRUE
+					}
 				}
+			}else{
+				mmstop
+				home_bgm_flg_ = FALSE
 			}
 		}else{
-			if(screen_shot_type != kTypeUnknown){
-				root_bgm_flg_ = FALSE
-				if(screen_shot_type == kTypeBattle){
-					root_bgm_flg_ = FALSE
-					if(battle_bgm_flg){
-						if(battle_bgm_flg_ == FALSE){
-							mmplay 1
-							battle_bgm_flg_ = TRUE
-						}
+			;マップBGM
+			if(screen_shot_type == kTypeMap){
+				home_bgm_flg_ = FALSE
+				if(map_bgm_flg){
+					if(map_bgm_flg_ == FALSE){
+						mmplay 1
+						map_bgm_flg_ = TRUE
 					}
-				}else{
-					battle_bgm_flg_ = FALSE
-					mmstop
+				}
+			}else{
+				if(screen_shot_type != kTypeUnknown){
+					map_bgm_flg_ = FALSE
+					if(screen_shot_type == kTypeBattle){
+						map_bgm_flg_ = FALSE
+						if(battle_bgm_flg){
+							if(battle_bgm_flg_ == FALSE){
+								mmplay 2
+								battle_bgm_flg_ = TRUE
+							}
+						}
+					}else{
+						battle_bgm_flg_ = FALSE
+						mmstop
+					}
 				}
 			}
 		}
@@ -567,46 +556,44 @@
 
 //各状況のボタンを押した際の処理
 *mode_now     :application_mode = kModeNow     :return
-*mode_result  :application_mode = kModeReslut  :return
 *mode_home    :application_mode = kModeHome    :return
 *mode_info    :application_mode = kModeInfo    :return
 *mode_factory :application_mode = kModeFactory :return
-*mode_team1   :application_mode = kModeTeam1   :return
-*mode_team2   :application_mode = kModeTeam2   :return
-*mode_team3   :application_mode = kModeTeam3   :return
-*mode_team4   :application_mode = kModeTeam4   :return
-*mode_unit11  :application_mode = kModeUnit11  :return
-*mode_unit12  :application_mode = kModeUnit12  :return
-*mode_unit13  :application_mode = kModeUnit13  :return
-*mode_unit14  :application_mode = kModeUnit14  :return
-*mode_unit15  :application_mode = kModeUnit15  :return
-*mode_unit16  :application_mode = kModeUnit16  :return
-*mode_unit21  :application_mode = kModeUnit21  :return
-*mode_unit22  :application_mode = kModeUnit22  :return
-*mode_unit23  :application_mode = kModeUnit23  :return
-*mode_unit24  :application_mode = kModeUnit24  :return
-*mode_unit25  :application_mode = kModeUnit25  :return
-*mode_unit26  :application_mode = kModeUnit26  :return
-*browse_root_bgm
+*mode_map     :application_mode = kModeMap     :return
+*mode_battle  :application_mode = kModeBattle  :return
+*mode_result1 :application_mode = kModeResult1 :return
+*mode_result2 :application_mode = kModeResult2 :return
+*mode_fleet   :application_mode = kModeFleet   :return
+*mode_unit    :application_mode = kModeUnit    :return
+*browse_home_bgm
 	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
 	if(stat){
-		root_bgm_path = refstr
-		objprm 34, root_bgm_path
-		mmload root_bgm_path, 0, 1
+		home_bgm_path = refstr
+		mmload home_bgm_path, 0, 1
+	}
+return
+*browse_map_bgm
+	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
+	if(stat){
+		map_bgm_path = refstr
+		mmload map_bgm_path, 1, 1
 	}
 return
 *browse_battle_bgm
 	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
 	if(stat){
 		battle_bgm_path = refstr
-		objprm 35, battle_bgm_path
-		mmload battle_bgm_path, 1, 1
+		mmload battle_bgm_path, 2, 1
 	}
 return
-*bgm_stop
-	root_bgm_flg_ = FALSE
+*stop_bgm
+	home_bgm_flg_ = FALSE
+	map_bgm_flg_ = FALSE
 	battle_bgm_flg_ = FALSE
 	mmstop
+return
+*about
+	dialog "ソフト名：" + kSoftName + "\n作成者：とりうみさん講座の人\n最終更新日：2015/02/15",,kSoftName
 return
 
 //座標取得
@@ -617,7 +604,6 @@ return
 		GetDesktopWindow kDeskBufferID
 		//撮影した画像から座標を検索する
 		GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
-		gsel kMainWindowID
 		SetTitle
 	}else{
 		// 座標を手動で取得する
@@ -627,22 +613,23 @@ return
 		;初期設定
 		bgscr kSubWindowID, kDispX, kDispY, , 0, 0
 		gsel kSubWindowID, 2
-		font msgothic, kFontSize
+		font msgothic, kLargeFontSize
 		;画面表示
 		gcopy kDeskBufferID, 0, 0, kDispX, kDispY
 		color :mes "枠を選択して下さい。(Escで終了)"
 		;選択操作
 		is_mouse_button = FALSE
+		is_mouse_select = FALSE
 		mouse_pos_x1 = 0 :mouse_pos_y1 = 0
 		repeat
 			stick key, kStickMouse
-			if(key & kStickEscKey) :end
+			if(key & kStickEscKey) :break
 			if(key & kStickMouse){
 				if(is_mouse_button){
 					// 選択中
 					redraw 0
 						pos 0, 0
-						gcopy kBufferID1, 0, 0, kDispX, kDispY
+						gcopy kDeskBufferID, 0, 0, kDispX, kDispY
 						color :mes "枠を選択して下さい。(Escで終了)"
 						DrawMouseSquare mousex, mousey, mouse_pos_x1, mouse_pos_y1
 					redraw 1
@@ -672,6 +659,7 @@ return
 						square_ysize = mouse_pos_y1 - mouse_pos_y2 + 1
 					}
 					is_mouse_button = FALSE
+					is_mouse_select = TRUE
 					break
 				}else{
 					// 何もしていない
@@ -681,84 +669,62 @@ return
 		loop
 		;選択結果から検索を行う
 		gsel kSubWindowID, -1
-		buffer kTempBufferID, square_xsize, square_ysize
-		gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
-		if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
-			gsel kMainWindowID
-		}else{
-			GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
-			flash_px += square_x :flash_py += square_y
-			gsel kMainWindowID
-			SetTitle
+		if(is_mouse_select){
+			buffer kTempBufferID, square_xsize, square_ysize
+			gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
+			if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
+			}else{
+				GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
+				flash_px += square_x :flash_py += square_y
+				SetTitle
+			}
 		}
 	}
 return
 
 //画像保存
 *save_picture
-	buffer kFlashBufferID, kFlashWX, kFlashWY
-	gcopy kMainWindowID, 0, kMainWY - kFlashWY, kFlashWX, kFlashWY
-	cvbuffer kCVFlashBufferID, kFlashWX, kFlashWY
-	cvputimg kCVFlashBufferID
-	cvsave AutoFileName(), kCVFlashBufferID
+	gsel kPutWindowID
+	cvbuffer kPutBufferID, ginfo_sx, ginfo_sy
+	cvputimg kPutBufferID
+	cvsave current_dir + "\\" + AutoFileName(), kPutBufferID
 	gsel kMainWindowID
 return
 
-//第1艦隊の編成を保存する
-*save_team1
-	buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
-	for y, 0, 2
-		for x, 0, 3
-			pos x * kUnitWX, y * kUnitWY
-			gcopy 5 + (kTypeUnit11 + (y * 3 + x)), kUnitPX, kUnitPY, kUnitWX, kUnitWY
-		next
-	next
-	cvbuffer kCVTempBufferID, kUnitWX * 3, kUnitWY * 2
-	cvputimg kCVTempBufferID
-	cvsave AutoFileName(), kCVTempBufferID
-	gsel kMainWindowID
-return
-
-//第2艦隊の編成を保存する
-*save_team2
-	buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
-	for y, 0, 2
-		for x, 0, 3
-			pos x * kUnitWX, y * kUnitWY
-			gcopy 5 + (kTypeUnit21 + (y * 3 + x)), kUnitPX, kUnitPY, kUnitWX, kUnitWY
-		next
-	next
-	cvbuffer kCVTempBufferID, kUnitWX * 3, kUnitWY * 2
-	cvputimg kCVTempBufferID
-	cvsave AutoFileName(), kCVTempBufferID
-	gsel kMainWindowID
-return
-
-//連合艦隊の編成を保存する
-*save_team12
-	buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3
-	for z, 0, 2
-		for y, 0, 3
-			for x, 0, 2
-				pos (z * 2 + x) * kUnitWX, y * kUnitWY
-				gcopy 5 + (kTypeUnit11 + (z * 6 + y * 2 + x)), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+//艦隊画像保存
+*save_fleets
+	if(commands_index < kFleetNum){
+		// 第1～第4艦隊
+		buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
+		for y, 0, 2
+			for x, 0, 3
+				pos x * kUnitWX, y * kUnitWY
+				gcopy kOffsetBufferID + kTypeUnit + commands_index * kUnitNum + (y * 3 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
 			next
 		next
-	next
-	cvbuffer kCVTempBufferID, kUnitWX * 4, kUnitWY * 3
-	cvputimg kCVTempBufferID
-	cvsave AutoFileName(), kCVTempBufferID
-	gsel kMainWindowID
+		cvbuffer kCVTempBufferID, kUnitWX * 3, kUnitWY * 2
+		cvputimg kCVTempBufferID
+		cvsave AutoFileName(), kCVTempBufferID
+	}else{
+		// 連合・支援艦隊
+		buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3
+		for z, 0, 2
+			for y, 0, 3
+				for x, 0, 2
+					pos (z * 2 + x) * kUnitWX, y * kUnitWY
+					gcopy kOffsetBufferID + kTypeUnit + (commands_index - kFleetNum) * (kUnitNum * 2) + (z * 6 + y * 2 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+				next
+			next
+		next
+		cvbuffer kCVTempBufferID, kUnitWX * 4, kUnitWY * 3
+		cvputimg kCVTempBufferID
+		cvsave AutoFileName(), kCVTempBufferID
+		gsel kMainWindowID
+	}
 return
 
-// NOTIFY_TRAYICONを処理する
-*OnMotificmd
-	itemID = lparam
-	switch itemID
-		case WM_LBUTTONDOWN
-			gsel kMainWindowID, 2
-			gsel kMainWindowID, 1
-			taskicoclr
-			swbreak
-	swend
+//終了確認
+*exit
+	dialog "終了しますか？", 2, kSoftName
+	if(stat == 6) :end
 return
