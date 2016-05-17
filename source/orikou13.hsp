@@ -1,0 +1,1319 @@
+/* おりこうさんな秘書 Ver.1.3
+ */
+
+	#packopt name "orikou13"
+	#include "hspcv.as"		;画像処理でOpenCVを使うためのライブラリ
+	#pack "area_exp.txt"
+	#pack "exp_table.txt"
+	//#pack "cursor.png"	;あえてpackしないことで変更できるようにした
+
+// 通常の定数
+	// 真偽
+	#const global TRUE  1
+	#const global FALSE 0
+	#const global NULL  0
+	// 画面ID
+	#enum kMainWindowID = 0	;操作画面
+	#enum kPutWindowID		;画像表示用画面
+	#enum kExpCalcWindowID	;経験値計算機
+	#enum kDockWindowID		;入渠タイマー
+	#enum kCountWindowID	;○号カウンター
+	#enum kPutTempWindowID	;kPutWindowID用バッファ
+	#enum kSubWindowID		;手動指定用画面
+	#enum kDeskBufferID		;スクショ用
+	#enum kFlashBufferID	;検索用
+	#enum global kCursorBufferID	;マウスカーソル表示用
+	#enum global kTempBufferID		;テンポラリ用
+	#enum global kNumGetBufferID	;数字認識用
+	#const kOffsetBufferID 20
+	// OpenCV用ID
+	#enum kCVDeskBufferID = 0
+	#enum kCVPutBufferID
+	#enum global kCVTempBufferID
+	// サイズ定義
+	;デスクトップ全体のサイズ
+	#define global kDispX ginfo_dispx
+	#define global kDispY ginfo_dispy
+	;Flash画面のサイズ
+	#const  global kFlashWX 800
+	#const  global kFlashWY 480
+	;編成画面のサイズ
+	#const kUnitWX 455
+	#const kUnitWY 365
+	;編成画面のオフセット座標
+	#const kUnitPX 330
+	#const kUnitPY 100
+	;フォントサイズ
+	#const kSmallFontSize 12
+	#const kLargeFontSize 30
+	;オブジェクト関係
+	#const kObjX 80
+	#const kObjY 20
+	#const kObjSpace 8
+	#const kObjSpaceX kObjSpace + kObjX
+	#const kObjSpaceY kObjSpace + kObjY
+	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
+	#const kCounterY 60
+	// キーボード・マウス操作
+	#const kStickEscKey 128
+	#const kStickMouse  256
+	// パラメータ
+	#const global kFleetNum 4	;艦隊数
+	#const global kUnitNum 6	;艦隊毎の艦娘数
+	#const global kDocks 4		;ドック数
+	// 画面状態(type_strと対応)
+	#enum global  kTypeUnknown = 0
+	#enum global  kTypeHome		;母港画面
+	#enum global  kTypeInfo		;戦績表示
+	#enum global  kTypeDock		;入渠画面
+	#enum global  kTypeFactory	;工廠画面
+	#enum global  kTypeMap		;マップ画面
+	#enum global  kTypeBattle	;戦闘画面
+	#enum global  kTypeBreak	;中大破の瞬間
+	#enum global  kTypeResult1	;戦果報告(交戦結果)
+	#enum global  kTypeResult2	;戦果報告(経験値・MVP表示)
+	#enum global  kTypePractice1	;演習画面(一覧)
+	#enum global  kTypePractice2	;演習画面(個別)
+	#enum global  kTypeFleet		;編成画面
+	kTypeUnit = kTypeFleet + kFleetNum	;改装画面
+	// アプリ機能(mode_strと対応)
+	#enum global  kModeNow = 0
+	#enum global  kModeHome		;母港画面
+	#enum global  kModeInfo		;戦績表示
+	#enum global  kModeDock		;入渠画面
+	#enum global  kModeFactory	;工廠画面
+	#enum global  kModeMap		;マップ画面
+	#enum global  kModeBattle	;戦闘画面
+	#enum global  kModeBreak	;中大破の瞬間
+	#enum global  kModeResult1	;戦果報告(交戦結果)
+	#enum global  kModeResult2	;戦果報告(経験値・MVP表示)
+	#enum global  kModePractice1	;演習画面(一覧)
+	#enum global  kModePractice2	;演習画面(個別)
+	#enum global  kModeFleet		;編成画面
+	kModeUnit = kModeFleet + kFleetNum	;改装画面
+	// その他フラグなど
+	#define kSoftName "おりこうさんな秘書 Ver.1.3"	;ソフト名
+	#const kMainWX kObjX * 2 + kObjSpace * 3	;メイン画面のサイズ
+	#const kMainWY kObjY * 19 + kObjSpace * 24
+	sdim current_dir, 260		;カレントディレクトリ
+		current_dir = dir_cur	;デバッグ用
+		//current_dir = dir_exe	;実行用
+	;コンボボックスの内容
+	sdim fleets_list, 1024
+		for k, 1, kFleetNum + 1
+			fleets_list += "第" + k + "艦隊\n"
+		next
+	sdim units_list, 10240
+		for i, 1, kFleetNum + 1
+			for j, 1, kUnitNum + 1
+				units_list += "第" + i + "-" + j + "番艦\n"
+			next
+		next
+	sdim commands_list, 1024
+		for k, 1, kFleetNum + 1
+			commands_list += "第" + k + "艦隊\n"
+		next
+		commands_list += "連合艦隊\n"
+		commands_list += "支援艦隊\n"
+	sdim level_list, 1024
+		for k, 1, 150 + 1
+			level_list += "" + k + "\n"
+		next
+	sdim area_list, 1024
+	gosub *area_init
+	;経験値計算機
+	now_level = 0
+	goal_level = 24
+	area_index = 11
+	reader_ship_flg = TRUE
+	mvp_flg = TRUE
+	result_index = 1
+	;入渠タイマー
+	;いちいちDLL叩いてるのはぶっちゃけhspext.dllが信用ならないからでち！
+	;pipeexecだとフリーズすることがあったのにこれだとそれがないのでち！
+	#uselib "kernel32.dll"
+	#func   CreatePipe     "CreatePipe"     sptr,sptr,sptr,sptr
+	#func   CloseHandle    "CloseHandle"    sptr
+	#func   CreateProcessA "CreateProcessA" sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr
+	#func   ReadFile       "ReadFile"       sptr,sptr,sptr,sptr,sptr
+	#const	SIZE_SEC_ATTR        12			// SECURITY_ATTRIBUTES構造体サイズ
+	#const	SIZE_SUP_INFO        68			// STARTUPINFO構造体サイズ
+	#const	STARTF_USESHOWWINDOW 0x00000001	// パラメータ使用フラグ（ウィンドウ表示状態）
+	#const	STARTF_USESTDHANDLES 0x00000100	// パラメータ使用フラグ（標準出入力ハンドル）
+	#const	SW_HIDE              0			// 起動時ウィンドウを表示しない
+	#const	SIZE_BUF             1024		// ReadFile読み取りサイズ上限
+	dock1_time1 = "00:00:00" :dock1_time2 = ""
+	dock2_time1 = "00:00:00" :dock2_time2 = ""
+	dock3_time1 = "00:00:00" :dock3_time2 = ""
+	dock4_time1 = "00:00:00" :dock4_time2 = ""
+	dim dock_hour,   kDocks
+	dim dock_minute, kDocks
+	dim dock_second, kDocks
+	ypos.0 = 136, 216, 298, 380
+	buffer kNumGetBufferID, 90, 25
+	;○号カウンター
+	sdim count_result, 1024		;○号カウンター
+	a_sortie_count = 0			;あ号出撃
+	a_to_boss_count = 0			;あ号ボス到達
+	a_win_boss_count = 0		;あ号ボス勝利
+	a_s_win_count = 0			;あ号S勝利
+	r_count = 0					;ろ号
+	i_count = 0					;い号
+	;fps
+	fps_num.0 = 30, 20, 10, 5, 3, 2, 1
+	sdim fps_list, 1024
+	for k, 0, length(fps_num)
+		fps_list += "" + fps_num(k) + "fps\n"
+	next
+	;その他
+	sdim home_bgm_path, 260		;母港BGM
+	sdim map_bgm_path, 260		;マップBGM
+	sdim battle_bgm_path, 260	;戦闘BGM
+	auto_getpos_flg = TRUE		;座標取得モード
+	dead_zone_flg = TRUE		;大破チェッカー機能
+	fleets_index = 0			;艦隊の番号
+	units_index = 0				;艦娘の番号
+	commands_index = 0			;保存したい艦隊の種類
+	zooming_index = 2			;サブ画面の倍率
+	fps_index = 0				;fps設定
+	home_bgm_flg = FALSE		;母港画面でのBGM
+	map_bgm_flg = FALSE			;マップ画面でのBGM
+	battle_bgm_flg = FALSE		;戦闘画面でのBGM
+	name_disable_flg = FALSE	;名前を隠すか
+	most_front_flg = FALSE		;最前面表示
+	cursor_flg = FALSE			;サブ画面にカーソルを表示するか
+	flash_px = 0 :flash_py = 0	;Flashの左上座標
+
+// モジュール
+	#module misc
+		// API呼び出し
+		#uselib "gdi32.dll"
+		#cfunc CreateDC "CreateDCA" sptr,sptr,sptr,int
+		#func DeleteDC  "DeleteDC"  int
+		#func BitBlt    "BitBlt"    int,int,int,int,int,int,int,int,int
+		// API用の定数
+		#const SRCCOPY    0x00CC0020
+		#const CAPTUREBLT 0x40000000
+		// 各種関数定義
+		//サブ画面にコピー
+		#deffunc PutWindowSet int window_id_, int buffer_id_
+			//カーソルを擬似的に表示させる(オプション)
+			if((cursor_flg@) && ((application_mode@ == kModeNow))){
+				gsel buffer_id_
+				mx = ginfo_mx - flash_px@ :my = ginfo_my - flash_py@
+				;カーソルを描画する
+				color 255, 0, 0
+				gmode 4,0,0,256
+				pos mx, my
+				gcopy kCursorBufferID, 0, 0, cursor_x@, cursor_y@
+				gmode 0
+				pos 0, 0
+			}
+			//サブ画面に画像を転送する
+			gsel window_id_
+			pos 0, 0
+			redraw 0
+				switch zooming_index@
+					case 0	;200％
+						gzoom 2 * kFlashWX, 2 * kFlashWY, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
+						swbreak
+					case 1	;150％
+						gzoom 1.5 * kFlashWX, 1.5 * kFlashWY, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
+						swbreak
+					case 2	;100％
+						gcopy buffer_id_, 0, 0, kFlashWX, kFlashWY
+						swbreak
+					case 3	;75％
+						gzoom 0.75 * kFlashWX, 0.75 * kFlashWY, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
+						swbreak
+					case 4	;50％
+						gzoom 0.5 * kFlashWX, 0.5 * kFlashWY, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
+						swbreak
+				swend
+			redraw 1
+		return
+		//デスクトップキャプチャ
+		#deffunc GetDesktopWindow int window_id_
+			buffer window_id_, kDispX, kDispY
+			//デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			//デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kDispX, kDispY, hdc_screen, 0, 0, SRCCOPY | CAPTUREBLT
+			//デバイスコンテキストを削除する
+			DeleteDC hdc_screen
+			redraw 1
+		return
+		//デスクトップの一部をキャプチャ
+		#deffunc GetFlashWindow int buffer_id_, int flash_px_, int flash_py_
+			buffer buffer_id_, kFlashWX, kFlashWY
+			//デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			//デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, flash_px_, flash_py_, SRCCOPY | CAPTUREBLT
+			//デバイスコンテキストを削除する
+			DeleteDC hdc_screen
+			redraw 1
+		return
+		//艦これ画面の自動認識
+		#deffunc GetPosFlashSquare int window_id_, int output_buffer_id_, var px_, var py_
+			;バッファ1：検索先画像
+			gsel window_id_
+			cvbuffer window_id_, ginfo_sx, ginfo_sy
+			cvputimg window_id_
+			//バッファ2:黒塗りの800x480の画像
+			buffer output_buffer_id_, kFlashWX, kFlashWY
+			boxf
+			cvbuffer output_buffer_id_, kFlashWX, kFlashWY
+			cvputimg output_buffer_id_
+			//マッチング処理を行う
+			cvmatch px_, py_, CV_TM_SQDIFF, output_buffer_id_, window_id_
+		return
+		//長方形枠を描画
+		#deffunc DrawMouseSquare int mouse_x1_, int mouse_y1_, int mouse_x2_, int mouse_y2_
+			if(mouse_x1_ < mouse_x2_){
+				square_x1 = mouse_x1_
+				square_x2 = mouse_x2_
+			}else{
+				square_x1 = mouse_x2_
+				square_x2 = mouse_x1_
+			}
+			if(mouse_y1_ < mouse_y2_){
+				square_y1 = mouse_y1_
+				square_y2 = mouse_y2_
+			}else{
+				square_y1 = mouse_y2_
+				square_y2 = mouse_y1_
+			}
+			color 0, 255, 255
+			line square_x1, square_y1, square_x2, square_y1
+			line square_x2, square_y1, square_x2, square_y2
+			line square_x2, square_y2, square_x1, square_y2
+			line square_x1, square_y2, square_x1, square_y1
+		return
+		//ファイル名を自動設定
+		#defcfunc AutoFileName
+			file_name = strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
+			exist file_name + ".png"
+			if(strsize == -1) :return file_name + ".png"
+			number = 0
+			repeat, 1
+				exist file_name + "_" + cnt + ".png"
+				if(strsize == -1){
+					number = cnt
+					break
+				}
+				wait 5
+			loop
+		return file_name + "_" + number + ".png"
+		//タイトルバーの文字列を設定
+		#deffunc SetTitle
+			mode_str.0 = "現在状況", "母港画面", "戦績表示", "入渠画面", "工廠画面", "マップ画面", "戦闘画面", "中大破画像", "交戦結果", "戦果報告", "演習一覧", "演習個別", "編成画面", "改装画面"
+			type_str.0 = "不明",     "母港画面", "戦績表示", "入渠画面", "工廠画面", "マップ画面", "戦闘画面", "中大破画像", "交戦結果", "戦果報告", "演習一覧", "演習個別", "編成画面", "改装画面"
+			sdim title_str, 1024
+			title_str = kSoftName@ + " - "
+			//表示モード
+			if(application_mode@ < kTypeFleet){
+				//通常
+				title_str += mode_str(application_mode@)
+			}else{
+				if(application_mode@ < kTypeUnit@){
+					//編成画面
+					title_str += mode_str(kTypeFleet)
+				}else{
+					//改装画面
+					title_str += mode_str(kTypeFleet + 1)
+				}
+			}
+			//艦これ画面の座標
+			title_str += " - (" + flash_px@ + ","  +flash_py@ + ") - "
+			//判定結果
+			if(screen_shot_type@ < kModeFleet){
+				//通常
+				title_str += type_str(screen_shot_type@)
+			}else{
+				if(screen_shot_type@ < kModeUnit@){
+					//編成画面
+					title_str += type_str(kModeFleet)
+				}else{
+					//改装画面
+					title_str += type_str(kModeFleet + 1)
+				}
+			}
+			gsel kPutWindowID@
+			title title_str
+			gsel kMainWindowID@
+		return
+		//色判定
+		#defcfunc NearColor int px_, int py_, int clr_r_, int clr_g_, int clr_b_
+			pget px_, py_
+			diff_r = ginfo_r - clr_r_
+			diff_g = ginfo_g - clr_g_
+			diff_b = ginfo_b - clr_b_
+			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
+			if(diff < 500) :return TRUE
+		return FALSE
+		//状況を判別する
+		#defcfunc JudgeSituation int flash_id_
+			gsel flash_id_
+			//母港画面
+			;中央下の履歴ボタン
+			if(NearColor(379, 464, 74, 202, 205)){	;通常
+				if(NearColor(175, 270, 255, 226, 120)){
+					return kTypeHome
+				}
+			}
+			if(NearColor(379, 464, 66, 182, 184)){	;帰投時
+				if(NearColor(175, 270, 230, 203, 108)){
+					return kTypeHome
+				}
+			}
+			//戦績表示
+			;勝率表示部分の真ん中の縦棒
+			if(NearColor(306, 276, 84, 84, 84)){
+				if(NearColor(251, 203, 35, 158, 159)){
+					if(NearColor(272, 479, 159, 155, 61)){
+						return kTypeInfo
+					}
+				}
+			}
+			//入渠画面
+			;三種類に対応しなければならないことに注意
+			if(NearColor(153, 257, 131, 161, 182)){
+				if(NearColor(100, 109, 176, 164, 123)){
+					return kTypeDock
+				}
+			}
+			if(NearColor(153, 257, 104, 128, 145)){
+				if(NearColor(100, 109, 140, 131,  98)){
+					return kTypeDock
+				}
+			}
+			if(NearColor(153, 257,  83, 102, 116)){
+				if(NearColor(100, 109, 112, 104,  78)){
+					return kTypeDock
+				}
+			}
+			//工廠画面
+			;建造ボタンと開発ボタン(通常時と数値設定時とで二種類存在することに注意)
+			if(NearColor(150, 175, 254, 203, 93)){
+				if(NearColor(150, 350, 70, 128, 75)){
+					return kTypeFactory
+				}
+			}
+			if(NearColor(150, 175, 203, 162, 74)){
+				if(NearColor(150, 350, 56, 102, 60)){
+					return kTypeFactory
+				}
+			}
+			//戦闘画面(夜戦込み)
+			if(NearColor(388, 4, 89, 201, 212)) :return kTypeBattle	;昼戦
+			if(NearColor(388, 4, 89, 177, 220)) :return kTypeBattle	;夜戦
+			//マップ画面
+			if(NearColor(221, 448, 21, 69, 93)){
+				if(NearColor(64, 301, 147, 122, 40)){
+					if(NearColor(799, 239, 61, 139, 180)){
+						return kTypeMap
+					}
+				}
+			}
+			//中大破画像
+			;四隅(相当ガバガバだということは自分でも分かっているんだが……)
+			if(NearColor(0, 0, 250, 250, 250)){
+				if(NearColor(799, 0, 251, 251, 251)){
+					;「中破」の文字
+					if(NearColor(493, 239, 217, 176, 103)){
+						if(NearColor(588, 225, 184, 165,  89)){
+							if(NearColor(700, 316, 230, 180, 114)){
+								if(NearColor(760, 447, 238, 180, 116)){
+									return kTypeBreak
+								}
+							}
+						}
+					}
+					;「大破」の文字
+					if(NearColor(570, 215, 167, 114, 111)){
+						if(NearColor(486, 363, 241, 95,  88)){
+							if(NearColor(705, 326, 255, 101,  93)){
+								if(NearColor(766, 472, 147,  82,  79)){
+									return kTypeBreak
+								}
+							}
+						}
+					}
+				}
+			}
+			//戦果報告交戦結果
+			;提督・艦隊名の左に出ている白縦棒
+			if(NearColor(87, 77, 255, 246, 242)){
+				;中央の白縦棒
+				if(NearColor(409, 77, 255, 246, 242)){
+					;外枠
+					if(NearColor(61, 20, 3, 91, 96)){
+						return kTypeResult1
+					}
+				}
+			}
+			//戦果報告
+			;提督・艦隊名の左に出ている白縦棒
+			if(NearColor(51, 77, 255, 246, 242)){
+				;中央の白縦棒(上中)
+				if(NearColor(395, 77, 255, 246, 242)){
+					if(NearColor(395, 289, 255, 246, 242)){
+						;左上(ガシャン対策)
+						if(NearColor(0, 0, 36, 54, 63)){
+							return kTypeResult2
+						}
+					}
+				}
+			}
+			//演習一覧
+			if(NearColor(140, 131, 103, 83, 46)){
+				if(NearColor(654, 119, 255, 191, 96)){
+					return kTypePractice1
+				}
+			}
+			//演習個別
+			if(NearColor(0, 0, 0, 0, 0)){
+				if(NearColor(295, 400, 119, 193, 75)){
+					return kTypePractice2
+				}
+			}
+			//編成画面
+			;随伴艦一括解除ボタン
+			if(NearColor(420, 118, 195, 180, 169)){
+				;左上の旗
+				for k, 0, kFleetNum
+					if(NearColor(123 + 30 * k, 126, 33, 150, 151)) :return kTypeFleet + k
+				next
+			}
+			//改装画面
+			;枠の柱
+			if(NearColor(300, 172, 241, 191, 119)){
+				;左上の旗
+				offset = -1
+				for k, 0, kFleetNum
+					if(NearColor(136 + 30 * k, 122, 33, 150, 151)){
+						offset = k * kUnitNum
+						_break
+					}
+				next
+				if(offset < 0) :return kTypeUnknown
+				;枠
+				for k, 0, kUnitNum
+					if(NearColor(294, 145 + 54 * k, 255, 102, 29)) :return kTypeUnit@ + offset + k
+				next
+			}
+		return kTypeUnknown
+		//「母港画面」かどうかを判定する(BGM・名前隠し用)
+		#defcfunc CheckHomeFlg int flash_id_
+			gsel flash_id_
+			;通常時
+			if(NearColor(665, 42, 83, 159, 73)){		;バケツアイコン
+				if(NearColor(736, 61, 172, 128, 95)){	;ボーキアイコン
+					return TRUE
+				}
+			}
+			;帰投時
+			if(NearColor(669, 61, 150, 139, 98)){	;弾薬アイコン
+				if(NearColor(737, 62, 83, 64, 49)){	;ボーキアイコン
+					return TRUE
+				}
+			}
+		return FALSE
+		//「大破した艦娘」がいるかどうかを判定する
+		#defcfunc CheckDeadZone int flash_id_
+			gsel flash_id_
+			flg = FALSE
+			for k, 0, kUnitNum
+				if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
+					flg = TRUE
+					_break
+				}
+			next
+		return flg
+	#global
+
+	onexit gosub *exit
+
+// ウィンドウ周りを初期設定
+	//保存用バッファ
+	buffer kFlashBufferID,  kFlashWX, kFlashWY
+	for k, kTypeHome, kTypeUnit + kFleetNum * kUnitNum + 1
+		buffer kOffsetBufferID + k, kFlashWX, kFlashWY
+	next
+	buffer kPutTempWindowID, kFlashWX, kFlashWY
+	//マウスカーソル
+	buffer kCursorBufferID
+	picload "cursor.png", 0
+	cursor_x = ginfo_sx :cursor_y = ginfo_sy
+	//メインウィンドウ
+	screen kExpCalcWindowID ,kObjSpace * 4 + kSmallFontSize * 8 + 0.6 * kObjX * 2, kObjSpace + kObjSpaceY * 6
+	gsel kExpCalcWindowID, -1
+	title "経験値計算機"
+	font msgothic, kSmallFontSize
+		pos kObjSpace, kObjSpace + kObjOffset
+			mes "現在→目標レベル"
+		pos kObjSpace, kObjSpace + kObjSpaceY + kObjOffset
+			mes "周回海域"
+		pos kObjSpace, kObjSpace + kObjSpaceY * 2 + kObjOffset
+			mes "オプション"
+		pos kObjSpace, kObjSpace + kObjSpaceY * 3 + kObjOffset
+			mes "必要経験値"
+		pos kObjSpace, kObjSpace + kObjSpaceY * 4 + kObjOffset
+			mes "戦闘経験値"
+		pos kObjSpace, kObjSpace + kObjSpaceY * 5 + kObjOffset
+			mes "必要周回数"
+	objsize 0.6 * kObjX, kObjY
+		pos kObjSpace * 2 + kSmallFontSize * 8, kObjSpace
+			combox now_level,,level_list
+		pos kObjSpace * 3 + kSmallFontSize * 8 + 0.6 * kObjX, kObjSpace
+			combox goal_level,,level_list
+		pos kObjSpace * 2 + kSmallFontSize * 4, kObjSpace + kObjSpaceY
+			combox area_index,,area_list
+		pos kObjSpace * 2 + kSmallFontSize * 5, kObjSpace + kObjSpaceY * 2
+			chkbox "旗艦", reader_ship_flg
+		pos kObjSpace * 3 + kSmallFontSize * 5 + 0.6 * kObjX, kObjSpace + kObjSpaceY * 2
+			chkbox "MVP", mvp_flg
+		pos kObjSpace * 3 + kSmallFontSize * 5 + kObjX, kObjSpace + kObjSpaceY * 5
+			button gosub "閉じる", *close_exp
+	objsize kObjX, kObjY
+		pos kObjSpace * 2 + kSmallFontSize * 5, kObjSpace + kObjSpaceY * 3
+			input need_exp
+			objenable 6, 0
+		pos kObjSpace * 2 + kSmallFontSize * 5, kObjSpace + kObjSpaceY * 4
+			input battle_exp
+			objenable 7, 0
+		pos kObjSpace * 2 + kSmallFontSize * 5, kObjSpace + kObjSpaceY * 5
+			input need_battles
+			objenable 8, 0
+	objsize 1.2 * kObjX, kObjY
+		pos kObjSpace * 3 + kSmallFontSize * 4 + 0.6 * kObjX, kObjSpace + kObjSpaceY
+			combox result_index,,"完全勝利S\n勝利S\n勝利A\n戦術的勝利B\n戦術的敗北C\n敗北D\n敗北E"
+	gosub *exp_calc
+
+	screen kDockWindowID, kObjSpace * 2 + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5
+	gsel kDockWindowID, -1
+	title "入渠タイマー"
+	objsize kObjX, kObjY
+		pos kObjSpace, kObjSpace
+			input dock1_time1
+		pos kObjSpace + kObjSpaceX, kObjSpace
+			input dock1_time2
+		pos kObjSpace, kObjSpace + kObjSpaceY
+			input dock2_time1
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY
+			input dock2_time2
+		pos kObjSpace, kObjSpace + kObjSpaceY * 2
+			input dock3_time1
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 2
+			input dock3_time2
+		pos kObjSpace, kObjSpace + kObjSpaceY * 3
+			input dock4_time1
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 3
+			input dock4_time2
+		pos kObjSpace, kObjSpace + kObjSpaceY * 4
+			button gosub "更新", *get_dock
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 4
+			button gosub "閉じる", *close_dock
+	repeat 8
+		objenable cnt, 0
+	loop
+
+	screen kCountWindowID, kObjSpace * 6 + kSmallFontSize * 2 + 0.8 * kObjX * 4, kObjSpace * 2 + kObjSpaceY * 2 + kCounterY
+	gsel kCountWindowID, -1
+	title "○号カウンター"
+	pos kObjSpace * 2 + kSmallFontSize * 2 + kObjSpaceX, kObjSpace + kObjSpaceY
+		mesbox count_result, ginfo_sx - (kObjSpace * 3 + kSmallFontSize * 2 + kObjSpaceX), kCounterY, 0
+	font msgothic, kSmallFontSize
+		pos kObjSpace, kObjSpace +                  kObjOffset
+			mes "あ号"
+		pos kObjSpace, kObjSpace + kObjSpaceY     + kObjOffset
+			mes "ろ号"
+		pos kObjSpace, kObjSpace + kObjSpaceY * 2 + kObjOffset
+			mes "い号"
+	objsize 0.8 * kObjX, kObjY
+		pos kObjSpace * 2 + kSmallFontSize * 2, kObjSpace
+			button gosub "出撃",       *count_a_sortie
+		pos kObjSpace * 3 + kSmallFontSize * 2 + 0.8 * kObjX,     kObjSpace
+			button gosub "ボス到達",   *count_a_to_boss
+		pos kObjSpace * 4 + kSmallFontSize * 2 + 0.8 * kObjX * 2, kObjSpace
+			button gosub "ボス勝利",   *count_a_win_boss
+		pos kObjSpace * 5 + kSmallFontSize * 2 + 0.8 * kObjX * 3, kObjSpace
+			button gosub "S勝利",      *count_a_s_win
+	objsize kObjX, kObjY
+		pos kObjSpace * 2 + kSmallFontSize * 2, kObjSpace + kObjSpaceY
+			button gosub "補給艦撃沈", *count_r
+		pos kObjSpace * 2 + kSmallFontSize * 2, kObjSpace + kObjSpaceY * 2
+			button gosub "空母系撃沈", *count_i
+		pos ginfo_sx - kObjSpaceX * 2, ginfo_sy - kObjSpaceY
+			button gosub "リセット", *reset_counter
+		pos ginfo_sx - kObjSpaceX, ginfo_sy - kObjSpaceY
+			button gosub "閉じる", *close_counter
+	gosub *redraw_counter
+
+	screen kPutWindowID, kFlashWX, kFlashWY, 4
+		title kSoftName
+
+	screen kMainWindowID, kMainWX, kMainWY
+	title kSoftName
+	gsel kMainWindowID, 2
+	color
+		line 0, kObjSpace     + kObjSpaceY    , kMainWX, kObjSpace     + kObjSpaceY
+		line 0, kObjSpace * 2 + kObjSpaceY * 8, kMainWX, kObjSpace * 2 + kObjSpaceY * 8
+		line 0, kObjSpace * 3 + kObjSpaceY * 11, kMainWX, kObjSpace * 3 + kObjSpaceY * 11
+		line 0, kObjSpace * 7 + kObjSpaceY * 14, kMainWX, kObjSpace * 7 + kObjSpaceY * 14
+	objsize kObjX, kObjY
+		pos kObjSpace             , kObjSpace
+			combox auto_getpos_flg,,"手動設定\n自動設定"
+		pos kObjSpace + kObjSpaceX, kObjSpace
+			button gosub "座標取得", *get_pos
+
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY
+			button gosub "現在状況", *mode_now
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY
+			button gosub "母港画面", *mode_home
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 2
+			button gosub "戦績表示", *mode_info
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 2
+			button gosub "入渠画面", *mode_dock
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 3
+			button gosub "工廠画面", *mode_factory
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 3
+			button gosub "マップ画面", *mode_map
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 4
+			button gosub "戦闘画面", *mode_battle
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 4
+			button gosub "中大破画像", *mode_break
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 5
+			button gosub "交戦結果", *mode_result1
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 5
+			button gosub "戦果報告", *mode_result2
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 6
+			button gosub "演習一覧", *mode_practice1
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 6
+			button gosub "演習個別", *mode_practice2
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 7
+			chkbox "大破チェック", dead_zone_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 7
+			button gosub "【画像保存】", *save_picture
+
+		pos kObjSpace             , kObjSpace * 3 + kObjSpaceY * 8
+			combox fleets_index,,fleets_list
+		pos kObjSpace + kObjSpaceX, kObjSpace * 3 + kObjSpaceY * 8
+			button gosub "編成画面", *mode_fleet
+		pos kObjSpace             , kObjSpace * 3 + kObjSpaceY * 9
+			combox units_index,,units_list
+		pos kObjSpace + kObjSpaceX, kObjSpace * 3 + kObjSpaceY * 9
+			button gosub "改装画面", *mode_unit
+		pos kObjSpace             , kObjSpace * 3 + kObjSpaceY * 10
+			combox commands_index,,commands_list
+		pos kObjSpace + kObjSpaceX, kObjSpace * 3 + kObjSpaceY * 10
+			button gosub "【○○艦隊】", *save_fleets
+
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 11
+			chkbox "母港BGM", home_bgm_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 11
+			button gosub "参照...", *browse_home_bgm
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 12
+			chkbox "マップBGM", map_bgm_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 12
+			button gosub "参照...", *browse_map_bgm
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 13
+			chkbox "戦闘BGM", battle_bgm_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 13
+			button gosub "参照...", *browse_battle_bgm
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 14
+			button gosub "BGM停止", *stop_bgm
+		pos kObjSpace             , kObjSpace * 5 + kObjSpaceY * 15
+			chkbox "名前隠し", name_disable_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 15
+			combox zooming_index,,"倍率200％\n倍率150％\n倍率100％\n倍率75％\n倍率50％"
+		pos kObjSpace             , kObjSpace * 5 + kObjSpaceY * 16
+			chkbox "カーソル", cursor_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 16
+			combox fps_index,,fps_list
+		pos kObjSpace             , kObjSpace * 5 + kObjSpaceY * 17
+			button gosub "経験値計算", *calc_exp
+		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 17
+			button gosub "入渠タイマー", *dock_timer
+		pos kObjSpace             , kObjSpace * 5 + kObjSpaceY * 18
+			button gosub "○号カウンター", *count_task
+		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 18
+			button gosub "情報...", *about
+
+// 自動更新を行う
+	dead_zone_flg_  = FALSE
+	zooming_index_   = zooming_index
+	most_front_flg_  = most_front_flg
+	home_bgm_flg_    = FALSE
+	map_bgm_flg_     = FALSE
+	battle_bgm_flg_  = FALSE
+	now_level_       = now_level
+	goal_level_      = goal_level
+	area_index_      = area_index
+	reader_ship_flg_ = reader_ship_flg
+	mvp_flg_         = mvp_flg
+	result_index_    = result_index
+	time = gettime(6)
+	repeat
+		SetTitle
+		// Flash画面を自動取得
+		GetFlashWindow kFlashBufferID, flash_px, flash_py
+		// 結果を判定し、自動で格納する
+		screen_shot_type = JudgeSituation(kFlashBufferID)
+		if(screen_shot_type != kTypeUnknown){
+			gsel kOffsetBufferID + screen_shot_type
+			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+		}
+		// アプリの状態に合わせ表示を変更する
+		// (どうでもいいけどなんでHSPには「else if」って記法がないんだよ！)
+		//サブ画面のサイズを変更する
+		if(zooming_index_ != zooming_index){
+			switch zooming_index
+				case 0	;200％
+					screen kPutWindowID, 2 * kFlashWX, 2 * kFlashWY, 4
+					swbreak
+				case 1	;150％
+					screen kPutWindowID, 1.5 * kFlashWX, 1.5 * kFlashWY, 4
+					swbreak
+				case 2	;100％
+					screen kPutWindowID, kFlashWX, kFlashWY, 4
+					swbreak
+				case 3	;75％
+					screen kPutWindowID, 0.75 * kFlashWX, 0.75 * kFlashWY, 4
+					swbreak
+				case 4	;50％
+					screen kPutWindowID, 0.5 * kFlashWX, 0.5 * kFlashWY, 4
+					swbreak
+			swend
+			zooming_index_ = zooming_index
+		}
+		//サブ画面用のバッファに画像を転送する
+		gsel kPutTempWindowID
+		if(application_mode == kModeNow){
+			//現在状況
+			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+		}else{
+			//それ以外
+			if(application_mode == kModeFleet){
+				gcopy kOffsetBufferID + application_mode + fleets_index, 0, 0, kFlashWX, kFlashWY
+			}else{if(application_mode == kModeUnit){
+				gcopy kOffsetBufferID + application_mode + units_index, 0, 0, kFlashWX, kFlashWY
+			}else{
+				gcopy kOffsetBufferID + application_mode, 0, 0, kFlashWX, kFlashWY
+			}}
+		}
+		//サブ画面のバッファに名前隠し処理を行う
+		if(name_disable_flg){
+			if(CheckHomeFlg(kPutTempWindowID)){	;要するに左上の歯車のすぐ右
+				color :boxf 111, 0, 273, 25
+			}
+			if(JudgeSituation(kPutTempWindowID) == kTypeInfo){	;戦績表示ではでっかく提督名が載る
+				color :boxf 201, 123, 496, 153
+			}
+			if(JudgeSituation(kPutTempWindowID) == kTypeResult1){	;交戦結果
+				color :boxf 92, 82, 264, 106
+			}
+			if(JudgeSituation(kPutTempWindowID) == kTypeResult2){	;戦果報告
+				color :boxf 56, 82, 228, 106
+			}
+			if(JudgeSituation(kPutTempWindowID) == kTypePractice1){	;演習一覧
+				color
+				boxf 338, 178, 503, 192
+				boxf 338, 233, 503, 247
+				boxf 338, 288, 503, 302
+				boxf 338, 343, 503, 357
+				boxf 338, 398, 503, 412
+			}
+			if(JudgeSituation(kPutTempWindowID) == kTypePractice2){	;演習個別
+				color :boxf 130, 87, 425, 117
+			}
+		}
+		PutWindowSet kPutWindowID, kPutTempWindowID
+		//BGMフラグに合わせ演奏する
+		;母港BGM
+		if(CheckHomeFlg(kFlashBufferID)){
+			map_bgm_flg_ = FALSE
+			battle_bgm_flg_ = FALSE
+			if(home_bgm_flg){
+				if(home_bgm_flg_ == FALSE){
+					mmplay 0
+					home_bgm_flg_ = TRUE
+				}
+			}else{
+				mmstop
+				home_bgm_flg_ = FALSE
+			}
+		}
+		;マップBGM
+		if(screen_shot_type == kTypeMap){
+			home_bgm_flg_ = FALSE
+			battle_bgm_flg_ = FALSE
+			if(map_bgm_flg){
+				if(map_bgm_flg_ == FALSE){
+					mmplay 1
+					map_bgm_flg_ = TRUE
+				}
+			}else{
+				mmstop
+				map_bgm_flg_ = FALSE
+			}
+		}
+		;戦闘BGM
+		if(screen_shot_type == kTypeBattle){
+			home_bgm_flg_ = FALSE
+			map_bgm_flg_ = FALSE
+			if(battle_bgm_flg){
+				if(battle_bgm_flg_ == FALSE){
+					mmplay 2
+					battle_bgm_flg_ = TRUE
+				}
+			}else{
+				mmstop
+				battle_bgm_flg_ = FALSE
+			}
+		}
+		if((screen_shot_type == kTypeResult1) || (screen_shot_type == kTypeResult2)){
+			mmstop
+			home_bgm_flg_ = FALSE
+			map_bgm_flg_ = FALSE
+			battle_bgm_flg_ = FALSE
+		}
+		//大破チェッカー機能
+		if(screen_shot_type == kTypeResult2){
+			if(CheckDeadZone(kFlashBufferID)){
+				if(dead_zone_flg){
+					if(dead_zone_flg_ == FALSE){
+						dialog "大破した艦娘がいます！！", 1, kSoftName
+						dead_zone_flg_ = TRUE
+					}
+				}else{
+					dead_zone_flg_ = FALSE
+				}
+			}else{
+				dead_zone_flg_ = FALSE
+			}
+		}else{
+			dead_zone_flg_ = FALSE
+		}
+		//経験値計算機
+		if(now_level_       != now_level)       :gosub *exp_calc :now_level_       = now_level
+		if(goal_level_      != goal_level)      :gosub *exp_calc :goal_level_      = goal_level
+		if(area_index_      != area_index)      :gosub *exp_calc :area_index_      = area_index
+		if(reader_ship_flg_ != reader_ship_flg) :gosub *exp_calc :reader_ship_flg_ = reader_ship_flg
+		if(mvp_flg_         != mvp_flg)         :gosub *exp_calc :mvp_flg_         = mvp_flg
+		if(result_index_    != result_index)    :gosub *exp_calc :result_index_    = result_index
+		//入渠タイマー
+		if(time != gettime(6)){
+			gsel kDockWindowID
+			gosub *increment_dock
+			gosub *redraw_dock
+			time = gettime(6)
+		}
+		await 1000 / fps_num(fps_index)
+	loop
+
+//経験値処理の初期化
+*area_init
+	notesel text_buffer
+	noteload "area_exp.txt"
+	dim exp_data, notemax
+	repeat notemax
+		noteget get, cnt
+		split get, " ", temp
+		area_list += temp(0) + "\n"
+		exp_data(cnt) = int(temp(1)) 
+	loop
+	noteload "exp_table.txt"
+	dim need_exp_table, notemax
+	repeat notemax
+		noteget get ,cnt
+		need_exp_table(cnt) = int(get)
+	loop
+return
+
+//各状況のボタンを押した際の処理
+*mode_now       :application_mode = kModeNow       :return
+*mode_home      :application_mode = kModeHome      :return
+*mode_info      :application_mode = kModeInfo      :return
+*mode_dock      :application_mode = kModeDock      :return
+*mode_factory   :application_mode = kModeFactory   :return
+*mode_map       :application_mode = kModeMap       :return
+*mode_battle    :application_mode = kModeBattle    :return
+*mode_break     :application_mode = kModeBreak     :return
+*mode_result1   :application_mode = kModeResult1   :return
+*mode_result2   :application_mode = kModeResult2   :return
+*mode_practice1 :application_mode = kModePractice1 :return
+*mode_practice2 :application_mode = kModePractice2 :return
+*mode_fleet     :application_mode = kModeFleet     :return
+*mode_unit      :application_mode = kModeUnit      :return
+*browse_home_bgm
+	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
+	if(stat){
+		home_bgm_path = refstr
+		mmload home_bgm_path, 0, 1
+	}
+return
+*browse_map_bgm
+	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
+	if(stat){
+		map_bgm_path = refstr
+		mmload map_bgm_path, 1, 1
+	}
+return
+*browse_battle_bgm
+	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
+	if(stat){
+		battle_bgm_path = refstr
+		mmload battle_bgm_path, 2, 1
+	}
+return
+*stop_bgm
+	home_bgm_flg_ = FALSE
+	map_bgm_flg_ = FALSE
+	battle_bgm_flg_ = FALSE
+	mmstop
+return
+*dock_timer
+	gsel kDockWindowID, 2
+return
+*calc_exp
+	gsel kExpCalcWindowID, 2
+return
+*exp_calc
+	now_id = ginfo_sel
+	gsel kExpCalcWindowID
+	;レベルの矛盾を修正
+	if(now_level > goal_level){
+		if(now_level != now_level_){
+			goal_level = now_level
+			objprm 1, goal_level
+		}
+		if(goal_level != goal_level_){
+			now_level = goal_level
+			objprm 0, now_level
+		}
+	}
+	;必要経験値を計算
+	now_exp = need_exp_table(now_level)
+	goal_exp = need_exp_table(goal_level)
+	diff_exp = goal_exp - now_exp
+	objprm 6, diff_exp
+	;戦闘経験値を計算
+	battle_exp = 1.0 * exp_data(area_index)
+	if(reader_ship_flg) :battle_exp *= 1.5
+	if(mvp_flg) :battle_exp *= 2.0
+	switch result_index
+		case 0	;完全勝利S
+			battle_exp *= 1.2
+			swbreak
+		case 1	;勝利S
+			battle_exp *= 1.2
+			swbreak
+		case 2	;勝利A
+			battle_exp *= 1.0
+			swbreak
+		case 3	;戦術的勝利B
+			battle_exp *= 1.0
+			swbreak
+		case 4	;戦術的敗北C
+			battle_exp *= 0.8
+			swbreak
+		case 5	;敗北D
+			battle_exp *= 0.7
+			swbreak
+		case 6	;敗北E
+			battle_exp *= 0.5
+			if(mvp_flg) :battle_exp *= 0.5	;MVP無効
+	swend
+	battle_exp = int(battle_exp)
+	objprm 7, battle_exp
+	;必要周回数を計算
+	if(need_exp \ battle_exp == 0){
+		need_battles = need_exp / battle_exp
+	}else{
+		need_battles = need_exp / battle_exp + 1
+	}
+	objprm 8, need_battles
+	gsel now_id
+return
+*close_exp
+	gsel kExpCalcWindowID, -1
+return
+
+*get_dock
+	if(JudgeSituation(kFlashBufferID) == kTypeDock){
+		time_start = gettime(6)
+		for k, 0, kDocks
+			dock_hour(k) = 0
+			dock_minute(k) = 0
+			dock_second(k) = 0
+			gsel kPutTempWindowID
+			if(NearColor(480, ypos(k), 33, 174, 178)){	//ドックに艦娘がいるかを判定
+				gsel kNumGetBufferID
+				gcopy kPutTempWindowID, 618, 157 + 80 * k, 90, 25
+				cvbuffer kCVTempBufferID, 90, 25
+				cvputimg kCVTempBufferID
+				;
+				exist current_dir + "\\" + "temp.png"
+				if(strsize != -1){
+					delete current_dir + "\\" + "temp.png"
+				}
+				cvsave current_dir + "\\" + "temp.png", kCVTempBufferID
+				;
+				secAttr = SIZE_SEC_ATTR, NULL, TRUE		// SECURITY_ATTRIBUTES構造体
+				CreatePipe varptr(hRead), varptr(hWrite), varptr(secAttr), 0
+				if(stat == FALSE) :_continue
+				cmd_line = current_dir + "\\" + "assist.exe temp.png"
+				supInfo     = SIZE_SUP_INFO, NULL, NULL, NULL
+				supInfo(4)  = 0,             0,    0,    0
+				supInfo(8)  = 0,             0,    NULL, STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES
+				supInfo(12) = SW_HIDE,       NULL, NULL, hWrite, NULL
+				dim procInfo, 4
+				CreateProcessA NULL, cmd_line, 0, 0, TRUE, NULL, NULL, NULL, varptr(supInfo), varptr(procInfo)
+				if(stat == FALSE) :CloseHandle hRead :_continue
+				CloseHandle hWrite
+				CloseHandle procInfo(0)
+				CloseHandle procInfo(1)
+				text = "" :size = 0
+				while
+					sdim buf, SIZE_BUF + 1
+					ReadFile hRead, varptr(buf), SIZE_BUF, varptr(size), NULL
+					if(stat){		// ReadFile成功
+						if(size == 0){	// 読み取り完了
+							_break
+						}
+						text += buf
+					}
+					else {			// ReadFile失敗
+						_break
+					}
+					wait 10
+				wend
+				dock_hour(k)   = limit(int(strmid(text, 0, 2)), 0, 60)
+				dock_minute(k) = limit(int(strmid(text, 3, 2)), 0, 60)
+				dock_second(k) = limit(int(strmid(text, 6, 2)), 0, 60)
+			}
+		next
+		exist current_dir + "\\" + "temp.png"
+		if(strsize != -1){
+			delete current_dir + "\\" + "temp.png"
+		}
+		gsel kDockWindowID
+		time_end = gettime(6)
+		for k, 0, ((time_end - time_start + 60) \ 60) + 1
+			gosub *increment_dock
+		next
+		gosub *redraw_dock
+	}
+return
+*increment_dock
+	for k, 0, kDocks
+		if((dock_hour(k) != 0) || (dock_minute(k) != 0) || (dock_second(k) != 0)){
+			dock_second(k)--
+			if(dock_second(k) < 0){
+				dock_second(k) += 60
+				dock_minute(k)--
+				if(dock_minute(k) < 0){
+					dock_minute(k) += 60
+					dock_hour(k) --
+				}
+			}
+		}
+	next
+return
+*redraw_dock
+	for k, 0, kDocks
+		objprm k * 2, strf("%02d:%02d:%02d", dock_hour(k), dock_minute(k), dock_second(k))
+		if((dock_hour(k) != 0) || (dock_minute(k) != 0) || (dock_second(k) != 0)){
+			now_hour   = gettime(4) + dock_hour(k)
+			now_minute = gettime(5) + dock_minute(k)
+			now_second = gettime(6) + dock_second(k)
+			if(now_second >= 60) :now_minute += now_second / 60 :now_second \= 60
+			if(now_minute >= 60) :now_hour += now_minute / 60 :now_minute \= 60
+			objprm k * 2 + 1, strf("%02d:%02d:%02d", now_hour, now_minute, now_second)
+		}else{
+			objprm k * 2 + 1, ""
+		}
+	next
+return
+*close_dock
+	gsel kDockWindowID, -1
+return
+*reset_counter
+	a_sortie_count = 0			;あ号出撃
+	a_to_boss_count = 0			;あ号ボス到達
+	a_win_boss_count = 0		;あ号ボス勝利
+	a_s_win_count = 0			;あ号S勝利
+	r_count = 0					;ろ号
+	i_count = 0					;い号
+	gosub *redraw_counter
+return
+*close_counter
+	gsel kCountWindowID, -1
+return
+*count_task
+	gsel kCountWindowID, 2
+return
+*count_a_sortie :a_sortie_count++ :gosub *redraw_counter :return
+*count_a_to_boss :a_to_boss_count++ :gosub *redraw_counter :return
+*count_a_win_boss :a_win_boss_count++ :gosub *redraw_counter :return
+*count_a_s_win :a_s_win_count++ :gosub *redraw_counter :return
+*count_r :r_count++ :gosub *redraw_counter :return
+*count_i :i_count++ :gosub *redraw_counter :return
+*redraw_counter
+	count_result = ""
+	;あ号
+	count_result += "あ号：" + a_sortie_count + "回/" + a_to_boss_count + "回/" + a_win_boss_count + "回/" + a_s_win_count + "回("
+	if((a_sortie_count >= 36) && (a_to_boss_count >= 24) && (a_win_boss_count >= 12) && (a_s_win_count >= 6)){
+		count_result += "達成)\n"
+	}else{
+		count_result += "未達成)\n"
+	}
+	;ろ号
+	count_result += "ろ号：" + r_count + "回("
+	if(r_count >= 50) :count_result += "達成)\n" :else :count_result += "未達成)\n"
+	;い号
+	count_result += "い号：" + i_count + "回("
+	if(i_count >= 20) :count_result += "達成)\n" :else :count_result += "未達成)\n"
+	id = ginfo_sel
+	gsel kCountWindowID
+	objprm 0, count_result
+	gsel id
+return
+*about
+	dialog "ソフト名：" + kSoftName + "\n作成者：YSR\n最終更新日：2015/02/23",,kSoftName
+return
+
+//座標取得
+*get_pos
+	if(auto_getpos_flg){
+		// 座標を自動で取得する
+		//デスクトップを撮影する
+		GetDesktopWindow kDeskBufferID
+		//撮影した画像から座標を検索する
+		GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+		SetTitle
+	}else{
+		// 座標を手動で取得する
+		//デスクトップを撮影する
+		GetDesktopWindow kDeskBufferID
+		//手動で枠を選択させる
+		;初期設定
+		bgscr kSubWindowID, kDispX, kDispY, , 0, 0
+		gsel kSubWindowID, 2
+		font msgothic, kLargeFontSize
+		;画面表示
+		gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+		color :mes "枠を選択して下さい。(Escで終了)"
+		;選択操作
+		is_mouse_button = FALSE
+		is_mouse_select = FALSE
+		mouse_pos_x1 = 0 :mouse_pos_y1 = 0
+		repeat
+			stick key, kStickMouse
+			if(key & kStickEscKey) :break
+			if(key & kStickMouse){
+				if(is_mouse_button){
+					// 選択中
+					redraw 0
+						pos 0, 0
+						gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+						color :mes "枠を選択して下さい。(Escで終了)"
+						DrawMouseSquare mousex, mousey, mouse_pos_x1, mouse_pos_y1
+					redraw 1
+				}else{
+					// 選択開始
+					mouse_pos_x1 = mousex
+					mouse_pos_y1 = mousey
+					is_mouse_button = TRUE
+				}
+			}else{
+				if(is_mouse_button){
+					// 選択終了
+					mouse_pos_x2 = mousex
+					mouse_pos_y2 = mousey
+					if(mouse_pos_x1 < mouse_pos_x2){
+						square_x = mouse_pos_x1
+						square_xsize = mouse_pos_x2 - mouse_pos_x1 + 1
+					}else{
+						square_x = mouse_pos_x2
+						square_xsize = mouse_pos_x1 - mouse_pos_x2 + 1
+					}
+					if(mouse_pos_y1 < mouse_pos_y2){
+						square_y = mouse_pos_y1
+						square_ysize = mouse_pos_y2 - mouse_pos_y1 + 1
+					}else{
+						square_y = mouse_pos_y2
+						square_ysize = mouse_pos_y1 - mouse_pos_y2 + 1
+					}
+					is_mouse_button = FALSE
+					is_mouse_select = TRUE
+					break
+				}else{
+					// 何もしていない
+				}
+			}
+			wait 5
+		loop
+		;選択結果から検索を行う
+		gsel kSubWindowID, -1
+		if(is_mouse_select){
+			buffer kTempBufferID, square_xsize, square_ysize
+			gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
+			if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
+			}else{
+				GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
+				flash_px += square_x :flash_py += square_y
+				SetTitle
+			}
+		}
+	}
+return
+
+//画像保存
+*save_picture
+	gsel kPutTempWindowID
+	cvbuffer kCVPutBufferID, ginfo_sx, ginfo_sy
+	cvputimg kCVPutBufferID
+	cvsave current_dir + "\\" + AutoFileName(), kCVPutBufferID
+	gsel kMainWindowID
+return
+
+//艦隊画像保存
+*save_fleets
+	if(commands_index < kFleetNum){
+		// 第1～第4艦隊
+		buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
+		for y, 0, 2
+			for x, 0, 3
+				pos x * kUnitWX, y * kUnitWY
+				gcopy kOffsetBufferID + kTypeUnit + commands_index * kUnitNum + (y * 3 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+			next
+		next
+		cvbuffer kCVTempBufferID, kUnitWX * 3, kUnitWY * 2
+		cvputimg kCVTempBufferID
+		cvsave current_dir + "\\" + AutoFileName(), kCVTempBufferID
+	}else{
+		// 連合・支援艦隊
+		buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3
+		for z, 0, 2
+			for y, 0, 3
+				for x, 0, 2
+					pos (z * 2 + x) * kUnitWX, y * kUnitWY
+					gcopy kOffsetBufferID + kTypeUnit + (commands_index - kFleetNum) * (kUnitNum * 2) + (z * 6 + y * 2 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+				next
+			next
+		next
+		cvbuffer kCVTempBufferID, kUnitWX * 4, kUnitWY * 3
+		cvputimg kCVTempBufferID
+		cvsave current_dir + "\\" + AutoFileName(), kCVTempBufferID
+		gsel kMainWindowID
+	}
+return
+
+//終了確認
+*exit
+	dialog "終了しますか？", 2, kSoftName
+	if(stat == 6) :end
+return
