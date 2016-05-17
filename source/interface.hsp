@@ -52,7 +52,7 @@
 			chkbox "装備ロック", weapon_lock_flg
 				weapon_lock_id = stat
 		POS_XY 2, 4
-			button gosub "CSV書き出し", *write_supply_csv
+			button gosub "資材管理", *show_supply_file_window
 		POS_XY 0, 5
 			chkbox "マスコット化", desktop_mascot_flg
 				desktop_mascot_id = stat
@@ -317,6 +317,18 @@
 		POS_X2Y 0, 7 :button gosub "強制再生", *start_bgm
 		POS_X2Y 1, 7 :button gosub "強制停止", *stop_bgm
 	hwnd_window(kBgmWindowID) = hwnd
+
+/* 資材管理用画面 */
+	screen kSupplyFileWindowID, POS_X(3), POS_Y(1) :title "資材管理"
+	gsel kSupplyFileWindowID, -1
+	objsize SIZE_X(1), SIZE_Y(1)
+		POS_XY 0, 0
+			button gosub "CSV読み込み", *load_supply_csv
+		POS_XY 1, 0
+			button gosub "CSV書き出し", *write_supply_csv
+/*		POS_XY 2, 0
+			button gosub "データ修正", *retouch_supply_data*/
+	hwnd_window(kSupplyFileWindowID) = hwnd
 
 /* メイン画面 */
 	screen kMainWindowID, POS_X(3), POS_Y(11) :title kSoftName

@@ -42,6 +42,14 @@
 					if(p == -1) :_continue
 					sdim param_name, 1024
 					param_name = strmid(getline, 0, p)
+					split param_name, "_", temp
+					size = stat
+					param_name_second = int(temp(size - 1))
+					param_name_first = ""
+					for m, 0, size - 1
+						if(m != 0) :param_name_first += "_"
+						param_name_first += temp(m)
+					next
 					sdim param_value, 1024
 					param_value = strmid(getline, p + 1, strlen(getline) - p - 1)
 					//ƒpƒ‰ƒ[ƒ^‚ÌŽí—Þ‚É‚æ‚Á‚Äê‡•ª‚¯
@@ -62,45 +70,51 @@
 						}
 						_continue
 					}
-					if(strmid(param_name, 0, 16) == "dock_finish_time"){
-						dock_finish_time@(int(strmid(param_name, 17, strlen(param_name) - 17))) = double(param_value)
+					if(param_name_first == "dock_finish_time"){
+						dock_finish_time@(param_name_second) = double(param_value)
 						_continue
 					}
-					if(strmid(param_name, 0, 15) == "expedition_kind"){
-						expedition_kind@(int(strmid(param_name, 16, strlen(param_name) - 16))) = limit(int(param_value), 0, 39)
+					if(param_name_first == "expedition_kind"){
+						expedition_kind@(param_name_second) = limit(int(param_value), 0, 39)
 						_continue
 					}
-					if(strmid(param_name, 0, 10) == "scene_list"){
-						text_buffer_scene += param_value + "\t" + strmid(param_name, 11, strlen(param_name) - 11) + "\n"
+					if(param_name == "akashi_flg") :akashi_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "akashi_start_time") :akashi_start_time@ = double(param_value)
+					if(param_name_first == "scene_list"){
+						text_buffer_scene += param_value + "\t" + param_name_second + "\n"
 						_continue
 					}
-					if(strmid(param_name, 0, 14) == "auto_count_flg"){
-						p = int(strmid(param_name, 15, strlen(param_name) - 15))
+					if(param_name_first == "akashi_fleet_name"){
+						akashi_fleet_name@(param_name_second) = param_value
+					}
+					if(param_name == "akashi_fleet_num") :akashi_fleet_num@ = limit(int(param_value), 1, kFleetNum) :_continue
+					if(param_name_first == "auto_count_flg"){
+						p = param_name_second
 						auto_count_flg@(p) = limit(int(param_value), FALSE, TRUE)
 						gsel kCounterWindowID
 						objprm auto_count_flg_id@ + p, auto_count_flg@(p)
 						_continue
 					}
-					if(strmid(param_name, 0, 9) == "count_num"){
+					if(param_name_first == "count_num"){
 						if(int(param_value) > 0){
-							count_num@(int(strmid(param_name, 10, strlen(param_name) - 10))) = int(param_value)
+							count_num@(param_name_second) = int(param_value)
 						}else{
-							count_num@(int(strmid(param_name, 10, strlen(param_name) - 10))) = 0
+							count_num@(param_name_second) = 0
 						}
 						_continue
 					}
-					if(strmid(param_name, 0, 10) == "scene_time"){
+					if(param_name_first == "scene_time"){
 						text_buffer_time += param_value + "\n"
 						_continue
 					}
-					if(strmid(param_name, 0, 8) == "bgm_path"){
+					if(param_name_first == "bgm_path"){
 						split param_name, "_", temp
 						bgm_list@(limit(int(temp(2)), 0, kBgmKinds - 1)) += param_value + "\n"
 						bgm_name_list@(limit(int(temp(2)), 0, kBgmKinds - 1)) += getpath(param_value, 1 + 8) + "\n"
 						_continue
 					}
-					if(strmid(param_name, 0, 7) == "bgm_flg"){
-						p = limit(int(strmid(param_name, 8, strlen(param_name) - 8)), 0, kBgmKinds - 1)
+					if(param_name_first == "bgm_flg"){
+						p = limit(param_name_second, 0, kBgmKinds - 1)
 						bgm_flg@(p) = limit(int(param_value), FALSE, TRUE)
 						gsel kBgmWindowID
 						objprm kBgmKinds + p, bgm_flg@(p)
@@ -210,6 +224,12 @@
 			next
 			for k, 0, (kFleetNum - 1)
 				text_buffer += "expedition_kind_" + k + "=" + expedition_kind@(k) + "\n"
+			next
+			text_buffer += "akashi_flg=" + akashi_flg@ + "\n"
+			text_buffer += "akashi_start_time=" + strf("%.16g", akashi_start_time@) + "\n"
+			text_buffer += "akashi_fleet_num=" + akashi_fleet_num@ + "\n"
+			for k, 0, kUnitNum
+				text_buffer += "akashi_fleet_name_" + k + "=" + akashi_fleet_name@(k) + "\n"
 			next
 			;
 			for k, 0, kCounterType

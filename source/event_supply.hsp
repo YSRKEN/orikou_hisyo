@@ -3,43 +3,125 @@
 //*資材ログに追記する
 *put_supply_log
 	if(flash_time - supply_last_time >= kPutSupplyLogInterval){
-		if(CheckHomeFlg(kMainBufferID) == FALSE) :return
-		supply_last_time = flash_time
-		PutLog "【資材ログ】"
-		GetSupply supply_list
-		// バッファを再作成してコピーする
-		sdim supply_log_, (supply_log_size + 1) * kSupplyLogBlockSize
-		memcpy supply_log_, supply_log, supply_log_size * kSupplyLogBlockSize
-		// 書き込む
-		p = supply_log_size * kSupplyLogBlockSize
-		//日時
-		wpoke supply_log_, p, gettime(0) :p += 2
-		poke  supply_log_, p, gettime(1) :p += 1
-		poke  supply_log_, p, gettime(3) :p += 1
-		poke  supply_log_, p, gettime(4) :p += 1
-		poke  supply_log_, p, gettime(5) :p += 1
-		poke  supply_log_, p, gettime(6) :p += 1
-		//燃料・弾薬・鋼材・ボーキ
-		lpoke supply_log_, p, supply_list(0) :p += 4
-		lpoke supply_log_, p, supply_list(1) :p += 4
-		lpoke supply_log_, p, supply_list(2) :p += 4
-		lpoke supply_log_, p, supply_list(3) :p += 4
-		//高速修復材・開発資材・司令部レベル
-		wpoke supply_log_, p, supply_list(4) :p += 2
-		wpoke supply_log_, p, supply_list(5) :p += 2
-		poke supply_log_, p, supply_list(6)
-		// 再コピーしてからファイルに保存する
-		sdim supply_log, (supply_log_size + 1) * kSupplyLogBlockSize
-		memcpy supply_log, supply_log_, (supply_log_size + 1) * kSupplyLogBlockSize
-		bsave exe_path + "\\save\\supply.dat", supply_log, (supply_log_size + 1) * kSupplyLogBlockSize
-		supply_log_size++
-		PutLog "追記完了"
-		gosub *draw_supply_graph
+		if(CheckHomeFlg(kMainBufferID) == FALSE){
+			if(exit_save_flg){
+				PutLog "【資材ログ】"
+				bsave exe_path + "\\save\\supply.dat", supply_log, supply_log_size * kSupplyLogBlockSize
+			}
+		}else{
+			supply_last_time = flash_time
+			PutLog "【資材ログ】"
+			GetSupply supply_list
+			// バッファを再作成してコピーする
+			sdim supply_log_, (supply_log_size + 1) * kSupplyLogBlockSize
+			memcpy supply_log_, supply_log, supply_log_size * kSupplyLogBlockSize
+			// 書き込む
+			p = supply_log_size * kSupplyLogBlockSize
+			//日時
+			wpoke supply_log_, p, gettime(0) :p += 2
+			poke  supply_log_, p, gettime(1) :p += 1
+			poke  supply_log_, p, gettime(3) :p += 1
+			poke  supply_log_, p, gettime(4) :p += 1
+			poke  supply_log_, p, gettime(5) :p += 1
+			poke  supply_log_, p, gettime(6) :p += 1
+			//燃料・弾薬・鋼材・ボーキ
+			lpoke supply_log_, p, supply_list(0) :p += 4
+			lpoke supply_log_, p, supply_list(1) :p += 4
+			lpoke supply_log_, p, supply_list(2) :p += 4
+			lpoke supply_log_, p, supply_list(3) :p += 4
+			//高速修復材・開発資材・司令部レベル
+			wpoke supply_log_, p, supply_list(4) :p += 2
+			wpoke supply_log_, p, supply_list(5) :p += 2
+			poke supply_log_, p, supply_list(6)
+			// 再コピーしてからファイルに保存する
+			sdim supply_log, (supply_log_size + 1) * kSupplyLogBlockSize
+			memcpy supply_log, supply_log_, (supply_log_size + 1) * kSupplyLogBlockSize
+			bsave exe_path + "\\save\\supply.dat", supply_log, (supply_log_size + 1) * kSupplyLogBlockSize
+			supply_log_size++
+			PutLog "追記完了"
+			gosub *draw_supply_graph
+		}
 	}
+return
+
+//*資材ログをCSVから読み込む
+*load_supply_csv
+	// ファイル選択
+	dialog "csv", 16, "資材ログ"
+	if(stat == 0) :return
+	// 読み込み処理
+	notesel text_buffer
+	noteload refstr
+	//1行目を読み込んで、どの列がどの項目に該当するかをチェックする
+	//例えば入力データで、2行目として出力したい燃料が4列目にあった場合、
+	//「column_index(1) = 3」となる(存在しない場合は-1)
+	noteget get, 0
+	split get, ",", temp
+	cols = stat
+	dim column_index, kSupplyLogKinds + 1
+	for k, 0, kSupplyLogKinds + 1
+		column_index(k) = -1
+	next
+	for k, 0, cols
+		col_name = temp(k)
+		for m, 0, kSupplyLogKinds + 1
+			if(instr(supply_kind_name(m),,col_name) != -1) :column_index(m) = k :_break
+		next
+	next
+	if(column_index(0) == -1){
+		dialog "CSVデータに日付情報が含まれていません！", 1, kSoftName
+		return
+	}
+	//1行づつ読み込んで、ログを再構築する
+	PutLog "【資材ログ】"
+	sdim supply_log_, notemax * kSupplyLogBlockSize
+	p = 0 :supply_log_size = 0
+	for k, 1, notemax
+		if(time != gettime(6)){
+			PutLog "読み込み率：" + strf("%.1f", 100.0 * (k + 1) / notemax) + "％"
+			wait 5
+			time = gettime(6)
+		}
+		noteget get, k
+		split get, ",", temp
+		if(stat != cols) :_continue
+		// 日付
+		string = temp(column_index(0))
+		strrep string, "-", " "
+		strrep string, ":", " "
+		strrep string, "/", " "
+		split string, " ", temp2
+		num = stat
+		if(num >= 1) :v1 = limit(int(temp2(0)), 2013, 9999) :else :v1 = 2013
+		if(num >= 2) :v2 = limit(int(temp2(1)), 1, 12) :else :v2 = 1
+		if(num >= 3) :v3 = limit(int(temp2(2)), 1, 31) :else :v3 = 1
+		if(num >= 4) :v4 = limit(int(temp2(3)), 0, 23) :else :v4 = 0
+		if(num >= 5) :v5 = limit(int(temp2(4)), 0, 59) :else :v5 = 0
+		if(num >= 6) :v6 = limit(int(temp2(5)), 0, 60) :else :v6 = 0
+		wpoke supply_log_, p, v1 :p += 2
+		poke  supply_log_, p, v2 :p += 1
+		poke  supply_log_, p, v3 :p += 1
+		poke  supply_log_, p, v4 :p += 1
+		poke  supply_log_, p, v5 :p += 1
+		poke  supply_log_, p, v6 :p += 1
+		// その他
+		lpoke supply_log_, p, limit(int(temp(column_index(1))),0,300000) :p += 4
+		lpoke supply_log_, p, limit(int(temp(column_index(2))),0,300000) :p += 4
+		lpoke supply_log_, p, limit(int(temp(column_index(3))),0,300000) :p += 4
+		lpoke supply_log_, p, limit(int(temp(column_index(4))),0,300000) :p += 4
+		wpoke supply_log_, p, limit(int(temp(column_index(5))),0,3000) :p += 2
+		wpoke supply_log_, p, limit(int(temp(column_index(6))),0,3000) :p += 2
+		poke  supply_log_, p, limit(int(temp(column_index(7))),1,120) :p += 1
+		supply_log_size++
+	next
+	sdim supply_log, supply_log_size * kSupplyLogBlockSize
+	memcpy supply_log, supply_log_, supply_log_size * kSupplyLogBlockSize
+	PutLog "読み込み終了"
 return
 
 //*資材ログをCSV形式で書き出す
 *write_supply_csv
+/* 今までのコード(遅い)
 	PutLog "【資材ログ】"
 	sdim text_buffer, 64
 	text_buffer += "日付,燃料,弾薬,鋼材,ボーキ,高速修復材,開発資材,司令部レベル\n"
@@ -69,7 +151,43 @@ return
 	notesel text_buffer
 	notesave exe_path + "\\save\\supply.csv"
 	PutLog "出力終了"
-	exec exe_path + "\\save\\supply.csv", 16
+	exec exe_path + "\\save\\supply.csv", 16*/
+/* Ver.3.0.4以降のコード(速い) */
+	dialog "csv", 17, "資材ログ"
+	if(stat == 0) :return
+	sdim fname, 260 :fname = refstr
+	if(getpath(fname, 2 + 16) != ".csv") :fname += ".csv"
+	PutLog "【資材ログ】"
+	string = "日付,燃料,弾薬,鋼材,ボーキ,高速修復材,開発資材,司令部レベル\n"
+	len = strlen(string)
+	string2 = "2099-12-31 23:59:59,300000,300000,300000,300000,3000,3000,120\n"
+	len2 = strlen(string2)
+	sdim text_buffer, len + supply_log_size * len2
+	memcpy text_buffer, string, len
+	p = 0 :p2 = len
+	for k, 0, supply_log_size
+		if(time != gettime(6)){
+			PutLog "出力率：" + strf("%.1f", 100.0 * (k + 1) / supply_log_size) + "％"
+			time = gettime(6)
+		}
+		v01 = wpeek(supply_log, p) :p += 2
+		v02 =  peek(supply_log, p) :p += 1
+		v03 =  peek(supply_log, p) :p += 1
+		v04 =  peek(supply_log, p) :p += 1
+		v05 =  peek(supply_log, p) :p += 1
+		v06 =  peek(supply_log, p) :p += 1
+		v07 = lpeek(supply_log, p) :p += 4
+		v08 = lpeek(supply_log, p) :p += 4
+		v09 = lpeek(supply_log, p) :p += 4
+		v10 = lpeek(supply_log, p) :p += 4
+		v11 = wpeek(supply_log, p) :p += 2
+		v12 = wpeek(supply_log, p) :p += 2
+		v13 =  peek(supply_log, p) :p += 1
+		string2 = strf("%04d-%02d-%02d %02d:%02d:%02d,%6d,%6d,%6d,%6d,%4d,%4d,%3d\n", v01,v02,v03,v04,v05,v06,v07,v08,v09,v10,v11,v12,v13)
+		memcpy text_buffer, string2, len2, p2 :p2 += len2
+	next
+	bsave fname, text_buffer
+	PutLog "出力終了"
 return
 
 //*資材グラフを表示する
@@ -204,3 +322,13 @@ return
 	gcopy kGraphBufferID, 0, 0, kGraphWX2, kGraphWY2
 	color :DrawLargeSquare POS_X(1), POS_Y(0), kGraphWX2, kGraphWY2
 return
+
+//*資材管理ウィンドウを表示する
+*show_supply_file_window
+	gsel kSupplyFileWindowID, 2
+return
+
+//*資材データを修正する
+/**retouch_supply_data
+	assert
+return*/

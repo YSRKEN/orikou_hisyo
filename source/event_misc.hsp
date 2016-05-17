@@ -53,6 +53,17 @@ return
 	// BGM機能
 	//現在の状況を更新する
 	gosub *check_bgm_type
+	// 各種タイマー
+	if(akashi_flg){
+		if((scene_result(0) == "母港画面") && (scene_result(1) == "通常画面")){
+			time_diff = flash_time - akashi_start_time
+			if(time_diff >= kAkashiInterval){
+				akashi_start_time = GetFloatTime()
+				PutLog "【明石タイマー】"
+				PutLog "カウントをリセットしました。"
+			}
+		}
+	}
 return
 
 //*サブ画面下の表示を更新する
@@ -147,7 +158,6 @@ return
 
 //*大破・消耗チェック
 *check_stopper
-	logmes "" + show_stopper_flg1 + " " + show_stopper_flg2 + " " + CheckStopperType()
 	ShowStopperWindow stopper_type	//ウィンドウ表示
 	if(show_stopper_flg1){
 		// 表示を無くすかどうかの判定

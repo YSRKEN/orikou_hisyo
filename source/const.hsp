@@ -14,6 +14,7 @@
 	#enum global kCondMeterWindowID	;cond値メータのID
 	#enum global kBgmWindowID		;BGM機能のID
 	#enum kMascotWindowID			;マスコット表示用ID
+	#enum kSupplyFileWindowID		;資材管理用のID
 	;↑マウスで動かせるのはここまで
 	#enum kSelectWindowID			;選択画面のID
 	#enum global kStopperWindowID	;進撃/出撃ストッパー画面用ID
@@ -146,6 +147,7 @@
 	#const kSort2WY3 30			;クロップする際の縦幅(装備)
 	#const kSortType 19			;艦種の種類数
 	#const kSortStrLength 40	;艦種データの長さ
+	#const kUnitMarkLength 72	;艦名データ(編成画面)の長さ
 	// その他
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
 	#const global kMaxSelectScenes 10	;1カテゴリにおける最大シーン数
@@ -166,6 +168,7 @@
 	#const global kSupplyLogBlockSize 28	;ログの1件あたりのブロックサイズ
 	#const kPutSupplyLogInterval 10.0 / 60 / 24	;資材ログの更新間隔
 	#const kAutoSaveInterval 10.0 / 60 / 24		;自動設定セーブの更新間隔
+	#const kAkashiInterval 20.0 / 24 / 60	;明石タイマーの修理時間「20分」
 	#const global kBgmKinds 4
 	#enum kBgmTypeHome = 0	;BGMの種類
 	#enum kBgmTypeMap
@@ -235,6 +238,12 @@
 	dim dock_finish_flg, kDocks + kDocks + (kFleetNum - 1)		;ラスト1分を切ったかを判定する
 	dim expedition_kind, (kFleetNum - 1)						;遠征における遠征の種類
 	sdim timer_output, 1024	;各種タイマーを表示するためのバッファ
+	//明石タイマー機能
+	akashi_start_time = 0.0	;明石が修理を開始した時刻
+	akashi_flg = FALSE		;明石が修理しているか
+	akashi_fleet_num  = 0	;明石が所属する艦隊
+	sdim akashi_fleet_name, kUnitMarkLength, kUnitNum	;所属艦隊における艦娘名
+	fleet_2byte_num = "１,２,３,４"
 	//認識に使用する座標
 	dck_pos_x.0 = 623, 634, 652, 663, 680, 691
 	dck_pos_y.0 = 136, 216, 298, 380
@@ -371,6 +380,14 @@
 	supply_pos_x4.0 = 760, 769, 778, 787	;開発資材
 	supply_pos_x5.0 = 395, 404, 413			;司令部レベル
 	graph_scale_interval.0 = 1.0, 7.0, 14.0, 30.0, 60.0, 90.0, 180.0, 365.0
+	supply_kind_name.0 = "日付 日時 時刻 タイミング"           
+	supply_kind_name.1 = "燃料 重油 石炭"                      
+	supply_kind_name.2 = "弾薬 弾 薬莢 銃弾 砲弾"              
+	supply_kind_name.3 = "鋼材 鉄 鉄鉱石"                      
+	supply_kind_name.4 = "ボーキサイト アルミニウム 鉄礬石"    
+	supply_kind_name.5 = "高速修復材 バケツ"                   
+	supply_kind_name.6 = "開発資材 ツルハシ 歯車"              
+	supply_kind_name.7 = "司令部レベル しれぇレベル 提督レベル"
 	// BGM機能
 	dim bgm_index, kBgmKinds
 	for k, 0, kBgmKinds
@@ -390,8 +407,8 @@
 	exe_path = dir_cur
 	sdim scene_result, 64, kPosDim
 	save_buffer_turn = 10	;セーブデータにおける縦の最大枚数
-	dim hwnd_window, 11		;マウスで動かせるようにするウィンドウのハンドル
-	dim unit_count, kFleetNum	;各艦隊の艦娘数
-	sdim status_bar_str, 1024	;ステータスバーに表示する文字列
-	dim battle_index, kBattleType	;各画面のインデックス
+	dim hwnd_window, kSelectWindowID	;マウスで動かせるようにするウィンドウのハンドル
+	dim unit_count, kFleetNum			;各艦隊の艦娘数
+	sdim status_bar_str, 1024			;ステータスバーに表示する文字列
+	dim battle_index, kBattleType		;各画面のインデックス
 	show_mascot_area_flg = FALSE

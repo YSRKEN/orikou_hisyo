@@ -69,6 +69,93 @@
 			}
 		next
 	}
+	// 明石タイマー
+	if((scene_result(0) == "編成画面") && (instr(scene_result(1),,"艦隊") != -1)){
+		// ドラッグして交換しようとしていないかを調べる
+		gsel kMainBufferID
+		flg = FALSE
+		for k, 0, kUnitNum
+			x = k \ 2 :y = k / 2
+			if(NearColor(342 * x + 142, 113 * y + 138, 180, 222, 219)) :flg = TRUE :_break
+		next
+		if(flg) :return
+		// 各艦の「マーク」を読み取る
+		sdim fleet_name, kUnitMarkLength, kUnitNum
+		for n, 0, kUnitNum
+			x = n \ 2 :y = n / 2
+			for k, 0, kUnitMarkLength
+				pget 342 * x + 135 + k, 113 * y + 159
+				if(ginfo_r >= 128) :fleet_name(n) += "1" :else :fleet_name(n) += "0"
+			next
+		next
+		// 明石が旗艦に居るかを判定する
+		// 明石　：「011000011001110000011000000011111111111111110000000000000000000000000000」
+		// 明石改：「011000011001110000011000000011111111111111110000111000011101110011100000」
+		if(strmid(fleet_name(0), 0, 44) == "01100001100111000001100000001111111111111111"){
+			akashi_flg_ = TRUE
+		}else{
+			akashi_flg_ = FALSE
+		}
+		// 修理する艦が存在するかを判定する
+		// ※結構ガバガバなので注意
+		if(akashi_flg_){
+			flg = FALSE
+			for n, 0, kUnitNum
+				x = n \ 2 :y = n / 2
+				//艦が存在する
+				if(NearColor(140 + 342 * x, 200 + 113 * y, 255, 242, 238)){
+					//無傷ではない
+					if(NearColor(342 * x + 272, 113 * y + 172, 26, 243, 26) == FALSE){
+						//修復マークが付いていないかも判定
+						if(NearColor(342 * x + 418, 113 * y + 158, 44, 199, 200) == FALSE){
+							flg = TRUE
+							_break
+						}
+					}
+				}
+			next
+			akashi_flg_ = flg
+		}
+		// 現在開いている艦隊番号を取得する
+		fleet_num_ = instr(fleet_2byte_num,,strmid(scene_result(1), 2, 2)) / 3 + 1
+		// akashi_flgにより行動が変化する
+		if(akashi_flg == FALSE){
+			if(akashi_flg_ == TRUE){
+				if(flg == FALSE) :return
+				//OKなので登録する
+				akashi_flg = TRUE
+				akashi_start_time = GetFloatTime()
+				akashi_fleet_num = fleet_num_
+				PutLog "【明石タイマー】"
+				PutLog "カウントを開始しました。"
+				for n, 0, kUnitNum
+					akashi_fleet_name(n) = fleet_name(n)
+				next
+			}
+		}else{
+			if(akashi_flg_ == FALSE){
+				if(fleet_num_ == akashi_fleet_num){
+					akashi_flg = FALSE
+					PutLog "【明石タイマー】"
+					PutLog "カウントを終了しました。"
+				}
+			}else{
+				flg = FALSE
+				for n, 0, kUnitNum
+					if(akashi_fleet_name(n) != fleet_name(n)) :flg = TRUE :_break
+				next
+				if((flg) || (fleet_num_ != akashi_fleet_num)){
+					akashi_start_time = GetFloatTime()
+					akashi_fleet_num = fleet_num_
+					PutLog "【明石タイマー】"
+					PutLog "カウントをリセットしました。"
+					for n, 0, kUnitNum
+						akashi_fleet_name(n) = fleet_name(n)
+					next
+				}
+			}
+		}
+	}
 return
 
 //*各種タイマーの表示を更新する
@@ -147,6 +234,15 @@ return
 			dock_finish_flg(k + kDocks * 2) = 0
 		}
 	next
+	timer_output += "【明石タイマー】\n"
+	if(akashi_flg){
+		time_diff = now_time - akashi_start_time
+		if(time_diff > 0.0) :timer_output += CnvStrSec2(time_diff) :else :timer_output += "00:00:00"
+		if(time_diff >= kAkashiInterval) :timer_output += "☆" :else :timer_output += "　"
+		timer_output += "第" + strmid(fleet_2byte_num, (akashi_fleet_num - 1) * 3, 2) + "艦隊\n"
+	}else{
+		timer_output += "00:00:00\n"
+	}
 	gsel kTimerWindowID
 	objprm 0, timer_output
 return
