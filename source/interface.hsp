@@ -1,0 +1,303 @@
+/* インターフェース部分 */
+
+/* バッファ */
+	buffer kFlashBufferID, kFlashWX + 2, kFlashWY + 2
+	buffer kCheckBufferID, kFlashWX + 2, kFlashWY + 2
+	buffer kMainBufferID, kFlashWX, kFlashWY
+	buffer kSubBufferID, kFlashWX, kFlashWY
+	buffer kSortListBufferID, kSortWX * kMaxSortPages, kSortWY
+	for k, 0, show_scene_list_size
+		buffer kSceneBufferID + k, kFlashWX, kFlashWY
+	next
+	buffer kNumGetBufferID, kMatchSize, kMatchSize
+	cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+
+	screen kStopperWindowID, 10, 10 :gsel kStopperWindowID, -1
+
+/* オプション画面 */
+	screen kOptionWindowID, POS_X(3), POS_Y(4), 4 :title "オプション画面"
+	gsel kOptionWindowID, -1
+	objsize SIZE_X(1), SIZE_Y(1)
+		POS_XY 0, 0
+			combox sub_window_size_index,,sub_window_size_list
+				sub_window_size_id = stat
+		POS_XY 1, 0
+			combox capture_fps_index,,capture_fps_list
+				capture_fps_id = stat
+		POS_XY 2, 0
+			chkbox "ズレ補正", check_move_flash_flg
+				check_move_flash_id = stat
+		POS_XY 0, 1
+			combox pic_save_path_flg,,"デフォルト\n指定フォルダ"
+		POS_XY 1, 1
+			button gosub "参照...", *browse_pic
+		POS_XY 2, 1
+			chkbox "名前隠し", name_disable_flg
+				name_disable_id = stat
+		POS_XY 0, 3
+			chkbox "時刻等表示", show_status_flg
+				show_status_id = stat
+		POS_XY 1, 3
+			chkbox "大破チェック", check_deadzone_flg
+				check_deadzone_id = stat
+		POS_XY 2, 3
+			chkbox "消耗チェック", check_exhausted_flg
+				check_exhausted_id = stat
+	objsize SIZE_X(3), SIZE_Y(1)
+		POS_XY 0, 2
+			input pic_save_path(1)
+				pic_save_path_id = stat
+	objenable pic_save_path_id, 0
+	hwnd_window(kOptionWindowID) = hwnd
+
+/* 各種タイマー */
+	screen kTimerWindowID, kTimerWX, kTimerWY, 4 :title "各種タイマー"
+	gsel kTimerWindowID, -1
+	pos kSpace, kSpace
+	mesbox timer_output, kTimerWX - kSpace * 2, kTimerWY - kSpace * 2, 4
+	hwnd_window(kTimerWindowID) = hwnd
+
+/* ソート一覧 */
+	screen kSortListWindowID, POS_X(4), POS_Y(10), 4 :title "ソート一覧"
+	gsel kSortListWindowID, -1
+	objsize SIZE_X(2), SIZE_Y(8)
+		POS_XY 0, 0
+			listbox sort_index, 0, sort_list
+				sort_index_id = stat
+				sort_index = -1
+	objsize SIZE_X(1), SIZE_Y(1)
+		POS_XY 0, 8
+			button gosub "追加", *add_sort_list
+		POS_XY 1, 8
+			button gosub "↑", *upper_sort_list
+		POS_XY 2, 8
+			combox sort_width_index,,"出力：1列\n出力：2列\n出力：3列\n出力：4列\n出力：5列\n艦種練度別"
+		POS_XY 3, 8
+			button gosub "全削除", *alldel_sort_list
+		POS_XY 0, 9
+			button gosub "削除", *del_sort_list
+		POS_XY 1, 9
+			button gosub "↓", *lower_sort_list
+		POS_XY 2, 9
+			combox direction_flg,,"方向：縦\n方向：横"
+		POS_XY 3, 9
+			button gosub "保存", *make_sort_list
+	hwnd_window(kSortListWindowID) = hwnd
+
+/* 経験値計算機 */
+	now_level = 0 :goal_level = 69 :area_index = 11 :result_index = 1
+	reader_ship_flg = TRUE :mvp_flg = TRUE :exp_ss_flg = FALSE
+	exp_unit_index = 0 :exp_option_index = 2
+	screen kExpCalcWindowID, POS_X(3), POS_Y(6), 4 :title "経験値計算機"
+	gsel kExpCalcWindowID, -1
+	font msgothic, kSmallFontSize
+		pos POS_X(0), POS_Y(0) + kObjOffset
+			mes "現在→目標"
+		pos POS_X(0), POS_Y(1) + kObjOffset
+			mes "周回海域"
+		pos POS_X(0), POS_Y(2) + kObjOffset
+			mes "オプション"
+		pos POS_X(0), POS_Y(4) + kObjOffset
+			mes "必要経験値"
+		pos POS_X(1), POS_Y(4) + kObjOffset
+			mes "戦闘経験値"
+		pos POS_X(2), POS_Y(4) + kObjOffset
+			mes "必要周回数"
+	objsize SIZE_X(1), SIZE_Y(1) + kObjOffset
+		POS_XY 1, 0
+			combox now_level,,level_list
+			now_level_id = stat
+		POS_XY 2, 0
+			combox goal_level,,level_list
+			goal_level_id = stat
+		POS_XY 1, 1
+			combox area_index,,area_list
+		POS_XY 2, 1
+			combox result_index,,"完全S\n勝利S\n勝利A\n勝利B\n敗北C\n敗北D\n敗北E"
+		POS_XY 1, 2
+			chkbox "旗艦", reader_ship_flg
+		POS_XY 2, 2
+			chkbox "MVP", mvp_flg
+		POS_XY 0, 3
+			chkbox "経験値補間", exp_ss_flg
+		POS_XY 1, 3
+			combox exp_unit_index,, unit_list
+		POS_XY 2, 3
+			combox exp_option_index,, "練度のみ\n目盛のみ\n練度+目盛"
+		POS_XY 0, 5
+			input need_exp
+			need_exp_id = stat
+		POS_XY 1, 5
+			input battle_exp
+			battle_exp_id = stat
+		POS_XY 2, 5
+			input need_battles
+			need_battles_id = stat
+	objenable need_exp_id, 0
+	objenable battle_exp_id, 0
+	objenable need_battles_id, 0
+	hwnd_window(kExpCalcWindowID) = hwnd
+	gosub *exp_calc
+
+/* ○号カウンタ */
+	screen kCounterWindowID, POS_X(5), POS_Y(6), 4 :title "○号カウンタ"
+	gsel kCounterWindowID, -1
+	POS_XY 3, 0
+		mesbox counter_output, SIZE_X(2), SIZE_Y(6), 4
+		counter_output_id = stat
+	objsize SIZE_X(1), SIZE_Y(1)
+		POS_XY 0, 0 :button gosub "海域出撃",   *counter_type_1 :counter_type_id = stat
+		POS_XY 0, 1 :button gosub "ボス到達",   *counter_type_2
+		POS_XY 0, 2 :button gosub "ボス勝利",   *counter_type_3
+		POS_XY 0, 3 :button gosub "S勝利判定",  *counter_type_4
+		POS_XY 0, 4 :button gosub "補給船撃沈", *counter_type_5
+		POS_XY 0, 5 :button gosub "空母系撃沈", *counter_type_6
+		for k, 0, kCounterType
+			POS_XY 1, k
+			chkbox "自動カウント", auto_count_flg(k)
+			if(k == 0) :auto_count_flg_id = stat
+		next
+		POS_XY 2, 0 :button gosub "リセット", *counter_reset_1 :counter_reset_id = stat
+		POS_XY 2, 1 :button gosub "リセット", *counter_reset_2
+		POS_XY 2, 2 :button gosub "リセット", *counter_reset_3
+		POS_XY 2, 3 :button gosub "リセット", *counter_reset_4
+		POS_XY 2, 4 :button gosub "リセット", *counter_reset_5
+		POS_XY 2, 5 :button gosub "リセット", *counter_reset_6
+	hwnd_window(kCounterWindowID) = hwnd
+
+/* cond値メータ */
+	screen kCondMeterWindowID, POS_X(6), POS_Y(7), 4 :title "cond値メータ"
+	gsel kCondMeterWindowID, -1
+	font msgothic, kSmallFontSize, 1
+		pos POS_X(2) + (kObjX - kSmallFontSize * 4) / 2, POS_Y(6) + kObjOffset
+			mes "交戦形態"
+		pos POS_X(3) + (kObjX - kSmallFontSize * 4) / 2, POS_Y(6) + kObjOffset
+			mes "戦闘結果"
+	objsize SIZE_X(1), SIZE_Y(1)
+		//状態判定
+		for k, 0, kUnitNum
+			POS_XY 0, k
+				input cond_msg(k)
+				if(k == 0) :cond_msg_id = stat
+		next
+		//cond値
+		for k, 0, kUnitNum
+			POS_XY 1, k
+				input cond(k)
+				if(k == 0) :cond_id = stat
+		next
+		//交戦形態
+		POS_XY 2, 0 :button gosub "昼戦のみ",  *battle_type_1 :battle_type_id = stat
+		POS_XY 2, 1 :button gosub "昼戦+夜戦", *battle_type_2
+		POS_XY 2, 2 :button gosub "夜戦マス",  *battle_type_3
+		//戦闘結果
+		POS_XY 3, 0 :button gosub "完全S",  *win_type_ss :win_type_id = stat
+		POS_XY 3, 1 :button gosub "勝利S",  *win_type_s
+		POS_XY 3, 2 :button gosub "勝利A",  *win_type_a
+		POS_XY 3, 3 :button gosub "勝利B",  *win_type_b
+		POS_XY 3, 4 :button gosub "敗北C",  *win_type_c
+		POS_XY 3, 5 :button gosub "敗北DE", *win_type_de
+		//MVP
+		POS_XY 4, 0 :button gosub "MVP", *mvp_1 :mvp_id = stat
+		POS_XY 4, 1 :button gosub "MVP", *mvp_2
+		POS_XY 4, 2 :button gosub "MVP", *mvp_3
+		POS_XY 4, 3 :button gosub "MVP", *mvp_4
+		POS_XY 4, 4 :button gosub "MVP", *mvp_5
+		POS_XY 4, 5 :button gosub "MVP", *mvp_6
+		//リセット
+		POS_XY 5, 0 :button gosub "リセット", *cond_reset_1 :cond_reset_id = stat
+		POS_XY 5, 1 :button gosub "リセット", *cond_reset_2
+		POS_XY 5, 2 :button gosub "リセット", *cond_reset_3
+		POS_XY 5, 3 :button gosub "リセット", *cond_reset_4
+		POS_XY 5, 4 :button gosub "リセット", *cond_reset_5
+		POS_XY 5, 5 :button gosub "リセット", *cond_reset_6
+		//その他
+		POS_XY 0, 6 :button gosub "三重キラ", *set_kira3    :set_kira3_id    = stat
+		POS_XY 1, 6 :button gosub "自然回復", *auto_recover :auto_recover_id = stat
+		POS_XY 2, 5 :chkbox "表示更新", auto_calc_flg
+		POS_XY 4, 6 :button gosub "海域帰投", *return_home  :return_home_id  = stat
+		POS_XY 5, 6 :button gosub "全リセ",   *reset_all
+	for k, 0, kUnitNum
+		objenable cond_msg_id + k, 0
+	next
+	hwnd_window(kCondMeterWindowID) = hwnd
+
+/* BGM機能 */
+	screen kBgmWindowID, POS_XX(4), POS_Y(8), 4 :title "BGM機能"
+	gsel kBgmWindowID, -1
+	font msgothic, kSmallFontSize, 1
+		pos POS_XX(0) + (kObjX - kSmallFontSize * 4) / 2, POS_Y(0) + kObjOffset
+			mes "母港画面"
+		pos POS_XX(1) + (kObjX - kSmallFontSize * 5) / 2, POS_Y(0) + kObjOffset
+			mes "マップ画面"
+		pos POS_XX(2) + (kObjX - kSmallFontSize * 4) / 2, POS_Y(0) + kObjOffset
+			mes "戦闘画面"
+		pos POS_XX(3) + (kObjX - kSmallFontSize * 4) / 2, POS_Y(0) + kObjOffset
+			mes "ボス戦闘"
+	objsize SIZE_X2(1), SIZE_Y(3)
+		POS_X2Y 0, 1 :listbox bgm_index(0),0,bgm_list(0)
+		POS_X2Y 1, 1 :listbox bgm_index(1),0,bgm_list(1)
+		POS_X2Y 2, 1 :listbox bgm_index(2),0,bgm_list(2)
+		POS_X2Y 3, 1 :listbox bgm_index(3),0,bgm_list(3)
+	objsize SIZE_X2(1), SIZE_Y(1)
+		POS_X2Y 0, 6 :chkbox "有効", bgm_flg(0)
+		POS_X2Y 1, 6 :chkbox "有効", bgm_flg(1)
+		POS_X2Y 2, 6 :chkbox "有効", bgm_flg(2)
+		POS_X2Y 3, 6 :chkbox "有効", bgm_flg(3)
+		POS_X2Y 0, 4 :button gosub "追加...", *browse_bgm_1
+		POS_X2Y 1, 4 :button gosub "追加...", *browse_bgm_2
+		POS_X2Y 2, 4 :button gosub "追加...", *browse_bgm_3
+		POS_X2Y 3, 4 :button gosub "追加...", *browse_bgm_4
+		POS_X2Y 0, 5 :button gosub "削除", *del_bgm_1
+		POS_X2Y 1, 5 :button gosub "削除", *del_bgm_2
+		POS_X2Y 2, 5 :button gosub "削除", *del_bgm_3
+		POS_X2Y 3, 5 :button gosub "削除", *del_bgm_4
+		POS_X2Y 0, 7 :button gosub "強制再生", *start_bgm
+		POS_X2Y 1, 7 :button gosub "強制停止", *stop_bgm
+	hwnd_window(kBgmWindowID) = hwnd
+
+/* メイン画面 */
+	screen kMainWindowID, POS_X(3), POS_Y(11) :title kSoftName
+	gsel kMainWindowID, 2
+	POS_XY 0, 6
+		mesbox soft_log, SIZE_X(3), SIZE_Y(5), 4
+		hMesBox = objinfo(stat, 2)
+	objsize SIZE_X(1), SIZE_Y(1)
+		POS_XY 0, 0
+			combox get_pos_mode,,"オート\nクリック\nクロップ\nマニュアル"
+				get_pos_mode_id = stat
+		POS_XY 1, 0
+			button gosub "座標取得", *get_pos
+		POS_XY 2, 0
+			button gosub "【画像保存】", *save_picture
+		POS_XY 2, 1
+			button gosub "オプション...", *show_option
+		POS_XY 0, 2
+			button gosub "【トリミング】", *save_picture_trim
+		POS_XY 1, 2
+			combox save_fleet_index,,"第１艦隊\n第２艦隊\n第３艦隊\n第４艦隊\n連合艦隊\n支援艦隊"
+		POS_XY 2, 2
+			button gosub "【艦隊画像】", *save_fleet
+		POS_XY 0, 3
+			button gosub "各種タイマー", *show_timer
+		POS_XY 1, 3
+			button gosub "ソート一覧", *show_sort_list
+		POS_XY 2, 3
+			button gosub "資材グラフ", *show_supply_graph
+		POS_XY 0, 4
+			button gosub "経験値計算機", *show_exp_calc
+		POS_XY 1, 4
+			button gosub "○号カウンタ", *show_counter
+		POS_XY 2, 4
+			button gosub "cond値メータ", *show_cond_meter
+		POS_XY 0, 5
+			button gosub "BGM機能", *show_bgm_window
+		POS_XY 1, 5
+			button "戦闘画面", *show_battle
+		POS_XY 2, 5
+			button gosub "各種情報", *about
+	objsize SIZE_X(2), SIZE_Y(1)
+		POS_XY 0, 1
+			combox scene_list_index,,scene_list_str
+				scene_list_id = stat
+	hwnd_window(kMainWindowID) = hwnd

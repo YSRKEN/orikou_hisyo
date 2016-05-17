@@ -1,0 +1,206 @@
+/* おりこうさんな秘書 Ver.3.0.0 */
+
+/* ソフトウェア情報 */
+	#packopt name "orikou"
+	#define global kSoftName   "おりこうさんな秘書"
+	#define kVersion    "Ver.3.0.0"
+	#define kVerString  "300"
+	#define kLastUpdate "2015/09/24"
+	#pack "area_exp.csv"
+	#pack "scene_list.csv"
+	#pack "show_scene.csv"
+	#pack "expedition.csv"
+	#pack "exp_table.csv"
+	#pack "sort_type.csv"
+
+/* ライブラリ・サブルーチン */
+	#include "hspcv.as"
+	#include "hspext.as"
+	#include "const.hsp"
+	#include "module.hsp"
+	LoadSystemData
+	#include "interface.hsp"
+	LoadSoftData
+	onexit gosub *exit
+	onclick gosub *move
+	goto *main
+	#include "event.hsp"
+
+/* メインルーチン */
+*main
+	MakeSubWindow
+	gosub *cond_enable
+	gosub *redraw_cond
+	gosub *redraw_counter
+	gosub *redraw_bgm_window
+	gsel kMainWindowID, 2
+	// 状態変化検出用変数
+	sub_window_size_index_ = sub_window_size_index	//サブ画面のサイズを変えたか否か
+	show_status_flg_ = show_status_flg	//ステータスを表示するか否か
+	pre_scene_name = ""			//前のシーンの名前
+	show_stopper_flg1 = FALSE	//ストッパーの画面を出せる状態ならTRUE
+	show_stopper_flg2 = FALSE	//ストッパーの画面を出していたらTRUE
+	sort_index_ = sort_index
+	dim cond_, kUnitNum
+	for k, 0, kUnitNum
+		cond_(k) = cond(k)
+	next
+	cond_step_ = cond_step
+	auto_calc_flg_ = auto_calc_flg
+	redraw_counter_flg = FALSE
+	bgm_type_now_ = bgm_type_now
+	// メインループ
+	repeat
+		if(exit_flg) :end
+		// 座標取得した場合のみ行う処理
+		if(get_pos_flg){
+			// 艦これの画面のスクリーンショットを取得する
+			FlashScreenShot kMainBufferID, window_handle, flash_position
+			flash_time = GetFloatTime()
+			// 取得したものについて、どういったシーンかを判定する
+			scene_result_index = JudgeSituation(kMainBufferID, scene_result)
+			gsel kSubWindowID
+			title scene_result(0) + "　" + scene_result(1)
+			// 判定したシーンをバッファにコピーする
+			if(scene_result_index < scene_list_size){
+				if(show_scene_list_index(scene_result_index) >= 0){
+					gsel kSceneBufferID + show_scene_list_index(scene_result_index)
+					gcopy kMainBufferID, 0, 0, kFlashWX, kFlashWY
+					show_scene_list_time(show_scene_list_index(scene_result_index)) = flash_time
+				}
+			}
+			// 対象ウィンドウの座標を随時監視する
+			gosub *check_pos
+			// 記録された画像から艦隊数を取得する
+			GetUnits unit_count
+			// 大破・消耗チェック
+			gosub *check_stopper
+			// 選択位置が変わった際に表示する画像を変更する
+			gosub *redraw_sort_preview
+			// 精度面の問題から、勝利判定は常時行うようにする
+			// (判定できない＝C以下と判定されるので、最大評価を取る)
+			if(scene_result(1) == "戦闘判定"){
+				battle_rank_ = JudgeBattleRank()
+				if(battle_rank > battle_rank_) :battle_rank = battle_rank_
+			}else{
+				if((scene_result(1) != "戦果報告") && (scene_result(1) != "不明")){
+					battle_rank = kBattleRankLoss
+				}
+			}
+			// 資材ログ機能
+			gosub *put_supply_log
+			// BGM切り替え
+			if(bgm_type_now_ != bgm_type_now){
+				gosub *change_bgm
+				bgm_type_now_ = bgm_type_now
+			}
+			// 定期的に設定を保存しておく
+			if(flash_time - autosave_last_time >= kAutoSaveInterval){
+				autosave_last_time = flash_time
+				SaveSoftData FALSE
+			}
+			// シーンが切り替わった際に行う処理
+			if((pre_scene_name != scene_result(1)) && (scene_result(1) != "不明")){
+				gosub *check_scene_change
+				pre_scene_type = scene_result(0)
+				pre_scene_name = scene_result(1)
+			}
+			// 各種タイマーを更新
+			if(time != gettime(6)){
+				time = gettime(6)
+				gosub *check_timer
+				gosub *redraw_timer
+			}
+		}
+		// 座標取得に関わらず行う処理
+		//サブ画面のサイズが変更になった場合の処理
+		if(sub_window_size_index_ != sub_window_size_index){
+			MakeSubWindow
+			sub_window_size_index_ = sub_window_size_index
+		}
+		//サブ画面におけるステータスバーの表示切り替え
+		if(show_status_flg_ != show_status_flg){
+			MakeSubWindow
+			show_status_flg_ = show_status_flg
+		}
+		//サブ画面上の表示を更新する
+		;表示したい画面を一旦別のバッファに送る(各種処理の準備)
+		gsel kSubBufferID
+		if(scene_list_index == 0){
+			gcopy kMainBufferID, 0, 0, kFlashWX, kFlashWY
+		}else{
+			gcopy kSceneBufferID + scene_list_index - 1, 0, 0, kFlashWX, kFlashWY
+		}
+		sdim scene_result2, 64, kPosDim
+		scene_result_index2 = JudgeSituation(kSubBufferID, scene_result2)
+		;名前隠し処理を行う
+		if(name_disable_flg){
+			gosub *name_disable_filter
+		}
+		;サブ画面に、選択したシーンを表示する
+		SetSubWindow
+		//サブ画面下の表示を更新する
+		gosub *redraw_status_bar
+		//経験値計算機の更新処理
+		gosub *check_exp_calc
+		// ○号カウンタの更新処理
+		if(redraw_counter_flg){
+			gosub *redraw_counter
+			redraw_counter_flg = FALSE
+		}
+		//cond値メータの更新処理
+		redraw_cond_flg = FALSE
+		for k, 0, kUnitNum
+			if(cond_(k) != cond(k)) :redraw_cond_flg = TRUE :_break
+		next
+		if(redraw_cond_flg){
+			gosub *redraw_cond
+			for k, 0, kUnitNum
+				cond_(k) = cond(k)
+			next
+		}
+		if(cond_step_ != cond_step) :gosub *cond_enable :cond_step_ = cond_step
+		if(auto_calc_flg_ != auto_calc_flg) :gosub *redraw_cond :auto_calc_flg_ = auto_calc_flg
+		// ウェイト
+		await 1000 / capture_fps(capture_fps_index)
+	loop
+
+/* 終了ボタンが押された際の判定 */
+*exit
+	if((wparam == kMainWindowID) || (wparam == kSubWindowID)){
+		dialog "終了しますか？", 2, kSoftName
+		if(stat == 6){
+			supply_last_time = 0.0 :gosub *put_supply_log	//強制的にログを保存する
+			SaveSoftData TRUE
+			gsel kMainWindowID
+			TasktrayDel
+			exit_flg = TRUE
+		}
+	}else{
+		gsel wparam, -1
+	}
+return
+
+/* マウスでウィンドウをドラッグできるようにする */
+*move
+	if(wparam == 1){
+		if(ginfo_act < kSelectWindowID){
+			sendmsg hwnd_window(ginfo_act), WM_NCLBUTTONDOWN, HTCAPTION, 0
+		}
+		if(ginfo_act == kStopperWindowID){
+			dialog "現在、進撃・出撃を制限されています。\nそれでも進撃・出撃を行いますか？", 3, kSoftName
+			if(stat == 6){
+				dialog "本当に進撃・出撃してよろしいですね？", 3, kSoftName
+				if(stat == 6){
+					gsel kStopperWindowID, -1
+					PutLog "【警告】"
+					PutLog "ストッパーが強制解除されました"
+					if(stopper_type == kStopperDeadZone){
+						show_stopper_flg1 = FALSE
+						show_stopper_flg2 = FALSE
+					}
+				}
+			}
+		}
+	}
+return

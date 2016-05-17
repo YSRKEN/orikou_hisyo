@@ -1,87 +1,76 @@
 /* 定数宣言 */
 
-	#pack "scene_list.txt"
-	#pack "area_exp.txt"
-	#pack "exp_table.txt"
-	#pack "expedition.txt"
-
-// 通常の定数
-	// 真偽
-	#const global TRUE  1
-	#const global FALSE 0
-	#const global NULL  0
+/* ウィンドウ・バッファ */
 	// 画面ID
-	#enum kMainWindowID = 0	;メイン画面
-	#enum kPutWindowID		;サブ画面
-	#enum kPutTempWindowID	;サブ画面用バッファ
-	#enum kTempBufferID		;テンポラリ画面
-	;座標取得用
-	#enum kSelectWindowID	;手動指定用画面
-	#enum kDeskBufferID		;スクショ用
-	#enum kFlashBufferID	;検索用
-	;ツール用
-	#enum kOptionWindowID	;オプション画面
-	#enum kExpCalcWindowID	;経験値計算機
-	#enum kDockWindowID		;各種タイマー
-	#enum kCountWindowID	;○号カウンター
-	#enum kSortListWindowID	;ソート一覧
-	#enum kSupplyGraphID	;資源グラフ
-	#enum kGraphBufferID
-	#enum kMatchBufferID	;マッチング用の捨てID
-	#enum kDeadZoneWindowID	;大破進撃を阻止するための画面
-	#enum kExhaustedWindowID	;消耗出撃を阻止するための画面
-	;バッファ用
-	#enum global kNumGetBufferID	;数字認識用
-	#enum kCursorBufferID	;カーソル用
-	#enum kBattleBufferID	;戦闘画面(特殊)
-	#enum kDropBufferID		;ドロップ画面
-	#enum kCaptureBufferID	;各保存画面
-	// OpenCV用ID
-	#enum global kCVTempBufferID = 0
-	#enum global kCVGPFSBufferID1
-	#enum global kCVGPFSBufferID2
-	#enum global kCVNumBufferID
+	//ウィンドウ
+	#enum global kMainWindowID = 0	;メイン画面のID
+	#enum global kSubWindowID		;サブ画面のID
+	#enum global kOptionWindowID	;オプション画面のID
+	#enum global kTimerWindowID		;各種タイマー画面のID
+	#enum global kSortListWindowID	;ソート一覧画面のID
+	#enum global kExpCalcWindowID	;経験値計算機のID
+	#enum global kCounterWindowID	;○号カウンタのID
+	#enum global kCondMeterWindowID	;cond値メータのID
+	#enum global kBgmWindowID		;BGM機能のID
+	;↑マウスで動かせるのはここまで
+	#enum kSelectWindowID			;選択画面のID
+	#enum global kStopperWindowID	;ストッパー画面用ID
+	//バッファ
+	#enum kDesktopBufferID			;デスクトップのスクショを保存するためのID
+	#enum global kFlashBufferID		;艦これの画面を探すためのID
+	#enum global kCheckBufferID		;座標ズレを検出するためのID
+	#enum global kMainBufferID		;艦これの画面を取得するためのID
+	#enum global kSubBufferID		;サブ画面に表示するためのID
+	#enum global kSortListBufferID	;ソート一覧を保存するためのID
+	#enum global kTempBufferID		;テンポラリ用バッファID
+	#enum global kSaveBufferID		;セーブ用バッファID
+	#enum global kNumGetBufferID	;画像認識用ID
+	;↑kSceneBufferID以外の全ての画面IDはここまで
+	#enum global kSceneBufferID		;各シーン保存用ID
+	// OpenCVの画面ID
+	#enum global kCVDesktopBufferID = 0
+	#enum global kCVFlashBufferID
+	#enum global kCVSaveBufferID
+	#enum global kCVTempBufferID
 	#enum global kCVMatchBufferID
-	#enum global kCVDenoiseBufferID
-	#enum global kBossJudgeBufferID1
-	#enum global kBossJudgeBufferID2
-	#enum global kBossJudgeBufferID3
-	// パラメータ
-	#const global kFleetNum    4	;艦隊数
-	#const global kUnitNum     6	;艦隊毎の艦娘数
-	#const global kDocks       4	;ドック数
-	#const global kBgmListSize 4	;BGMの種類数
-	#const global kTypeUnknown 0	;デフォルトの判定結果
-	#const global kTypeNow     0	;現在画面
-	// オブジェクトのサイズ
-	;Flash画面のサイズ
-	#const  global kFlashWX 800
-	#const  global kFlashWY 480
-	;オブジェクト関係
-	#const kObjX 80
+	#enum global kBossJudgeBufferID1	;赤い四角形
+	#enum global kBossJudgeBufferID2	;緑の四角形
+	#enum global kBossJudgeBufferID3	;マップ画像
+
+/* インターフェース */
+	// 各種オブジェクトのサイズ
+	;ボタン等のオブジェクトのサイズ
+	#const kObjX  80
+	#const kObjX2 1.5 * kObjX
 	#const kObjY 20
-	#const kObjSpace 8
-	#const kObjSpaceX kObjSpace + kObjX
-	#const kObjSpaceY kObjSpace + kObjY
-	#const kStatusBarY 24
-	;編成画面のサイズ
+	#const kSpace 8
+	#const global kStatusBarY 48
+	;各種画面のサイズ
+	#const kTimerWX 250
+	#const kTimerWY 250
+	;艦これの画面のサイズ
+	#const global kFlashWX 800
+	#const global kFlashWY 480
+	;編成画面のサイズ・オフセット座標
 	#const kFleetWX 684
 	#const kFleetWY 368
-	;編成画面のオフセット座標
 	#const kFleetPX 110
 	#const kFleetPY 96
-	;改装画面のサイズ
-	#const kUnitWX 455
-	#const kUnitWY 365
-	;改装画面のオフセット座標
-	#const kUnitPX 330
-	#const kUnitPY 100
-	;ソート画面のサイズ
+	;ソート画面のサイズ・オフセット座標
 	#const kSortWX 194
 	#const kSortWY 279
-	;ソートのオフセット座標
 	#const kSortPX 398
 	#const kSortPY 154
+	;改装画面(通常画面)のサイズ・オフセット座標
+	#const kUnitWX 455
+	#const kUnitWY 365
+	#const kUnitPX 330
+	#const kUnitPY 100
+	;改装画面(改修画面)のサイズ・オフセット座標
+	#const kUnitWX2 356
+	#const kUnitWY2 375
+	#const kUnitPX2 116
+	#const kUnitPY2 95
 	;資源画像用のパラメータ
 	#const kStockAllWX 229	;全体のサイズ
 	#const kStockAllWY 60
@@ -93,36 +82,107 @@
 	#const kStockOtherPY 9
 	#const kStockOtherWX kStockAllWX - kStockTimeWX	;資源部分のサイズ
 	#const kStockOtherWY kStockAllWY
-	;フォントサイズ
-	#const kSmallFontSize 12
+	;
 	#const kLargeFontSize 30
-	#const kStatusBarFontSize kStatusBarY - 4
-	#const kStatusBarOffset (kStatusBarY - kStatusBarFontSize) / 2
-	#const kGraphFontSize 12
-	;メイン画面のサイズ
-	#const kMainWX kObjSpace + kObjSpaceX * 2
-	#const kMainWY kObjSpace * 4 + kObjSpaceY * 12
-;	#const kMainWY kObjSpace * 4 + kObjSpaceY * 11
-	;カウンター画面
+	#const kSmallFontSize 12
 	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
-	#const kCounterY kObjSpaceY * 3 - kObjSpace
-	;資源グラフのサイズ
-	#const kGraphWX 600
-	#const kGraphWY 300
+	// 座標取得モード
+	#enum global kGetPosAuto = 0	;座標取得方法
+	#enum global kGetPosClick
+	#enum global kGetPosCrop
+	#enum global kGetPosManual
 	// キーボード・マウス操作
-	#const kStickSpace  16
-	#const kStickCtrl   64
 	#const kStickEscKey 128
 	#const kStickMouse  256
-	// 認識用
-	#const global kPoints 3		;3点に対して、
-	#const global kParams 5		;xy座標+RGBの5つの数字でチェックする
-	#const global kMatchSize 64	;認識時のブロックサイズ
+	// マクロ
+	#define ctype POS_X(%1)  (%1) * kObjX + ((%1) + 1) * kSpace
+	#define ctype POS_XX(%1)  (%1) * kObjX2 + ((%1) + 1) * kSpace
+	#define ctype POS_Y(%1)  (%1) * kObjY + ((%1) + 1) * kSpace
+	#define ctype SIZE_X(%1) (%1) * kObjX + ((%1) - 1) * kSpace
+	#define ctype SIZE_X2(%1) (%1) * kObjX2 + ((%1) - 1) * kSpace
+	#define ctype SIZE_Y(%1) (%1) * kObjY + ((%1) - 1) * kSpace
+	#define POS_XY(%1, %2) pos POS_X(%1), POS_Y(%2)
+	#define POS_X2Y(%1, %2) pos POS_XX(%1), POS_Y(%2)
+
+/* その他の定数 */
+	// 基本
+	#const global TRUE  1
+	#const global FALSE 0
+	// API
+	#const WM_NCLBUTTONDOWN $000000A1
+	#const HTCAPTION 2
+	#const global kRectDim 4	;「座標2つ」「オフセットと座標」における次元数
+	#const global kPosDim 2		;「座標1つ」「オフセット」における次元数
+	// 画像認識
+	#const global kMatchSize 64
 	#const kExpPagePer 8		;遠征のページ毎の数
 	#const kExpPages 5			;遠征のページ数
-	#const global kExpAllPage kExpPages * kExpPagePer
 	#const global kExpStrLength 128	;遠征データの長さ
+	#const global kExpAllPage kExpPages * kExpPagePer
+	#const kMaxSortPages 30		;ソート一覧の最大ページ数
+	#const kSortListHeight 10	;ソート一覧の縦サイズ
+	#const kSortWY2 28			;取得する際の縦幅
+	#const kSortWY3 27			;クロップする際の縦幅
+	#const kSortType 19			;艦種の種類数
+	#const kSortStrLength 40	;艦種データの長さ
+	// その他
+	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
+	#const global kMaxSelectScenes 10	;1カテゴリにおける最大シーン数
+	#const global kFleetNum 4	;艦隊数
+	#const global kUnitNum  6	;艦隊毎の艦娘数
+	#const global kDocks    4	;ドック数
+	#const global kMaxYear 2099	;サポートする最大年
+	#const global kStopperDeadZone  1	;ストッパー機能
+	#const global kStopperExhausted 2
+	#const kBattleType 3	;戦闘の種類(昼戦・夜戦・現在画面)
+	#const global kCounterType 6	;○号カウンタでカウントする種類
+	#enum global kBattleRankS = 0
+	#enum global kBattleRankA
+	#enum global kBattleRankB
+	#enum global kBattleRankLoss
+	#const global kSupplyLogBlockSize 28
+	#const kPutSupplyLogInterval 10.0 / 60 / 24
+	#const kAutoSaveInterval 10.0 / 60 / 24
+	#const global kBgmKinds 4
+	#enum kBgmTypeHome = 0
+	#enum kBgmTypeMap
+	#enum kBgmTypeBattle
+	#enum kBgmTypeBoss
 
+/* 初期設定 */
+	// 座標設定
+	dim window_param, kRectDim	;ウィンドウのオフセットとサイズ
+	dim flash_position, kPosDim	;艦これの画面のオフセット
+	get_pos_flg = FALSE
+	// ズレ検出用定数(左上・右上・右下・左下・上・右・下・左)
+	pos_x1 = kFlashWX / 2 :pos_x2 = kFlashWX + 1
+	pos_y1 = kFlashWY / 2 :pos_y2 = kFlashWY + 1
+	check_x.0 = 0, pos_x2, pos_x2,      0, pos_x1, pos_x2, pos_x1,      0
+	check_y.0 = 0,      0, pos_y2, pos_y2,      0, pos_y1, pos_y2, pos_y1
+	move_x.0 = 1, -1, -1,  1,  0, -1,  0,  1
+	move_y.0 = 1,  1, -1, -1,  1,  0, -1,  0
+	// セーブファイルの保存フォルダを作成
+	dirlist x, dir_cur + "\\save", 5
+	if(stat == 0) :mkdir dir_cur + "\\save"
+	// 画像のデフォルトな保存フォルダを作成
+	sdim pic_save_path, 260, 2
+	pic_save_path(0) = dir_cur + "\\pic"
+	dirlist x, pic_save_path(0), 5
+	if(stat == 0) :mkdir pic_save_path(0)
+	pic_save_path_flg = FALSE
+	// サブ画面の状況
+	sdim sub_window_size_list, 1024
+		sub_window_size_list = "300%\n200%\n150%\n100%\n75%\n50%\n25%"
+	sub_window_size_x.0 = 3 * kFlashWX, 2 * kFlashWX, int(1.5 * kFlashWX), kFlashWX, int(0.75 * kFlashWX), int(0.5 * kFlashWX), int(0.25 * kFlashWX)
+	sub_window_size_y.0 = 3 * kFlashWY, 2 * kFlashWY, int(1.5 * kFlashWY), kFlashWY, int(0.75 * kFlashWY), int(0.5 * kFlashWY), int(0.25 * kFlashWY)
+	status_y.0 = 3 * kStatusBarY, 2 * kStatusBarY, int(1.5 * kStatusBarY), kStatusBarY, int(0.75 * kStatusBarY), int(0.5 * kStatusBarY), int(0.25 * kStatusBarY)
+	//取得fps
+	capture_fps.0 = 30, 20, 15, 10, 5, 3, 2, 1
+	sdim capture_fps_list, 1024
+		for k, 0, length(capture_fps)
+			capture_fps_list += "" + capture_fps(k) + "fps\n"
+		next
+	// 日付変換用
 	dim yearplus,13,2
 	yearplus(0,0)=0		:yearplus(0,1)=0
 	yearplus(1,0)=31	:yearplus(1,1)=31
@@ -137,209 +197,119 @@
 	yearplus(10,0)=304	:yearplus(10,1)=305
 	yearplus(11,0)=334	:yearplus(11,1)=335
 	yearplus(12,0)=365	:yearplus(12,1)=366
-
-// 変数初期化
-	// コンボボックスの内容
-	sdim mode_list, 1024	//実行モード
-		gosub *init_mode_list
-		error_log += NowTime() + ",init_mode_list,\n"
-	sdim fleets_list, 1024	//第○艦隊
-		for k, 1, kFleetNum + 1
-			fleets_list += "第" + k + "艦隊\n"
-		next
-	sdim unit_list, 1024	//第○番艦
-		for k, 1, kUnitNum + 1
-			unit_list += "第" + k + "番艦\n"
-		next
-	sdim units_list, 10240	//第○艦隊○番艦
-		for i, 1, kFleetNum + 1
-			for j, 1, kUnitNum + 1
-				units_list += "第" + i + "-" + j + "番艦\n"
-			next
-		next
-	sdim commands_list, 1024	//艦隊保存用コマンド
-		for k, 1, kFleetNum + 1
-			commands_list += "第" + k + "艦隊\n"
-		next
-		commands_list += "連合艦隊\n"
-		commands_list += "支援艦隊\n"
-	sdim bgm_list, 1024	//BGM一覧
-		bgm_list_name.0 = "母港", "マップ", "戦闘", "ボス"
-		bgm_list_flg.0 = FALSE, FALSE, FALSE, FALSE
-		sdim bgm_list_filename, 260, kBgmListSize
-		bgm_list_filename.0 = "<NONE>", "<NONE>", "<NONE>", "<NONE>"
-		gosub *init_bgm_list
-		error_log += NowTime() + ",init_bgm_list,\n"
-	sdim fps_list, 1024	//fps一覧
-		fps_num.0 = 30, 20, 15, 10, 5, 3, 2, 1
-		for k, 0, length(fps_num)
-			fps_list += "" + fps_num(k) + "fps\n"
-		next
-	sdim zooming_list, 1024	//倍率一覧
-		zooming_num.0 = 50, 75, 100, 150, 200
-		for k, 0, length(zooming_num)
-			zooming_list += "倍率" + zooming_num(k) + "％\n"
-		next
+	dim year_offset, kMaxYear + 2	;とりあえず2099年まで用意しとけばいいやろ(フラグ)
+	for k, 1, kMaxYear + 2
+		leap_flg = (k \ 4 == 0) - (k \ 100 == 0) + (k \ 400 == 0)
+		year_offset(k) = year_offset(k - 1) + 365 + leap_flg
+	next
+	// 各種タイマー
+	ddim dock_finish_time, kDocks + kDocks + (kFleetNum - 1)	;入渠・建造・遠征終了時刻
+	dim dock_finish_flg, kDocks + kDocks + (kFleetNum - 1)		;ラスト1分を切ったかを判定する
+	dim expedition_kind, (kFleetNum - 1)						;遠征における遠征の種類
+	sdim timer_output, 1024	;各種タイマーを表示するためのバッファ
+	//認識に使用する座標
+	dck_pos_x.0 = 623, 634, 652, 663, 680, 691
+	dck_pos_y.0 = 136, 216, 298, 380
+	bld_pos_x.0 = 402, 414, 433, 445, 464, 476
+	bld_pos_y.0 = 185, 263, 341, 419
+	exp_pos_x.0 = 722, 731, 745, 754, 768, 777
+	exp_pos_y   = 387
+	//認識に使用する遠征データ
+	sdim exped_small_str, kExpStrLength, kExpAllPage	;リスト内の表示
+	sdim exped_large_str, kExpStrLength, kExpAllPage	;右上の表示
+	sdim exped_name, 64, kExpAllPage					;遠征名
+	notesel text_buffer
+	noteload "expedition.csv"
+	for k, 0, kExpAllPage
+		noteget get, k + 1
+		split get, ",", temp
+		exped_small_str(k) = temp(0)
+		exped_large_str(k) = temp(1)
+		exped_name(k) = temp(2)
+	next
+	//認識に使用するテンプレート
+	buffer kTempBufferID, kMatchSize * 23, kMatchSize	//テンプレート
+	buffer kNumGetBufferID, kMatchSize, kMatchSize		//書き込むためのバッファ
+	for k, 0, 10
+		// とりあえず数字を出力する
+		gsel kNumGetBufferID
+		color 255, 255, 255 :boxf
+		color :font "Symbol", kMatchSize, 1 :pos 0,0 :mes k
+		// 二値化した後、数字の位置および大きさを求める
+		cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+		cvputimg kCVTempBufferID
+		cvconvert 0, kCVTempBufferID
+		cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
+		cvgetimg kCVTempBufferID
+		GetSquare2 px, py, wx, wy
+		// テンプレートに向けて拡大コピーする
+		gsel kTempBufferID
+		pos k * kMatchSize * 2, 0
+		gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy, 1
+	next
+	//テンプレートを二値化して、黒塗りの領域("11")を別途用意する
+	cvbuffer kCVMatchBufferID, kMatchSize * 23, kMatchSize
+	cvputimg kCVMatchBufferID
+	cvconvert 0, kCVMatchBufferID
+	cvthreshold CV_THRESH_OTSU, 0, 255, kCVMatchBufferID
+	cvgetimg kCVMatchBufferID
+	color :boxf kMatchSize * 22, 0, kMatchSize * 23, kMatchSize
+	for k, 0, 12
+		DrawSquare k * kMatchSize * 2, 0
+	next
+	//CVバッファ側に書き込む
+	cvbuffer kCVMatchBufferID, kMatchSize * 23, kMatchSize
+	cvputimg kCVMatchBufferID
+	// ソート画面認識用のデータ
+	sdim sort_type_str, kSortStrLength, kSortType	;左側の表示
+	sdim sort_type_name, 64, kSortType				;それの日本語Ver
+	notesel text_buffer
+	noteload "sort_type.csv"
+	for k, 0, kSortType
+		noteget get, k + 1
+		split get, ",", temp
+		sort_type_str(k) = temp(0)
+		sort_type_name(k) = temp(1)
+	next
+	sort_pos_x.0 = 163, 172
+	sort_pos_y.0 = 0, 28, 55, 83, 111, 139, 167, 195, 223, 251
+	// 戦闘画面ボタン
+	show_battle_type = 0			;表示する画面(0～2が昼戦・夜戦・現在画面に対応)
+	dim battle_index, kBattleType	;各画面のインデックス
+	// ソート一覧
+	sdim sort_list, 1024
+	sort_list_size = 0
+	// 経験値計算機
 	sdim level_list, 1024
 		for k, 1, 150 + 1
 			level_list += "" + k + "\n"
 		next
 	sdim area_list, 1024
-		gosub *area_init
-		error_log += NowTime() + ",area_init,\n"
-	// その他設定
-	;カレントディレクトリを記憶
-	sdim pic_save_path, 260, 2
-		pic_save_path(0) = dir_cur
-		pic_save_path(1) = pic_save_path(0)
-	;経験値計算機
-	now_level = 0
-	goal_level = 24
-	area_index = 11
-	reader_ship_flg = TRUE
-	mvp_flg = TRUE
-	result_index = 1
-	;○号カウンター
-	sdim count_result, 1024		;○号カウンター
-	a_sortie_count = 0			;あ号出撃
-	a_to_boss_count = 0			;あ号ボス到達
-	a_win_boss_count = 0		;あ号ボス勝利
-	a_s_win_count = 0			;あ号S勝利
-	r_count = 0					;ろ号
-	i_count = 0					;い号
-	;各種タイマー
-	;入渠
-	dock1_time1 = "00:00:00" :dock1_time2 = ""
-	dock2_time1 = "00:00:00" :dock2_time2 = ""
-	dock3_time1 = "00:00:00" :dock3_time2 = ""
-	dock4_time1 = "00:00:00" :dock4_time2 = ""
-	dim dock_hour,   kDocks
-	dim dock_minute, kDocks
-	dim dock_second, kDocks
-	xpos.0 = 623, 634, 652, 663, 680, 691
-	ypos.0 = 136, 216, 298, 380
-	;建造
-	bdock1_time1 = "00:00:00" :bdock1_time2 = ""
-	bdock2_time1 = "00:00:00" :bdock2_time2 = ""
-	bdock3_time1 = "00:00:00" :bdock3_time2 = ""
-	bdock4_time1 = "00:00:00" :bdock4_time2 = ""
-	dim bdock_hour,   kDocks
-	dim bdock_minute, kDocks
-	dim bdock_second, kDocks
-	bxpos.0 = 402, 414, 433, 445, 464, 476
-	bypos.0 = 185, 263, 341, 419
-	;遠征
-	edock2_time1 = "00:00:00" :edock2_time2 = ""
-	edock3_time1 = "00:00:00" :edock3_time2 = ""
-	edock4_time1 = "00:00:00" :edock4_time2 = ""
-	dim edock_hour,   kDocks - 1
-	dim edock_minute, kDocks - 1
-	dim edock_second, kDocks - 1
-	expos.0 = 722, 731, 745, 754, 768, 777
-	sdim exped_small_str, kExpStrLength, kExpAllPage	;リスト内の表示
-	sdim exped_large_str, kExpStrLength, kExpAllPage	;右上の表示
 		notesel text_buffer
-		noteload "expedition.txt"
-		for k, 0, kExpAllPage
-			noteget get, k + 1
-			split get, "\t", temp
-			exped_small_str(k) = temp(0)
-			exped_large_str(k) = temp(1)
+		noteload "area_exp.csv"
+		dim exp_data, notemax
+		repeat notemax
+			noteget get, cnt
+			split get, ",", temp
+			area_list += temp(0) + "\n"
+			exp_data(cnt) = int(temp(1)) 
+		loop
+		noteload "exp_table.csv"
+		dim need_exp_table, notemax
+		repeat notemax
+			noteget get ,cnt
+			need_exp_table(cnt) = int(get)
+		loop
+	sdim unit_list, 1024
+		for k, 1, kUnitNum + 1
+			unit_list += "第" + k + "番艦\n"
 		next
-	gosub *match_init
-	error_log += NowTime() + ",match_init,\n"
-	;ソート一覧
-	sdim sort_list, 1024
-	sort_list_size = 0
-	supply_last_time = -1
-	save_last_time = -1
-	logging_index = 9
-	supply_xpos.0 = 680, 689, 697, 704, 712, 719
-	supply_xpos.6 = 749, 758, 766, 773, 781, 788
-	;資源ログ
-	exist pic_save_path(0) + "\\supply.csv"
-	if(strsize != -1){
-		notesel supply_log
-		noteload pic_save_path(0) + "\\supply.csv"
-		dim supply_log_int, 100, 2 + 5	;2は日時の部分
-		supply_log_size = LoadLog(supply_log, supply_log_int)
-	}else{
-		sdim supply_log, 32000
-		supply_log = "時間,燃料,弾薬,鋼材,ボーキ,バケツ\n"
-		supply_log_size = 0
-	}
-	;資源グラフ
-	scale_mode = 0	;モード(1日・1週間・2週間・1ヶ月・2ヶ月・3ヶ月・半年・1年)
-	scale_zooming.0  = 12, 7,  7, 10, 10, 12,   6,  12	;縦線の数
-	scale_blocking.0 =  1, 7, 14, 30, 60, 90, 180, 365	;1画面毎の日数
-	;各種フラグ
-	name_disable_flg  = TRUE
-	cursor_flg        = TRUE
-	dead_zone_flg     = FALSE
-	cap_crop_flg      = FALSE
-	auto_set_flg      = TRUE
-	auto_save_flg     = TRUE
-	my_folder_flg     = FALSE
-	auto_supply_flg   = TRUE
-	denoise_flg       = FALSE
-	auto_count_flg_a  = FALSE
-	auto_count_flg_r  = FALSE
-	auto_count_flg_i  = FALSE
-	auto_time_set_flg = FALSE
-	exhausted_flg     = FALSE
-	zero_interpolation_flg = FALSE
-	get_pos_flg       = FALSE	;座標取得するとTRUEになる
-	get_handle_flg    = TRUE	;ズレ補正時だけOFFになる
-	show_date_flg     = TRUE	;最終更新日時を表示するか否か
-	auto_get_pos_flg  = FALSE	;座標取得を利用した時のみTRUEになる
-	exit_flg = FALSE			;終了時にONになる(Win8対策)
-	;その他
-	dim unit_count, kFleetNum
-	dim unit_count_, kFleetNum
-	dim last_up_date, kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 2, 7
-	dim supply_list, 5
-	GetMonitorParam kDispX ,kDispY ,kOffsetX, kOffsetY
-	kFleetIdOffset = kCaptureBufferID + kSceneListSize
-	kUnitIdOffset = kFleetIdOffset + kFleetNum
-	kSortIdOffset = kUnitIdOffset + kFleetNum * kUnitNum
-	flash_px = -1
-	flash_py = -1
-	fps_index = 2
-	zooming_index_ = -1
-	dead_zone_flg_ = FALSE
-	dead_zone_flg__ = FALSE
-	exhausted_flg_ = FALSE
-	exhausted_flg__ = FALSE
-
-// バッファ初期化
-	//マウスカーソル
-	buffer kCursorBufferID
-	exist pic_save_path(0) + "\\cursor.png"
-	if(strsize == -1) :end
-	picload pic_save_path(0) + "\\cursor.png", 0
-	cursor_x = ginfo_sx :cursor_y = ginfo_sy
-
-	//保存用バッファ
-	;サブ画面用バッファ
-	buffer kPutTempWindowID, kFlashWX, kFlashWY
-	;各保存画面
-	buffer kBattleBufferID, kFlashWX, kFlashWY
-	buffer kDropBufferID, kFlashWX, kFlashWY
-	repeat kSceneListSize
-		buffer kCaptureBufferID + cnt, kFlashWX, kFlashWY
-	loop
-	;編成画面
-	repeat kFleetNum
-		buffer kCaptureBufferID + kSceneListSize + cnt, kFlashWX, kFlashWY
-	loop
-	;改装画面
-	repeat kFleetNum * kUnitNum
-		buffer kCaptureBufferID + kSceneListSize + kFleetNum + cnt, kFlashWX, kFlashWY
-	loop
-	;認識用
-	buffer kNumGetBufferID, kMatchSize, kMatchSize
-	;デノイズ用
-	cvbuffer kCVDenoiseBufferID, kFlashWX, kFlashWY
+	unit_pos_x.0 = 261, 270
+	// ○号カウンタ
+	dim auto_count_flg, kCounterType
+	dim count_num, kCounterType
+	sdim counter_output, 1024
+	exercises_flg = FALSE
 	;ボス判定用
 	buffer kTempBufferID, 5, 5
 		color 219,24,24 :boxf
@@ -349,110 +319,48 @@
 			cvbuffer kBossJudgeBufferID2, 5, 5	;緑色
 				cvputimg kBossJudgeBufferID2
 	cvbuffer kBossJudgeBufferID3, kFlashWX, kFlashWY
-
-	ReadSaveData
-	gosub *init_bgm_list
-	error_log += NowTime() + ",init_bgm_list,\n"
-	goto *main1
-
-*init_bgm_list
-	bgm_list = ""
-	for k, 0, kBgmListSize
-		bgm_list += bgm_list_name(k)
-		if(bgm_list_flg(k)){
-			bgm_list += "(ON ,"
-		}else{
-			bgm_list += "(OFF,"
-		}
-		exist bgm_list_filename(k)
-		if(strsize != -1){
-			mmload bgm_list_filename(k), k, 1
-			bgm_list += getpath(bgm_list_filename(k), 1 + 8) + ")\n"
-		}else{
-			bgm_list += "<NONE>)\n"
-		}
-	next
-return
-
-*init_mode_list
-	notesel text_buffer
-	noteload "scene_list.txt"
-	kSceneListSize = notemax - 1
-	dim mode_filter, kSceneListSize, kPoints, kParams	;判定用パラメータ
-	sdim mode_list2, 64, kSceneListSize + 5	;実行モード一覧
-		mode_list += "現在画面\n"
-		mode_list2(0) = "現在画面"
-	//1行づつ読み込む
-	repeat kSceneListSize
-		noteget get, cnt + 1
-		split get, "\t", temp
-		mode_list += temp(0) + "\n"
-		mode_list2(cnt + 1) = temp(0)
-		if(temp(0) == "マップ画面"){
-			kMapBufferID = kCaptureBufferID + cnt
-		}
-		for i, 0, kPoints
-			for j, 0, kParams
-				mode_filter(cnt, i, j) = int(temp(i * kParams + j + 1))
-			next
+	boss_battle_flg = FALSE
+	// cond値メータ
+	dim cond, kUnitNum
+	sdim cond_msg, 645, kUnitNum
+		for k, 0, kUnitNum
+			cond(k) = 49
 		next
-	loop
-	mode_list += "編成画面\n改装画面\n戦闘画面\nドロップ画面"
-	mode_list2(kSceneListSize + 1) = "編成画面"
-	mode_list2(kSceneListSize + 2) = "改装画面"
-	mode_list2(kSceneListSize + 3) = "戦闘画面"
-	mode_list2(kSceneListSize + 4) = "ドロップ画面"
-	;判定結果用配列
-	sdim mode_list3, 64, kSceneListSize + 5
-	mode_list3(0) = "不明"
-	repeat kSceneListSize + 4, 1
-		mode_list3(cnt) = mode_list2(cnt)
-	loop
-	;
-	kTypeDrop = kSceneListSize + 4
-	kTypeDropFlg = FALSE
-return
-
-//経験値処理の初期化
-*area_init
-	notesel text_buffer
-	noteload "area_exp.txt"
-	dim exp_data, notemax
-	repeat notemax
-		noteget get, cnt
-		split get, " ", temp
-		area_list += temp(0) + "\n"
-		exp_data(cnt) = int(temp(1)) 
-	loop
-	noteload "exp_table.txt"
-	dim need_exp_table, notemax
-	repeat notemax
-		noteget get ,cnt
-		need_exp_table(cnt) = int(get)
-	loop
-return
-
-//マッチング処理の初期化
-*match_init
-	buffer kMatchBufferID, kMatchSize * 23, kMatchSize
-	for k, 0, 10
-		buffer kNumGetBufferID, kMatchSize, kMatchSize
-		color 255, 255, 255 :boxf :color
-		font "Symbol", kMatchSize, 1
-		mes k
-		OtsuThreshold FALSE
-		GetSquare px, py, wx, wy
-		gsel kMatchBufferID
-		pos k * kMatchSize * 2, 0
-		gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy, 1
+	cond_step = 0
+	auto_calc_flg = TRUE
+	// 資材ログ機能
+	// 日時・燃料・弾薬・鋼材・ボーキ・高速修復材・開発資材・司令部レベルをロギングする。
+	// 1データに(2+1+1+1+1+1)+4*4+2*2+1=28Byteとすれば1MiBで37449件も記録できる。
+	// 1件につき10分間隔とすると260日分。ただ、件数も記録しておけば、毎回再確保して
+	// 延々とロギング可能。
+	dim supply_list, 7
+	supply_log_size = 0
+	sdim supply_log, 64	;64は適当なサイズ
+	supply_last_time = 0.0
+	supply_pos_x1.0 = 680, 689, 697, 704, 712, 719	;燃料と弾薬
+	supply_pos_x2.0 = 749, 758, 766, 773, 781, 788	;鋼材とボーキ
+	supply_pos_x3.0 = 695, 704, 713, 722	;高速修復材
+	supply_pos_x4.0 = 760, 769, 778, 787	;開発資材
+	supply_pos_x5.0 = 395, 404, 413			;司令部レベル
+	// BGM機能
+	dim bgm_index, kBgmKinds
+	for k, 0, kBgmKinds
+		bgm_index(k) = -1
 	next
-	OtsuThreshold FALSE
-	color :boxf kMatchSize * 22, 0, kMatchSize * 23, kMatchSize
-	for k, 0, 12
-		DrawSquare k * kMatchSize * 2, 0, kMatchSize, kMatchSize
-	next
-	cvbuffer kCVMatchBufferID, kMatchSize * 23, kMatchSize
-	cvputimg kCVMatchBufferID
-return
-
-*main1
+	dim bgm_flg, kBgmKinds
+	sdim bgm_list, 1024, kBgmKinds
+	sdim bgm_list_size, kBgmKinds
+	sdim bgm_name_list, 1024, kBgmKinds
+	bgm_type_now = -1
+	sdim battle_bgm_text, 1024
+	battle_bgm_text = "交戦形態 昼戦画面 夜戦画面 砲撃・連撃 対空カットイン 昼カットイン 昼カットイン 魚雷カットイン 主砲カットイン 砲雷カットイン 中破画面 大破画面"
+	home_bgm_text1 = "母港画面 母港画面 編成画面 改装画面 工廠画面 入渠画面 補給画面 戦績表示 アイテム 任務画面 遠征出撃"
+	home_bgm_text2 = "演習個別 艦隊選択"
+	// その他の初期設定
+	sdim soft_log, 32000
+	exe_path = dir_cur
+	sdim scene_result, 64, kPosDim
+	save_buffer_turn = 10	;セーブデータにおける縦の最大枚数
+	dim hwnd_window, 9		;マウスで動かせるようにするウィンドウのハンドル
+	dim unit_count, kFleetNum	;各艦隊の艦娘数
+	sdim status_bar_str, 1024	;ステータスバーに表示する文字列

@@ -1,989 +1,1030 @@
-/* モジュール */
+/* モジュール定義 */
 
-	#uselib "winmm.dll"
-	#cfunc timeGetTime "timeGetTime"
-
-	// API用
+/* WinAPI絡み */
 	#module api
-		// API呼び出し
+		// APIを呼び出すための宣言
 		#uselib "gdi32.dll"
-		#cfunc CreateDC "CreateDCA" sptr,sptr,sptr,int
-		#func DeleteDC  "DeleteDC"  int
-		#func BitBlt    "BitBlt"    int,int,int,int,int,int,int,int,int
+			#func  BitBlt "BitBlt" int,int,int,int,int,int,int,int,int
+			#cfunc CreateDC "CreateDCA" sptr,sptr,sptr,int
+			#func  DeleteDC "DeleteDC" int
 		#uselib "user32.dll"
-		#cfunc GetSystemMetrics "GetSystemMetrics" int
-		#cfunc GetForegroundWindow   "GetForegroundWindow"
-		#func GetWindowRect "GetWindowRect" int, int
-		#cfunc GetWindowDC        "GetWindowDC"         int
-		#func ReleaseDC     "ReleaseDC"     int, int
-		#cfunc WindowFromPoint "WindowFromPoint" int, int
-		// API用の定数
+			#cfunc GetSystemMetrics "GetSystemMetrics" int
+			#cfunc GetWindowDC "GetWindowDC" int
+			#func  GetWindowRect "GetWindowRect" int, int
+			#func  ReleaseDC "ReleaseDC" int, int
+			#cfunc WindowFromPoint "WindowFromPoint" int, int
+		// APIを呼び出すための定数宣言
+		#const NULL 0
 		#const SRCCOPY    0x00CC0020
 		#const CAPTUREBLT 0x40000000
-		#const SM_CMONITORS 0x00000050
-		#const SM_CXVIRTUALSCREEN 0x0000004E
-		#const SM_CYVIRTUALSCREEN 0x0000004F
 		#const SM_XVIRTUALSCREEN  0x0000004C
 		#const SM_YVIRTUALSCREEN  0x0000004D
-		// 各種関数定義
-		//座標取得
-		#deffunc GetMonitorParam var all_size_x_, var all_size_y_, var all_offset_x_, var all_offset_y_
-			all_size_x_ =   GetSystemMetrics(SM_CXVIRTUALSCREEN)
-			all_size_y_ =   GetSystemMetrics(SM_CYVIRTUALSCREEN)
-			all_offset_x_ = GetSystemMetrics(SM_XVIRTUALSCREEN)
-			all_offset_y_ = GetSystemMetrics(SM_YVIRTUALSCREEN)
+		#const SM_CXVIRTUALSCREEN 0x0000004E
+		#const SM_CYVIRTUALSCREEN 0x0000004F
+		// モニタ全体のオフセットとサイズを取得する
+		#deffunc GetDesktopParam array desktop_param
+			desktop_param(0) = GetSystemMetrics(SM_XVIRTUALSCREEN)
+			desktop_param(1) = GetSystemMetrics(SM_YVIRTUALSCREEN)
+			desktop_param(2) = GetSystemMetrics(SM_CXVIRTUALSCREEN)
+			desktop_param(3) = GetSystemMetrics(SM_CYVIRTUALSCREEN)
 		return
-		//デスクトップキャプチャ
-		#deffunc GetDesktopWindow int window_id_
-			buffer window_id_, kDispX@, kDispY@
-			//デスクトップのデバイスコンテキストを作成する
+		// デスクトップのスクリーンショットを取得する
+		#deffunc DesktopScreenShot int desktop_buffer_id, array desktop_param
+			;保存用のバッファを初期化する
+			buffer desktop_buffer_id, desktop_param(2), desktop_param(3)
+			;デスクトップのデバイスコンテキストを作成する
 			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
-			//デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, kDispX@, kDispY@, hdc_screen, kOffsetX@, kOffsetY@, SRCCOPY | CAPTUREBLT
-			//デバイスコンテキストを削除する
+			;デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, desktop_param(2), desktop_param(3), hdc_screen, desktop_param(0), desktop_param(1), SRCCOPY | CAPTUREBLT
+			;デバイスコンテキストを削除する
 			DeleteDC hdc_screen
-			redraw 1
 		return
-		//デスクトップの一部をキャプチャ
-		#deffunc GetFlashWindow int buffer_id_, int flash_px_, int flash_py_
-			buffer buffer_id_, kFlashWX, kFlashWY
-			//デスクトップのデバイスコンテキストを作成する
-			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
-			//デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, flash_px_, flash_py_, SRCCOPY | CAPTUREBLT
-			//デバイスコンテキストを削除する
-			DeleteDC hdc_screen
-			redraw 1
+		// 艦これの画面を探索する
+		#deffunc FlashPositionSearch int desktop_buffer_id, array flash_position
+			// デスクトップのスクショをCVバッファに入れる
+			gsel desktop_buffer_id
+			if((ginfo_sx < kFlashWX) || (ginfo_sy < kFlashWY)) :return
+			cvbuffer kCVDesktopBufferID, ginfo_sx, ginfo_sy
+			cvputimg kCVDesktopBufferID
+			// 800x480の灰色画面の周囲に1ピクセルの白枠を付けたものをCVバッファに入れる
+			gsel kFlashBufferID
+			color 100, 100, 100
+			boxf 1, 1, kFlashWX, kFlashWY
+			cvbuffer kCVFlashBufferID, kFlashWX, kFlashWY
+			cvputimg kCVFlashBufferID
+			// マッチング処理を行う
+			cvmatch flash_position(0), flash_position(1), CV_TM_SQDIFF, kCVFlashBufferID, kCVDesktopBufferID
+			// 「1ピクセルの白枠」の分だけ補正処理を行う
+			flash_position(0) += 1
+			flash_position(1) += 1
 		return
-		//艦これ画面の自動認識
-		#deffunc GetPosFlashSquare int window_id_, int output_buffer_id_, var px_, var py_
-			;バッファ1：検索先画像
-			gsel window_id_
-			cvbuffer kCVGPFSBufferID1, ginfo_sx, ginfo_sy
-			cvputimg kCVGPFSBufferID1
-			//バッファ2:802x482の白画像の中央に800x480の灰色画像を置いた画像
-			buffer output_buffer_id_, kFlashWX + 2, kFlashWY + 2
-			color 100, 100, 100 :boxf 1, 1, kFlashWX, kFlashWY
-			cvbuffer kCVGPFSBufferID2, kFlashWX, kFlashWY
-			cvputimg kCVGPFSBufferID2
-			//マッチング処理を行う
-			cvmatch px_, py_, CV_TM_SQDIFF, kCVGPFSBufferID2, kCVGPFSBufferID1
-			px_ = px_ + 1 :py_ = py_ + 1
+		// 指定した点におけるウィンドウのハンドルを取得する
+		#defcfunc GetWindowHandle array flash_point
+		return WindowFromPoint(flash_point(0), flash_point(1))
+		// 指定したハンドルにおけるオフセットとサイズを取得する
+		#deffunc GetWindowParam int window_handle, array window_param
+			dim rect, kRectDim
+			GetWindowRect window_handle, varptr(rect)
+			window_param(0) = rect(0)
+			window_param(1) = rect(1)
+			window_param(2) = rect(2) - rect(0)
+			window_param(3) = rect(3) - rect(1)
 		return
-		//艦これ画面がずれていないかを調べる
-		#defcfunc CheckAutoSet
-			buffer kTempBufferID@, kFlashWX + 2, kFlashWY + 2
-			hdc_browser = GetWindowDC(handle@)
-			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_browser, flash_px@ - rect@(0) - 1, flash_py@ - rect@(1) - 1, SRCCOPY | CAPTUREBLT
-			ReleaseDC handle@, hdc_browser
-			//四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
-			pget 0, 0
-			check_r = ginfo_r :check_g = ginfo_g :check_b = ginfo_b
-			auto_set_flg = FALSE
-			check_x.0 = kFlashWX / 2, kFlashWX + 1, kFlashWX + 1, kFlashWX + 1, kFlashWX / 2, 0, 0
-			check_y.0 = 0, 0, kFlashWX / 2, kFlashWY + 1, kFlashWY + 1, kFlashWY + 1, kFlashWX / 2
-			for k, 0, 7
-				pget check_x(k), check_y(k)
-				if((check_r != ginfo_r) || (check_g != ginfo_g) || (check_b != ginfo_b)){
-					auto_set_flg = TRUE
-					_break
-				}
+		// ウィンドウのスクリーンショットを取得する
+		#deffunc WindowScreenShot int window_buffer_id, int window_handle, array window_param
+			;保存用のバッファを初期化する
+			buffer window_buffer_id, window_param(2), window_param(3)
+			;ウィンドウのデバイスコンテキストを作成する
+			hdc_window = GetWindowDC(window_handle)
+			;ウィンドウの画像をコピーする
+			BitBlt hdc, 0, 0, window_param(2), window_param(3), hdc_window, 0, 0, SRCCOPY | CAPTUREBLT
+			;デバイスコンテキストを削除する
+			ReleaseDC window_handle, hdc_window
+		return
+		// 艦これの画面のスクリーンショットを取得する
+		#deffunc FlashScreenShot int flash_buffer_id, int window_handle, array flash_position
+			gsel flash_buffer_id
+			;デスクトップのデバイスコンテキストを作成する
+			hdc_window = GetWindowDC(window_handle)
+			;デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_window, flash_position(0), flash_position(1), SRCCOPY | CAPTUREBLT
+			;デバイスコンテキストを削除する
+			ReleaseDC window_handle, hdc_window
+		return
+		// 艦これの画面がズレていないかを判定する
+		#defcfunc CheckMoveFlash int window_handle, array flash_position
+			gsel kCheckBufferID
+			;デスクトップのデバイスコンテキストを作成する
+			hdc_window = GetWindowDC(window_handle)
+			;デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_window, flash_position(0) - 1, flash_position(1) - 1, SRCCOPY | CAPTUREBLT
+			;デバイスコンテキストを削除する
+			ReleaseDC window_handle, hdc_window
+			;RGB値で判定する。四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
+			dim clr, 8
+			for k, 0, 8
+				pget check_x@(k), check_y@(k)
+				clr(k) = (ginfo_r * 1000 + ginfo_g) * 1000 + ginfo_b
 			next
+			auto_set_flg = FALSE
+			if((clr(0) != clr(1)) && (clr(1) == clr(2))){
+				flash_position(0) += move_x@(0)
+				flash_position(1) += move_y@(0)
+				auto_set_flg = TRUE
+			}else{
+				for k, 1, 8
+					if(clr(0) != clr(k)){
+						flash_position(0) += move_x@(k)
+						flash_position(1) += move_y@(k)
+						auto_set_flg = TRUE
+						_break
+					}
+				next
+			}
 		return auto_set_flg
-		//艦これを開いているブラウザのハンドルを取得する
-		#defcfunc GetKanColleHandle
-			gsel kPutWindowID@
-			title "5秒以内に艦これの画面をアクティブにしてください..."
-			aplsel@ "艦隊これくしょん～艦これ～"
-			aplact@
-			wait 500
-		return GetForegroundWindow()
-		//ブラウザのクライアント領域のサイズを取得する
-		#deffunc GetClientSize int handle_, array rect_
-			GetWindowRect handle_, varptr(rect_)
-		return
-		//艦これを開いているブラウザの画像を取得する
-		#deffunc GetKanColleWindow int handle_, int window_id_, int wx_, int wy_
-			buffer window_id_, wx_, wy_
-			hdc_browser = GetWindowDC(handle_)
-			BitBlt hdc, 0, 0, wx_, wy_, hdc_browser, 0, 0, SRCCOPY | CAPTUREBLT
-			ReleaseDC handle_, hdc_browser
-		return
-		//デスクトップの一部をキャプチャ2
-		#deffunc GetFlashWindow2 int handle_, int buffer_id_, int flash_px_, int flash_py_
-			if(handle_ == NULL) :return
-			gsel buffer_id_
-			hdc_browser = GetWindowDC(handle_)
-			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_browser, flash_px_ - rect@(0), flash_py_ - rect@(1), SRCCOPY | CAPTUREBLT
-			ReleaseDC handle_, hdc_browser
-		return
-		//指定した点を含むウィンドウのハンドルを取得する
-		#defcfunc GetPointHandle int point_x_, int point_y_
-			dim point, 2
-				point.0 = point_x_
-				point.1 = point_y_
-		return WindowFromPoint(point.0, point.1)
 	#global
 
-	// 汎用
-	#module misc_
-		//screen_shot_typeを文字列に変換
-		#defcfunc SstToStr int screen_shot_type_
-			if(screen_shot_type_ >= kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum + 1) :return ""
-			if(screen_shot_type_ >= kSceneListSize@ + kFleetNum + 1) :return "改装画面"
-			if(screen_shot_type_ >= kSceneListSize@ + 1) :return "編成画面"
-			if(screen_shot_type_ < 0) :return ""
-		return mode_list3@(screen_shot_type_)
+	#module _tasktray
+		// APIを呼び出すための宣言
+		#uselib "Shell32.dll"
+			#func Shell_NotifyIcon "Shell_NotifyIconA" int, var
+			#func ExtractIconEx "ExtractIconExA" sptr, int, nullptr, var, int
+		#uselib "Kernel32.dll"
+			#func GetModuleFileName "GetModuleFileNameA" nullptr, var, int
+		// APIを呼び出すための定数宣言
+		#const global WM_TRAYEVENTSTART $8000 + 1
+		// タスクトレイにアイコンを登録する
+		// Tasktray ツールチップ文字列, アイコンを含むファイルのパス
+		#deffunc Tasktray str tip, str fName_
+			tt_handle = hwnd
+			// fNameに関する補完処理
+			fName = ""
+			if(fName_ == "") :GetModuleFileName fName, 1024 :else :fName = fName_
+			// APIに投げるための構造体データを作成
+			dim NOTIFYICONDATA,88 / 4
+			NOTIFYICONDATA(0) = 88
+			NOTIFYICONDATA(1) = tt_handle
+			NOTIFYICONDATA(2) = 0
+			NOTIFYICONDATA(3) = 7
+			NOTIFYICONDATA(4) = WM_TRAYEVENTSTART
+			ExtractIconEx fName, 0, NOTIFYICONDATA(5), 1
+			poke NOTIFYICONDATA, 4*6, tip
+			Shell_NotifyIcon 0, NOTIFYICONDATA
+		return stat
+		// タスクトレイのアイコンを削除する
+		#deffunc TasktrayDel
+		if(length(NOTIFYICONDATA) == (88 / 4)){
+			NOTIFYICONDATA(3) = 0
+			Shell_NotifyIcon 2, NOTIFYICONDATA
+		}
+		return
+		// タスクトレイからバルーン通知を出す
+		// TasktrayPopup bInfo,bInfoTitle,tIcon,time
+		// bInfo : バルーンに表示するメッセージ
+		// bInfoTitle : バルーンのタイトル
+		// tIcon : アイコンの種類[ 0:無し 1:情報(i) 2:警告(!) 3:エラー(X) ]
+		// time : タイムアウト値（1/1000秒単位）
+		#deffunc TasktrayPopup str bInfo, str bInfoTitle, int tIcon, int time
+			dim NOTIFYICONDATA,488 / 4
+			NOTIFYICONDATA(0) = 488
+			NOTIFYICONDATA(1) = tt_handle
+			NOTIFYICONDATA(2) = 0
+			NOTIFYICONDATA(3) = $10
+			poke NOTIFYICONDATA, 4 * 40, bInfo
+			NOTIFYICONDATA(104) = time
+			poke NOTIFYICONDATA, 4 * 105, bInfoTitle
+			NOTIFYICONDATA(121) = tIcon
+			Shell_NotifyIcon 1, NOTIFYICONDATA
+		return
+		#deffunc TasktrayPopup2 str bInfo, str bInfoTitle, int tIcon, int time
+			Tasktray kSoftName, ""
+			TasktrayPopup bInfo, bInfoTitle, tIcon, time
+			TasktrayDel
+		return
 	#global
-	#module misc
-		//長方形枠を描画
-		#deffunc DrawMouseSquare int mouse_x1_, int mouse_y1_, int mouse_x2_, int mouse_y2_
-			if(mouse_x1_ < mouse_x2_){
-				square_x1 = mouse_x1_
-				square_x2 = mouse_x2_
-			}else{
-				square_x1 = mouse_x2_
-				square_x2 = mouse_x1_
-			}
-			if(mouse_y1_ < mouse_y2_){
-				square_y1 = mouse_y1_
-				square_y2 = mouse_y2_
-			}else{
-				square_y1 = mouse_y2_
-				square_y2 = mouse_y1_
-			}
+
+/* 画像処理用関数 */
+	#module pic
+		// 長方形枠を描画
+		#deffunc DrawMouseSquare int mouse_x1, int mouse_y1, int mouse_x2, int mouse_y2
+			square_x1 = min(mouse_x1, mouse_x2)
+			square_y1 = min(mouse_y1, mouse_y2)
+			square_x2 = max(mouse_x1, mouse_x2)
+			square_y2 = max(mouse_y1, mouse_y2)
 			color 0, 255, 255
 			line square_x1, square_y1, square_x2, square_y1
 			line square_x2, square_y1, square_x2, square_y2
 			line square_x2, square_y2, square_x1, square_y2
 			line square_x1, square_y2, square_x1, square_y1
 		return
-		//タイトルバーの文字列を設定
-		#deffunc SetTitle
-			sdim title_str, 1024
-			//実行モード
-			title_str += mode_list2@(mode_index@) + " - "
-			//判定結果
-			if(kTypeDropFlg@ == TRUE){
-				title_str += "ドロップ画面 - "
-			}else{
-				title_str += SstToStr(screen_shot_type@) + " - "
-			}
-			//艦これ画面の座標
-			title_str += "(" + flash_px@ + ","  +flash_py@ + ")"
-			//反映
-			gsel kPutWindowID@
-			title title_str
-			gsel kMainWindowID@
+		// カレントカラーではない色の領域をクロップする
+		#deffunc GetSquare var px__, var py__, var wx__, var wy__, array square
+			;カレントカラーを記憶しておく
+			rr = ginfo_r
+			gg = ginfo_g
+			bb = ginfo_b
+			;検索範囲を整理する
+			x_min = square.0
+			x_max = square.0 + square.2
+			y_min = square.1
+			y_max = square.1 + square.3
+			;検索する(上・左・下・右の順)
+			for x, x_min, x_max
+				flg = FALSE
+				for y, y_min, y_max
+					pget x, y
+					if((ginfo_r != rr) || (ginfo_g != gg) || (ginfo_b != bb)) :flg = TRUE :_break
+				next
+				if(flg) :px__ = x :_break
+			next
+			for y, y_min, y_max
+				flg = FALSE
+				for x, x_min, x_max
+					pget x, y
+					if((ginfo_r != rr) || (ginfo_g != gg) || (ginfo_b != bb)) :flg = TRUE :_break
+				next
+				if(flg) :py__ = y :_break
+			next
+			for x, x_max - 1, x_min - 1, -1
+				flg = FALSE
+				for y, y_min, y_max
+					pget x, y
+					if((ginfo_r != rr) || (ginfo_g != gg) || (ginfo_b != bb)) :flg = TRUE :_break
+				next
+				if(flg) :wx__ = x - px__ + 1 :_break
+			next
+			for y, y_max - 1, y_min - 1, -1
+				flg = FALSE
+				for x, x_min, x_max
+					pget x, y
+					if((ginfo_r != rr) || (ginfo_g != gg) || (ginfo_b != bb)) :flg = TRUE :_break
+				next
+				if(flg) :wy__ = y - py__ + 1 :_break
+			next
 		return
-		//色判定
-		#defcfunc NearColor int px_, int py_, int clr_r_, int clr_g_, int clr_b_
-			pget px_, py_
-			diff_r = ginfo_r - clr_r_
-			diff_g = ginfo_g - clr_g_
-			diff_b = ginfo_b - clr_b_
+		// ゲームの画面を探索する
+		#deffunc GamePositionSearch int desktop_buffer_id, array square, array flash_position, array game_window_size
+			;選択範囲の左上をカレントカラーとする
+			gsel desktop_buffer_id
+			pget square(0), square(1)
+			;クロップ処理
+			GetSquare px, py, wx, wy, square
+			;左上座標およびサイズを取得
+			flash_position(0) = px
+			flash_position(1) = py
+			game_window_size(0) = wx
+			game_window_size(1) = wy
+		return
+		// 特定座標における色が一致するかを判定する
+		// この閾値500というのは実は適当。100ぐらいでも編成・改装画面の認識はできるが、
+		// 100だと入渠画面で各ドックを認識することが出来ないっぽいので……
+		#defcfunc NearColor int nc_x, int nc_y, int nc_r, int nc_g, int nc_b
+			pget nc_x, nc_y
+			diff_r = ginfo_r - nc_r
+			diff_g = ginfo_g - nc_g
+			diff_b = ginfo_b - nc_b
 			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
-			if(diff < 500) :return TRUE
-		return FALSE
-		#defcfunc FarColor int scene_type_, int point_index_
-			pget mode_filter@(scene_type_, point_index_, 0), mode_filter@(scene_type_, point_index_, 1)
-			diff_r = ginfo_r - mode_filter@(scene_type_, point_index_, 2)
-			diff_g = ginfo_g - mode_filter@(scene_type_, point_index_, 3)
-			diff_b = ginfo_b - mode_filter@(scene_type_, point_index_, 4)
-			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
-			if(diff < 500) :return FALSE
+			if(diff > 500) :return FALSE
 		return TRUE
-		//状況を判別する
-		#defcfunc JudgeSituation int flash_id_, int change_flg_
-			if(change_flg_) :kTypeDropFlg@ = FALSE
-			gsel flash_id_
-			//通常の画面
-			judge_type = -1
-			for i, 0, kSceneListSize@
-				type_flg = TRUE
-				for j, 0, kPoints
-					if(FarColor(i, j)){
-						type_flg = FALSE
+		// どういったシーンかを判定する
+		#defcfunc JudgeSituation int buffer_id, array scene_result
+			scene_result(0) = "不明"
+			scene_result(1) = "不明"
+			gsel buffer_id
+			for n, 0, scene_list_size@
+				flg = TRUE
+				for k, 0, scene_list_points@(n)
+					if(NearColor(scene_list_x@(n, k), scene_list_y@(n, k), scene_list_r@(n, k), scene_list_g@(n, k), scene_list_b@(n, k)) == FALSE){
+						flg = FALSE
 						_break
 					}
 				next
-				if(type_flg){
-					judge_type = i + 1
+				if(flg){
+					scene_result(0) = scene_list_category@(n)
+					scene_result(1) = scene_list_name@(n)
 					_break
 				}
 			next
-			if(judge_type != -1) :return judge_type
-			//編成画面
-			if(NearColor(420, 118, 195, 180, 169)){
-				;左上の旗
-				for k, 0, kFleetNum
-					if(NearColor(123 + 30 * k, 126, 33, 150, 151)) :return kSceneListSize@ + k + 1
-				next
-			}
-			//改装画面
-			;枠の柱
-			if(NearColor(300, 172, 241, 191, 119)){
-				;左上の旗
-				offset = -1
-				for k, 0, kFleetNum
-					if(NearColor(136 + 30 * k, 122, 33, 150, 151)){
-						offset = k * kUnitNum
-						_break
-					}
-				next
-				if(offset < 0) :return kTypeUnknown
-				;枠
-				for k, 0, kUnitNum
-					if(NearColor(294, 145 + 54 * k, 255, 102, 29)) :return kSceneListSize@ + kFleetNum + offset + k + 1
-				next
-			}
-			//ドロップ画面
-			;コモン
-			if(NearColor(745,437,32,162,165)){
-				if(NearColor(3,360,195,212,243)){
-					if(NearColor(11,471,68,104,105)){
-						if(change_flg_) :kTypeDropFlg@ = TRUE
-						return kTypeDrop@
-					}
-				}
-			}
-			;アンコモン
-			if(NearColor(745,437,32,162,165)){
-				if(NearColor(2,359,189,218,234)){
-					if(NearColor(15,467,68,105,106)){
-						if(change_flg_) :kTypeDropFlg@ = TRUE
-						return kTypeDrop@
-					}
-				}
-			}
-			;スーパーコモン
-			if(NearColor(745,437,32,162,165)){
-				if(NearColor(5,358,193,231,237)){
-					if(NearColor(11,471,68,104,105)){
-						if(change_flg_) :kTypeDropFlg@ = TRUE
-						return kTypeDrop@
-					}
-				}
-			}
-			;レア
-			if(NearColor(745,437,32,162,165)){
-				if(NearColor(8,358,205,210,211)){
-					if(NearColor(17,451,30,66,70)){
-						if(change_flg_) :kTypeDropFlg@ = TRUE
-						return kTypeDrop@
-					}
-				}
-			}
-			;スーパーレア
-			if(NearColor(745,437,32,162,165)){
-				if(NearColor(9,359,190,178,73)){
-					if(NearColor(18,457,39,71,58)){
-						if(change_flg_) :kTypeDropFlg@ = TRUE
-						return kTypeDrop@
-					}
-				}
-			}
-			;ホロ
-			if(NearColor(745,437,32,162,165)){
-				if(NearColor(3,349,238,199,195)){
-					if(NearColor(10,465,62,77,80)){
-						if(change_flg_) :kTypeDropFlg@ = TRUE
-						return kTypeDrop@
-					}
-				}
-			}
-			;スーパーホロ
-			if(NearColor(745,437,32,162,165)){
-				if(NearColor(9,360,255,243,226)){
-					if(NearColor(12,451,68,97,97)){
-						if(change_flg_) :kTypeDropFlg@ = TRUE
-						return kTypeDrop@
-					}
-				}
-			}
-			;SSホロ
-			if(NearColor(745,437,32,162,165)){
-				if(NearColor(4,343,254,228,196)){
-					if(NearColor(8,437,65,90,86)){
-						if(change_flg_) :kTypeDropFlg@ = TRUE
-						return kTypeDrop@
-					}
-				}
-			}
-		return kTypeUnknown
-		//サブ画面にコピー
-		#deffunc PutWindowSet int window_id_, int buffer_id_
-			//カーソルを擬似的に表示させる(オプション)
-			if((cursor_flg@) && ((mode_index@ == kTypeNow))){
-				gsel buffer_id_
-				mx = ginfo_mx - flash_px@ :my = ginfo_my - flash_py@
-				;カーソルを描画する
-				color 255, 0, 0
-				gmode 4,0,0,256
-				pos mx, my
-				gcopy kCursorBufferID@, 0, 0, cursor_x@, cursor_y@
-				gmode 0
-				pos 0, 0
-			}
-			//サブ画面に画像を転送する
-			gsel window_id_
-			pos 0, 0
-			redraw 0
-				gzoom zooming_num@(zooming_index@) * kFlashWX / 100, zooming_num@(zooming_index@) * kFlashWY / 100, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
-			redraw 1
+		return n
+		// サブ画面を生成する
+		#deffunc MakeSubWindow
+			screen kSubWindowID, sub_window_size_x@(sub_window_size_index@), sub_window_size_y@(sub_window_size_index@) + show_status_flg@ * status_y@(sub_window_size_index@), 4
+			title "サブ画面"
+			gsel kSubWindowID, 2
+			hwnd_window@(kSubWindowID) = hwnd
 		return
-		//現在時刻を取得
-		#defcfunc NowTime
-		return strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
-		//ファイル名を自動設定
-		#defcfunc AutoFileName
-			file_name = NowTime()
-			exist file_name + ".png"
-			if(strsize == -1) :return file_name + ".png"
-			number = 1
-			while
-				exist file_name + "_" + number + ".png"
-				if(strsize != -1){
-					number++
-				}else{
-					_break
-				}
-				wait 5
-			wend
-		return file_name + "_" + number + ".png"
-		#defcfunc AutoFileName_
-			file_name = NowTime()
-			exist file_name + ".bmp"
-			if(strsize == -1) :return file_name + ".bmp"
-			number = 1
-			while
-				exist file_name + "_" + number + ".bmp"
-				if(strsize != -1){
-					number++
-				}else{
-					_break
-				}
-				wait 5
-			wend
-		return file_name + "_" + number + ".bmp"
-		//「母港画面」かどうかを判定する(BGM・名前隠し用)
-		#defcfunc CheckHomeFlg int flash_id_
-			gsel flash_id_
-			if(NearColor(665, 42, 83, 159, 73)){		;バケツアイコン
-				if(NearColor(736, 61, 172, 128, 95)){	;ボーキアイコン
+		// サブ画面に画像を表示する
+		#deffunc SetSubWindow
+			gsel kSubWindowID
+			pos 0, 0
+			gzoom sub_window_size_x@(sub_window_size_index@), sub_window_size_y@(sub_window_size_index@), kSubBufferID, 0, 0, kFlashWX, kFlashWY, 1
+		return
+		// 「母港画面」(提督名や資源量が表示されている状態)かを判定する
+		#defcfunc CheckHomeFlg int buffer_id
+			// バケツアイコン→ボーキアイコンの順で調べる
+			// (本当は帰投画面と音量設定でも隠せるが、需要があまりない上、
+			// 資材ログ機能でロギングする際にたまたま帰投画面だったりしたら
+			// 認識精度が下がりかねないのでコメントアウトしている)
+			gsel buffer_id
+			//通常画面
+			if(NearColor(665, 42, 83, 159, 73)){
+				if(NearColor(736, 61, 172, 128, 95)){
 					return TRUE
 				}
 			}
+			//帰投画面
+			//if(NearColor(665, 42, 225, 222, 203)){if(NearColor(736, 61, 155, 115, 85)){return TRUE}}
+			//音量設定
+			//if(NearColor(665, 42, 17, 32, 15)){if(NearColor(736, 61, 35, 26, 19)){return TRUE}}
 		return FALSE
-		//「大破した艦娘」がいるかどうかを判定する
-		#defcfunc CheckDeadZone int flash_id_, int sst
-			if(SstToStr(sst) == "出撃画面"){
-				gsel flash_id_
-				flg = FALSE
+		// 記録された画像から艦隊数を取得する
+		#deffunc GetUnits array unit_count
+			// 改装画面
+			if((scene_result@(0) == "改装画面") && (strmid(scene_result@(1), 0, 2) == "第")){
+				gsel kMainBufferID
+				for k, kUnitNum - 1, -1, -1
+					if(NearColor(160, 180 + 54 * k, 235, 218, 203) == FALSE){
+						if(NearColor(260, 180 + 54 * k, 234, 217, 202) == FALSE){
+							unit_count((show_scene_list_index@(scene_result_index@) - scene_fleet_offset@) / kUnitNum) = k + 1
+							_break
+						}
+					}
+				next
+			}
+			// 編成画面
+			if((scene_result@(0) == "編成画面") && (strmid(scene_result@(1), 0, 2) == "第")){
+				gsel kMainBufferID
+				for k, kUnitNum - 1, -1, -1
+					x = k \ 2 :y = k / 2
+					if(NearColor(140 + 342 * x, 200 + 113 * y, 255, 242, 238)){
+						unit_count(show_scene_list_index@(scene_result_index@) - scene_unit_offset@) = k + 1
+						_break
+					}
+				next
+			}
+		return
+		// 大破、もしくは消耗状態かを判定する
+		#defcfunc CheckStopperType
+			// 戦果報告画面(大破判定のみ)
+			if(scene_result@(1) == "戦果報告"){
+				gsel kMainBufferID
+				type = 0
+				for k, 0, kUnitNum
+					if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
+						type = kStopperDeadZone
+						_break
+					}
+				next
+				return type
+			}
+			// 出撃画面(大破・消耗判定)
+			if((scene_result@(1) == "艦隊選択") && (scene_result@(0) != "演習出撃")){
+				// 大破判定
+				gsel kMainBufferID
+				flg = 0
 				for k, 0, kUnitNum
 					;大破
 					if(NearColor(482, 137 + 50 * k, 251, 114, 94)){
 						if(NearColor(489, 146 + 50 * k, 106, 46, 42)){
-							flg = TRUE
+							flg = kStopperDeadZone
 							_break
 						}
 					}
 					;橙疲労+大破
 					if(NearColor(482, 137 + 50 * k, 250, 99, 53)){
 						if(NearColor(489, 146 + 50 * k, 180, 73, 20)){
-							flg = TRUE
+							flg = kStopperDeadZone
 							_break
 						}
 					}
 					;赤疲労+大破
 					if(NearColor(482, 137 + 50 * k, 251, 58, 54)){
 						if(NearColor(489, 146 + 50 * k, 180, 22, 20)){
+							flg = kStopperDeadZone
+							_break
+						}
+					}
+				next
+				// 消耗判定
+				for k, 0, kUnitNum
+					;燃料
+					if(NearColor(488, 167 + 50 * k, 255, 222, 0)){
+						flg = kStopperExhausted
+						_break
+					}
+					if(NearColor(488, 167 + 50 * k, 221, 42, 42)){
+						flg = kStopperExhausted
+						_break
+					}
+					;弾薬
+					if(NearColor(514, 167 + 50 * k, 255, 222, 0)){
+						flg = kStopperExhausted
+						_break
+					}
+					if(NearColor(514, 167 + 50 * k, 221, 42, 42)){
+						flg = kStopperExhausted
+						_break
+					}
+				next
+				return flg
+			}
+		return 0
+		// ストッパー画面を表示する
+		#deffunc ShowStopperWindow int stopper_type
+			if(show_stopper_flg1@ == FALSE) :return
+			if(show_stopper_flg2@ == FALSE){
+				if(scene_result@(1) == "進撃確認"){
+					bgscr kStopperWindowID, 180, 130, , window_param@(0) + flash_position@(0) + 200, window_param@(1) + flash_position@(1) + 180
+					gsel kStopperWindowID, 2
+					color 255, 0, 0
+					font msgothic, 36
+					pos 10, 10
+					mes "大破した\n 艦娘が\nいます！"
+					show_stopper_flg2@ = TRUE
+				}
+				if((scene_result@(1) == "艦隊選択") && (scene_result@(0) != "演習出撃")){
+					bgscr kStopperWindowID, 180, 50, , window_param@(0) + flash_position@(0) + 540, window_param@(1) + flash_position@(1) + 420
+					gsel kStopperWindowID, 2
+					color 255, 0, 0
+					font msgothic, 32
+					pos 10, 10
+					switch stopper_type
+						case kStopperDeadZone
+							mes "大破艦あり"
+							show_stopper_flg2@ = TRUE
+						swbreak
+						case kStopperExhausted
+							mes "消耗艦あり"
+							show_stopper_flg2@ = TRUE
+						swbreak
+					swend
+				}
+			}
+		return
+		// 縦横比を一定にしたgzoom
+		#deffunc gzoom2 int wx2, int wy2, int buffer_id, int px_, int py_, int wx_, int wy_
+			if(wx2 * wy_ > wy2 * wx_){
+				;より横長の範囲にコピーするので縦を合わせる
+				gzoom wx_ * wy2 / wy_, wy2, buffer_id, px_, py_, wx_, wy_, 1
+			}else{
+				;より縦長の範囲にコピーするので横を合わせる
+				gzoom wx2, wy_ * wx2 / wx_, buffer_id, px_, py_, wx_, wy_, 1
+			}
+		return
+		// ボスマスに自艦隊があるかを判定する
+		#defcfunc CheckBossOfAeraMap
+			gsel area_map_window_id@
+			cvputimg kBossJudgeBufferID3
+			cvmatch boss_icon_x,  boss_icon_y,  CV_TM_SQDIFF, kBossJudgeBufferID1, kBossJudgeBufferID3
+			cvmatch fleet_icon_x, fleet_icon_y, CV_TM_SQDIFF, kBossJudgeBufferID2, kBossJudgeBufferID3
+			icon_x_diff = boss_icon_x - fleet_icon_x
+			icon_y_diff = boss_icon_y - fleet_icon_y
+			icon_r2_diff = icon_x_diff * icon_x_diff + icon_y_diff * icon_y_diff
+			;ポイント～ポイント間はおよそ630ピクセル、
+			;マッチング時は最大30ピクセルほどなので判定は容易い？
+			if(icon_r2_diff < 10000) :return TRUE
+		return FALSE
+		// 勝利判定の画面で、どの判定に当たるのかを判断する
+		// S・A・B・C以下を0・1・2・3とする
+		#defcfunc JudgeBattleRank
+			gsel win_judge_window_id@
+			// 完全勝利S
+			if(NearColor(23,43,28,181,184)){
+				if(NearColor(628,218,183,144, 2)){
+					if(NearColor(30,243,173,141,  2)){
+						return kBattleRankS
+					}
+				}
+			}
+			// 勝利S
+			if(NearColor(23,43,29,189,192)){
+				if(NearColor(604,240,251,228,83)){
+					if(NearColor(258,196,135,164,164)){
+						return kBattleRankS
+					}
+				}
+			}
+			// 勝利A
+			if(NearColor(23,43,29,179,182)){
+				if(NearColor(605,236,143,13,4)){
+					if(NearColor(258,196,136,165,165)){
+						return kBattleRankA
+					}
+				}
+			}
+			// 戦術的勝利B
+			if(NearColor(23,43,28,186,189)){
+				if(NearColor(605,269,251,160,23)){
+					if(NearColor(276,199,205,232,236)){
+						return kBattleRankB
+					}
+				}
+			}
+		return kBattleRankLoss
+	#global
+
+/* ファイル処理用関数 */
+	#module file
+		#uselib "shlwapi.dll"	//dirlistだとドライブ直下の判定ができないので……
+			#cfunc PathIsDirectory "PathIsDirectoryA" str
+		// 設定読み込み
+		#deffunc LoadSoftData
+			PutLog "【設定読み込み】"
+			PutLog "読み込み中..."
+			// デフォルト設定で初期化する
+			capture_fps_index@     = 2
+			check_move_flash_flg@  = TRUE
+			get_pos_mode@          = kGetPosAuto
+			name_disable_flg@      = TRUE
+			pic_save_path_flg      = FALSE
+			pic_save_path@(1)      = ""
+			show_status_flg@       = FALSE
+			check_deadzone_flg@    = TRUE
+			check_exhausted_flg@   = TRUE
+			sub_window_size_index@ = 3
+			for k, 0, kCounterType
+				auto_count_flg@(k) = TRUE
+				count_num@(k) = 0
+			next
+			// iniファイルを読み込んで設定を反映する
+			exist exe_path@ + "\\save\\setting.ini"
+			if(strsize != -1){
+				// バッファに読み込む
+				notesel text_buffer
+				noteload exe_path@ + "\\save\\setting.ini"
+				// 1行づつ読み込んで処理する
+				sdim text_buffer_scene, 32000
+				sdim text_buffer_time, 32000
+				for k, 0, notemax
+					noteget getline, k
+					// コメントは削除する
+					p = instr(getline,,";")
+					if(p != -1) :getline = strmid(getline, 0, p)
+					// パラメータである場合のみ反映する
+					p = instr(getline,,"=")
+					if(p == -1) :_continue
+					sdim param_name, 1024
+					param_name = strmid(getline, 0, p)
+					sdim param_value, 1024
+					param_value = strmid(getline, p + 1, strlen(getline) - p - 1)
+					//パラメータの種類によって場合分け
+					if(param_name == "capture_fps_index") :capture_fps_index@    = limit(int(param_value), 0, length(capture_fps) - 1) :_continue
+					if(param_name == "check_move_flash")  :check_move_flash_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "get_pos_mode"){
+						if(param_value == "auto")   :get_pos_mode@ = kGetPosAuto
+						if(param_value == "click")  :get_pos_mode@ = kGetPosClick
+						if(param_value == "crop")   :get_pos_mode@ = kGetPosCrop
+						if(param_value == "manual") :get_pos_mode@ = kGetPosManual
+						_continue
+					}
+					if(param_name == "name_disable") :name_disable_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "pic_save_path_flg") :pic_save_path_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "pic_save_path"){
+						if(PathIsDirectory(param_value) != 0){
+							pic_save_path@(1) = param_value
+						}
+						_continue
+					}
+					if(strmid(param_name, 0, 16) == "dock_finish_time"){
+						dock_finish_time@(int(strmid(param_name, 17, strlen(param_name) - 17))) = double(param_value)
+						_continue
+					}
+					if(strmid(param_name, 0, 15) == "expedition_kind"){
+						expedition_kind@(int(strmid(param_name, 16, strlen(param_name) - 16))) = limit(int(param_value), 0, 39)
+						_continue
+					}
+					if(strmid(param_name, 0, 10) == "scene_list"){
+						text_buffer_scene += param_value + "\t" + strmid(param_name, 11, strlen(param_name) - 11) + "\n"
+						_continue
+					}
+					if(strmid(param_name, 0, 14) == "auto_count_flg"){
+						p = int(strmid(param_name, 15, strlen(param_name) - 15))
+						auto_count_flg@(p) = limit(int(param_value), FALSE, TRUE)
+						gsel kCounterWindowID
+						objprm auto_count_flg_id@ + p, auto_count_flg@(p)
+						_continue
+					}
+					if(strmid(param_name, 0, 9) == "count_num"){
+						if(int(param_value) > 0){
+							count_num@(int(strmid(param_name, 10, strlen(param_name) - 10))) = int(param_value)
+						}else{
+							count_num@(int(strmid(param_name, 10, strlen(param_name) - 10))) = 0
+						}
+						_continue
+					}
+					if(strmid(param_name, 0, 10) == "scene_time"){
+						text_buffer_time += param_value + "\n"
+						_continue
+					}
+					if(strmid(param_name, 0, 8) == "bgm_path"){
+						split param_name, "_", temp
+						bgm_list@(limit(int(temp(2)), 0, kBgmKinds - 1)) += param_value + "\n"
+						bgm_name_list@(limit(int(temp(2)), 0, kBgmKinds - 1)) += getpath(param_value, 1 + 8) + "\n"
+						_continue
+					}
+					if(strmid(param_name, 0, 7) == "bgm_flg"){
+						p = limit(int(strmid(param_name, 8, strlen(param_name) - 8)), 0, kBgmKinds - 1)
+						bgm_flg@(p) = limit(int(param_value), FALSE, TRUE)
+						gsel kBgmWindowID
+						objprm kBgmKinds + p, bgm_flg@(p)
+						_continue
+					}
+					if(param_name == "show_status") :show_status_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_deadzone") :check_deadzone_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_exhausted") :check_exhausted_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "sub_window_size_index") :sub_window_size_index@ = limit(int(param_value), 0, length(sub_window_size_x@) - 1) :_continue
+				next
+				for i, 0, kBgmKinds
+					notesel bgm_list@(i)
+					bgm_list_size@(i) = notemax
+				next
+				// pngファイルを読み込んでバッファを反映する
+				exist exe_path@ + "\\save\\buffer.png"
+				if(strsize != -1){
+					buffer kSaveBufferID
+					picload exe_path@ + "\\save\\buffer.png"
+					save_buffer_y = ginfo_sy / kFlashWY
+					for k, 0, show_scene_list_size@
+						scene_string = show_scene_list_category@(k) + "_" + show_scene_list_name@(k)
+						notesel text_buffer_scene
+						for n, 0, notemax
+							noteget get, n
+							split get, "\t", temp
+							if(temp(0) == scene_string){
+								gsel kSceneBufferID + k
+								pos 0, 0
+								gcopy kSaveBufferID, kFlashWX * (int(temp(1)) / save_buffer_y), kFlashWY * (int(temp(1)) \ save_buffer_y), kFlashWX, kFlashWY
+								notesel text_buffer_time
+								noteget get, n
+								show_scene_list_time@(k) = double(get)
+								_break
+							}
+						next
+					next
+				}
+				// datファイルを読み込んで資材量を反映する
+				exist exe_path@ + "\\save\\supply.dat"
+				if(strsize != -1){
+					supply_log_size@ = strsize / kSupplyLogBlockSize
+					sdim supply_log@, supply_log_size@ * kSupplyLogBlockSize
+					bload exe_path@ + "\\save\\supply.dat", supply_log@
+				}
+			}
+			PutLog "読み込み完了"
+			ResetObjParam
+		return
+		// 設定保存
+		// flgがTRUEだと、画像データ部分のセーブも行う
+		#deffunc SaveSoftData int flg
+			if(flg){
+				PutLog "【設定保存】"
+				PutLog "保存中..."
+			}
+			// iniファイルを保存
+			sdim text_buffer, 32000
+			text_buffer += "_version_=" + kVerString@ + "\n"
+			text_buffer += "capture_fps_index=" + capture_fps_index@    + "\n"
+			text_buffer += "check_move_flash="  + check_move_flash_flg@ + "\n"
+			;
+			get_pos_mode_string = "auto"
+			if(get_pos_mode@ == kGetPosAuto)   :get_pos_mode_string = "auto"
+			if(get_pos_mode@ == kGetPosClick)  :get_pos_mode_string = "click"
+			if(get_pos_mode@ == kGetPosCrop)   :get_pos_mode_string = "crop"
+			if(get_pos_mode@ == kGetPosManual) :get_pos_mode_string = "manual"
+			text_buffer += "get_pos_mode=" + get_pos_mode_string + "\n"
+			;
+			text_buffer += "name_disable=" + name_disable_flg@ + "\n"
+			text_buffer += "pic_save_path_flg=" + pic_save_path_flg@ + "\n"
+			text_buffer += "pic_save_path="     + pic_save_path@(1) + "\n"
+			;
+			for k, 0, show_scene_list_size@
+				text_buffer += "scene_list_" + k + "=" + show_scene_list_category@(k) + "_" + show_scene_list_name@(k) + "\n"
+				text_buffer += "scene_time_" + k + "=" + strf("%.16g", show_scene_list_time@(k)) + "\n"
+			next
+			;
+			for k, 0, kDocks * 2 + (kFleetNum - 1)
+				text_buffer += "dock_finish_time_" + k + "=" + strf("%.16g", dock_finish_time@(k)) + "\n"
+			next
+			for k, 0, (kFleetNum - 1)
+				text_buffer += "expedition_kind_" + k + "=" + expedition_kind@(k) + "\n"
+			next
+			;
+			for k, 0, kCounterType
+				text_buffer += "auto_count_flg_" + k + "=" + auto_count_flg@(k) + "\n"
+			next
+			for k, 0, kCounterType
+				text_buffer += "count_num_" + k + "=" + count_num@(k) + "\n"
+			next
+			;
+			for i, 0, kBgmKinds
+				notesel bgm_list@(i)
+				for j, 0, notemax
+					noteget get, j
+					text_buffer += "bgm_path_" + i + "_" + j + "=" + get + "\n"
+				next
+			next
+			for i, 0, kBgmKinds
+				text_buffer += "bgm_flg_" + i + "=" + bgm_flg@(i) + "\n"
+			next
+			;
+			text_buffer += "show_status=" + show_status_flg@ + "\n"
+			text_buffer += "check_deadzone=" + check_deadzone_flg@ + "\n"
+			text_buffer += "check_exhausted=" + check_exhausted_flg@ + "\n"
+			text_buffer += "sub_window_size_index=" + sub_window_size_index@ + "\n"
+			notesel text_buffer
+			notesave exe_path@ + "\\save\\setting.ini"
+			// pngファイルを保存
+			if(flg){
+				save_buffer_y = save_buffer_turn@
+				save_buffer_x = show_scene_list_size@ / save_buffer_y
+				if(show_scene_list_size@ \ save_buffer_y != 0) :save_buffer_x++
+				buffer kSaveBufferID, kFlashWX * save_buffer_x, kFlashWY * save_buffer_y
+				for k, 0, show_scene_list_size@
+					pos kFlashWX * (k / save_buffer_y), kFlashWY * (k \ save_buffer_y)
+					gcopy kSceneBufferID + k, 0, 0, kFlashWX, kFlashWY
+				next
+				cvbuffer kCVSaveBufferID, ginfo_sx, ginfo_sy
+				cvputimg kCVSaveBufferID
+				cvsave exe_path@ + "\\save\\buffer.png", kCVSaveBufferID
+			}
+			// ソフトのログを保存
+			//保存先フォルダが存在するかを判定
+			dirlist x, exe_path@ + "\\log", 5
+			if(stat == 0) :mkdir exe_path@ + "\\log"
+			//ログを保存する
+			notesel soft_log@
+			notesave exe_path@ + "\\log\\soft(" + NowTime() + ").log"
+
+			if(flg) :PutLog "保存完了"
+		return
+		// データ読み込み
+		#deffunc LoadSystemData
+			// 記録するシーン一覧
+			//テキストを読み込む
+			notesel text_buffer
+			noteload "show_scene.csv"
+			show_scene_list_size@ = notemax - 1
+			//行毎に処理する
+			sdim show_scene_list_category@, 64, show_scene_list_size@
+			sdim show_scene_list_name@,     64, show_scene_list_size@
+			ddim show_scene_list_time@, show_scene_list_size@
+			for n, 0, show_scene_list_size@
+				noteget get, n + 1
+				split get, ",", temp
+				show_scene_list_category@(n) = temp(0)
+				show_scene_list_name@(n) = temp(1)
+				;特別な画面について、予めインデックスを引き出しておく
+				if(temp(1) == "第１艦隊　１番艦"){
+					scene_fleet_offset@ = n
+				}
+				if(temp(1) == "第１艦隊"){
+					scene_unit_offset@ = n
+				}
+				if(temp(1) == "昼戦画面"){
+					battle_index@(0) = n
+				}
+				if(temp(1) == "夜戦画面"){
+					battle_index@(1) = n
+				}
+				if(temp(1) == "海域マップ"){
+					area_map_window_id@ = kSceneBufferID + n
+				}
+				if(temp(1) == "戦闘判定"){
+					win_judge_window_id@ = kSceneBufferID + n
+				}
+			next
+			battle_index@(2) = -1
+			//表示用のカタログを生成する
+			sdim scene_list_str@, 32000
+			scene_list_str@ = "現在画面\n"
+			for n, 0, show_scene_list_size@
+				scene_list_str@ += show_scene_list_category@(n) + "　" + show_scene_list_name@(n) + "\n"
+			next
+			// シーン一覧
+			//テキストを読み込む
+			notesel text_buffer
+			noteload "scene_list.csv"
+			scene_list_size@ = notemax - 1
+			//行毎に処理する
+			sdim scene_list_category@, 64, scene_list_size@
+			sdim scene_list_name@,     64, scene_list_size@
+			dim scene_list_points@, scene_list_size@
+			dim scene_list_x@, scene_list_size@, kMaxScenePoints
+			dim scene_list_y@, scene_list_size@, kMaxScenePoints
+			dim scene_list_r@, scene_list_size@, kMaxScenePoints
+			dim scene_list_g@, scene_list_size@, kMaxScenePoints
+			dim scene_list_b@, scene_list_size@, kMaxScenePoints
+			dim show_scene_list_index@, scene_list_size@
+			scene_list_count = 0
+			for n, 0, scene_list_size@
+				;普通に読み込み
+				noteget get, n + 1
+				split get, ",", temp
+				scene_list_category@(scene_list_count) = temp(0)
+				scene_list_name@(scene_list_count)     = temp(1)
+				scene_list_points@(scene_list_count)   = int(temp(2))
+				for k, 0, scene_list_points@(scene_list_count)
+					scene_list_x@(scene_list_count, k) = int(temp(3 + k * 5))
+					scene_list_y@(scene_list_count, k) = int(temp(4 + k * 5))
+					scene_list_r@(scene_list_count, k) = int(temp(5 + k * 5))
+					scene_list_g@(scene_list_count, k) = int(temp(6 + k * 5))
+					scene_list_b@(scene_list_count, k) = int(temp(7 + k * 5))
+				next
+				;show_scene_list_indexに関する処理
+				flg = FALSE
+				for i, 0, show_scene_list_size@
+					if(scene_list_category@(scene_list_count) == show_scene_list_category@(i)){
+						if(scene_list_name@(scene_list_count) == show_scene_list_name@(i)){
+							show_scene_list_index@(scene_list_count) = i
 							flg = TRUE
 							_break
 						}
 					}
 				next
-				return flg
-			}
-			if(SstToStr(sst) == "戦果報告"){
-				gsel flash_id_
-				flg = FALSE
-				for k, 0, kUnitNum
-					if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
-						flg = TRUE
-						_break
-					}
-				next
-				return flg
-			}
-		return FALSE
-		//「消耗した艦娘」がいるかどうかを判定する
-		#defcfunc CheckExhausted int flash_id_, int sst
-			if(SstToStr(sst) == "出撃画面"){
-				gsel flash_id_
-				flg = FALSE
-				for k, 0, kUnitNum
-					;燃料
-					if(NearColor(488, 167 + 50 * k, 255, 222, 0)){
-						flg = TRUE
-						_break
-					}
-					if(NearColor(488, 167 + 50 * k, 221, 42, 42)){
-						flg = TRUE
-						_break
-					}
-					;弾薬
-					if(NearColor(514, 167 + 50 * k, 255, 222, 0)){
-						flg = TRUE
-						_break
-					}
-					if(NearColor(514, 167 + 50 * k, 221, 42, 42)){
-						flg = TRUE
-						_break
-					}
-				next
-				return flg
-			}
-			gsel flash_id_
-			if(NearColor(616, 119, 66, 66, 66)){
-				if(NearColor(721, 381, 255, 246, 242)){
-					if(NearColor(568, 459, 248, 239, 92)){
-						flg = FALSE
-						for k, 0, kUnitNum
-							;燃料
-							if(NearColor(488, 167 + 50 * k, 255, 222, 0)){
-								flg = TRUE
-								_break
-							}
-							if(NearColor(488, 167 + 50 * k, 221, 42, 42)){
-								flg = TRUE
-								_break
-							}
-							;弾薬
-							if(NearColor(514, 167 + 50 * k, 255, 222, 0)){
-								flg = TRUE
-								_break
-							}
-							if(NearColor(514, 167 + 50 * k, 221, 42, 42)){
-								flg = TRUE
-								_break
-							}
-						next
-						return flg
-					}
+				if(flg == FALSE){
+					show_scene_list_index@(scene_list_count) = -1
 				}
-			}
-			gsel flash_id_
-			exercises_ex_flg@ = FALSE
-			if(NearColor(17, 17, 0, 0, 0)){
-				if(NearColor(563,360,255,246,242)){
-					if(NearColor(79,55,195,168,86)){
-						flg = FALSE
-						for k, 0, kUnitNum
-							;燃料
-							if(NearColor(315, 145 + 50 * k, 255, 222, 0)){
-								flg = TRUE
-								_break
-							}
-							if(NearColor(315, 145 + 50 * k, 221, 42, 42)){
-								flg = TRUE
-								_break
-							}
-							;弾薬
-							if(NearColor(340, 145 + 50 * k, 255, 222, 0)){
-								flg = TRUE
-								_break
-							}
-							if(NearColor(340, 145 + 50 * k, 221, 42, 42)){
-								flg = TRUE
-								_break
-							}
-						next
-						exercises_ex_flg@ = flg
-						return flg
-					}
-				}
-			}
-		return FALSE
-		//選択画面かを判定する
-		#defcfunc CheckSelect int flash_id_
-			gsel flash_id_
-			flg = TRUE
-			if(NearColor(164, 217,  93, 182, 226) == FALSE) :flg = FALSE
-			if(NearColor(268, 249, 239, 248, 247) == FALSE) :flg = FALSE
-			if(NearColor(398, 240,  81, 201, 251) == FALSE) :flg = FALSE
-		return flg
-		#defcfunc CheckSelect2 int flash_id_
-			gsel flash_id_
-			flg = TRUE
-			if(NearColor(607, 124,  62,  62,  62) == FALSE) :flg = FALSE
-			if(NearColor(726, 381, 255, 246, 242) == FALSE) :flg = FALSE
-		return flg
-		// 艦隊ごとの艦娘数を更新する
-		#deffunc GetUnits int flash_id_, int sst, array unit_count__
-			gsel flash_id_
-			if(sst >= kSceneListSize@ + kFleetNum + 1){
-				//改装画面
-				unit_k = (sst - (kSceneListSize@ + kFleetNum + 1)) / kUnitNum
-				unit_count__(unit_k) = 0
-				for k, kUnitNum - 1, -1, -1
-					if(NearColor(160, 180 + 54 * k, 235, 218, 203) == FALSE){
-						if(NearColor(260, 180 + 54 * k, 234, 217, 202) == FALSE){
-							//艦娘がいた時点でカウントを終了させる
-							unit_count__(unit_k) = k + 1
-							_break
-						}
-					}
-				next
+				scene_list_count++
+			next
+			scene_list_size@ = scene_list_count
+		return
+		// OpenCVで保存する(bmp, jpg, png等に対応)
+		#deffunc PicSave str file_name
+			cvbuffer kCVSaveBufferID, ginfo_sx, ginfo_sy
+			cvputimg kCVSaveBufferID
+			if(pic_save_path@(pic_save_path_flg@) != ""){
+				cvsave pic_save_path@(pic_save_path_flg@) + "\\" + file_name, kCVSaveBufferID
 			}else{
-				//編成画面
-				unit_k = sst- (kSceneListSize@ + 1)
-				unit_count__(unit_k) = 0
-				for k, kUnitNum - 1, -1, -1
-					x = k \ 2 :y = k / 2
-					if(NearColor(140 + 342 * x, 200 + 113 * y, 255, 242, 238)){
-						//艦娘がいた時点でカウントを終了させる
-						unit_count__(unit_k) = k + 1
-						_break
-					}
-				next
+				cvsave pic_save_path@(0) + "\\" + file_name, kCVSaveBufferID
 			}
 		return
-		// フォルダパスについての判定
-		#defcfunc CheckSaveFolder str path_
-			sdim path, 260
-			path = path_
-			dirlist xx, path, 5
-		return stat
-		// ソフトのデータをセーブする
-		#deffunc WriteSaveData int mode
-			gsel kPutWindowID@, 2
-			title "セーブ中..."
-			// テキスト
-			sdim output, 32000
-			output += "Version\t"        + kSoftVer2@         + "\n"
-			output += "ManualPosition\t" + manual_getpos_flg@ + "\n"
-			output += "ShowMode\t"       + mode_index@        + "\n"
-			output += "ShowFleet\t"      + fleets_index@      + "\n"
-			output += "ShowUnit\t"       + units_index@ + "\n"
-			output += "SaveUnits\t"      + commands_index@ + "\n"
-			output += "HomeBGMMode\t"    + bgm_list_flg@(0) + "\n"
-			output += "HomeBGMPath\t"    + bgm_list_filename@(0) + "\n"
-			output += "MapBGMMode\t"     + bgm_list_flg@(1) + "\n"
-			output += "MapBGMPath\t"     + bgm_list_filename@(1) + "\n"
-			output += "BattleBGMMode\t"  + bgm_list_flg@(2) + "\n"
-			output += "BattleBGMPath\t"  + bgm_list_filename@(2) + "\n"
-			output += "BossBGMMode\t"  + bgm_list_flg@(3) + "\n"
-			output += "BossBGMPath\t"  + bgm_list_filename@(3) + "\n"
-			output += "DisableName\t"    + name_disable_flg@ + "\n"
-			output += "ShowCursor\t"     + cursor_flg@ + "\n"
-			output += "CheckDeadZone\t"  + dead_zone_flg@ + "\n"
-			output += "CaptureCrop\t"    + cap_crop_flg@ + "\n"
-			output += "AutoPosSet\t"     + auto_set_flg@ + "\n"
-			output += "ShutdownSave\t"   + auto_save_flg@ + "\n"
-			output += "MySaveFolder\t"   + my_folder_flg@ + "\n"
-			output += "SaveFolderPath\t" + pic_save_path@(1) + "\n"
-			output += "SupplyLogging\t"  + auto_supply_flg@ + "\n"
-			output += "LoggingTime\t" + (logging_index@ + 1) + "\n"
-			output += "ShowLastDate\t"   + show_date_flg@ + "\n"
-			output += "Denoise\t"        + denoise_flg@ + "\n"
-			output += "AutoCountSetA\t"   + auto_count_flg_a@ + "\n"
-			output += "AutoCountSetR\t"   + auto_count_flg_r@ + "\n"
-			output += "AutoCountSetI\t"   + auto_count_flg_i@ + "\n"
-			output += "AutoTimeSet\t"    + auto_time_set_flg@ + "\n"
-			output += "AutoSaveText\t"   + auto_save_flg2@ + "\n"
-			output += "CheckExhausted\t" + exhausted_flg@ + "\n"
-			output += "MultiShotName\t" + save_picture2_index@ + "\n"
-			output += "ZeroIntPol\t" + zero_interpolation_flg@ + "\n"
-			output += "CounterA1\t"      + a_sortie_count@ + "\n"
-			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
-			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
-			output += "CounterA4\t"      + a_s_win_count@ + "\n"
-			output += "CounterR\t"       + r_count@ + "\n"
-			output += "CounterI\t"       + i_count@ + "\n"
-			output += "GetFps\t"         + fps_index@ + "\n"
-			output += "Zooming\t"        + zooming_index@ + "\n"
-			output += "FlashPositionX\t" + flash_px@ + "\n"
-			output += "FlashPositionY\t" + flash_py@ + "\n"
-			;艦隊毎の艦娘数
-			for k, 0, kFleetNum
-				output += "UnitCount" + (k + 1) + "\t" + unit_count@(k) + "\n"
-			next
-			;最終更新日時
-			for k, 0, kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum + 2
-				output += "LastUpdate" + (k + 1) + "\t" + strf("%04d%02d%02d%02d%02d%02d%03d", last_up_date@(k, 0), last_up_date@(k, 1), last_up_date@(k, 2), last_up_date@(k, 3), last_up_date@(k, 4), last_up_date@(k, 5), last_up_date@(k, 6)) + "\n"
-			next
-			notesel output
-			notesave pic_save_path@(0) + "\\save.txt"
-			// 資材量
-			if(CheckHomeFlg(kFlashBufferID@)){
-				GetSupply kFlashBufferID@, supply_list@
-				supply_log@ += NowTime() + "," + supply_list@(0) + "," + supply_list@(1) + "," + supply_list@(2) + "," + supply_list@(3) + "," + supply_list@(4) + "\n"
-				notesel supply_log@ :notesave pic_save_path@(0) + "\\supply.csv"
-			}
-			// 画像
-			if(mode){
-				buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 2)
-				for k, 0, kSceneListSize@
-					pos 0, k * kFlashWY
-					gcopy kCaptureBufferID@ + k, 0, 0, kFlashWX, kFlashWY
-				next
-				pos 0, kSceneListSize@ * kFlashWY
-				gcopy kBattleBufferID@, 0, 0, kFlashWX, kFlashWY
-				pos 0, (kSceneListSize@ + 1) * kFlashWY
-				gcopy kDropBufferID@, 0, 0, kFlashWX, kFlashWY
-				for k, 0, kFleetNum
-					pos kFlashWX, k * kFlashWY
-					gcopy kFleetIdOffset@ + k, 0, 0, kFlashWX, kFlashWY
-				next
-				for i, 0, kFleetNum
-					for j, 0, kUnitNum
-						pos kFlashWX * (i + 2), j * kFlashWY
-						gcopy kUnitIdOffset@ + (i * kUnitNum + j), 0, 0, kFlashWX, kFlashWY
-					next
-				next
-				cvbuffer kCaptureBufferID@, ginfo_sx, ginfo_sy
-				cvputimg kCaptureBufferID@
-				cvsave pic_save_path@(0) + "\\save.png", kCaptureBufferID@
-			}
-		return
-		// ソフトのデータをロードする
-		#deffunc ReadSaveData
-			// テキスト
-			exist pic_save_path@(0) + "\\save.txt"
-			if(strsize == -1) :return
-			notesel text_buffer :noteload pic_save_path@(0) + "\\save.txt"
-			;とりあえずバージョンを取得する
-			read_ver = -1
-			for k, 0, notemax
-				noteget get, k
-				split get, "\t", temp
-				if(temp(0) == "Version"){
-					read_ver = abs(int(temp(1)))
-					_break
-				}
-			next
-			if(read_ver < 0) :return
-			;後は上から適当に読み込み
-			for k, 0, notemax
-				noteget get, k
-				split get, "\t", temp
-				if(temp(0) == "ManualPosition") :manual_getpos_flg@    = limit(int(temp(1)), 0, 2)
-				if(temp(0) == "ShowMode")       :mode_index@           = limit(int(temp(1)), 0, kSceneListSize@ + 3)
-				if(temp(0) == "ShowFleet")      :fleets_index@         = limit(int(temp(1)), 0, kUnitNum@ - 1)
-				if(temp(0) == "ShowUnit")       :units_index@          = limit(int(temp(1)), 0, kFleetNum@ * kUnitNum@ - 1)
-				if(temp(0) == "SaveUnits")      :commands_index@       = limit(int(temp(1)), 0, kFleetNum@ + 1)
-				if(temp(0) == "HomeBGMMode")    :bgm_list_flg@(0)      = limit(int(temp(1)), 0, 1)
-				if(temp(0) == "HomeBGMPath")    :bgm_list_filename@(0) = temp(1)
-				if(temp(0) == "MapBGMMode")     :bgm_list_flg@(1)      = limit(int(temp(1)), 0, 1)
-				if(temp(0) == "MapBGMPath")     :bgm_list_filename@(1) = temp(1)
-				if(temp(0) == "BattleBGMMode")  :bgm_list_flg@(2)      = limit(int(temp(1)), 0, 1)
-				if(temp(0) == "BattleBGMPath")  :bgm_list_filename@(2) = temp(1)
-				if(temp(0) == "DisableName")    :name_disable_flg@     = limit(int(temp(1)), 0, 1)
-				if(temp(0) == "ShowCursor")     :cursor_flg@           = limit(int(temp(1)), 0, 1)
-				if(temp(0) == "CheckDeadZone")  :dead_zone_flg@        = limit(int(temp(1)), 0, 1)
-				if(temp(0) == "CaptureCrop")    :cap_crop_flg@         = limit(int(temp(1)), 0, 1)
-				if(temp(0) == "AutoPosSet")     :auto_set_flg@         = limit(int(temp(1)), 0, 1)
-				if(temp(0) == "CounterA1")      :a_sortie_count@       = abs(int(temp(1)))
-				if(temp(0) == "CounterA2")      :a_to_boss_count@      = abs(int(temp(1)))
-				if(temp(0) == "CounterA3")      :a_win_boss_count@     = abs(int(temp(1)))
-				if(temp(0) == "CounterA4")      :a_s_win_count@        = abs(int(temp(1)))
-				if(temp(0) == "CounterR")       :r_count@              = abs(int(temp(1)))
-				if(temp(0) == "CounterI")       :i_count@              = abs(int(temp(1)))
-				if(temp(0) == "GetFps")         :fps_index@            = limit(int(temp(1)), 0, length(fps_num@) - 1)
-				if(temp(0) == "Zooming")        :zooming_index@        = limit(int(temp(1)), 0, length(zooming_num@) - 1)
-				if(temp(0) == "FlashPositionX") :flash_px@             = int(temp(1))
-				if(temp(0) == "FlashPositionY") :flash_py@             = int(temp(1))
-				if(read_ver >= 16){
-					if(temp(0) == "ShutdownSave")   :auto_save_flg@        = limit(int(temp(1)), 0, 1)
-				}
-				if(read_ver >= 18){
-					if(strmid(temp(0), 0, 9) == "UnitCount"){
-						f = limit(int(strmid(temp(0), 9, strlen(temp(0)) - 9)) - 1, 0, 3)
-						unit_count@(k) = f
-					}
-					if(strmid(temp(0), 0, 10) == "LastUpdate"){
-						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum + 1)
-						;バージョンによってtにオフセットを掛ける(間違えて上書きされる対策)
-						if((read_ver <= 19) && (t >= 16)) :t += 2
-						if((read_ver == 20) && (t >= 17)) :t += 1
-						;最終更新日時を反映
-						last_up_date@(t, 0) = limit(int(strmid(temp(1),  0, 4)), 0, 9999)
-						last_up_date@(t, 1) = limit(int(strmid(temp(1),  4, 2)), 0, 12)
-						last_up_date@(t, 2) = limit(int(strmid(temp(1),  6, 2)), 0, 31)
-						last_up_date@(t, 3) = limit(int(strmid(temp(1),  8, 2)), 0, 23)
-						last_up_date@(t, 4) = limit(int(strmid(temp(1), 10, 2)), 0, 59)
-						last_up_date@(t, 5) = limit(int(strmid(temp(1), 12, 2)), 0, 59)
-						last_up_date@(t, 6) = limit(int(strmid(temp(1), 14, 3)), 0, 999)
-					}
-				}
-				if(read_ver >= 20){
-					if(temp(0) == "MySaveFolder")   :my_folder_flg@ = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "SaveFolderPath") :pic_save_path@(1) = temp(1)
-					;セーブデータについて判定を行う
-					if(CheckSaveFolder(pic_save_path@(1)) == FALSE) :pic_save_path@(1) = ""
-				}
-				if(read_ver >= 202){
-					if(temp(0) == "SupplyLogging") :auto_supply_flg@ = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "LoggingTime")   :logging_index@  = limit(int(temp(1)), 1, 10) - 1
-				}
-				if(read_ver >= 204){
-					if(temp(0) == "ShowLastDate") :show_date_flg@ = limit(int(temp(1)), 0, 1)
-				}
-				if(read_ver >= 206){
-					if(temp(0) == "Denoise") :denoise_flg@ = limit(int(temp(1)), 0, 1)
-				}
-				if(read_ver >= 207){
-					//if(temp(0) == "AutoCountSet") :auto_count_flg@ = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "AutoTimeSet") :auto_time_set_flg@ = limit(int(temp(1)), 0, 1)
-				}
-				if(read_ver >= 208){
-					if(temp(0) == "AutoSaveText") :auto_save_flg2@ = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "CheckExhausted") :exhausted_flg@ = limit(int(temp(1)), 0, 1)
-				}
-				if(read_ver >= 209){
-					if(temp(0) == "MultiShotName") :save_picture2_index@ = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "AutoCountSetA") :auto_count_flg_a@ = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "AutoCountSetR") :auto_count_flg_r@ = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "AutoCountSetI") :auto_count_flg_i@ = limit(int(temp(1)), 0, 1)
-				}
-				if(read_ver >= 210){
-					if(temp(0) == "ZeroIntPol") :zero_interpolation_flg@ = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "BossBGMMode")  :bgm_list_flg@(3)      = limit(int(temp(1)), 0, 1)
-					if(temp(0) == "BossBGMPath")  :bgm_list_filename@(3) = temp(1)
-				}else{
-					bgm_list_flg@(3)      = bgm_list_flg@(2)
-					bgm_list_filename@(3) = bgm_list_filename@(2)
-				}
-			next
-			;微修正
-			for k, 0, 3
-				exist bgm_list_filename@(k)
-				if(strsize == -1){
-					bgm_list_flg@(k) = FALSE
-					bgm_list_filename@(k) = "<NONE>"
-				}
-			next
-			// 画像
-			exist pic_save_path@(0) + "\\save.png"
-			if(strsize == -1) :return
-			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 2)
-			picload pic_save_path@(0) + "\\save.png"
-			for k, 0, kSceneListSize@
-				gsel kCaptureBufferID@ + k
-				pos 0, 0
-				gcopy kTempBufferID@, 0, k * kFlashWY, kFlashWX, kFlashWY
-			next
-			gsel kBattleBufferID@
-			pos 0, 0
-			gcopy kTempBufferID@, 0, kSceneListSize@ * kFlashWY, kFlashWX, kFlashWY
-			gsel kDropBufferID@
-			pos 0, 0
-			gcopy kTempBufferID@, 0, (kSceneListSize@ + 1) * kFlashWY, kFlashWX, kFlashWY
-			for k, 0, kFleetNum
-				gsel kFleetIdOffset@ + k
-				pos 0, 0
-				gcopy kTempBufferID@, kFlashWX, k * kFlashWY, kFlashWX, kFlashWY
-			next
-			for i, 0, kFleetNum
-				for j, 0, kUnitNum
-					gsel kUnitIdOffset@ + (i * kUnitNum + j)
-					pos 0, 0
-					gcopy kTempBufferID@, kFlashWX * (i + 2), j * kFlashWY, kFlashWX, kFlashWY
-				next
-			next
-		return
-		// 縦横比を一定にしたgzoom
-		#deffunc gzoom2 int wx2_, int wy2_, int buffer_id_, int px_, int py_, int wx_, int wy_
-			if(wx2_ * wy_ > wy2_ * wx_){
-				;より横長の範囲にコピーするので縦を合わせる
-				gzoom wx_ * wy2_ / wy_, wy2_, buffer_id_, px_, py_, wx_, wy_, 1
-			}else{
-				;より縦長の範囲にコピーするので横を合わせる
-				gzoom wx2_, wy_ * wx2_ / wx_, buffer_id_, px_, py_, wx_, wy_, 1
-			}
-		return
-		// 時刻を格納するためのラッパー関数
-		#deffunc SetLastUpdate int index_
-			last_up_date@(index_, 0) = gettime(0)
-			last_up_date@(index_, 1) = gettime(1)
-			last_up_date@(index_, 2) = gettime(3)
-			last_up_date@(index_, 3) = gettime(4)
-			last_up_date@(index_, 4) = gettime(5)
-			last_up_date@(index_, 5) = gettime(6)
-			last_up_date@(index_, 6) = gettime(7)
-		return
-		// 時刻を表示するためのラッパー関数
-		#defcfunc GetLastUpdate int index_
-		return strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", last_up_date@(index_, 0), last_up_date@(index_, 1), last_up_date@(index_, 2), last_up_date@(index_, 3), last_up_date@(index_, 4), last_up_date@(index_, 5), last_up_date@(index_, 6))
-		// 資源量を取得
-		#deffunc GetSupply int flash_id_, array supply_list_
-			;燃料
-			fuel = 0 :keta = 1
-			for k, 5, -1, -1
-				buffer kTempBufferID@, 7, 11
-				gcopy flash_id_, supply_xpos@(k), 36, 7, 11
-				number = MatchNumber(150, TRUE)
-				if(number < 10){
-					if(k == 0) :number = limit(number, 0, 3)
-					fuel += number * keta
-				}
-				keta *= 10
-			next
-			;弾薬
-			ammo = 0 :keta = 1
-			for k, 5, -1, -1
-				buffer kTempBufferID@, 7, 11
-				gcopy flash_id_, supply_xpos@(k), 55, 7, 11
-				number = MatchNumber(150, TRUE)
-				if(number < 10){
-					if(k == 0) :number = limit(number, 0, 3)
-					ammo += number * keta
-				}
-				keta *= 10
-			next
-			;鋼材
-			steel = 0 :keta = 1
-			for k, 5, -1, -1
-				buffer kTempBufferID@, 7, 11
-				gcopy flash_id_, supply_xpos@(k + 6), 36, 7, 11
-				number = MatchNumber(150, TRUE)
-				if(number < 10){
-					if(k == 0) :number = limit(number, 0, 3)
-					steel += number * keta
-				}
-				keta *= 10
-			next
-			;ボーキ
-			bauxite = 0 :keta = 1
-			for k, 5, -1, -1
-				buffer kTempBufferID@, 7, 11
-				gcopy flash_id_, supply_xpos@(k + 6), 55, 7, 11
-				number = MatchNumber(150, TRUE)
-				if(number < 10){
-					if(k == 0) :number = limit(number, 0, 3)
-					bauxite += number * keta
-				}
-				keta *= 10
-			next
-			;バケツ
-			bucket = 0 :keta = 1
-			for k, 3, -1, -1
-				buffer kTempBufferID@, 9, 12
-				gcopy flash_id_, 695 + k * 9, 13, 9, 12
-				number = MatchNumber(150, TRUE)
-				if(number < 10){
-					if(k == 0) :number = limit(number, 0, 3)
-					bucket += number * keta
-				}
-				keta *= 10
-			next
-			;代入
-			supply_list_(0) = fuel
-			supply_list_(1) = ammo
-			supply_list_(2) = steel
-			supply_list_(3) = bauxite
-			supply_list_(4) = bucket
-		return
-		// ログを読み込む
-		#defcfunc LoadLog var supply_log, array supply_log_int
-			notesel supply_log
-			dim supply_log_int, notemax, 2 + 5
-			supply_log_size = 0
-			gsel kMainWindowID
-			old_log_flg = TRUE
-			for k, 1, notemax
-				if(time_ != gettime(6)){
-					title "" + strf("%2.1f％", 100.0 * k / notemax)
-					time_ = gettime(6)
-					await 5
-				}
-				noteget get, k
-				split get, ",", temp
-				if(stat < 5) :_continue
-				strrep temp(0), ":", ""	;互換性対策
-				strrep temp(0), "-", ""
-				strrep temp(0), " ", ""
-				strrep temp(0), ".", ""
-				supply_log_int(supply_log_size, 0) = int(strmid(temp(0), 0, 8))
-				supply_log_int(supply_log_size, 1) = int(strmid(temp(0), 8, 9))
-				supply_log_int(supply_log_size, 2) = int(temp(1))
-				supply_log_int(supply_log_size, 3) = int(temp(2))
-				supply_log_int(supply_log_size, 4) = int(temp(3))
-				supply_log_int(supply_log_size, 5) = int(temp(4))
-				if(length(temp) > 5){
-					supply_log_int(supply_log_size, 6) = int(temp(5))
-					old_log_flg = FALSE
-				}
-				supply_log_size++
-			next
-			;ログが古かった場合は新版に書き直しておく
-			if(old_log_flg){
-				supply_log = "時間,燃料,弾薬,鋼材,ボーキ,バケツ\n"
-				for k, 0, supply_log_size
-					temp = strf("%08d", supply_log_int(k, 0))
-					supply_log += strmid(temp, 0, 4) + "-" + strmid(temp, 4, 2) + "-" + strmid(temp, 6, 2) + " "
-					temp = strf("%09d", supply_log_int(k, 1))
-					supply_log += strmid(temp, 0, 2) + "-" + strmid(temp, 2, 2) + "-" + strmid(temp, 4, 2) + "." + strmid(temp, 6, 3) + ","
-					supply_log += str(supply_log_int(k, 2)) + ","
-					supply_log += str(supply_log_int(k, 3)) + ","
-					supply_log += str(supply_log_int(k, 4)) + ","
-					supply_log += str(supply_log_int(k, 5)) + ","
-					supply_log += str(supply_log_int(k, 6)) + "\n"
-				next
-			}
-			title kSoftName@
-		return supply_log_size
-		// 日付を統一日付にコンバートする
-		#defcfunc ConvertDay int day
-			year_ = day / 10000
-			month_ = (day \ 10000) / 100
-			day_ = day \ 100
+	#global
 
-			leap_years = (year_ - 1) / 4 - (year_ - 1) / 100 + (year_ - 1) / 400
-			day2 = (year_ - leap_years - 1) * 365 + leap_years * 366
-			leap_flg = (year_ \ 4 == 0) - (year_ \ 100 == 0) + (year_ \ 400 == 0)
-			day2 += yearplus@(month_ - 1, leap_flg) + day_
-		return day2
-		// 時間を日付基準でコンバートする
-		#defcfunc ConvertTime int time
-			hour = time / 10000000
-			minute = (time \ 10000000) / 100000
-			second = (time \ 100000) / 1000
-			milli = time \ 1000
+/* 時間絡み */
+	#module time
+		// 現在時刻を取得
+		#defcfunc NowTime
+		return strf("%04d-%02d-%02d %02d-%02d-%02d-%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
+		#defcfunc NowTimeMini
+		return strf("%02d:%02d:%02d", gettime(4), gettime(5), gettime(6))
+		//年月日を「日」に変換
+		#defcfunc CnvFloatDay int year, int month, int day
+			leap_years = (year - 1) / 4 - (year - 1) / 100 + (year - 1) / 400
+			leap_flg = (year \ 4 == 0) - (year \ 100 == 0) + (year \ 400 == 0)
+		return (year - 1) * 365 + leap_years + yearplus@(month - 1, leap_flg) + day
+		//時分秒ミリ秒を「日」に変換
+		#defcfunc CnvFloatSec int hour, int minute, int second, int milli
 		return ((((1.0 * milli / 1000) + second) / 60 + minute) / 60 + hour) / 24
-		// 統一日付を日付にコンバートする
-		#defcfunc ConvertDay2 int day2_
-			day2__ = day2_
-			sdim day_, 1024
-			day3 = 0
-			dim day_temp, 3
-			;日付を特定する
-			for y, 1, 2100
-				leap_flg = (y \ 4 == 0) - (y \ 100 == 0) + (y \ 400 == 0)
-				if(day3 + 365 + leap_flg >= day2__){
-					day_temp(0) = y
-					day2__ -= day3
-					for m, 0, 12
-						if(yearplus@(m + 1, leap_flg) >= day2__){
-							day_temp(1) = m + 1
-							day2__ -= yearplus@(m, leap_flg)
-							day_temp(2) = day2__
-							_break
-						}
-					next
+		//現在時刻を「日」に変換
+		#defcfunc GetFloatTime
+			float_time_day = CnvFloatDay(gettime(0), gettime(1), gettime(3))
+			float_time_sec = CnvFloatSec(gettime(4), gettime(5), gettime(6), gettime(7))
+		return 1.0 * float_time_day + float_time_sec
+		//「日」を年月日に変換
+		#defcfunc CnvStrDay int float_day
+			sdim output, 64
+			float_day_ = float_day
+			//年を特定する
+			for k, 1, kMaxYear + 1
+				if(year_offset@(k) >= float_day_){
+					output += strf("%04d/", k)
+					float_day_ -= year_offset@(k - 1)
+					leap_flg = (k \ 4 == 0) - (k \ 100 == 0) + (k \ 400 == 0)
 					_break
-				}else{
-					day3 += 365 + leap_flg
 				}
 			next
-			;日付を出力する
-			day_ = strf("%04d/%02d/%02d", day_temp(0), day_temp(1), day_temp(2))
-		return day_
-		#deffunc Denoise
-			cvputimg kCVDenoiseBufferID
-			cvsmooth CV_BILATERAL, 30, 30, 0, kCVDenoiseBufferID
-			cvgetimg kCVDenoiseBufferID
+			//月を特定する
+			for k, 1, 12 + 1
+				if(yearplus@(k, leap_flg) >= float_day_){
+					output += strf("%02d/", k)
+					float_day_ -= yearplus@(k - 1, leap_flg)
+					_break
+				}
+			next
+			//日を特定する
+			output += strf("%02d", float_day_)
+		return output
+		//「日」を時分秒ミリ秒に変換
+		#defcfunc CnvStrSec double float_sec
+			sdim output, 64
+			float_sec_ = float_sec
+			if(absf(float_sec_ - 0.04170138) < 0.0001) :assert
+			//時
+			float_sec_ *= 24
+			hour_ = int(float_sec_)
+			output += strf("%02d:", hour_)
+			float_sec_ -= double(hour_)
+			//分
+			float_sec_ *= 60
+			minute_ = int(float_sec_)
+			output += strf("%02d:", minute_)
+			float_sec_ -= double(minute_)
+			//秒
+			float_sec_ *= 60
+			second_ = int(float_sec_)
+			output += strf("%02d.", second_)
+			float_sec_ -= double(second_)
+			//ミリ秒
+			float_sec_ *= 1000
+			milli_ = int(float_sec_ + 0.5)
+			output += strf("%03d", milli_)
+		return output
+		//「日」を時分秒に変換
+		#defcfunc CnvStrSec2 double float_sec
+			sdim output, 64
+			float_sec_ = float_sec
+			if(absf(float_sec_ - 0.04170138) < 0.0001) :assert
+			//時
+			float_sec_ *= 24
+			hour_ = int(float_sec_)
+			output += strf("%02d:", hour_)
+			float_sec_ -= double(hour_)
+			//分
+			float_sec_ *= 60
+			minute_ = int(float_sec_)
+			output += strf("%02d:", minute_)
+			float_sec_ -= double(minute_)
+			//秒
+			float_sec_ *= 60
+			second_ = int(float_sec_ + 0.5)
+			output += strf("%02d", second_)
+			float_sec_ -= double(second_)
+		return output
+		//「日」を現在時刻に変換
+		#defcfunc CnvStrTime double float_time
+		return CnvStrDay(int(float_time)) + " " + CnvStrSec(float_time - double(int(float_time)))
+	#global
+
+/* 文字認識用関数 */
+	#module ocr
+		// 画像内で、黒部分の位置および大きさを求める
+		#deffunc GetSquare2 var px__, var py__, var wx__, var wy__
+			color 255, 255, 255
+			square.0 = 0, 0, kMatchSize, kMatchSize
+			GetSquare px__, py__, wx__, wy__, square
+		return
+		// 指定した座標から、縦横kMatchSizeの赤枠線を引く
+		#deffunc DrawSquare int px_, int py_
+			color 255, 0, 0
+			line px_ + kMatchSize    , py_                 , px_                 , py_
+			line px_ + kMatchSize - 1, py_ + kMatchSize    , px_ + kMatchSize - 1, py_
+			line px_ + kMatchSize - 1, py_ + kMatchSize - 1, px_                 , py_ + kMatchSize- 1
+			line px_                 , py_ + kMatchSize    , px_                 , py_
+		return
+		// 配列number(サイズ：len)に認識した数字を代入する
+		// pos_xとpos_yは左上座標(横方向に読む)、glyph_xとglyph_yは数字の大きさ
+		// thresholdは閾値、reverse_flgは色を反転させるか(反転処理の方が先)
+		// 配列毎の返却値は0～9、10(白ベタ)、11(黒ベタ)……としたかったが、誤認識回避のために
+		// 11が出たら1に修正している。これは、1とみなされるべき画像がベタッと横に広がる可能性
+		// があるため。意図的に11を使うことなんて無いので問題はないはず
+		#deffunc ReadNumber array number, int len, array pos_x, int pos_y, int glyph_x, int glyph_y, int threshold, int reverse_flg
+			read_buffer_id = ginfo_sel
+			buffer kTempBufferID, glyph_x, glyph_y
+			for n, 0, len
+				// バッファ1にコピーする
+				gsel kTempBufferID
+				gcopy read_buffer_id, pos_x(n), pos_y, glyph_x, glyph_y
+				// バッファ2にバッファ1を拡大コピーする
+				gsel kNumGetBufferID
+				pos 0, 0 :gzoom kMatchSize, kMatchSize, kTempBufferID, 0, 0, glyph_x, glyph_y, 1
+				;bmpsave "" + k@ + " " + k@ + " " + n + "-1.bmp"
+				// CVバッファにバッファ2をコピー。反転フラグが立っている場合は反転させる
+				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+				cvputimg kCVTempBufferID
+				cvconvert 0, kCVTempBufferID
+				if(reverse_flg) :cvxors ,,,kCVTempBufferID
+				// 二値化する(thresholdの値が大きいほど濃くなる)
+				if(threshold < 0){
+					// 大津の手法
+					cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
+				}else{
+					// 通常
+					cvthreshold CV_THRESH_BINARY, threshold, 255, kCVTempBufferID
+				}
+				// 一旦バッファ2に戻して、数字の位置および大きさを求める
+				//小さすぎる場合は認識結果として10を返す
+				cvgetimg kCVTempBufferID, 1
+				GetSquare2 px, py, wx, wy
+				if((wx * 4 < kMatchSize) || (wy * 4 < kMatchSize)){
+					number(n) = 10
+					_continue
+				}
+				// 数字をバッファ2全体に拡大して、CVバッファに再びコピーする
+				pos 0, 0 :gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy
+				;bmpsave "" + k@ + " " + k@ + " " + n + "-2.bmp"
+				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+				cvputimg kCVTempBufferID
+				cvconvert 0, kCVTempBufferID
+				// 二値化した後にバッファ2に戻して周囲に赤枠線を引き、再び戻す
+				cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
+				cvgetimg kCVTempBufferID, 1
+				DrawSquare 0, 0
+				;bmpsave "" + k@ + " " + k@ + " " + n + "-3.bmp"
+				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+				cvputimg kCVTempBufferID
+				// テンプレートとのマッチングを行い、結果を認識結果として返す
+				cvmatch px, py, CV_TM_SQDIFF, kCVTempBufferID, kCVMatchBufferID
+				num = limit(int(1.0 * px / (2 * kMatchSize) + 0.5), 0, 11)
+				if(num == 11) :num = 1
+				number(n) = num
+			next
+		return
+		// 時刻用に、読み取った数字を正規化する
+		#deffunc NormalizeTime array number
+			for k, 0, 6
+				if(k \ 2 == 0){
+					number(k) = limit(number(k), 0, 5)
+				}else{
+					number(k) = limit(number(k), 0, 9)
+				}
+			next
+		return
+		// 練度用に、読み取った数字を正規化する
+		#deffunc NormalizeLevel array number
+			for k, 0, 2
+				if(number(k) == 11) :number(k) = 1 :_continue
+				if(number(k) == 10) :number(k) = 0 :_continue
+			next
 		return
 		// 遠征名を取得する(小)
 		#defcfunc GetExpSmallName int exped_index
@@ -1023,117 +1064,111 @@
 				}
 			next
 		return exp_large_name
-		// 編成画面でレベルを取得する
-		#defcfunc GetLevel int exp_unit_index_
-			level = 0 :keta = 1
-			for k, 2, -1, -1
-				buffer kTempBufferID@, 8, 13
-				gcopy kFlashBufferID@, 254 + k * 8 + (exp_unit_index_ \ 2) * 344, 149 + (exp_unit_index_ / 2) * 113, 8, 13
-				number = MatchNumber(85, TRUE)
-				if(number < 10){
-					if(k == 0) :number = limit(number, 0, 1)
-					level += number * keta
-				}
-				keta *= 10
-			next
-		return level
-		// 編成画面で経験値ゲージを取得する
-		#defcfunc GetUnitExp int exp_unit_index_
-			unit_exp_double = 1.0
-			for k, 0, 160
-				if(NearColor(284 + (exp_unit_index_ \ 2) * 344 + k, 194 + (exp_unit_index_ / 2) * 113, 165, 232, 208) == FALSE){
-					unit_exp_double = 1.0 * k / 160
-					_break
-				}
-			next
-		return unit_exp_double
-	#global
-	#module get_num
-		#deffunc DrawSquare int px_, int py_, int wx_, int wy_
-			color 255, 0, 0
-			line px_ + wx_, py_, px_, py_
-			line px_ + wx_ - 1, py_ + wy_, px_ + wx_ - 1, py_
-			line px_ + wx_ - 1, py_ + wy_ - 1, px_ , py_ + wy_ - 1
-			line px_      , py_ + wy_, px_      , py_
-		return
-		#deffunc OtsuThreshold int reverse_flg_
-			cvbuffer kCVTempBufferID, ginfo_sx, ginfo_sy
-			cvputimg kCVTempBufferID
-			cvconvert 0, kCVTempBufferID
-			if(reverse_flg_) :cvxors ,,,kCVTempBufferID
-			cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
-			cvgetimg kCVTempBufferID, 1
-		return
-		#deffunc NormalThreshold int thres_, int reverse_flg_
-			cvbuffer kCVTempBufferID, ginfo_sx, ginfo_sy
-			cvputimg kCVTempBufferID
-			cvconvert 0, kCVTempBufferID
-			if(reverse_flg_) :cvxors ,,,kCVTempBufferID
-			cvthreshold CV_THRESH_BINARY, thres_, 255, kCVTempBufferID
-			cvgetimg kCVTempBufferID, 1
-		return
-		#deffunc GetSquare var px__, var py__, var wx__, var wy__
-			for x, 0, ginfo_sx
-				flg = FALSE
-				for y, 0, ginfo_sy
-					pget x, y
-					if(ginfo_r == 0) :flg = TRUE :_break
-				next
-				if(flg) :px__ = x :_break
-			next
-			for y, 0, ginfo_sy
-				flg = FALSE
-				for x, 0, ginfo_sx
-					pget x, y
-					if(ginfo_r == 0) :flg = TRUE :_break
-				next
-				if(flg) :py__ = y :_break
-			next
-			for x, ginfo_sx - 1, -1, -1
-				flg = FALSE
-				for y, 0, ginfo_sy
-					pget x, y
-					if(ginfo_r == 0) :flg = TRUE :_break
-				next
-				if(flg) :wx__ = x - px__ + 1 :_break
-			next
-			for y, ginfo_sy - 1, -1, -1
-				flg = FALSE
-				for x, 0, ginfo_sx
-					pget x, y
-					if(ginfo_r == 0) :flg = TRUE :_break
-				next
-				if(flg) :wy__ = y - py__ + 1 :_break
-			next
-		return
-		#defcfunc MatchNumber_ int thres_, int reverse_flg_
-			id = ginfo_sel :sx = ginfo_sx :sy = ginfo_sy
-			gsel kNumGetBufferID :color 255, 255, 255 :boxf
-			pos 0, 0
-			gzoom kMatchSize, kMatchSize, id, 0, 0, sx, sy, 1
-			if(thres_ < 0){
-				OtsuThreshold reverse_flg_
+		// 資材量を取得する
+		#deffunc GetSupply array supply_list
+			dim supnum, 6
+			// 燃料
+			gsel kMainBufferID
+			ReadNumber supnum, 6, supply_pos_x1@, 36, 7, 11, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(0) = CnvNumber(supnum)
+			// 弾薬
+			gsel kMainBufferID
+			ReadNumber supnum, 6, supply_pos_x1@, 55, 7, 11, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(1) = CnvNumber(supnum)
+			// 鋼材
+			gsel kMainBufferID
+			ReadNumber supnum, 6, supply_pos_x2@, 36, 7, 11, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(2) = CnvNumber(supnum)
+			// ボーキ
+			gsel kMainBufferID
+			ReadNumber supnum, 6, supply_pos_x2@, 55, 7, 11, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(3) = CnvNumber(supnum)
+
+			dim supnum, 4
+			// 高速修復材
+			gsel kMainBufferID
+			ReadNumber supnum, 4, supply_pos_x3@, 13, 9, 12, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(4) = CnvNumber(supnum)
+			// 開発資材
+			gsel kMainBufferID
+			ReadNumber supnum, 4, supply_pos_x4@, 13, 9, 12, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(5) = CnvNumber(supnum)
+
+			dim supnum, 3
+			// 司令部レベル
+			gsel kMainBufferID
+			ReadNumber supnum, 3, supply_pos_x5@, 14, 9, 12, 150, TRUE
+			if(supnum(1) == 10){
+				supply_list(6) = limit(supnum(0), 1, 9)
 			}else{
-				NormalThreshold thres_, reverse_flg_
+				if(supnum(2) == 10){
+					supply_list(6) = limit(supnum(0), 1, 9) * 10 + limit(supnum(1), 0, 9)
+				}else{
+					supply_list(6) = 100 + limit(supnum(1), 0, 2) * 10 + limit(supnum(2), 0, 9)
+				}
 			}
-			GetSquare px, py, wx, wy
-			;常識的に考えて、面積が小さすぎると数字として成り立たないよね？
-			if((wx * 2 < kMatchSize) || (wy * 2 < kMatchSize)){
-				return 10
-			}
-			;
-			gsel kNumGetBufferID
-			pos 0, 0
-			gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy
-			OtsuThreshold FALSE
-			;bmpsave "" + k@misc + "_.bmp"
-			DrawSquare 0, 0, kMatchSize, kMatchSize
-			cvbuffer kCVNumBufferID, kMatchSize, kMatchSize
-			cvputimg kCVNumBufferID
-			cvmatch px, py, CV_TM_SQDIFF, kCVNumBufferID, kCVMatchBufferID
-		return limit(int(1.0 * px / (2 * kMatchSize) + 0.5), 0, 11)
-		#defcfunc MatchNumber int thres_, int reverse_flg_
-			number = MatchNumber_(thres_, reverse_flg_)
-			if(number == 11) :number = 1	;暫定的な仕様
-		return number
+		return
+		// 資源用に、読み取った数字を正規化する
+		#deffunc NormalizeSupply array number
+			for k, 0, length(number)
+				if(number(k) == 10) :number(k) = 0
+				if(k  == 0){
+					number(k) = limit(number(k), 0, 3)
+				}else{
+					number(k) = limit(number(k), 0, 9)
+				}
+			next
+		return
+		// 読み取った数字を各桁とみなして足し合わせる
+		#defcfunc CnvNumber array number
+			c_n = 0
+			for k, 0, length(number)
+				c_n += number(k)
+				if(k != length(number) - 1) :c_n *= 10
+			next
+		return c_n
+	#global
+
+/* その他色々 */
+	#module misc
+		#const EM_SCROLL 0x00B5
+		#const SB_BOTTOM 7
+		// 最大値
+		#defcfunc max int param_1, int param_2
+			if(param_1 > param_2) :return param_1
+		return param_2
+		// 最小値
+		#defcfunc min int param_1, int param_2
+			if(param_1 < param_2) :return param_1
+		return param_2
+		// オブジェクトの状態を読み込んだ状態に合わせて変更する
+		#deffunc ResetObjParam
+			gsel kMainWindowID
+			objprm get_pos_mode_id@, get_pos_mode@
+			gsel kOptionWindowID
+			objprm sub_window_size_id@, sub_window_size_index@
+			objprm capture_fps_id@, capture_fps_index@
+			objprm check_move_flash_id@, check_move_flash_flg@
+			objprm pic_save_path_id@, pic_save_path@(1)
+			objprm name_disable_id@, name_disable_flg@
+			objprm show_status_id@, show_status_flg@
+			objprm check_deadzone_id@, check_deadzone_flg@
+			objprm check_exhausted_id@, check_exhausted_flg@
+		return
+		// ログに追記
+		#deffunc PutLog str message
+			soft_log@ += NowTimeMini() + " " + message + "\n"
+			gsel kMainWindowID
+			objprm 0, soft_log@
+			sendmsg hMesBox@, EM_SCROLL, SB_BOTTOM, 0
+		return
+		// 改装画面のバッファIDを算出
+		#defcfunc GetUnitID int fleet_num, int unit_num
+		return kSceneBufferID + scene_fleet_offset@ + fleet_num * kUnitNum + unit_num
 	#global
