@@ -1,7 +1,7 @@
-/* おりこうさんな秘書 改四点二
+/* おりこうさんな秘書 Ver.1.0
  */
 
-	#packopt name "oriko42"
+	#packopt name "orikou10"
 	#include "hspcv.as"		;画像処理でOpenCVを使うためのライブラリ
 
 // 通常の定数
@@ -71,7 +71,7 @@
 	#enum global  kModeFleet		;編成画面
 	kModeUnit = kModeFleet + kFleetNum	;改装画面
 	// その他フラグなど
-	#define kSoftName "おりこうさんな秘書 改四点二"	;ソフト名
+	#define kSoftName "おりこうさんな秘書 Ver.1.0"	;ソフト名
 	#const kMainWX kObjX * 2 + kObjSpace * 3	;メイン画面のサイズ
 	#const kMainWY kObjY * 14 + kObjSpace * 18
 	sdim current_dir, 260		;カレントディレクトリ
@@ -638,7 +638,7 @@ return
 	mmstop
 return
 *about
-	dialog "ソフト名：" + kSoftName + "\n作成者：とりうみさん講座の人\n最終更新日：2015/02/15",,kSoftName
+	dialog "ソフト名：" + kSoftName + "\n作成者：YSR\n最終更新日：2015/02/16",,kSoftName
 return
 
 //座標取得
