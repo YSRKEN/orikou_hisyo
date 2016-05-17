@@ -1,0 +1,477 @@
+/* 毎回のループに伴って発生する処理 */
+goto *main3
+
+//ステータスバーに最終更新日時を表示する
+*draw_last_update
+	;記録処理
+	if(screen_shot_type != kTypeUnknown){
+		if(kTypeDropFlg){
+			SetLastUpdate kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 1
+		}else{
+			if((screen_shot_type == kTypeDrop) && (kTypeDropFlg == FALSE)){
+			}else{
+				SetLastUpdate screen_shot_type - 1
+				if(screen_shot_type <= kSceneListSize){
+					if((sst_str == "昼戦画面") || (sst_str == "夜戦画面") || (sst_str == "夜戦マス")){
+						for k, 0, 7
+							last_up_date(kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum, k) = last_up_date(screen_shot_type - 1, k)
+						next
+					}
+				}
+			}
+		}
+	}
+	;表示処理
+	gsel kPutWindowID
+	redraw 0
+		color 255, 255, 255 :boxf 0, zooming_num(zooming_index) * kFlashWY / 100, zooming_num(zooming_index) * kFlashWX / 100, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarY
+		color
+		pos kStatusBarOffset, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarOffset
+		font msgothic, kStatusBarFontSize
+		if(mode_index == kTypeNow){
+			;現在画面
+			mes "" + strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
+		}else{if(mode_index == kSceneListSize + 1){
+			;編成画面
+			mes GetLastUpdate(kSceneListSize + fleets_index)
+		}else{if(mode_index == kSceneListSize + 2){
+			;改装画面
+			mes GetLastUpdate(kSceneListSize + kFleetNum + units_index)
+		}else{if(mode_index == kSceneListSize + 3){
+			;戦闘画面
+			mes GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum)
+		}else{if(mode_index == kSceneListSize + 4){
+			mes GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 1)
+		else{
+			;その他
+			mes GetLastUpdate(mode_index - 1)
+		}}}}}
+		;大破チェック機能でのチェック結果も表示
+		if(dead_zone_flg_){
+			pos kStatusBarOffset + kStatusBarFontSize * 12, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarOffset
+			color 255, 0, 0
+			mes "※大破艦あり※"
+		}else{
+			;大破艦がいない場合は艦隊毎の艦娘数を表示
+			pos kStatusBarOffset + kStatusBarFontSize * 12, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarOffset
+			color 0, 0, 0
+			mes "[" + unit_count(0) + "," + unit_count(1) + "," + unit_count(2) + "," + unit_count(3) + "]"
+		}
+	redraw 1
+return
+
+// 資源ログ機能
+*put_supply_log
+	if(auto_supply_flg){
+		if(CheckHomeFlg(kFlashBufferID)){
+			if((supply_last_time == -1) || (timeGetTime() - supply_last_time > 1000 * 60 * (logging_index + 1))){
+				supply_last_time = timeGetTime()
+				GetSupply kFlashBufferID, supply_list
+				supply_log += NowTime() + "," + supply_list(0) + "," + supply_list(1) + "," + supply_list(2) + "," + supply_list(3) + "," + supply_list(4) + "\n"
+				notesel supply_log :notesave pic_save_path(0) + "\\supply.csv"
+				supply_log_size = LoadLog(supply_log, supply_log_int)
+				gosub *make_graph
+				gosub *plot_graph
+				gsel kMainWindowID
+				error_log += NowTime() + ",supply_log," + supply_log_size + "\n"
+			}
+		}
+	}
+	if(scale_mode_ != scale_mode){
+		if(supply_log_size != 0){
+			kGraphStepX = kGraphWX / scale_zooming(scale_mode)
+			gosub *make_graph
+			gosub *plot_graph
+		}
+		scale_mode_ = scale_mode
+	}
+return
+
+//大破チェッカー機能
+*check_deadzone
+	;dead_zone_flg_に関する処理
+	if(screen_shot_type <= kSceneListSize){
+		if(CheckDeadZone(kFlashBufferID, screen_shot_type)){
+			if((sst_str == "出撃画面") || (sst_str == "戦果報告")){
+				dead_zone_flg_ = TRUE
+			}
+		}
+		if(screen_shot_type != kTypeUnknown){
+			if((sst_str != "出撃画面") && (sst_str != "戦果報告")){
+				dead_zone_flg_ = FALSE
+			}
+		}
+	}
+	;dead_zone_flg__に関する処理
+	if(dead_zone_flg__ == FALSE){
+		if(dead_zone_flg){
+			if(dead_zone_flg_){
+				if(CheckSelect(kFlashBufferID)){
+					//大破進撃阻止用画面
+					bgscr kDeadZoneWindowID, 180, 130, , flash_px + 200, flash_py + 180
+					gsel kDeadZoneWindowID, 2
+					color 255, 0, 0
+					font msgothic, 36
+					pos 10, 10
+					mes "大破した\n 艦娘が\nいます！"
+					dead_zone_flg__ = TRUE
+					error_log += NowTime() + ",stop_move,d\n"
+				}
+				if(CheckSelect2(kFlashBufferID)){
+					//大破出撃阻止用画面
+					bgscr kDeadZoneWindowID, 180, 50, , flash_px + 540, flash_py + 420
+					gsel kDeadZoneWindowID, 2
+					color 255, 0, 0
+					font msgothic, 32
+					pos 10, 10
+					mes "大破艦あり"
+					dead_zone_flg__ = TRUE
+					error_log += NowTime() + ",stop_go,d\n"
+				}
+			}
+		}
+	}else{
+		;座標がズレた場合に再表示する処理
+		if(get_pos_flg2){
+			if(dead_zone_flg){
+				if(dead_zone_flg_){
+					if(CheckSelect(kFlashBufferID)){
+						//大破進撃阻止用画面
+						bgscr kDeadZoneWindowID, 180, 130, , flash_px + 200, flash_py + 180
+						gsel kDeadZoneWindowID, 2
+						color 255, 0, 0
+						font msgothic, 36
+						pos 10, 10
+						mes "大破した\n 艦娘が\nいます！"
+						dead_zone_flg__ = TRUE
+						error_log += NowTime() + ",stop_move,d\n"
+					}
+					if(CheckSelect2(kFlashBufferID)){
+						//大破出撃阻止用画面
+						bgscr kDeadZoneWindowID, 180, 50, , flash_px + 540, flash_py + 420
+						gsel kDeadZoneWindowID, 2
+						color 255, 0, 0
+						font msgothic, 32
+						pos 10, 10
+						mes "大破艦あり"
+						dead_zone_flg__ = TRUE
+						error_log += NowTime() + ",stop_go,d\n"
+					}
+				}
+			}
+		}
+		;白い枠を非表示にする処理
+		if(dead_zone_flg == FALSE)  :gsel kDeadZoneWindowID, -1 :dead_zone_flg__ = FALSE
+		if(dead_zone_flg_ == FALSE) :gsel kDeadZoneWindowID, -1 :dead_zone_flg__ = FALSE
+	}
+return
+
+// 消耗チェック
+*check_exhausted
+	;exhausted_flg_
+	if(screen_shot_type <= kSceneListSize){
+		if(CheckExhausted(kFlashBufferID, screen_shot_type)){
+			exhausted_flg_ = TRUE
+		}
+		if(screen_shot_type != kTypeUnknown){
+			if((sst_str != "出撃画面") && (sst_str != "遠征画面")){
+				exhausted_flg_ = FALSE
+			}
+		}
+	}
+	;exhausted_flg__
+	if(exhausted_flg__ == FALSE){
+		if(exhausted_flg){
+			if(exhausted_flg_){
+				if(CheckSelect2(kFlashBufferID)){
+					//消耗出撃阻止用画面
+					bgscr kExhaustedWindowID, 180, 50, , flash_px + 540, flash_py + 420
+					gsel kExhaustedWindowID, 2
+					color 255, 0, 0
+					font msgothic, 32
+					pos 10, 10
+					mes "消耗艦あり"
+					exhausted_flg__ = TRUE
+					error_log += NowTime() + ",stop_go,e\n"
+				}
+			}
+		}
+	}else{
+		;座標がズレた場合に再表示する処理
+		if(get_pos_flg2){
+			if(exhausted_flg){
+				if(exhausted_flg_){
+					if(CheckSelect2(kFlashBufferID)){
+						//消耗出撃阻止用画面
+						bgscr kExhaustedWindowID, 180, 50, , flash_px + 540, flash_py + 420
+						gsel kExhaustedWindowID, 2
+						color 255, 0, 0
+						font msgothic, 32
+						pos 10, 10
+						mes "消耗艦あり"
+						exhausted_flg__ = TRUE
+						error_log += NowTime() + ",stop_go,e\n"
+					}
+				}
+			}
+		}
+		;白い枠を非表示にする処理
+		if(exhausted_flg == FALSE)  :gsel kExhaustedWindowID, -1 :exhausted_flg__ = FALSE
+		if(exhausted_flg_ == FALSE) :gsel kExhaustedWindowID, -1 :exhausted_flg__ = FALSE
+	}
+return
+
+// ○号カウンターの自動化
+*auto_count_routine
+	if(auto_count_flg_a){
+		// 各フラグの判定
+		//出撃判定
+		gsel kFlashBufferID
+		ac_sortie   = FALSE
+		if(NearColor(183,239,255,210,78)){
+			if(NearColor(286,174,255,227,135)){
+				if(NearColor(504,297,154,134,14)){
+					ac_sortie   = TRUE
+				}
+			}
+		}
+		;ボスマス判定
+		if(ac_boss_battle == FALSE){
+			;絵がマップ画面から切り替わった際に、
+			;艦隊アイコンとボスアイコンが十分近ければOK
+			if(screen_shot_type_ != screen_shot_type){
+				if(SstToStr(screen_shot_type_) == "マップ画面"){
+					;領域のマッチング
+					gsel kMapBufferID
+					pos 0, 0
+					cvputimg kBossJudgeBufferID3
+					cvmatch boss_icon_x,  boss_icon_y,  CV_TM_SQDIFF, kBossJudgeBufferID1, kBossJudgeBufferID3
+					cvmatch fleet_icon_x, fleet_icon_y, CV_TM_SQDIFF, kBossJudgeBufferID2, kBossJudgeBufferID3
+					icon_x_diff = boss_icon_x - fleet_icon_x
+					icon_y_diff = boss_icon_y - fleet_icon_y
+					icon_r2_diff = icon_x_diff * icon_x_diff + icon_y_diff * icon_y_diff
+					;ポイント～ポイント間はおよそ630ピクセル、
+					;マッチング時は最大30ピクセルほどなので判定は容易い？
+					if(icon_r2_diff < 10000){
+						ac_boss_battle = TRUE
+					}else{
+						ac_boss_battle = FALSE
+					}
+				}
+			}
+		}else{
+			if(SstToStr(screen_shot_type_) == "母港画面"){
+				ac_boss_battle = FALSE
+			}
+		}
+		;ボス勝利
+		ac_boss_win = (FALSE + ac_win_s) * ac_boss_battle
+		if(ac_boss_battle){
+			gsel kFlashBufferID
+			;勝利A
+			if(NearColor(23,43,29,179,182)){
+				if(NearColor(605,236,143,13,4)){
+					if(NearColor(258,196,136,165,165)){
+						ac_boss_win = TRUE
+					}
+				}
+			}
+			;戦術的勝利B
+			if(NearColor(23,43,28,186,189)){
+				if(NearColor(605,269,251,160,23)){
+					if(NearColor(276,199,205,232,236)){
+						ac_boss_win = TRUE
+					}
+				}
+			}
+		}
+		//S勝利判定
+		;勝利S
+		ac_win_s = FALSE
+		if(NearColor(23,43,29,189,192)){
+			if(NearColor(604,240,251,228,83)){
+				if(NearColor(258,196,135,164,164)){
+					ac_win_s = TRUE
+				}
+			}
+		}
+		;完全勝利S
+		gsel kFlashBufferID
+		if(NearColor(23,43,28,181,184)){
+			if(NearColor(628,218,183,144, 2)){
+				if(NearColor(30,243,173,141,  2)){
+					ac_win_s = TRUE
+				}
+			}
+		}
+		// 変化時を検出してカウント
+		;出撃
+		if(ac_sortie){
+			if(ac_sortie_ == FALSE){
+				ac_sortie_ = ac_sortie
+				a_sortie_count++
+				gosub *redraw_counter
+				wait 50
+				error_log += NowTime() + ",auto_count,sortie\n"
+			}
+		}else{
+			if(ac_sortie_ == TRUE){
+				ac_sortie_ = ac_sortie
+			}
+		}
+		;ボス到達
+		if(ac_boss_battle){
+			if(ac_boss_battle_ == FALSE){
+				ac_boss_battle_ = ac_boss_battle
+				a_to_boss_count++
+				gosub *redraw_counter
+				error_log += NowTime() + ",auto_count,boss_battle\n"
+			}
+		}else{
+			if(ac_boss_battle_ == TRUE){
+				ac_boss_battle_ = ac_boss_battle
+			}
+		}
+		;ボス勝利
+		if(ac_boss_win){
+			if(ac_boss_win_ == FALSE){
+				ac_boss_win_ = ac_boss_win
+				a_win_boss_count++
+				gosub *redraw_counter
+				error_log += NowTime() + ",auto_count,boss_win\n"
+				ac_boss_battle = FALSE
+			}
+		}else{
+			if(ac_boss_win_ == TRUE){
+				ac_boss_win_ = ac_boss_win
+			}
+		}
+		;S勝利
+		if(ac_win_s){
+			if(ac_win_s_ == FALSE){
+				ac_win_s_ = ac_win_s
+				a_s_win_count++
+				gosub *redraw_counter
+				error_log += NowTime() + ",auto_count,win_s\n"
+			}
+		}else{
+			if(ac_win_s_ == TRUE){
+				if(screen_shot_type != kTypeUnknown){
+					ac_win_s_ = ac_win_s
+				}
+			}
+		}
+	}
+	if(auto_count_flg_r){
+		// 各フラグの判定
+		if(screen_shot_type < kSceneListSize + 1){
+			if(sst_str == "交戦結果"){
+				gsel kBattleBufferID
+				//補給艦撃沈
+				ac_kill_sup_count = 0
+				ac_kill_sup = FALSE
+				for k, 0, kUnitNum
+					if(NearColor(767,173 + 45 * k,77,166,223)){
+						if(NearColor(669,178 + 45 * k,254,254,254)){
+							if(NearColor(649,157 + 45 * k,133,133,133)){
+								ac_kill_sup_count++
+								ac_kill_sup = TRUE
+							}
+						}
+					}
+				next
+			}else{
+				ac_kill_sup = FALSE
+			}
+		}else{
+			ac_kill_sup = FALSE
+		}
+		// 変化時を検出してカウント
+		;補給艦
+		if(ac_kill_sup){
+			if(ac_kill_sup_ == FALSE){
+				ac_kill_sup_ = ac_kill_sup
+				r_count += ac_kill_sup_count
+				gosub *redraw_counter
+				error_log += NowTime() + ",auto_count,kill_sup\n"
+			}
+		}else{
+			if(ac_kill_sup_ == TRUE){
+				ac_kill_sup_ = ac_kill_sup
+			}
+		}
+	}
+	if(auto_count_flg_i){
+		// 各フラグの判定
+		if(screen_shot_type < kSceneListSize + 1){
+			if(sst_str == "交戦結果"){
+				gsel kBattleBufferID
+				//空母系撃沈
+				ac_kill_air_count = 0
+				ac_kill_air = FALSE
+				for k, 0, kUnitNum
+					if(NearColor(767,173 + 45 * k,77,166,223)){
+						;正規空母
+						if(NearColor(670,176 + 45 * k,167,167,167)){
+							if(NearColor(671,157 + 45 * k,215,215,215)){
+								ac_kill_air_count++
+								ac_kill_air = TRUE
+							}
+						}
+						;軽空母
+						if(NearColor(667,177 + 45 * k,183,183,183)){
+							if(NearColor(664,170 + 45 * k,252,252,252)){
+								ac_kill_air_count++
+								ac_kill_air = TRUE
+							}
+						}
+					}
+				next
+			}else{
+				ac_kill_air = FALSE
+			}
+		}else{
+			ac_kill_air = FALSE
+		}
+		// 変化時を検出してカウント
+		;空母系
+		if(ac_kill_air){
+			if(ac_kill_air_ == FALSE){
+				ac_kill_air_ = ac_kill_air
+				i_count += ac_kill_air_count
+				gosub *redraw_counter
+				error_log += NowTime() + ",auto_count,kill_air\n"
+			}
+		}else{
+			if(ac_kill_air_ == TRUE){
+				ac_kill_air_ = ac_kill_air
+			}
+		}
+	}
+return
+
+// 各種タイマーの自動更新
+*auto_timer_routine
+	if(auto_time_set_flg){
+		if(screen_shot_type <= kSceneListSize){
+			if(screen_shot_type_ != screen_shot_type){
+				if(sst_str == "入渠画面") :gosub *get_dock
+				if(sst_str == "工廠画面") :gosub *get_dock
+			}
+		}
+		if(NearColor(509,113,252,180,88)){
+			if(NearColor(286,139,54,70,44)){
+				if(NearColor(585,393,35,158,159)){
+					if(NearColor(598,451,118,113,114)){
+						gosub *get_dock_e2
+						gosub *get_dock_e3
+						gosub *get_dock_e4
+						wait 20
+					}
+				}
+			}
+		}
+	}
+return
+
+*main3

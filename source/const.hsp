@@ -37,9 +37,14 @@
 	#enum kCaptureBufferID	;各保存画面
 	// OpenCV用ID
 	#enum global kCVTempBufferID = 0
+	#enum global kCVGPFSBufferID1
+	#enum global kCVGPFSBufferID2
 	#enum global kCVNumBufferID
 	#enum global kCVMatchBufferID
 	#enum global kCVDenoiseBufferID
+	#enum global kBossJudgeBufferID1
+	#enum global kBossJudgeBufferID2
+	#enum global kBossJudgeBufferID3
 	// パラメータ
 	#const global kFleetNum    4	;艦隊数
 	#const global kUnitNum     6	;艦隊毎の艦娘数
@@ -104,6 +109,8 @@
 	#const kGraphWX 600
 	#const kGraphWY 300
 	// キーボード・マウス操作
+	#const kStickSpace  16
+	#const kStickCtrl   64
 	#const kStickEscKey 128
 	#const kStickMouse  256
 	// 認識用
@@ -254,11 +261,12 @@
 	my_folder_flg     = FALSE
 	auto_supply_flg   = TRUE
 	denoise_flg       = FALSE
-	auto_count_flg    = FALSE
+	auto_count_flg_a  = FALSE
+	auto_count_flg_r  = FALSE
+	auto_count_flg_i  = FALSE
 	auto_time_set_flg = FALSE
 	exhausted_flg     = FALSE
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
-	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
 	get_handle_flg    = TRUE	;ズレ補正時だけOFFになる
 	show_date_flg     = TRUE	;最終更新日時を表示するか否か
 	auto_get_pos_flg  = FALSE	;座標取得を利用した時のみTRUEになる
@@ -280,6 +288,8 @@
 	dead_zone_flg__ = FALSE
 	exhausted_flg_ = FALSE
 	exhausted_flg__ = FALSE
+	save_picture_size_x = 0
+	save_picture_size_y = 0
 
 // バッファ初期化
 	//マウスカーソル
@@ -310,6 +320,15 @@
 	buffer kNumGetBufferID, kMatchSize, kMatchSize
 	;デノイズ用
 	cvbuffer kCVDenoiseBufferID, kFlashWX, kFlashWY
+	;ボス判定用
+	buffer kTempBufferID, 5, 5
+		color 219,24,24 :boxf
+			cvbuffer kBossJudgeBufferID1, 5, 5	;赤色
+				cvputimg kBossJudgeBufferID1
+		color 158,229,97 :boxf
+			cvbuffer kBossJudgeBufferID2, 5, 5	;緑色
+				cvputimg kBossJudgeBufferID2
+	cvbuffer kBossJudgeBufferID3, kFlashWX, kFlashWY
 
 	ReadSaveData
 	gosub *init_bgm_list
@@ -349,6 +368,9 @@ return
 		split get, "\t", temp
 		mode_list += temp(0) + "\n"
 		mode_list2(cnt + 1) = temp(0)
+		if(temp(0) == "マップ画面"){
+			kMapBufferID = kCaptureBufferID + cnt
+		}
 		for i, 0, kPoints
 			for j, 0, kParams
 				mode_filter(cnt, i, j) = int(temp(i * kParams + j + 1))

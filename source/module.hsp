@@ -16,6 +16,7 @@
 		#func GetWindowRect "GetWindowRect" int, int
 		#cfunc GetWindowDC        "GetWindowDC"         int
 		#func ReleaseDC     "ReleaseDC"     int, int
+		#cfunc WindowFromPoint "WindowFromPoint" int, int
 		// API用の定数
 		#const SRCCOPY    0x00CC0020
 		#const CAPTUREBLT 0x40000000
@@ -58,34 +59,23 @@
 		#deffunc GetPosFlashSquare int window_id_, int output_buffer_id_, var px_, var py_
 			;バッファ1：検索先画像
 			gsel window_id_
-			cvbuffer window_id_, ginfo_sx, ginfo_sy
-			cvputimg window_id_
+			cvbuffer kCVGPFSBufferID1, ginfo_sx, ginfo_sy
+			cvputimg kCVGPFSBufferID1
 			//バッファ2:802x482の白画像の中央に800x480の灰色画像を置いた画像
 			buffer output_buffer_id_, kFlashWX + 2, kFlashWY + 2
 			color 100, 100, 100 :boxf 1, 1, kFlashWX, kFlashWY
-			cvbuffer output_buffer_id_, kFlashWX, kFlashWY
-			cvputimg output_buffer_id_
+			cvbuffer kCVGPFSBufferID2, kFlashWX, kFlashWY
+			cvputimg kCVGPFSBufferID2
 			//マッチング処理を行う
-			cvmatch px_, py_, CV_TM_SQDIFF, output_buffer_id_, window_id_
+			cvmatch px_, py_, CV_TM_SQDIFF, kCVGPFSBufferID2, kCVGPFSBufferID1
 			px_ = px_ + 1 :py_ = py_ + 1
 		return
 		//艦これ画面がずれていないかを調べる
 		#defcfunc CheckAutoSet
 			buffer kTempBufferID@, kFlashWX + 2, kFlashWY + 2
-			if(manual_getpos_flg@ != 2){
-				//デスクトップのデバイスコンテキストを作成する
-				hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
-				//デスクトップの画像をコピーする
-				BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_screen, kOffsetX@ + flash_px@ - 1, kOffsetY@ + flash_py@ - 1, SRCCOPY | CAPTUREBLT
-				//デバイスコンテキストを削除する
-				DeleteDC hdc_screen
-			}else{
-				if(other_get_pos_flg@){
-					hdc_browser = GetWindowDC(handle@)
-					BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_browser, flash_px@ - rect@(0) - 1, flash_py@ - rect@(1) - 1, SRCCOPY | CAPTUREBLT
-					ReleaseDC handle@, hdc_browser
-				}
-			}
+			hdc_browser = GetWindowDC(handle@)
+			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_browser, flash_px@ - rect@(0) - 1, flash_py@ - rect@(1) - 1, SRCCOPY | CAPTUREBLT
+			ReleaseDC handle@, hdc_browser
 			//四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
 			pget 0, 0
 			check_r = ginfo_r :check_g = ginfo_g :check_b = ginfo_b
@@ -121,11 +111,18 @@
 		return
 		//デスクトップの一部をキャプチャ2
 		#deffunc GetFlashWindow2 int handle_, int buffer_id_, int flash_px_, int flash_py_
+			if(handle_ == NULL) :return
 			gsel buffer_id_
 			hdc_browser = GetWindowDC(handle_)
 			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_browser, flash_px_ - rect@(0), flash_py_ - rect@(1), SRCCOPY | CAPTUREBLT
 			ReleaseDC handle_, hdc_browser
 		return
+		//指定した点を含むウィンドウのハンドルを取得する
+		#defcfunc GetPointHandle int point_x_, int point_y_
+			dim point, 2
+				point.0 = point_x_
+				point.1 = point_y_
+		return WindowFromPoint(point.0, point.1)
 	#global
 
 	// 汎用
@@ -354,6 +351,21 @@
 				wait 5
 			wend
 		return file_name + "_" + number + ".png"
+		#defcfunc AutoFileName_
+			file_name = NowTime()
+			exist file_name + ".bmp"
+			if(strsize == -1) :return file_name + ".bmp"
+			number = 1
+			while
+				exist file_name + "_" + number + ".bmp"
+				if(strsize != -1){
+					number++
+				}else{
+					_break
+				}
+				wait 5
+			wend
+		return file_name + "_" + number + ".bmp"
 		//「母港画面」かどうかを判定する(BGM・名前隠し用)
 		#defcfunc CheckHomeFlg int flash_id_
 			gsel flash_id_
@@ -542,10 +554,13 @@
 			output += "LoggingTime\t" + (logging_index@ + 1) + "\n"
 			output += "ShowLastDate\t"   + show_date_flg@ + "\n"
 			output += "Denoise\t"        + denoise_flg@ + "\n"
-			output += "AutoCountSet\t"   + auto_count_flg@ + "\n"
+			output += "AutoCountSetA\t"   + auto_count_flg_a@ + "\n"
+			output += "AutoCountSetR\t"   + auto_count_flg_r@ + "\n"
+			output += "AutoCountSetI\t"   + auto_count_flg_i@ + "\n"
 			output += "AutoTimeSet\t"    + auto_time_set_flg@ + "\n"
 			output += "AutoSaveText\t"   + auto_save_flg2@ + "\n"
 			output += "CheckExhausted\t" + exhausted_flg@ + "\n"
+			output += "MultiShotName\t" + save_picture2_index@ + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -685,12 +700,18 @@
 					if(temp(0) == "Denoise") :denoise_flg@ = limit(int(temp(1)), 0, 1)
 				}
 				if(read_ver >= 207){
-					if(temp(0) == "AutoCountSet") :auto_count_flg@ = limit(int(temp(1)), 0, 1)
+					//if(temp(0) == "AutoCountSet") :auto_count_flg@ = limit(int(temp(1)), 0, 1)
 					if(temp(0) == "AutoTimeSet") :auto_time_set_flg@ = limit(int(temp(1)), 0, 1)
 				}
 				if(read_ver >= 208){
 					if(temp(0) == "AutoSaveText") :auto_save_flg2@ = limit(int(temp(1)), 0, 1)
 					if(temp(0) == "CheckExhausted") :exhausted_flg@ = limit(int(temp(1)), 0, 1)
+				}
+				if(read_ver >= 209){
+					if(temp(0) == "MultiShotName") :save_picture2_index@ = limit(int(temp(1)), 0, 1)
+					if(temp(0) == "AutoCountSetA") :auto_count_flg_a@ = limit(int(temp(1)), 0, 1)
+					if(temp(0) == "AutoCountSetR") :auto_count_flg_r@ = limit(int(temp(1)), 0, 1)
+					if(temp(0) == "AutoCountSetI") :auto_count_flg_i@ = limit(int(temp(1)), 0, 1)
 				}
 			next
 			;微修正
@@ -756,64 +777,64 @@
 		// 資源量を取得
 		#deffunc GetSupply int flash_id_, array supply_list_
 			;燃料
-			fuel = 0
-			for k, 0, 6
+			fuel = 0 :keta = 1
+			for k, 5, -1, -1
 				buffer kTempBufferID@, 7, 11
 				gcopy flash_id_, 683 + k * 7, 36, 7, 11
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
-					fuel *= 10
 					if(k == 0) :number = limit(number, 0, 3)
-					fuel += number
+					fuel += number * keta
 				}
+				keta *= 10
 			next
 			;弾薬
-			ammo = 0
-			for k, 0, 6
+			ammo = 0 :keta = 1
+			for k, 5, -1, -1
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 680 + k * 8, 55, 8, 11
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
-					ammo *= 10
 					if(k == 0) :number = limit(number, 0, 3)
-					ammo += number
+					ammo += number * keta
 				}
+				keta *= 10
 			next
 			;鋼材
-			steel = 0
-			for k, 0, 6
+			steel = 0 :keta = 1
+			for k, 5, -1, -1
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 749 + k * 8, 36, 8, 11
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
-					steel *= 10
 					if(k == 0) :number = limit(number, 0, 3)
-					steel += number
+					steel += number * keta
 				}
+				keta *= 10
 			next
 			;ボーキ
-			bauxite = 0
-			for k, 0, 6
+			bauxite = 0 :keta = 1
+			for k, 5, -1, -1
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 749 + k * 8, 55, 8, 11
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
-					bauxite *= 10
 					if(k == 0) :number = limit(number, 0, 3)
-					bauxite += number
+					bauxite += number * keta
 				}
+				keta *= 10
 			next
 			;バケツ
-			bucket = 0
-			for k, 0, 4
+			bucket = 0 :keta = 1
+			for k, 3, -1, -1
 				buffer kTempBufferID@, 9, 12
 				gcopy flash_id_, 695 + k * 9, 13, 9, 12
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
-					bucket *= 10
 					if(k == 0) :number = limit(number, 0, 3)
-					bucket += number
+					bucket += number * keta
 				}
+				keta *= 10
 			next
 			;代入
 			supply_list_(0) = fuel

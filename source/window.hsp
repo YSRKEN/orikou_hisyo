@@ -7,98 +7,102 @@ goto *main2
 	switch manual_getpos_flg
 		case 0
 			// 座標を自動で取得する
-			//デスクトップを撮影する
-			GetDesktopWindow kDeskBufferID
-			//撮影した画像から座標を検索する
-			GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
-			//座標補正
-			flash_px += kOffsetX :flash_py += kOffsetY
-			;
-			SetTitle
-			get_pos_flg = TRUE
-			other_get_pos_flg = FALSE
-			get_pos_flg2 = TRUE
+			if(get_handle_flg){
+				//デスクトップを撮影する
+				GetDesktopWindow kDeskBufferID
+				//撮影した画像から座標を検索する
+				GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+				//座標補正
+				flash_px += kOffsetX :flash_py += kOffsetY
+				;handleを取得
+				handle = 0
+				handle = GetPointHandle(flash_px + kFlashWX / 2, flash_py + kFlashWY / 2)
+				if(handle == 0) :dialog "ハンドルを取得できませんでした", 0, kSoftName :swbreak
+			}
+			gosub *get_pos_child
 			swbreak
 		case 1
 			// 座標を手動で取得する
-			//デスクトップを撮影する
-			GetDesktopWindow kDeskBufferID
-			//手動で枠を選択させる
-			;初期設定
-			bgscr kSelectWindowID, kDispX, kDispY, , kOffsetX, kOffsetY
-			gsel kSelectWindowID, 2
-			font msgothic, kLargeFontSize
-			;画面表示
-			gcopy kDeskBufferID, 0, 0, kDispX, kDispY
-			color :mes "枠を選択して下さい。(Escで終了)"
-			;選択操作
-			is_mouse_button = FALSE
-			is_mouse_select = FALSE
-			mouse_pos_x1 = 0 :mouse_pos_y1 = 0
-			repeat
-				stick key, kStickMouse
-				if(key & kStickEscKey) :break
-				if(key & kStickMouse){
-					if(is_mouse_button){
-						// 選択中
-						redraw 0
-							pos 0, 0
-							gcopy kDeskBufferID, 0, 0, kDispX, kDispY
-							color :mes "枠を選択して下さい。(Escで終了)"
-							DrawMouseSquare mousex, mousey, mouse_pos_x1, mouse_pos_y1
-						redraw 1
+			if(get_handle_flg){
+				//デスクトップを撮影する
+				GetDesktopWindow kDeskBufferID
+				//手動で枠を選択させる
+				;初期設定
+				bgscr kSelectWindowID, kDispX, kDispY, , kOffsetX, kOffsetY
+				gsel kSelectWindowID, 2
+				font msgothic, kLargeFontSize
+				;画面表示
+				gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+				color :mes "枠を選択して下さい。(Escで終了)"
+				;選択操作
+				is_mouse_button = FALSE
+				is_mouse_select = FALSE
+				mouse_pos_x1 = 0 :mouse_pos_y1 = 0
+				repeat
+					stick key, kStickMouse
+					if(key & kStickEscKey) :break
+					if(key & kStickMouse){
+						if(is_mouse_button){
+							// 選択中
+							redraw 0
+								pos 0, 0
+								gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+								color :mes "枠を選択して下さい。(Escで終了)"
+								DrawMouseSquare mousex, mousey, mouse_pos_x1, mouse_pos_y1
+							redraw 1
+						}else{
+							// 選択開始
+							mouse_pos_x1 = mousex
+							mouse_pos_y1 = mousey
+							is_mouse_button = TRUE
+						}
 					}else{
-						// 選択開始
-						mouse_pos_x1 = mousex
-						mouse_pos_y1 = mousey
-						is_mouse_button = TRUE
+						if(is_mouse_button){
+							// 選択終了
+							mouse_pos_x2 = mousex
+							mouse_pos_y2 = mousey
+							if(mouse_pos_x1 < mouse_pos_x2){
+								square_x = mouse_pos_x1
+								square_xsize = mouse_pos_x2 - mouse_pos_x1 + 1
+							}else{
+								square_x = mouse_pos_x2
+								square_xsize = mouse_pos_x1 - mouse_pos_x2 + 1
+							}
+							if(mouse_pos_y1 < mouse_pos_y2){
+								square_y = mouse_pos_y1
+								square_ysize = mouse_pos_y2 - mouse_pos_y1 + 1
+							}else{
+								square_y = mouse_pos_y2
+								square_ysize = mouse_pos_y1 - mouse_pos_y2 + 1
+							}
+							is_mouse_button = FALSE
+							is_mouse_select = TRUE
+							break
+						}else{
+							// 何もしていない
+						}
 					}
-				}else{
-					if(is_mouse_button){
-						// 選択終了
-						mouse_pos_x2 = mousex
-						mouse_pos_y2 = mousey
-						if(mouse_pos_x1 < mouse_pos_x2){
-							square_x = mouse_pos_x1
-							square_xsize = mouse_pos_x2 - mouse_pos_x1 + 1
-						}else{
-							square_x = mouse_pos_x2
-							square_xsize = mouse_pos_x1 - mouse_pos_x2 + 1
-						}
-						if(mouse_pos_y1 < mouse_pos_y2){
-							square_y = mouse_pos_y1
-							square_ysize = mouse_pos_y2 - mouse_pos_y1 + 1
-						}else{
-							square_y = mouse_pos_y2
-							square_ysize = mouse_pos_y1 - mouse_pos_y2 + 1
-						}
-						is_mouse_button = FALSE
-						is_mouse_select = TRUE
-						break
+					wait 5
+				loop
+				;選択結果から検索を行う
+				gsel kSelectWindowID, -1
+				handle = 0
+				if(is_mouse_select){
+					buffer kTempBufferID, square_xsize, square_ysize
+					gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
+					if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
 					}else{
-						// 何もしていない
+						GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
+						flash_px += square_x :flash_py += square_y
+						;座標補正
+						flash_px += kOffsetX :flash_py += kOffsetY
+						;handleを取得
+						handle = GetPointHandle(flash_px + kFlashWX / 2, flash_py + kFlashWY / 2)
 					}
 				}
-				wait 5
-			loop
-			;選択結果から検索を行う
-			gsel kSelectWindowID, -1
-			if(is_mouse_select){
-				buffer kTempBufferID, square_xsize, square_ysize
-				gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
-				if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
-				}else{
-					GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
-					flash_px += square_x :flash_py += square_y
-					;座標補正
-					flash_px += kOffsetX :flash_py += kOffsetY
-					;
-					SetTitle
-					get_pos_flg = TRUE
-					other_get_pos_flg = FALSE
-					get_pos_flg2 = TRUE
-				}
+				if(handle == 0) :dialog "ハンドルを取得できませんでした", 0, kSoftName :swbreak
 			}
+			gosub *get_pos_child
 			swbreak
 		case 2
 			// 座標を自動で取得する(ウィンドウ相手にBitBltするVer)
@@ -107,20 +111,58 @@ goto *main2
 				handle = GetKanColleHandle()
 				if(handle == 0) :dialog "ハンドルを取得できませんでした", 0, kSoftName :swbreak
 			}
-			dim rect, 4
-			GetClientSize handle, rect
-			wx = rect(2) - rect(0) :wy = rect(3) - rect(1)
-			if((wx < kFlashWX) || (wy < kFlashWY)) :dialog "画面サイズを取得できませんでした", 0, kSoftName :swbreak
-			GetKanColleWindow handle, kDeskBufferID, wx, wy
-			//撮影した画像から座標を検索する
-			GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
-			flash_px += rect(0) :flash_py += rect(1)
-			SetTitle
-			get_pos_flg = TRUE
-			other_get_pos_flg = TRUE
-			get_pos_flg2 = TRUE
+			gosub *get_pos_child
+			swbreak
+		case 3
+			// 座標を手動で取得する(クリック版)
+			if(get_handle_flg){
+				//デスクトップを撮影する
+				GetDesktopWindow kDeskBufferID
+				//手動でクリックさせる
+				;初期設定
+				bgscr kSelectWindowID, kDispX, kDispY, , kOffsetX, kOffsetY
+				gsel kSelectWindowID, 2
+				font msgothic, kLargeFontSize
+				;画面表示
+				gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+				color :mes "クリックして下さい。(Escで終了)"
+				;選択操作
+				is_mouse_button = FALSE
+				mouse_pos_x = 0 :mouse_pos_y = 0
+				repeat
+					stick key, kStickMouse
+					if(key & kStickEscKey) :break
+					if(key & kStickMouse){
+						/*mouse_pos_x = mousex + kOffsetX
+						mouse_pos_y = mousey + kOffsetY*/
+						mouse_pos_x = ginfo(0)
+						mouse_pos_y = ginfo(1)
+						is_mouse_button = TRUE
+						break
+					}
+					wait 5
+				loop
+				;選択結果から検索を行う
+				gsel kSelectWindowID, -1
+				handle = 0
+				if(is_mouse_button) :handle = GetPointHandle(mouse_pos_x, mouse_pos_y)
+				if(handle == 0) :dialog "ハンドルを取得できませんでした", 0, kSoftName :swbreak
+			}
+			gosub *get_pos_child
 			swbreak
 	swend
+return
+*get_pos_child
+	dim rect, 4
+	GetClientSize handle, rect
+	wx = rect(2) - rect(0) :wy = rect(3) - rect(1)
+	if((wx < kFlashWX) || (wy < kFlashWY)) :dialog "画面サイズを取得できませんでした", 0, kSoftName :return
+	GetKanColleWindow handle, kDeskBufferID, wx, wy
+	//撮影した画像から座標を検索する
+	GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+	flash_px += rect(0) :flash_py += rect(1)
+	SetTitle
+	get_pos_flg = TRUE
 return
 
 //画像保存
@@ -144,25 +186,55 @@ return
 		gsel kPutTempWindowID
 	}
 	if(denoise_flg) :Denoise
-	cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
-	cvputimg kCaptureBufferID
-	if(mode_index == kTypeNow){
-		;現在画面
-		cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCaptureBufferID
-	}else{if(mode_index == kSceneListSize + 1){
-		;編成画面
-		cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + fleets_index) + ".png", kCaptureBufferID
-	}else{if(mode_index == kSceneListSize + 2){
-		;改装画面
-		cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + kFleetNum + units_index) + ".png", kCaptureBufferID
-	}else{if(mode_index == kSceneListSize + 3){
-		;戦闘画面
-		cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum) + ".png", kCaptureBufferID
+	if(auto_save_picture_flg){
+		if(save_picture2_index == 0){
+			bmpsave pic_save_path(my_folder_flg) + "\\" + AutoFileName_()
+		}else{
+			bmpsave pic_save_path(my_folder_flg) + "\\" + save_picture2_firstname + strf("%05d", save_picture2_count) + ".bmp"
+			save_picture2_count++
+		}
 	}else{
-		;その他
-		cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(mode_index - 1) + ".png", kCaptureBufferID
-	}}}}
+		if((save_picture_size_x != ginfo_sx) || (save_picture_size_y != ginfo_sy)){
+			cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
+			save_picture_size_x = ginfo_sx
+			save_picture_size_y = ginfo_sy
+		}
+		cvputimg kCaptureBufferID
+		if(mode_index == kTypeNow){
+			;現在画面
+			cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCaptureBufferID
+		}else{if(mode_index == kSceneListSize + 1){
+			;編成画面
+			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + fleets_index) + ".png", kCaptureBufferID
+		}else{if(mode_index == kSceneListSize + 2){
+			;改装画面
+			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + kFleetNum + units_index) + ".png", kCaptureBufferID
+		}else{if(mode_index == kSceneListSize + 3){
+			;戦闘画面
+			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum) + ".png", kCaptureBufferID
+		}else{
+			;その他
+			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(mode_index - 1) + ".png", kCaptureBufferID
+		}}}}
+	}
 	gsel kMainWindowID
+return
+*save_picture2
+	if(auto_save_picture_flg){
+		error_log += NowTime() + ",auto_save_picture,end\n"
+		auto_save_picture_flg = FALSE
+		gsel kMainWindowID
+		objprm auto_save_picture_id, "【連写保存】"
+	}else{
+		error_log += NowTime() + ",auto_save_picture,start\n"
+		auto_save_picture_flg = TRUE
+		gsel kMainWindowID
+		objprm auto_save_picture_id, "【連写停止】"
+		if(save_picture2_index == 1){
+			save_picture2_firstname = NowTime() + "_"
+			save_picture2_count = 1
+		}
+	}
 return
 
 //艦隊画像保存
@@ -786,6 +858,16 @@ return
 	max_param = ((max_param / 1000) + 1) * 1000
 	min_param = ((min_param / 1000) - 1) * 1000 :if(min_param < 0) :min_param = 0
 	diff_param = max_param - min_param
+	;バケツ
+	max_bucket = supply_log_int(0, 6)
+	min_bucket = supply_log_int(0, 6)
+	for n, 0, supply_log_size
+		if(max_bucket < supply_log_int(n, 6)) :max_bucket = supply_log_int(n, 6)
+		if(min_bucket > supply_log_int(n, 6)) :min_bucket = supply_log_int(n, 6)
+	next
+	max_bucket = ((max_bucket / 10) + 1) * 10
+	min_bucket = ((min_bucket / 10) - 1) * 10 :if(min_bucket < 0) :min_bucket = 0
+	diff_bucket = max_bucket - min_bucket
 	// グラフを作成する
 	day_diff = day_last - day_first + 1
 	block_num = day_diff / scale_blocking(scale_mode)
@@ -838,7 +920,19 @@ return
 		yy2 = kGraphWY - 1.0 * (yy - min_param) / diff_param * kGraphWY
 		line 0, yy2, block_num * kGraphWX, yy2
 	next
+	;バケツ
+	interval_y_b = 1
+	if(diff_bucket > 10) :interval_y_b = 10
+	if(diff_bucket > 100) :interval_y_b = 100
+	if(diff_bucket > 1000) :interval_y_b = 1000
+	color $A0,$A0,$F0
+	for yy, 0, 5000, interval_y_b
+		if(limit(yy, min_bucket, max_bucket) != yy) :_continue
+		yy2 = kGraphWY - 1.0 * (yy - min_bucket) / diff_bucket * kGraphWY
+		line 0, yy2, block_num * kGraphWX, yy2
+	next
 	//グラフ線
+	;燃料・弾薬・鋼材・ボーキ
 	for n, 0, supply_log_size - 1
 		for k, 2, 6
 			switch k
@@ -861,6 +955,15 @@ return
 			p4 = kGraphWY - 1.0 * (supply_log_int(n + 1, k) - min_param) / diff_param * kGraphWY
 			line p1, p2, p3, p4
 		next
+	next
+	;バケツ
+	for n, 0, supply_log_size - 1
+		color $7B,$BB,$E4
+		p1 = ((ConvertDay(supply_log_int(n, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n, 1)) * kGraphWX) / scale_blocking(scale_mode)
+		p2 = kGraphWY - 1.0 * (supply_log_int(n, 6) - min_bucket) / diff_bucket * kGraphWY
+		p3 = ((ConvertDay(supply_log_int(n + 1, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n + 1, 1)) * kGraphWX) / scale_blocking(scale_mode)
+		p4 = kGraphWY - 1.0 * (supply_log_int(n + 1, 6) - min_bucket) / diff_bucket * kGraphWY
+		line p1, p2, p3, p4
 	next
 	//日付
 	color 0, 0, 255
@@ -887,6 +990,10 @@ return
 		mes max_param
 		pos 0, kGraphWY - kGraphFontSize
 		mes min_param
+			pos kGraphWX - strlen(str(max_bucket)) * kGraphFontSize / 2, 0
+			mes max_bucket
+			pos kGraphWX - strlen(str(min_bucket)) * kGraphFontSize / 2, kGraphWY - kGraphFontSize
+			mes min_bucket
 	redraw 1
 return
 //資材グラフのスクショを保存
