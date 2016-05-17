@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.1.7 */
+/* おりこうさんな秘書 Ver.1.8 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.1.7"
-	#define kSoftVer2       "17"
-	#define kSoftLastUpdate "2015/04/27"
+	#define kSoftVer        "Ver.1.8"
+	#define kSoftVer2       "18"
+	#define kSoftLastUpdate "2015/04/28"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -161,7 +161,7 @@
 	title kSoftName
 	kMainWX2 = ginfo(10)	;メイン画面の表示サイズ
 	kPutWindowOffset = 10 + kMainWX2 + (kMainWX2 - kMainWX) * 2
-	screen kPutWindowID, kFlashWX, kFlashWY, 4, kPutWindowOffset, 10
+	screen kPutWindowID, kFlashWX, kFlashWY + kStatusBarY, 4, kPutWindowOffset, 10
 	gsel kPutWindowID, 2
 	SetTitle
 	gsel kMainWindowID, 2
@@ -266,6 +266,13 @@
 		if(screen_shot_type != kTypeUnknown){
 			gsel kCaptureBufferID + screen_shot_type - 1
 			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+			if(screen_shot_type < kSceneListSize){
+				;戦闘画面(昼戦画面と夜戦画面)ならば再度コピーする
+				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面")){
+					gsel kBattleBufferID
+					gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+				}
+			}
 		}
 		//艦隊における艦娘数を認識し、減少した場合はバッファを初期化する
 		if(screen_shot_type >= kSceneListSize + 1){
@@ -285,7 +292,8 @@
 		// アプリの状態に合わせ表示を変更する
 		//サブ画面のサイズを変更する
 		if(zooming_index_ != zooming_index){
-			screen kPutWindowID, zooming_num(zooming_index) * kFlashWX / 100, zooming_num(zooming_index) * kFlashWY / 100, 4
+			screen kPutWindowID, zooming_num(zooming_index) * kFlashWX / 100, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarY, 4
+			gsel kPutWindowID, 2
 			zooming_index_ = zooming_index
 		}
 		//サブ画面用バッファに画像を転送する
@@ -301,10 +309,13 @@
 			}else{if(mode_index == kSceneListSize + 2){
 				;改装画面
 				gcopy kUnitIdOffset + units_index, 0, 0, kFlashWX, kFlashWY
+			}else{if(mode_index == kSceneListSize + 3){
+				;戦闘画面(特殊)
+				gcopy kBattleBufferID, 0, 0, kFlashWX, kFlashWY
 			}else{
 				;その他
 				gcopy kCaptureBufferID + mode_index - 1, 0, 0, kFlashWX, kFlashWY
-			}}
+			}}}
 		}
 		//サブ画面のバッファに名前隠し処理を行う
 		if(name_disable_flg){
@@ -331,13 +342,52 @@
 		// サブ画面にサブ画面用バッファの画像を変倍して転送する
 		PutWindowSet kPutWindowID, kPutTempWindowID
 		//大破チェッカー機能
-		if((mode_index == kTypeNow) && (CheckDeadZone(kFlashBufferID)) && (dead_zone_flg)){
-			if(dead_zone_flg_ == FALSE){
-				dialog "大破した艦娘がいます！！", 1, kSoftName
+		;dead_zone_flg_に関する処理
+		if(screen_shot_type < kSceneListSize){
+			if((CheckDeadZone(kFlashBufferID)) && (mode_list3(screen_shot_type) == "戦果報告")){
 				dead_zone_flg_ = TRUE
 			}
+			if((screen_shot_type != kTypeUnknown) && (mode_list3(screen_shot_type) != "戦果報告")){
+				dead_zone_flg_ = FALSE
+			}
+		}
+		;dead_zone_flg__に関する処理
+		if(dead_zone_flg__ == FALSE){
+			if(dead_zone_flg){
+				if(dead_zone_flg_){
+					if(CheckSelect(kFlashBufferID)){
+						//大破進撃阻止用画面
+						bgscr kDeadZoneWindowID, 180, 130, , flash_px + 200, flash_py + 180
+						gsel kDeadZoneWindowID, 2
+						color 255, 0, 0
+						font msgothic, 36
+						pos 10, 10
+						mes "大破した\n 艦娘が\nいます！"
+						dead_zone_flg__ = TRUE
+					}
+				}
+			}
 		}else{
-			dead_zone_flg_ = FALSE
+			;座標がズレた場合に再表示する処理
+			if(get_pos_flg2){
+				if(dead_zone_flg){
+					if(dead_zone_flg_){
+						if(CheckSelect(kFlashBufferID)){
+							//大破進撃阻止用画面
+							bgscr kDeadZoneWindowID, 180, 130, , flash_px + 200, flash_py + 180
+							gsel kDeadZoneWindowID, 2
+							color 255, 0, 0
+							font msgothic, 36
+							pos 10, 10
+							mes "大破した\n 艦娘が\nいます！"
+							dead_zone_flg__ = TRUE
+						}
+					}
+				}
+			}
+			;白い枠を非表示にする処理
+			if(dead_zone_flg == FALSE)  :gsel kDeadZoneWindowID, -1 :dead_zone_flg__ = FALSE
+			if(dead_zone_flg_ == FALSE) :gsel kDeadZoneWindowID, -1 :dead_zone_flg__ = FALSE
 		}
 		//経験値計算機
 		if(now_level_       != now_level)       :gosub *exp_calc :now_level_       = now_level
@@ -379,6 +429,7 @@
 			bgm_type_ = bgm_type
 		}
 		//自動ズレ補正
+		get_pos_flg2 = FALSE
 		switch manual_getpos_flg
 			case 0
 				;自動設定
@@ -416,6 +467,18 @@
 								get_handle_flg = FALSE
 								gosub *get_pos
 								get_handle_flg = TRUE
+							}else{
+								;大破チェック用に、ズレ検出機構を新たに設ける
+								dim rect_, 4
+								GetClientSize handle, rect_
+								if((rect_(0) != rect(0)) || (rect_(1) != rect(1))){
+									flash_px += rect_(0) - rect(0)
+									flash_py += rect_(1) - rect(1)
+									for k, 0, 4
+										rect(k) = rect_(k)
+									next
+									get_pos_flg2 = TRUE
+								}
 							}
 						}
 						auto_set_time = gettime(6)
@@ -425,6 +488,49 @@
 		swend
 		//ソート一覧
 		if(sort_index_ != sort_index) :gosub *redraw_sort_preview :sort_index_ = sort_index
+		//ステータスバーに最終更新日時を表示する
+		;記録処理
+		if(screen_shot_type == kTypeUnknown){
+		}else{
+			SetLastUpdate screen_shot_type - 1
+			if(screen_shot_type < kSceneListSize){
+				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面")){
+					for k, 0, 7
+						last_up_date(44, k) = last_up_date(screen_shot_type - 1, k)
+					next
+				}
+			}
+		}
+		;表示処理
+		gsel kPutWindowID
+		redraw 0
+			color 255, 255, 255 :boxf 0, zooming_num(zooming_index) * kFlashWY / 100, zooming_num(zooming_index) * kFlashWX / 100, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarY
+			color
+			pos kStatusBarOffset, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarOffset
+			font msgothic, kStatusBarFontSize
+			if(mode_index == kTypeNow){
+				;現在画面
+				mes "" + strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
+			}else{if(mode_index == kSceneListSize + 1){
+				;編成画面
+				mes GetLastUpdate(kSceneListSize + fleets_index)
+			}else{if(mode_index == kSceneListSize + 2){
+				;改装画面
+				mes GetLastUpdate(kSceneListSize + kFleetNum + units_index)
+			}else{if(mode_index == kSceneListSize + 3){
+				;戦闘画面
+				mes GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum)
+			}else{
+				;その他
+				mes GetLastUpdate(mode_index - 1)
+			}}}}
+			;大破チェック機能でのチェック結果も表示
+			if(dead_zone_flg_){
+				pos kStatusBarOffset + kStatusBarFontSize * 12, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarOffset
+				color 255, 0, 0
+				mes "※大破艦あり※"
+			}
+		redraw 1
 		// ウェイト
 		await 1000 / fps_num(fps_index)
 	loop

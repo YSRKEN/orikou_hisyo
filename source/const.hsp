@@ -24,10 +24,12 @@
 	#enum kCountWindowID	;○号カウンター
 	#enum kSortListWindowID	;ソート一覧
 	#enum kMatchBufferID	;マッチング用の捨てID
+	#enum kDeadZoneWindowID	;大破進撃を阻止するための画面
 	;バッファ用
 	#enum global kNumGetBufferID1	;数字認識用(64x64)
 	#enum global kNumGetBufferID2	;数字認識用(32x32)
 	#enum kCursorBufferID	;カーソル用
+	#enum kBattleBufferID	;戦闘画面(特殊)
 	#enum kCaptureBufferID	;各保存画面
 	// OpenCV用ID
 	#enum global kCVTempBufferID = 0
@@ -50,6 +52,7 @@
 	#const kObjSpace 8
 	#const kObjSpaceX kObjSpace + kObjX
 	#const kObjSpaceY kObjSpace + kObjY
+	#const kStatusBarY 24
 	;編成画面のサイズ
 	#const kFleetWX 684
 	#const kFleetWY 368
@@ -71,6 +74,8 @@
 	;フォントサイズ
 	#const kSmallFontSize 12
 	#const kLargeFontSize 30
+	#const kStatusBarFontSize kStatusBarY - 4
+	#const kStatusBarOffset (kStatusBarY - kStatusBarFontSize) / 2
 	;メイン画面のサイズ
 	#const kMainWX kObjSpace + kObjSpaceX * 2
 	#const kMainWY kObjSpace * 4 + kObjSpaceY * 14
@@ -169,9 +174,11 @@
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
 	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
 	get_handle_flg = TRUE		;ズレ補正時だけOFFになる
+	auto_get_pos_flg  = FALSE	;座標取得を利用した時のみTRUEになる
 	;その他
 	dim unit_count, kFleetNum
 	dim unit_count_, kFleetNum
+	dim last_up_date, kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 1, 7
 	GetMonitorParam kDispX ,kDispY ,kOffsetX, kOffsetY
 	kFleetIdOffset = kCaptureBufferID + kSceneListSize
 	kUnitIdOffset = kFleetIdOffset + kFleetNum
@@ -181,6 +188,7 @@
 	fps_index = 2
 	zooming_index_ = -1
 	dead_zone_flg_ = FALSE
+	dead_zone_flg__ = FALSE
 
 // バッファ初期化
 	//マウスカーソル
@@ -194,6 +202,7 @@
 	;サブ画面用バッファ
 	buffer kPutTempWindowID, kFlashWX, kFlashWY
 	;各保存画面
+	buffer kBattleBufferID, kFlashWX, kFlashWY
 	repeat kSceneListSize
 		buffer kCaptureBufferID + cnt, kFlashWX, kFlashWY
 	loop
@@ -235,7 +244,7 @@ return
 	noteload "scene_list.txt"
 	kSceneListSize = notemax - 1
 	dim mode_filter, kSceneListSize, kPoints, kParams	;判定用パラメータ
-	sdim mode_list2, 64, kSceneListSize + 3	;実行モード一覧
+	sdim mode_list2, 64, kSceneListSize + 4	;実行モード一覧
 		mode_list += "現在画面\n"
 		mode_list2(0) = "現在画面"
 	//1行づつ読み込む
@@ -250,9 +259,10 @@ return
 			next
 		next
 	loop
-	mode_list += "編成画面\n改装画面"
+	mode_list += "編成画面\n改装画面\n戦闘画面"
 	mode_list2(kSceneListSize + 1) = "編成画面"
 	mode_list2(kSceneListSize + 2) = "改装画面"
+	mode_list2(kSceneListSize + 3) = "戦闘画面"
 	;判定結果用配列
 	sdim mode_list3, 64, kSceneListSize + 3
 	mode_list3(0) = "不明"

@@ -10,8 +10,8 @@
 		#uselib "user32.dll"
 		#cfunc GetSystemMetrics "GetSystemMetrics" int
 		#cfunc GetForegroundWindow   "GetForegroundWindow"
-		#func GetClientRect "GetClientRect" int, int
-		#cfunc GetDC        "GetDC"         int
+		#func GetWindowRect "GetWindowRect" int, int
+		#cfunc GetWindowDC        "GetWindowDC"         int
 		#func ReleaseDC     "ReleaseDC"     int, int
 		// API用の定数
 		#const SRCCOPY    0x00CC0020
@@ -76,8 +76,8 @@
 				//デバイスコンテキストを削除する
 				DeleteDC hdc_screen
 			}else{
-				hdc_browser = GetDC(handle@)
-				BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_browser, flash_px@ - 1, flash_py@ - 1, SRCCOPY | CAPTUREBLT
+				hdc_browser = GetWindowDC(handle@)
+				BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_browser, flash_px@ - rect@(0) - 1, flash_py@ - rect@(1) - 1, SRCCOPY | CAPTUREBLT
 				ReleaseDC handle@, hdc_browser
 			}
 			//四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
@@ -86,7 +86,7 @@
 			auto_set_flg = FALSE
 			check_x.0 = kFlashWX / 2, kFlashWX + 1, kFlashWX + 1, kFlashWX + 1, kFlashWX / 2, 0, 0
 			check_y.0 = 0, 0, kFlashWX / 2, kFlashWY + 1, kFlashWY + 1, kFlashWY + 1, kFlashWX / 2
-			for k, 0, 6
+			for k, 0, 7
 				pget check_x(k), check_y(k)
 				if((check_r != ginfo_r) || (check_g != ginfo_g) || (check_b != ginfo_b)){
 					auto_set_flg = TRUE
@@ -103,23 +103,21 @@
 			wait 500
 		return GetForegroundWindow()
 		//ブラウザのクライアント領域のサイズを取得する
-		#deffunc GetClientSize int handle_, var wx__, var wy__
-			dim rect, 4
-			GetClientRect handle_, varptr(rect)
-			wx__ = rect(2) - rect(0) :wy__ = rect(3) - rect(1)
+		#deffunc GetClientSize int handle_, array rect_
+			GetWindowRect handle_, varptr(rect_)
 		return
 		//艦これを開いているブラウザの画像を取得する
 		#deffunc GetKanColleWindow int handle_, int window_id_, int wx_, int wy_
 			buffer window_id_, wx_, wy_
-			hdc_browser = GetDC(handle_)
+			hdc_browser = GetWindowDC(handle_)
 			BitBlt hdc, 0, 0, wx_, wy_, hdc_browser, 0, 0, SRCCOPY | CAPTUREBLT
 			ReleaseDC handle_, hdc_browser
 		return
 		//デスクトップの一部をキャプチャ2
 		#deffunc GetFlashWindow2 int handle_, int buffer_id_, int flash_px_, int flash_py_
 			gsel buffer_id_
-			hdc_browser = GetDC(handle_)
-			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_browser, flash_px_, flash_py_, SRCCOPY | CAPTUREBLT
+			hdc_browser = GetWindowDC(handle_)
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_browser, flash_px_ - rect@(0), flash_py_ - rect@(1), SRCCOPY | CAPTUREBLT
 			ReleaseDC handle_, hdc_browser
 		return
 	#global
@@ -151,7 +149,6 @@
 		//タイトルバーの文字列を設定
 		#deffunc SetTitle
 			sdim title_str, 1024
-			title_str = kSoftName@ + " - "
 			//実行モード
 			title_str += mode_list2@(mode_index@) + " - "
 			//判定結果
@@ -292,6 +289,14 @@
 				}
 			next
 		return flg
+		//選択画面かを判定する
+		#defcfunc CheckSelect int flash_id_
+			gsel flash_id_
+			flg = TRUE
+			if(NearColor(164, 217,  93, 182, 226) == FALSE) :flg = FALSE
+			if(NearColor(268, 249, 239, 248, 247) == FALSE) :flg = FALSE
+			if(NearColor(398, 240,  81, 201, 251) == FALSE) :flg = FALSE
+		return flg
 		// 艦隊ごとの艦娘数を更新する
 		#deffunc GetUnits int flash_id_, int screen_shot_type_, array unit_count__
 			gsel flash_id_
@@ -356,28 +361,32 @@
 			output += "Zooming\t"        + zooming_index@ + "\n"
 			output += "FlashPositionX\t" + flash_px@ + "\n"
 			output += "FlashPositionY\t" + flash_py@ + "\n"
+			;艦隊毎の艦娘数
+			for k, 0, kFleetNum
+				output += "UnitCount" + (k + 1) + "\t" + unit_count@(k) + "\n"
+			next
+			;最終更新日時
+			for k, 0, kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum + 1
+				output += "LastUpdate" + (k + 1) + "\t" + strf("%04d%02d%02d%02d%02d%02d%03d", last_up_date@(k, 0), last_up_date@(k, 1), last_up_date@(k, 2), last_up_date@(k, 3), last_up_date@(k, 4), last_up_date@(k, 5), last_up_date@(k, 6)) + "\n"
+			next
 			notesel output
 			notesave current_dir@ + "\\save.txt"
 			// 画像
-			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * kSceneListSize@
+			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 1)
 			for k, 0, kSceneListSize@
 				pos 0, k * kFlashWY
 				gcopy kCaptureBufferID@ + k, 0, 0, kFlashWX, kFlashWY
-				//pos 0, k * kFlashWY
-				//mes "1-" + k
 			next
+			pos 0, kSceneListSize@ * kFlashWY
+			gcopy kBattleBufferID@, 0, 0, kFlashWX, kFlashWY
 			for k, 0, kFleetNum
 				pos kFlashWX, k * kFlashWY
 				gcopy kFleetIdOffset@ + k, 0, 0, kFlashWX, kFlashWY
-				//pos kFlashWX, k * kFlashWY
-				//mes "2-" + k
 			next
 			for i, 0, kFleetNum
 				for j, 0, kUnitNum
 					pos kFlashWX * (i + 2), j * kFlashWY
 					gcopy kUnitIdOffset@ + (i * kUnitNum + j), 0, 0, kFlashWX, kFlashWY
-					//pos kFlashWX * (i + 2), j * kFlashWY
-					//mes "3-" + i + "" + j
 				next
 			next
 			cvbuffer kCaptureBufferID@, ginfo_sx, ginfo_sy
@@ -406,7 +415,7 @@
 				noteget get, k
 				split get, "\t", temp
 				if(temp(0) == "ManualPosition") :manual_getpos_flg@    = limit(int(temp(1)), 0, 2)
-				if(temp(0) == "ShowMode")       :mode_index@           = limit(int(temp(1)), 0, kSceneListSize@ + 2)
+				if(temp(0) == "ShowMode")       :mode_index@           = limit(int(temp(1)), 0, kSceneListSize@ + 3)
 				if(temp(0) == "ShowFleet")      :fleets_index@         = limit(int(temp(1)), 0, kUnitNum@ - 1)
 				if(temp(0) == "ShowUnit")       :units_index@          = limit(int(temp(1)), 0, kFleetNum@ * kUnitNum@ - 1)
 				if(temp(0) == "SaveUnits")      :commands_index@       = limit(int(temp(1)), 0, kFleetNum@ + 1)
@@ -434,6 +443,23 @@
 				if(read_ver >= 16){
 					if(temp(0) == "ShutdownSave")   :auto_save_flg@        = limit(int(temp(1)), 0, 1)
 				}
+				if(read_ver >= 18){
+					if(strmid(temp(0), 0, 9) == "UnitCount"){
+						f = limit(int(strmid(temp(0), 9, strlen(temp(0)) - 9)) - 1, 0, 3)
+						unit_count@(k) = f
+					}
+					if(strmid(temp(0), 0, 10) == "LastUpdate"){
+						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, 44)
+						last_up_date@(t, 0) = limit(int(strmid(temp(1),  0, 4)), 0, 9999)
+						last_up_date@(t, 1) = limit(int(strmid(temp(1),  4, 2)), 0, 12)
+						last_up_date@(t, 2) = limit(int(strmid(temp(1),  6, 2)), 0, 31)
+						last_up_date@(t, 3) = limit(int(strmid(temp(1),  8, 2)), 0, 23)
+						last_up_date@(t, 4) = limit(int(strmid(temp(1), 10, 2)), 0, 59)
+						last_up_date@(t, 5) = limit(int(strmid(temp(1), 12, 2)), 0, 59)
+						last_up_date@(t, 6) = limit(int(strmid(temp(1), 14, 3)), 0, 999)
+					}
+					
+				}
 			next
 			;微修正
 			for k, 0, 3
@@ -453,6 +479,9 @@
 				pos 0, 0
 				gcopy kTempBufferID@, 0, k * kFlashWY, kFlashWX, kFlashWY
 			next
+			gsel kBattleBufferID@
+			pos 0, 0
+			gcopy kTempBufferID@, 0, kSceneListSize@ * kFlashWY, kFlashWX, kFlashWY
 			for k, 0, kFleetNum
 				gsel kFleetIdOffset@ + k
 				pos 0, 0
@@ -476,6 +505,19 @@
 				gzoom wx2_, wy_ * wx2_ / wx_, buffer_id_, px_, py_, wx_, wy_, 1
 			}
 		return
+		// 時刻を格納するためのラッパー関数
+		#deffunc SetLastUpdate int index_
+			last_up_date@(index_, 0) = gettime(0)
+			last_up_date@(index_, 1) = gettime(1)
+			last_up_date@(index_, 2) = gettime(3)
+			last_up_date@(index_, 3) = gettime(4)
+			last_up_date@(index_, 4) = gettime(5)
+			last_up_date@(index_, 5) = gettime(6)
+			last_up_date@(index_, 6) = gettime(7)
+		return
+		// 時刻を表示するためのラッパー関数
+		#defcfunc GetLastUpdate int index_
+		return strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", last_up_date@(index_, 0), last_up_date@(index_, 1), last_up_date@(index_, 2), last_up_date@(index_, 3), last_up_date@(index_, 4), last_up_date@(index_, 5), last_up_date@(index_, 6))
 	#global
 	#module get_num
 		#deffunc DrawSquare int px_, int py_, int wx_, int wy_

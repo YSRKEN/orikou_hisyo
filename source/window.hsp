@@ -13,6 +13,7 @@ goto *main2
 			SetTitle
 			get_pos_flg = TRUE
 			other_get_pos_flg = FALSE
+			get_pos_flg2 = TRUE
 			swbreak
 		case 1
 			// 座標を手動で取得する
@@ -88,6 +89,7 @@ goto *main2
 					SetTitle
 					get_pos_flg = TRUE
 					other_get_pos_flg = FALSE
+					get_pos_flg2 = TRUE
 				}
 			}
 			swbreak
@@ -98,14 +100,18 @@ goto *main2
 				handle = GetKanColleHandle()
 				if(handle == 0) :dialog "ハンドルを取得できませんでした", 0, kSoftName :swbreak
 			}
-			GetClientSize handle, wx, wy
+			dim rect, 4
+			GetClientSize handle, rect
+			wx = rect(2) - rect(0) :wy = rect(3) - rect(1)
 			if((wx < kFlashWX) || (wy < kFlashWY)) :dialog "画面サイズを取得できませんでした", 0, kSoftName :swbreak
 			GetKanColleWindow handle, kDeskBufferID, wx, wy
 			//撮影した画像から座標を検索する
 			GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+			flash_px += rect(0) :flash_py += rect(1)
 			SetTitle
 			get_pos_flg = TRUE
 			other_get_pos_flg = TRUE
+			get_pos_flg2 = TRUE
 			swbreak
 	swend
 return

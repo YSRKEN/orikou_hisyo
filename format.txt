@@ -11,11 +11,11 @@ ShowFleet      [0-3]                 表示したい艦隊(編成画面)
 ShowUnit       ([0-9]|1[0-9]|2[0-3]) 表示したい艦娘(改装画面)
 SaveUnits      [0-5]                 保存したい編成まとめ画像(第1～4艦隊、連合艦隊、支援艦隊)
 HomeBGMMode    (0|1)                 母港BGMを鳴らすか否か
-HomeBGMPath    .+                    母港BGMの保存パス。空の場合は「<NONE>」など何かを書くこと。
+HomeBGMPath    .+                    母港BGMの保存パス。空の場合は「<NONE>」など何かを書くこと
 MapBGMMode     (0|1)                 マップBGMを鳴らすか否か
-MapBGMPath     .+                    マップBGMの保存パス。空の場合は「<NONE>」など何かを書くこと。
+MapBGMPath     .+                    マップBGMの保存パス。空の場合は「<NONE>」など何かを書くこと
 BattleBGMMode  (0|1)                 戦闘BGMを鳴らすか否か
-BattleBGMPath  .+                    戦闘BGMの保存パス。空の場合は「<NONE>」など何かを書くこと。
+BattleBGMPath  .+                    戦闘BGMの保存パス。空の場合は「<NONE>」など何かを書くこと
 DisableName    (0|1)                 名前を隠すか否か
 ShowCursor     (0|1)                 カーソルを表示するか否か
 CheckDeadZone  (0|1)                 大破チェックするか否か
@@ -28,7 +28,13 @@ CounterA3      \d+                   あ号カウンターのボス勝利回数(非負)
 CounterA4      \d+                   あ号カウンターのS勝利回数(非負)
 CounterR       \d+                   ろ号カウンターの値(非負)
 CounterI       \d+                   い号カウンターの値(非負)
-GetFps         [0-6]                 取得FPS。30,20,10,5,3,2,1fpsに対応。
-Zooming        [0-4]                 サブ画面の倍率。50,75,100,150,200％に対応。
+GetFps         [0-6]                 取得FPS。30,20,10,5,3,2,1fpsに対応
+Zooming        [0-4]                 サブ画面の倍率。50,75,100,150,200％に対応
 FlashPositionX (-|)\d+               艦これのディスプレイに対するX座標
 FlashPositionY (-|)\d+               艦これのディスプレイに対するY座標
+UnitCount1     [0-6]                 第1艦隊の艦娘数
+    ～
+UnitCount4     [0-6]                 第4艦隊の艦娘数
+LastUpdate1    (\d){17}              最終更新日時。1～16までは母港画面～ソート画面、
+    ～                               17～20までは編成画面、21～44までは改装画面、45が戦闘画面
+LastUpdate45   (\d){17}              当然バージョンによって対応が変化するので注意
