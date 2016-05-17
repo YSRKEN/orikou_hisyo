@@ -418,6 +418,12 @@
 			next
 			notesel output
 			notesave pic_save_path@(0) + "\\save.txt"
+			// 資材量
+			if(CheckHomeFlg(kFlashBufferID@)){
+				GetSupply kFlashBufferID@, supply_list@
+				supply_log@ += NowTime() + "," + supply_list@(0) + "," + supply_list@(1) + "," + supply_list@(2) + "," + supply_list@(3) + "\n"
+				notesel supply_log@ :notesave "supply.csv"
+			}
 			// 画像
 			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 1)
 			for k, 0, kSceneListSize@
@@ -585,7 +591,7 @@
 			for k, 0, 6
 				buffer kTempBufferID@, 7, 11
 				gcopy flash_id_, 683 + k * 7, 36, 7, 11
-				number = MatchNumber(165, TRUE)
+				number = MatchNumber(150, TRUE)
 				;assert
 				if(number < 10){
 					fuel *= 10
@@ -598,7 +604,7 @@
 			for k, 0, 6
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 680 + k * 8, 55, 8, 11
-				number = MatchNumber(165, TRUE)
+				number = MatchNumber(150, TRUE)
 				;assert
 				if(number < 10){
 					ammo *= 10
@@ -611,7 +617,7 @@
 			for k, 0, 6
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 749 + k * 8, 36, 8, 11
-				number = MatchNumber(165, TRUE)
+				number = MatchNumber(150, TRUE)
 				;assert
 				if(number < 10){
 					steel *= 10
@@ -624,7 +630,7 @@
 			for k, 0, 6
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 749 + k * 8, 55, 8, 11
-				number = MatchNumber(165, TRUE)
+				number = MatchNumber(150, TRUE)
 				;assert
 				if(number < 10){
 					bauxite *= 10
@@ -697,7 +703,7 @@
 				if(flg) :wy__ = y - py__ + 1 :_break
 			next
 		return
-		#defcfunc MatchNumber int thres_, int reverse_flg_
+		#defcfunc MatchNumber_ int thres_, int reverse_flg_
 			id = ginfo_sel :sx = ginfo_sx :sy = ginfo_sy
 			gsel kNumGetBufferID :color 255, 255, 255 :boxf
 			pos 0, 0
@@ -708,6 +714,11 @@
 				NormalThreshold thres_, reverse_flg_
 			}
 			GetSquare px, py, wx, wy
+			;常識的に考えて、面積が小さすぎると数字として成り立たないよね？
+			if((wx * 2 < kMatchSize) || (wy * 2 < kMatchSize)){
+				return 10
+			}
+			;
 			gsel kNumGetBufferID
 			pos 0, 0
 			gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy
@@ -719,4 +730,8 @@
 			cvputimg kCVNumBufferID
 			cvmatch px, py, CV_TM_SQDIFF, kCVNumBufferID, kCVMatchBufferID
 		return limit(int(1.0 * px / (2 * kMatchSize) + 0.5), 0, 11)
+		#defcfunc MatchNumber int thres_, int reverse_flg_
+			number = MatchNumber_(thres_, reverse_flg_)
+			if(number == 11) :number = 1	;暫定的な仕様
+		return number
 	#global

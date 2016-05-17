@@ -534,6 +534,15 @@ return
 	}
 return
 
+//資材グラフを出す
+*show_graph
+	gsel kSupplyGraphID, 2
+return
+//資材グラフを閉じる
+*close_graph
+	gsel kSupplyGraphID, -1
+return
+
 //資源画像を保存
 *save_stock
 	if(CheckHomeFlg(kPutTempWindowID)){

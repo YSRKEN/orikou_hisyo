@@ -24,6 +24,7 @@
 	#enum kDockWindowID		;入渠タイマー
 	#enum kCountWindowID	;○号カウンター
 	#enum kSortListWindowID	;ソート一覧
+	#enum kSupplyGraphID	;資源グラフ
 	#enum kMatchBufferID	;マッチング用の捨てID
 	#enum kDeadZoneWindowID	;大破進撃を阻止するための画面
 	;バッファ用
@@ -89,6 +90,7 @@
 	#const kStatusBarOffset (kStatusBarY - kStatusBarFontSize) / 2
 	;メイン画面のサイズ
 	#const kMainWX kObjSpace + kObjSpaceX * 2
+;	#const kMainWY kObjSpace * 4 + kObjSpaceY * 12
 	#const kMainWY kObjSpace * 4 + kObjSpaceY * 11
 	;カウンター画面
 	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
@@ -196,10 +198,12 @@
 	auto_set_flg      = TRUE
 	auto_save_flg     = TRUE
 	my_folder_flg     = FALSE
+	auto_supply_flg   = TRUE
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
 	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
 	get_handle_flg = TRUE		;ズレ補正時だけOFFになる
 	auto_get_pos_flg  = FALSE	;座標取得を利用した時のみTRUEになる
+	exit_flg = FALSE			;終了時にONになる(Win8対策)
 	;その他
 	dim unit_count, kFleetNum
 	dim unit_count_, kFleetNum

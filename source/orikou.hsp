@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.2.0.2 */
+/* おりこうさんな秘書 Ver.2.0.3 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.2.0.2"
-	#define kSoftVer2       "202"
-	#define kSoftLastUpdate "2015/05/08"
+	#define kSoftVer        "Ver.2.0.3"
+	#define kSoftVer2       "203"
+	#define kSoftLastUpdate "2015/05/12"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -189,6 +189,12 @@
 				sort_index_id = stat
 	sort_index = -1
 
+	//資材グラフ
+	screen kSupplyGraphID, 600, 300
+	gsel kSupplyGraphID, -1
+	title "資材グラフ"
+	button gosub "閉じる", *close_graph
+
 	//メイン画面・サブ画面
 	//(ウィンドウを隣接して配置したいので表示位置を計算している)
 	screen kMainWindowID, kMainWX, kMainWY,,10, 10
@@ -242,6 +248,16 @@
 			button gosub "○号カウンター", *count_task
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 8
 			button gosub "ソート一覧", *show_sort_list
+/*		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
+			button gosub "資材グラフ", *show_graph
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 9
+			button gosub "【資源画像】", *save_stock
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 10
+			button gosub "手動セーブ", *save_soft_data
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 11
+			button gosub "オプション...", *show_option
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 11
+			button gosub "情報...", *about*/
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 9
 			button gosub "【資源画像】", *save_stock
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 9
@@ -274,6 +290,7 @@
 	sort_index_ = sort_index
 	//ループしつつ監視
 	repeat
+		if(exit_flg) :end
 		SetTitle
 		// Flash画面を自動取得
 		if(other_get_pos_flg == FALSE){
@@ -604,6 +621,6 @@
 	dialog "終了しますか？", 2, kSoftName
 	if(stat == 6){
 		if(auto_save_flg) :WriteSaveData
-		end
+		exit_flg = TRUE
 	}
 return
