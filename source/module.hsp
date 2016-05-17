@@ -481,6 +481,10 @@
 					}
 					if(strmid(temp(0), 0, 10) == "LastUpdate"){
 						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, 45)
+						;バージョンによってtにオフセットを掛ける(間違えて上書きされる対策)
+						if((read_ver <= 19) && (t >= 16)) :t += 2
+						if((read_ver == 20) && (t >= 17)) :t += 1
+						;最終更新日時を反映
 						last_up_date@(t, 0) = limit(int(strmid(temp(1),  0, 4)), 0, 9999)
 						last_up_date@(t, 1) = limit(int(strmid(temp(1),  4, 2)), 0, 12)
 						last_up_date@(t, 2) = limit(int(strmid(temp(1),  6, 2)), 0, 31)

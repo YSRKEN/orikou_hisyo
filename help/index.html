@@ -1,0 +1,660 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<link rev="made" href="mailto:ysr.ken@gmail.com">
+		<link rel="index" href="./index.html">
+		<title>おりこうさんな秘書 ヘルプ</title>
+		<style type="text/css">
+			<!-- .underline{text-decoration: underline;}
+			img{border: none;}
+			div{border-style: solid; border-width: 1px; padding: 5px 5px 5px 5px;}-->
+		</style>
+	</head>
+	<body>
+<!-- タイトル -->
+		<h1>おりこうさんな秘書 Ver.2.0.1</h1>
+		<a href="http://www.vector.co.jp/soft/win95/game/se509326.html">http://www.vector.co.jp/soft/win95/game/se509326.html</a>
+		<hr>
+
+<!-- 目次 -->
+		<h1><a name="index">目次</a></h1>
+		<ul>
+			<li><a href="#intro">概要</a></li>
+			<li><a href="#inst">導入・削除</a></li>
+			<li><a href="#howto">操作方法</a><ul>
+				<li><a href="#window">画面構成</a></li>
+				<li><a href="#getpos">座標取得</a></li>
+				<li><a href="#showmode">表示モード</a></li>
+				<li><a href="#save_cap">画像保存</a></li>
+				<li><a href="#auto_bgm">BGM機能</a></li>
+				<li><a href="#tools">各種ツール</a></li>
+				<li><a href="#save_data">セーブについて</a></li>
+				<li><a href="#option">オプション</a></li>
+				<li><a href="#about">その他</a></li>
+			</ul></li>
+			<li><a href="#caution">注意</a></li>
+			<li><a href="#thanks">謝辞</a></li>
+			<li><a href="#history">更新履歴</a></li>
+			<li><a href="#copyright">著作権について</a></li>
+			<li><a href="#comment">コメント</a></li>
+		</ul>
+		<hr>
+
+<!-- 概要 -->
+		<h1><a name="intro">概要</a></h1>
+		<p>　このソフトウェアは、艦これの画面を常に監視しつつ、要所要所でスクショを自動で撮ってくれるソフトです。<br>
+		　これにより、いつでも母港画面や編成画面や戦果報告などを確認できるようになるので、例えば次のような用途に役立ちます。</p>
+		<ul>
+			<li>戦果報告を適当にクリックで飛ばしたから大破してないかが分からない場合に、<strong>遡って確認することが出来る</strong></li>
+			<li>艦隊の編成や装備も確認できるので、進軍中でも遠征に出した<strong>編成をサッと見られる</strong></li>
+			<li>名前隠し機能もあるので、スクショでうっかり<strong>提督名を晒してしまうこともない</strong></li>
+		</ul>
+		<p>　また特殊な機能として、次のような機能も実装しています。</p>
+		<ul>
+			<li>改装画面でのスクショを利用した<strong>「装備まとめ画像作成機能」</strong></li>
+			<li>母港・マップ・戦闘画面において<strong>「BGMを自動で流せる機能」</strong></li>
+			<li>必要経験値や周回数を計算する<strong>「経験値計算機」</strong></li>
+			<li>入渠画面を画像で読み取り、自動でカウントする<strong>「入渠タイマー」</strong></li>
+			<li>あ・い・ろ号のカウントを支援する<strong>「○号カウンター」</strong></li>
+			<li>編成画面でのソート一覧を見やすくまとめる<strong>「ソートまとめ画像作成機能」</strong></li>
+			<li>大破出撃や大破進撃を未然に防ぐ<strong>「大破チェック機能」</strong></li>
+		</ul>
+		<p>　最新の開発状況や更新情報は、次のスレにまとめているので一度覗いてみてください。</p>
+		<div>【艦これ】おりこうさんな秘書【スクショ】<br>
+		<a href="http://anago.open2ch.net/test/read.cgi/software/1424098430/">http://anago.open2ch.net/test/read.cgi/software/1424098430/</a></div>
+		<p><a href="#index">↑目次へ戻る</a></p>
+		<hr>
+
+<!-- 導入・削除 -->
+		<h1><a name="inst">導入・削除</a></h1>
+		<h2>インストール方法</h2>
+		<p>　zipファイルを解凍するだけです。セーブデータは基本的に持ち越せます。</p>
+		<h2>アンインストール方法</h2>
+		<p>　ファイルをそのまま削除するだけです。レジストリは使用しません。</p>
+		<h2>ファイル構成</h2>
+		<p><strong>　先頭に☆が付いたファイルは、動作に必須なファイルです。</strong><br>
+		　また、セーブ時には<a href="../save.txt">save.txt</a>および<a href="../save.png">save.png</a>がorikou.exeと同フォルダに作成されます。</p>
+		<table border="1" summary="orikou.exe・hspcv.dll・hspext.dll・cursor.pngが必須で、他は必須ではありません">
+			<tr>
+				<th abbr="ファイル・フォルダ名">ファイル・フォルダ名</th>
+				<th abbr="説明">説明</th>
+			</tr>
+			<tr>
+				<td>☆orikou.exe</td>
+				<td>実行ファイル。これをクリックして実行します</td>
+			</tr>
+			<tr>
+				<td>☆hspcv.dll</td>
+				<td>動作に必要なライブラリ。主に画像処理を担当します</td>
+			</tr>
+			<tr>
+				<td>☆hspext.dll</td>
+				<td>動作に必要なライブラリ。主にファイル処理を担当します</td>
+			</tr>
+			<tr>
+				<td>☆cursor.png</td>
+				<td>カーソルアイコン画像(自作)。<span style="color: #ff0000; background-color: #FFFFFF">赤色(255,0,0)</span>が透過するので自由に改造できます</td>
+			</tr>
+			<tr>
+				<td><a href="../format.txt">format.txt</a></td>
+				<td>セーブデータの書式についての説明書。手で編集したい場合にどうぞ</td>
+			</tr>
+			<tr>
+				<td>sourceフォルダ</td>
+				<td>ソースコード。Manual.txtで内部構造を詳しく説明しています</td>
+			</tr>
+			<tr>
+				<td>helpフォルダ</td>
+				<td>取扱説明書(HTML版)。index.htmlがこの文書です</td>
+			</tr>
+		</table>
+		<p><a href="#index">↑目次へ戻る</a></p>
+		<hr>
+
+<!-- 操作方法 -->
+		<h1><a name="howto">操作方法</a></h1>
+		<h2><a name="window">画面構成</a></h2>
+			<p>　気になる箇所をクリックしてみてください。説明する箇所へと飛びます。</p>
+			<h3><a name="main_window">メイン画面(境界を<span style="color: #ff0000; background-color: #FFFFFF">赤い線</span>で図示)</a></h3>
+			<img src="./images/main_window.png" alt="メイン画面" usemap="#map_mw" width="200" height="378">
+			<map name="map_mw">
+				<area shape="rect" href="#getpos"    alt="座標取得"                 accesskey="G" coords="8,30,191,65">
+				<area shape="poly" href="#showmode"  alt="表示モード"               accesskey="M" coords="8,67,99,67,99,98,191,98,191,125,8,125">
+				<area shape="rect" href="#save_cap"  alt="画像保存(スクショ)"       accesskey="C" coords="101,67,191,96">
+				<area shape="rect" href="#save_cap"  alt="画像保存(装備まとめ画像)" accesskey="W" coords="8,127,191,157">
+				<area shape="rect" href="#auto_bgm"  alt="BGM機能"                  accesskey="B" coords="8,159,191,249">
+				<area shape="poly" href="#tools"     alt="各種ツール"               accesskey="T" coords="8,251,191,251,191,308,8,308">
+				<area shape="rect" href="#save_cap"  alt="画像保存(資源まとめ画像)" accesskey="H" coords="8,310,99,336">
+				<area shape="rect" href="#save_data" alt="セーブについて"           accesskey="S" coords="101,310,191,336">
+				<area shape="rect" href="#option"    alt="オプション"               accesskey="O" coords="8,338,99,369">
+				<area shape="rect" href="#about"     alt="その他"                   accesskey="A" coords="101,338,191,369">
+			</map>
+			<h3><a name="sub_window">サブ画面</a></h3>
+			<a href="#showmode"><img src="./images/sub_window.png" alt="サブ画面" width="416" height="302"></a>
+			<h3>経験値計算機・入渠タイマー・○号カウンター・ソート一覧</h3>
+			<p>　<a href="#tools">各種ツール</a>の項に掲載しています。</p>
+			<h3>オプション画面</h3>
+			<p>　<a href="#option">オプション</a>の項に掲載しています。</p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="getpos">座標取得</a></h2>
+			<p>　<a href="#main_window">メイン画面</a>にて「座標取得」ボタンを押すと、ディスプレイ全体から艦これの画面が検索され、その左上の座標がサブ画面にも表示されます。<br>
+			　この際、<strong>艦これの画面はブラウザにおける100％表示(800x480)</strong>であることと、その周囲1ピクセル以上が同色の背景である必要があります。<br>
+			　マルチディスプレイ環境の場合、<strong>検索範囲は全てのディスプレイを含む長方形領域</strong>であることに注意してください。<br>
+			　また、「座標取得」ボタンの左にあるコンボボックスから、取得アルゴリズムを選択できます。
+			</p>
+			<table border="1" summary="自動設定・手動設定・自動設定IIがありますがオススメは最後です">
+				<tr>
+					<th abbr="設定名">設定名</th>
+					<th abbr="説明">説明</th>
+				</tr>
+				<tr>
+					<td>自動設定</td>
+					<td>　ディスプレイ全体のスクショから自動で検索します。<strong>一番楽</strong>な形式です。</td>
+				</tr>
+				<tr>
+					<td>手動設定</td>
+					<td>この状態で「座標取得」ボタンを押すと、マウスで艦これの画面を含む領域を手動で選択するよう求められます。<br>
+					Escキーでキャンセル可能ですが、選択するとその範囲から艦これの画面を検索します。<strong>自動設定が使えない時</strong>に。</td>
+				</tr>
+				<tr>
+					<td>自動設定II</td>
+					<td>この状態で「座標取得」ボタンを押すと、艦これの画面を含むウィンドウ(ブラウザ)を5秒以内にアクティブにするよう求められます。<br>
+					すると、アクティブになったウィンドウから艦これの画面を検索します。これが<strong>一番オススメ</strong>の形式です(理由は後述)。</td>
+				</tr>
+			</table>
+			<p>　これ以降は、艦これの画面を常時記録しながら、自動でシーン毎にスクショ画像が振り分けられていきます(<a href="#showmode">表示モード</a>で後述)。<br>
+			　この際、「自動設定」「手動設定」と「自動設定II」とでは<span class="underline">記録するアルゴリズムが多少異なっている</span>ことに注意が必要です。<br>
+			　詳細を割愛して要点だけ述べると、後者だと<strong>PCへの負荷がより低く</strong>、おまけに<strong>艦これの画面が他のウィンドウに隠されていても問題なく記録できる</strong>のです。<br>
+			　その理由が知りたい方は、Win32APIについて調べたり次のページを読んだりしてください。</p>
+			<div>Aero有効時におけるデスクトップキャプチャについて<br>
+			<a href="http://amalabo.blog35.fc2.com/blog-entry-242.html">http://amalabo.blog35.fc2.com/blog-entry-242.html</a></div><br>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="showmode">表示モード</a></h2>
+			<p>　画像保存ボタンの左にあるコンボボックスから、<a href="#sub_window">サブ画面</a>にどのシーンを表示するかを選択できます。以下に一覧を示します。</p>
+			<table border="1" summary="表示モードの説明。主に現在画面・母港画面・戦果報告・編成画面・改装画面・戦闘画面が使われると思われます">
+				<tr>
+					<th abbr="表示モード">表示モード</th>
+					<th abbr="説明">説明</th>
+				</tr>
+				<tr>
+					<td>現在画面</td>
+					<td>その瞬間に、艦これの画面に表示されている場面</td>
+				</tr>
+				<tr>
+					<td>母港画面</td>
+					<td>秘書艦と6つの大きな歯車が鎮座している場面</td>
+				</tr>
+				<tr>
+					<td>工廠画面</td>
+					<td>工廠ドックの場面(通常時)</td>
+				</tr>
+				<tr>
+					<td>数値設定</td>
+					<td>工廠ドックの場面(建造・開発等の暗転時)</td>
+				</tr>
+				<tr>
+					<td>入渠画面</td>
+					<td>入渠ドックの場面</td>
+				</tr>
+				<tr>
+					<td>戦績表示</td>
+					<td>提督経験値、最大保有可能数等が表示されている場面</td>
+				</tr>
+				<tr>
+					<td>ランキング</td>
+					<td>提督経験値がランキングされている場面</td>
+				</tr>
+				<tr>
+					<td>マップ画面</td>
+					<td>海域に出撃してからの道中(羅針盤部分)の場面</td>
+				</tr>
+				<tr>
+					<td>昼戦画面</td>
+					<td>昼戦の場面</td>
+				</tr>
+				<tr>
+					<td>夜戦画面</td>
+					<td>夜戦の場面</td>
+				</tr>
+				<tr>
+					<td>交戦結果</td>
+					<td>戦闘終了直後の、敵味方の損害状況が表示された場面</td>
+				</tr>
+				<tr>
+					<td>戦果報告</td>
+					<td>MVPが表示されている場面</td>
+				</tr>
+				<tr>
+					<td>演習一覧</td>
+					<td>演習時に表示される5つの艦隊の場面</td>
+				</tr>
+				<tr>
+					<td>演習個別</td>
+					<td>演習相手を選択した際の詳細表示場面</td>
+				</tr>
+				<tr>
+					<td>中破画面</td>
+					<td>中破した際の場面</td>
+				</tr>
+				<tr>
+					<td>大破画面</td>
+					<td>大破した際の場面</td>
+				</tr>
+				<tr>
+					<td>ソート画面</td>
+					<td>編成画面で「変更」をクリックした際出る一覧が載っている場面</td>
+				</tr>
+				<tr>
+					<td>出撃画面</td>
+					<td>出撃ボタンを押す直前の場面</td>
+				</tr>
+				<tr>
+					<td>補給画面</td>
+					<td>補給時の場面</td>
+				</tr>
+				<tr>
+					<td>編成画面</td>
+					<td>編成の場面。第1～第4艦隊まで対応</td>
+				</tr>
+				<tr>
+					<td>改装画面</td>
+					<td>改装の場面。第1～第4艦隊まで対応</td>
+				</tr>
+				<tr>
+					<td>戦闘画面</td>
+					<td>昼戦画面or夜戦場面</td>
+				</tr>
+			</table>
+			<p>　なお、それぞれについて、<span class="underline">最後に記録した日時がサブ画面下のステータスバーに表示されます</span>。<br>
+			　また、<strong>大破艦が存在する場合はその警告</strong>、そうでない場合は<strong>各艦隊毎の艦娘数</strong>が、日時の横に表示されます(認識してない場合は0)。</p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="save_cap">画像保存</a></h2>
+			<p>　【画像保存】ボタン、【○○艦隊】ボタン、【資源画像】ボタンは全て何らかの画像を保存するものです。<br>
+			　しかし、その役割は大きく異なっています。以下にその違いを示します。</p>
+			<table border="1" summary="画像を保存するボタンの違いについての説明">
+				<tr>
+					<th abbr="名称">名称</th>
+					<th abbr="説明">説明</th>
+				</tr>
+				<tr>
+					<td>【画像保存】</td>
+					<td>現在サブ画面に表示されている内容を<strong>そのまま保存</strong>します。<br>
+					一般的に「スクショ」と呼ばれるのはこれで、<strong>一番オーソドックス</strong>だと言えます。<br>
+					<a href="#option">オプション</a>で「名前隠し」や「画像クロップ」にチェックを入れていると、このモードに反映されます。</td>
+				</tr>
+				<tr>
+					<td>【○○艦隊】</td>
+					<td>このボタンの左にあるコンボボックスに従い、<strong>装備まとめ画像を自動生成して保存</strong>します。<br>
+					種類としては、第1～第4艦隊、連合艦隊(第1+2艦隊)、支援艦隊(第3+4艦隊)の計6パターンが選べます。<br>
+					当然ですが、<strong>改装画面でその艦娘を一度は表示していないとその箇所は記録されません</strong>。<br>
+					また、5隻以下の編成の場合、空き場所は自動で空白になります。</td>
+				</tr>
+				<tr>
+					<td>【資源画像】</td>
+					<td>「鎮守府画面」が表示されてる際にのみ機能し、<strong>時刻と資源だけ纏められた画像</strong>を保存します。<br>
+					(「鎮守府画面」は、「画面上部に資源状況が表示されている状況」全てを指します)<br>
+					<a href="http://ch.nicovideo.jp/numenume/blomaga/ar614197">とあるスクショソフト</a>にも同様の機能が搭載されています……と言うか向こうの方が先なんですけどね。</td>
+				</tr>
+			</table>
+			<p>　画像の保存先は、デフォルトではこのソフトのexeファイルと同じフォルダですが、<a href="#option">オプション</a>で変更可能です。<br>
+			　またファイル名は、【画像保存】でかつ表示モードが「現在画面」以外の場合のみ「最後に記録した日時」、それ以外ではボタンを押した時刻で保存されます。<br>
+			　ちなみに後者の場合、<strong>連打しても連番で保存される</strong>ので誤って上書きされることはありません。<br>
+			　また、画像の形式はフルカラーな<a href="http://ja.wikipedia.org/wiki/Portable_Network_Graphics">png</a>ファイルです。</p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="auto_bgm">BGM機能</a></h2>
+			<p>　母港画面・マップ画面・戦闘画面のそれぞれで好きなBGMを流すことができます。<br>
+			(ここでの母港画面とは、表示モードの「マップ画面」と「戦闘画面」以外の全てを指します)<br>
+			　コンボボックスで状態を変更したいBGMを選んだ後、次の4ボタンで操作します。</p>
+			<div><dl>
+				<dt>参照...</dt><dd>BGMのファイルを参照します。形式はwav・mp3・wmaに対応しています。</dd>
+				<dt>切り替え</dt><dd>鳴らすか否かを切り替えます。鳴ってる最中でもOFFにすると鳴り止みます。</dd>
+				<dt>強制再生</dt><dd>そのシーンにおけるBGMを<strong>強制的に再生します</strong>。</dd>
+				<dt>強制停止</dt><dd>鳴っているBGMを<strong>強制的に止めます</strong>。</dd>
+			</dl></div>
+			<p>　これらのBGMは、それぞれのシーンに入った際に鳴りだし、別のシーンに移動すると鳴り止みます。<br>
+			　具体的には、マップ画面に入るまでは<strong>母港BGM</strong>、マップ画面では<strong>マップBGM</strong>、戦闘画面では<strong>戦闘BGM</strong>が鳴ります。<br>
+			　<span class="underline">交戦結果～進撃撤退の選択画面までは無音となる</span>ことに注意してください。</p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="tools">各種ツール</a></h2>
+			<p>　だいたい見たまんまなので、それぞれではポイントを書くだけに留めます。</p>
+			<h3>経験値計算機</h3>
+			<p>　Lv.XからLv.Yまで上げる際にどれだけの経験値が必要かを計算します。<br>
+			　レベリングで稼ぐとした場合、どれだけ周回する必要があるかも計算できます。</p>
+			<img src="./images/exp_calc.png" alt="経験値計算機" width="240" height="214">
+			<h3>入渠タイマー</h3>
+			<p>　艦これの画面を入渠画面にした上で「更新」ボタンを押すと、艦これの画面を読み取ってカウントしてくれます。<br>
+			　向かって左が残り時間、右が終了予定時刻です。なお、<strong>ゲームの画像素材は認識に一切使用していません</strong>。全て自前です。</p>
+			<img src="./images/dock.png" alt="入渠タイマー" width="208" height="186">
+			<h3>○号カウンター</h3>
+			<p>　各ボタンでカウント、リセットボタンで0回にリセットされます。カウントはちゃんと<a href="save_data">セーブ</a>されるのでご心配なく。</p>
+			<img src="./images/counter.png" alt="○号カウンター" width="344" height="170">
+			<h3>ソート一覧作成機能</h3>
+			<p>　まず艦これの画面を編成画面にした後、ゲーム画面の方で変更ボタンを押すと艦娘のリストが表示されますね？<br>
+			　その状態でソフトの「追加」ボタンを押すと、ソート画面の一覧に画像が追加されます。<br>
+			　リストには「追加」ボタンを押した時刻で表示され、それぞれクリックするとプレビューされます。<br>
+			　「↑」「↓」「削除」「全削除」ボタンの意味を改めて書く必要はないでしょう。<br>
+			　後は出力する際の列数を指定して「作成」ボタンを押せば、ソート一覧画像が保存されます。<br>
+			　なお、<strong>ソート一覧には艦船名およびレベルしか表示されません</strong>。</p>
+			<img src="./images/sort_list.png" alt="ソート一覧作成機能" width="360" height="310">
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="save_data">セーブについて</a></h2>
+			<p>　このソフトウェアの設定および内部で記録された画像は、ソフト終了時および手動でセーブ<strong>できます</strong>。<br>
+			　つまり<a href="#main_window">メイン画面</a>の「手動セーブ」、および<a href="#option">オプション</a>の「終了セーブ」の<strong>どちらも利用しない場合はセーブされません</strong>。<br>
+			　セーブデータ(<a href="../save.txt">save.txt</a>および<a href="../save.png">save.png</a>)は、ソフト起動時に自動で読み込まれます。<br>
+			　セーブデータを違うVerのおり秘書に移した場合、<strong>完全な互換性は保証されない</strong>のでご容赦ください。<br>
+			　(もちろん、<a href="../format.txt">format.txt</a>を読みつつちまちま修正すればいいのですが)
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="option">オプション</a></h2>
+			<p>　各項目について解説します。</p>
+			<table border="1" summary="オプションの各項目についての説明">
+				<tr>
+					<th abbr="項目名">項目名</th>
+					<th abbr="説明">説明</th>
+				</tr>
+				<tr>
+					<td>名前隠し</td>
+					<td>サブ画面から提督名を黒塗りで隠します。</td>
+				</tr>
+				<tr>
+					<td>カーソル</td>
+					<td>サブ画面にマウスカーソルを表示します。<br>
+					cursor.pngにおいて<span style="color: #ff0000; background-color: #FFFFFF">赤色(255,0,0)</span>が透過するので、自由に改造できます。</td>
+				</tr>
+				<tr>
+					<td>大破チェック</td>
+					<td>出撃画面or戦果報告の際に大破艦が存在していた場合、出撃ボタンおよび進撃ボタンを白い枠で押せなくします。<br>
+					この枠は他のシーンに移るか、「大破チェック」のチェックを外すと消えます。<strong>チェック推奨</strong>。</td>
+				</tr>
+				<tr>
+					<td>画面クロップ</td>
+					<td>通常【画像保存】ボタンを押すと、800x480なスクショが保存されます。<br>
+					しかしここにチェックが入っていると、編成画面では編成部分のみ、改装画面では艦娘部分のみのスクショが保存されます。</td>
+				</tr>
+				<tr>
+					<td>ズレ補正</td>
+					<td>ブラウザの位置を動かしたりして、艦これの画面がズレた際、それを自動で検知して修正します。<br>
+					当然、「手動設定」の際はズレる度に選択を強いられるのでご了承下さい。<br>
+					ちなみにこの検知は、「手動設定」では5秒間隔、それ以外では1秒間隔で行われます。</td>
+				</tr>
+				<tr>
+					<td>終了セーブ</td>
+					<td>ソフト終了時に自動でセーブされます。<strong>チェック推奨</strong>。</td>
+				</tr>
+				<tr>
+					<td>フォルダ指定</td>
+					<td>通常、スクショはこのソフトのexeファイルと同じフォルダですが、ここにチェックが入っていると<br>
+					その下に表示されているフォルダに保存されます。もちろん「参照」ボタンでフォルダを変更可能です。</td>
+				</tr>
+				<tr>
+					<td>fps</td>
+					<td>画面を記録するfpsを設定します。30・20・15・10・5・3・2・1fpsを指定出来ます。</td>
+				</tr>
+				<tr>
+					<td>倍率</td>
+					<td>サブ画面の、艦これの画面に対する比率を設定します。50・75・100・150・200％を指定できます。</td>
+				</tr>
+			</table>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="about">その他</a></h2>
+			<p>　ソフト名・おり秘書の作成者・最終更新日が表示されます。</p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<p><a href="#index">↑目次へ戻る</a></p>
+		<hr>
+
+<!-- 注意 -->
+		<h1><a name="caution">注意</a></h1>
+		<ul>
+			<li>このソフトの原理としては、Win32APIでスクショを取り、それを画像認識して記録するといったものです。<br>
+			ですから、<strong>コマンドを送りつけるBOTやマウスを自動操作するマクロ、およびプロキシで通信を拾う専ブラとは別物です</strong>。<br>
+			どういったツールが駄目なのかは「<a href="http://blog.gamelogbook.com/2014/01/blog-post_1849.html">マクロチートツールに対する艦これ公式発表</a>」に詳しく纏められています。
+			……大本営(運営)のツイートからするに、自動操作系や、本来見えない情報(cond値など)を表示できる系のソフトは駄目なようです。<br>
+			つまり、艦これの画面に出たものをただ記録するだけのおり秘書は大丈夫、なはず。</li>
+			<li>前述のように、艦これの画面は<strong>100％表示(800x480)のもの以外には対応していません</strong>。<br>
+			できれば対応したいのですが、アルゴリズムの都合上仕方ないのです……。</li>
+			<li>画像保存機能およびセーブデータ保存でドライブに書き込む際、セキュリティに阻まれることがあります。<br>
+			具体的にはWindows SmartScreenや、各種セキュリティソフトなどで警告が表示されることがあります。<br>
+			もちろん<strong>おり秘書はウイルスではありませんしウイルスチェックもしています</strong>が……。</li>
+			<li>装備まとめ画像作成時に、艦娘の順番を変更及び外した場合の対応が<strong>雑</strong>です。<br>
+			例えば「吹雪」「白雪」「初雪」といった艦隊において、編成画面で吹雪や白雪を外した場合、<br>
+			まとめ画像を保存すると吹雪や白雪ではなく初雪が外された画像になってしまいます。<br>
+			これは、<strong>編成画面への変更があった際、艦船名は見ずにただ艦船数しか見てない</strong>ことに由来します。<br>
+			要するに、<strong>「装備まとめ画像を作成する際は、毎回改装画面でその艦隊全員分のページに切り替えてね」</strong>ということです。</li>
+			<li>このソフトは「<a href="http://hsp.tv/">Hot Soup Processor</a>」というプログラミング言語で記述されています。<br>
+			<strong>文法も簡単</strong>だし、<strong>ツールやゲームを作る際には超便利</strong>なのでみんなも使ってみよう！</li>
+			<li>バグによる記録画像の消失など、ソフト使用によって生じた損失については責任を取れませんのでご了承下さい。</li>
+		</ul>
+		<p><a href="#index">↑目次へ戻る</a></p>
+		<hr>
+
+<!-- 謝辞 -->
+		<h1><a name="thanks">謝辞</a></h1>
+		<p>　この方々がいなければこのソフトウェアは生まれませんでした。深く感謝いたします。</p>
+		<table border="1" summary="謝辞">
+			<tr>
+				<th abbr="タイトル">タイトル</th>
+				<th abbr="作者">作者(敬称略)</th>
+				<th abbr="URL">URL</th>
+			</tr>
+			<tr>
+				<td>艦これ一覧めいかー</td>
+				<td>kanahiron</td>
+				<td><a href="http://www.vector.co.jp/soft/winnt/game/se508332.html">http://www.vector.co.jp/soft/winnt/game/se508332.html</a></td>
+			</tr>
+			<tr>
+				<td>赤城さんのお風呂タイマー</td>
+				<td>Satofumi Kamimura</td>
+				<td><a href="https://sites.google.com/site/bathtimer/">https://sites.google.com/site/bathtimer/</a></td>
+			</tr>
+			<tr>
+				<td>HSP-NEXT</td>
+				<td>sakura</td>
+				<td><a href="http://hspnext.com/index.html">http://hspnext.com/index.html</a></td>
+			</tr>
+			<tr>
+				<td>Advanced HSP</td>
+				<td>ちょくと</td>
+				<td><a href="http://chokuto.ifdef.jp/advanced/index.html">http://chokuto.ifdef.jp/advanced/index.html</a></td>
+			</tr>
+			<tr>
+				<td>Let's HSP!</td>
+				<td>Kpan</td>
+				<td><a href="http://lhsp.s206.xrea.com/">http://lhsp.s206.xrea.com/</a></td>
+			</tr>
+			<tr>
+				<td>プログラミング工房</td>
+				<td>chrono</td>
+				<td><a href="http://lldev.jp/index.html">http://lldev.jp/index.html</a></td>
+			</tr>
+			<tr>
+				<td>中井技術工房</td>
+				<td>中井喜博</td>
+				<td><a href="http://nakai99.sakura.ne.jp/">http://nakai99.sakura.ne.jp/</a></td>
+			</tr>
+			<tr>
+				<td>あまラボ</td>
+				<td>amaman</td>
+				<td><a href="http://amalabo.blog35.fc2.com/">http://amalabo.blog35.fc2.com/</a></td>
+			</tr>
+			<tr>
+				<td>艦これ記録係</td>
+				<td>WGSY-UIRO</td>
+				<td><a href="http://ch.nicovideo.jp/numenume/blomaga/ar614197">http://ch.nicovideo.jp/numenume/blomaga/ar614197</a></td>
+			</tr>
+			<tr>
+				<td>HTMLクイックリファレンス</td>
+				<td>猿橋大氏</td>
+				<td><a href="http://www.htmq.com/">http://www.htmq.com/</a></td>
+			</tr>
+			<tr>
+				<td>Another HTML-lint</td>
+				<td>石野恵一郎</td>
+				<td><a href="http://openlab.ring.gr.jp/k16/htmllint/index.html">http://openlab.ring.gr.jp/k16/htmllint/index.html</a></td>
+			</tr>
+			<tr>
+				<td>超初心者のためのホームページ作成講座</td>
+				<td>？</td>
+				<td><a href="http://park16.wakwak.com/~html-css/index.html">http://park16.wakwak.com/~html-css/index.html</a></td>
+			</tr>
+		</table>
+		<p><a href="#index">↑目次へ戻る</a></p>
+		<hr>
+
+<!-- 更新履歴 -->
+		<h1><a name="history">更新履歴</a></h1>
+		<table border="1" summary="更新履歴">
+			<tr>
+				<th abbr="バージョン">バージョン</th>
+				<th abbr="公開日">公開日</th>
+				<th abbr="変更箇所">変更箇所</th>
+			</tr>
+			<tr>
+				<td>Ver.2.0.1</td>
+				<td>2015/05/04</td>
+				<td>・工廠画面1を工廠画面に、工廠画面2を数値設定に名前変更した。<br>
+				・認識可能な場面に補給画面を追加した。<br>
+				<strong>・ReadmeをHTML形式に切り替えた。</strong><br>
+				・セーブデータ移行の際、過去のセーブデータをそのまま持ってきても最終更新日時が壊れないようにした。</td>
+			</tr>
+			<tr>
+				<td>Ver.2.0</td>
+				<td>2015/05/02</td>
+				<td>・オプション画面を新設。これにより画面サイズがコンパクトになった。<br>
+				・大破チェックを出撃時にも行うようにした。<br>
+				・スクリーンショットの保存フォルダを指定できるようにした。<br>
+				<strong>・スクリーンショット保存時、撮影時間をその画像の最終更新日時にした。<br>
+				つまり、例えば5/3が最終更新日時な画像を5/6に保存した際、<br>
+				従来は5/6の日付でファイル名だったのが今回からは5/3のファイル名になる。</strong><br>
+				・資源部分のみのスクリーンショットを撮れるようにした。<br>
+				・座標取得の精度を上げた。<br>
+				・取得fpsに「20fps」を追加した。<br>
+				・その他細かいバグ(改装画面における艦娘数認識がおかしいなど)を修正した。</td>
+			</tr>
+			<tr>
+				<td>Ver.1.9</td>
+				<td>2015/04/30</td>
+				<td>・編成まとめ画像作成時に、艦隊毎の艦娘数を誤爆する不具合を修正。<br>
+				また、各艦隊の艦娘数をいつでも確認できるようにした。</td>
+			</tr>
+			<tr>
+				<td>Ver.1.8</td>
+				<td>2015/04/28</td>
+				<td><strong>・サブ画面に、各場面毎の最終更新日時を表示するようにした(セーブもされる)。</strong><br>
+				・シーンに「戦闘画面」を新設。昼戦画面と夜戦画面で最後に表示したものを記録する。<br>
+				……まあこれVer.1.3まで付いてた「戦闘画面」を再現しただけなんですけどね！<br>
+				<strong>・大破チェックの仕様を変更して、大破発生時は進撃ボタンがありそうな部分を別画面で隠すようにした。<br>
+				チェックを外すか別のシーンに移行すれば消えます。</strong><br>
+				・自動ズレ補正機能のバグを修正。真横(左)に動く場合に検出してなかった……。<br>
+				・大破チェックの仕様変更に応じて、自動設定IIでの取得方法を微妙に変更。<br>
+				具体的にはクライアント領域だけではなく非クライアント領域を含めてキャプチャするようにした。<br>
+				<strong>これだけでAPIがガラっと変わる</strong>のがWinAPIの恐ろしさよ……。<br>
+				またこれに伴い、自動設定IIでもセーブされた座標がちゃんと効くようになった。<br>
+				(今まではクライアント領域基準の座標だったので「自動設定」「手動設定」とかに使いまわせなかった)</td>
+			</tr>
+			<tr>
+				<td>Ver.1.7</td>
+				<td>2015/04/27</td>
+				<td><strong>「自動設定II」を新設。艦これの画面が他の画面に隠されていても取得できるようになった。</strong></td>
+			</tr>
+			<tr>
+				<td>Ver.1.6</td>
+				<td>2015/04/26</td>
+				<td>・自動ズレ補正機能にて、座標取得を手動設定にしていた場合は再取得の間隔を1秒ではなく5秒にした。<br>
+				そうしないと、「連続でマウス選択を迫られてチェック外せない」といった事故が頻発するので……。<br>
+				・ソートまとめ画像作成機能を追加した。<br>
+				・終了時のセーブの有無をチェックボックスで選べるようにした。</td>
+			</tr>
+			<tr>
+				<td>Ver.1.5</td>
+				<td>2015/04/21</td>
+				<td><strong>・手動セーブ機能＆終了時セーブ機能を実装。<br>
+				これにより、終了して起動しなおしても設定とスクショが残せるようになった。</strong><br>
+				・マルチモニタに正式対応。どのディスプレイにあっても認識できるようになった。<br>
+				・編成まとめ画像作成時に、以前の編成時の艦娘データが残ってしまう不具合を修正。<br>
+				これにより、5隻以下の編成を記録する際にいつでも正しく記録できるようになる。<br>
+				<strong>・自動ズレ補正機能を実装。これにより、画面がズレても自動で戻せるようになった。</strong><br>
+				・ソースコードを読み解くためのマニュアルを付属させた。</td>
+			</tr>
+			<tr>
+				<td>Ver.1.4</td>
+				<td>2015/04/19</td>
+				<td><strong>・コードを分割して分かりやすくした。と言うか全面的に書き直した。</strong><br>
+				・サブ画面も最前面表示にした。また、デフォルトでは50％表示にした。<br>
+				・保存可能なシーンを大幅に拡充した。それに伴い、演習個別でボタンを選択していると認識されない不具合を修正した。<br>
+				・画面クロップ機能を搭載。これにより、編成画面で編成のみ、改装画面で艦娘のみを保存できるようにした。<br>
+				・○号カウンターを各任務毎にリセットできるようにした。<br>
+				・入渠タイマーが「現在入渠画面が表示されている時」じゃないと更新できないようにした。誤作動防止のためなのでご理解ください。<br>
+				・<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>の利用を辞めた。と言うか<strong>HSPでパイプ実行すると安定しなさすぎる</strong>んだよ！<br>
+				なんでしょっちゅうフリーズしやがるのか……？<br>
+				(<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>が悪いとは言ってない。ほぼ間違いなくHSP側が悪いかと)</td>
+			</tr>
+			<tr>
+				<td>Ver.1.3</td>
+				<td>2015/02/23</td>
+				<td>・サブ画面のマウスカーソル表示を、現在状況モードのみに限定した。<br>
+				・サブ画面に表示されてるのが入渠画面でない時に入渠タイマーが使えないのを修正した。<br>
+				・○○艦隊保存機能でのファイルパスがおかしかったのを修正した。<br>
+				・演習一覧・演習個別の記録に対応した。<br>
+				・<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>を利用して文字認識の精度を上げた。<br>
+				・上記の機能を追加するために、ボタン等を少しだけ小さくした。</td>
+			</tr>
+			<tr>
+				<td>Ver.1.2</td>
+				<td>2015/02/19</td>
+				<td>・サブ画面の更新頻度を1～30fpsまで調整できるようにした。<br>
+				・サブ画面にマウスカーソルを表示させられるようにするオプションを付けた。</td>
+			</tr>
+			<tr>
+				<td>Ver1.1</td>
+				<td>2015/02/18</td>
+				<td><strong>・【画像保存】ボタンで、保存される画像のサイズが「倍率～～％」に影響されないようにした。<br>
+				これにより、文字が潰れずに安心して保存できるようになった。</strong><br>
+				・「倍率～～％」に拡大の方も実装した。大きなディスプレイでもこれで安心？<br>
+				・中破・大破した際の画像も自動記録できるようにした。<br>
+				・経験値計算機と入渠タイマーを追加実装した。</td>
+			</tr>
+			<tr>
+				<td>Ver1.0</td>
+				<td>2015/02/15</td>
+				<td>初版。</td>
+			</tr>
+		</table>
+		<p><a href="#index">↑目次へ戻る</a></p>
+		<hr>
+
+<!-- 著作権について -->
+		<h1><a name="copyright">著作権について</a></h1>
+		<div><dl>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.2.0.1</dd>
+			<dt>種別</dt><dd>フリーウェア</dd>
+			<dt>種類</dt><dd>攻略・プレイ支援</dd>
+			<dt>開発者</dt><dd>YSR</dd>
+			<dt>動作環境</dt><dd>Microsoft Windows 98,Me,2000,XP(NT4.0以降を含む),Vista,7,8,8.1</dd>
+			<dt>開発言語</dt><dd>Hot Soup Processor ver.3.4beta</dd>
+			<dt>連絡先</dt><dd><a href="mailto:ysr.ken@gmail.com">ysr.ken@gmail.com</a></dd>
+			<dt>Webページ</dt><dd><a href="http://www.vector.co.jp/vpack/browse/person/an050622.html">http://www.vector.co.jp/vpack/browse/person/an050622.html</a></dd>
+			<dt>転載</dt><dd>自由です。ただし、私の名前も一緒に乗せてください。</dd>
+		</dl></div>
+		<p>※艦隊これくしょんは角川ゲームズ／DMM.comが製作、運営しているオンラインゲームです。<br>
+		(C)2014 DMM.com POWERCHORD STUDIO/KADOKAWA GAMES All Rights Reserved.</p>
+		<p><a href="#index">↑目次へ戻る</a></p>
+		<hr>
+
+<!-- コメント -->
+		<h1><a name="comment">コメント</a></h1>
+		<p>　誰か私に天津風ちゃんを下さい……。</p>
+		<p><a href="#index">↑目次へ戻る</a></p>
+		<hr>
+
+<!-- このページについて -->
+		<p>※このページは<a href="http://openlab.ring.gr.jp/k16/htmllint/index.html">Another HTML-lint</a>によってチェックされました。</p>
+	</body>
+</html>
+
+<!--
+	慣れないHTML編集に苦戦しつつも、このヘルプを作るのは楽しかったです。
+	文法もAnother HTML-lintでばっちりチェックしたから問題はないはず。
+	(流石にプログラマが文法ミスしてちゃ締まらないしね)
+	汚いソースですが、最後まで見て下さりありがとうございます。
+-->
