@@ -1,7 +1,7 @@
-/* おりこうさんな秘書 改四
+/* おりこうさんな秘書 改四点一
  */
 
-	#packopt name "おりこうさんな秘書改四"
+	#packopt name "oriko41"
 	#include "hspcv.as"		;画像処理でOpenCVを使うためのライブラリ
 
 // 通常の定数
@@ -71,7 +71,7 @@
 	#enum global  kModeFleet		;編成画面
 	kModeUnit = kModeFleet + kFleetNum	;改装画面
 	// その他フラグなど
-	#define kSoftName "おりこうさんな秘書 改四"	;ソフト名
+	#define kSoftName "おりこうさんな秘書 改四点一"	;ソフト名
 	#const kMainWX kObjX * 2 + kObjSpace * 3	;メイン画面のサイズ
 	#const kMainWY kObjY * 14 + kObjSpace * 18
 	sdim current_dir, 260		;カレントディレクトリ
@@ -306,9 +306,12 @@
 			//戦果報告交戦結果
 			;提督・艦隊名の左に出ている白縦棒
 			if(NearColor(87, 77, 255, 246, 242)){
-				;中央の白縦棒(上下)
+				;中央の白縦棒
 				if(NearColor(409, 77, 255, 246, 242)){
-					return kTypeResult1
+					;外枠
+					if(NearColor(61, 20, 3, 91, 96)){
+						return kTypeResult1
+					}
 				}
 			}
 			//戦果報告
@@ -512,44 +515,51 @@
 		//BGMフラグに合わせ演奏する
 		;母港BGM
 		if(CheckHomeFlg(kFlashBufferID)){
+			map_bgm_flg_ = FALSE
+			battle_bgm_flg_ = FALSE
 			if(home_bgm_flg){
 				if(home_bgm_flg_ == FALSE){
-					if(application_mode == kModeNow){
-						mmplay 0
-						home_bgm_flg_ = TRUE
-					}
+					mmplay 0
+					home_bgm_flg_ = TRUE
 				}
 			}else{
 				mmstop
 				home_bgm_flg_ = FALSE
 			}
-		}else{
-			;マップBGM
-			if(screen_shot_type == kTypeMap){
-				home_bgm_flg_ = FALSE
-				if(map_bgm_flg){
-					if(map_bgm_flg_ == FALSE){
-						mmplay 1
-						map_bgm_flg_ = TRUE
-					}
+		}
+		;マップBGM
+		if(screen_shot_type == kTypeMap){
+			home_bgm_flg_ = FALSE
+			battle_bgm_flg_ = FALSE
+			if(map_bgm_flg){
+				if(map_bgm_flg_ == FALSE){
+					mmplay 1
+					map_bgm_flg_ = TRUE
 				}
 			}else{
-				if(screen_shot_type != kTypeUnknown){
-					map_bgm_flg_ = FALSE
-					if(screen_shot_type == kTypeBattle){
-						map_bgm_flg_ = FALSE
-						if(battle_bgm_flg){
-							if(battle_bgm_flg_ == FALSE){
-								mmplay 2
-								battle_bgm_flg_ = TRUE
-							}
-						}
-					}else{
-						battle_bgm_flg_ = FALSE
-						mmstop
-					}
-				}
+				mmstop
+				map_bgm_flg_ = FALSE
 			}
+		}
+		;戦闘BGM
+		if(screen_shot_type == kTypeBattle){
+			home_bgm_flg_ = FALSE
+			map_bgm_flg_ = FALSE
+			if(battle_bgm_flg){
+				if(battle_bgm_flg_ == FALSE){
+					mmplay 2
+					battle_bgm_flg_ = TRUE
+				}
+			}else{
+				mmstop
+				battle_bgm_flg_ = FALSE
+			}
+		}
+		if((screen_shot_type == kTypeResult1) || (screen_shot_type == kTypeResult2)){
+			mmstop
+			home_bgm_flg_ = FALSE
+			map_bgm_flg_ = FALSE
+			battle_bgm_flg_ = FALSE
 		}
 		await 1000 / 30
 	loop
