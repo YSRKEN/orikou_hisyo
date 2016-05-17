@@ -381,6 +381,117 @@ return
 	next
 return
 
+//ソート一覧画面を出す
+*show_sort_list
+	gsel kSortListWindowID, 2
+return
+//ソート一覧画面を閉じる
+*close_sort_list
+	gsel kSortListWindowID, -1
+return
+//追加
+*add_sort_list
+	if(mode_list3(JudgeSituation(kPutTempWindowID)) == "ソート画面"){
+		;バッファの追加
+		buffer kSortIdOffset + sort_list_size, kSortWX, kSortWY
+		gcopy kPutTempWindowID, kSortPX, kSortPY, kSortWX, kSortWY
+		;リストの追加
+		sort_list += NowTime() + "\n"
+		gsel kSortListWindowID
+		objprm sort_index_id, sort_list
+		sort_list_size++
+	}
+return
+//↑
+*upper_sort_list
+	if((sort_index >= 1) && (sort_index < sort_list_size)){
+		;バッファの入れ替え
+		buffer kTempBufferID, kSortWX, kSortWY
+		gcopy kSortIdOffset + sort_index - 1, 0, 0, kSortWX, kSortWY
+		gsel kSortIdOffset + sort_index - 1
+		gcopy kSortIdOffset + sort_index, 0, 0, kSortWX, kSortWY
+		gsel kSortIdOffset + sort_index
+		gcopy kTempBufferID, 0, 0, kSortWX, kSortWY
+		;リストの入れ替え
+		notesel sort_list
+		noteget text_buffer,  sort_index - 1
+		noteget text_buffer2, sort_index
+		noteadd text_buffer2, sort_index - 1, 1
+		noteadd text_buffer,  sort_index,     1
+		gsel kSortListWindowID
+		objprm sort_index_id, sort_list
+	}
+return
+//↓
+*lower_sort_list
+	if((sort_index >= 0) && (sort_index < sort_list_size - 1)){
+		;バッファの入れ替え
+		buffer kTempBufferID, kSortWX, kSortWY
+		gcopy kSortIdOffset + sort_index + 1, 0, 0, kSortWX, kSortWY
+		gsel kSortIdOffset + sort_index + 1
+		gcopy kSortIdOffset + sort_index, 0, 0, kSortWX, kSortWY
+		gsel kSortIdOffset + sort_index
+		gcopy kTempBufferID, 0, 0, kSortWX, kSortWY
+		;リストの入れ替え
+		notesel sort_list
+		noteget text_buffer,  sort_index + 1
+		noteget text_buffer2, sort_index
+		noteadd text_buffer2, sort_index + 1, 1
+		noteadd text_buffer,  sort_index,     1
+		gsel kSortListWindowID
+		objprm sort_index_id, sort_list
+	}
+return
+//削除
+*del_sort_list
+	if((sort_index >= 0) && (sort_index < sort_list_size)){
+		;バッファの削除
+		for k, sort_index, sort_list_size - 1
+			gsel kSortIdOffset + k
+			gcopy kSortIdOffset + k + 1, 0, 0, kSortWX, kSortWY
+		next
+		;リストの削除
+		notesel sort_list
+		notedel sort_index
+		gsel kSortListWindowID
+		objprm sort_index_id, sort_list
+		sort_list_size--
+	}
+return
+//全削除
+*alldel_sort_list
+	sort_list = ""
+	gsel kSortListWindowID
+	objprm sort_index_id, sort_list
+	sort_list_size = 0
+return
+//画像を出力
+*make_sort_list
+	;出力用バッファを準備
+	ListSizeX = (sort_width_index + 1) * kSortWX
+	ListSizeY = sort_list_size / (sort_width_index + 1) * kSortWY
+	if(sort_list_size \ (sort_width_index + 1) != 0) :ListSizeY + kSortWY
+	buffer kTempBufferID, ListSizeX, ListSizeY
+	;バッファに書き込んでいく
+	for k, 0, sort_list_size
+		x = k \ (sort_width_index + 1)
+		y = (k - x) / (sort_width_index + 1)
+		pos x * kSortWX, y * kSortWY
+		gcopy kSortIdOffset + k, 0, 0, kSortWX, kSortWY
+	next
+	cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
+	cvputimg kCaptureBufferID
+	cvsave current_dir + "\\" + AutoFileName(), kCaptureBufferID
+return
+//リストクリックに応じて画像変更
+*redraw_sort_preview
+	if((sort_index >= 0) && (sort_index < sort_list_size)){
+		gsel kSortListWindowID
+		pos kObjSpace * 2 + kObjX * 2, kObjSpace
+		gzoom2 kObjX * 2, kObjY * 10, kSortIdOffset + sort_index, 0, 0, kSortWX, kSortWY
+	}
+return
+
 //データセーブ(手動)
 *save_soft_data
 	WriteSaveData

@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.1.5 */
+/* おりこうさんな秘書 Ver.1.6 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.1.5"
-	#define kSoftVer2       "15"
-	#define kSoftLastUpdate "2015/04/23"
+	#define kSoftVer        "Ver.1.6"
+	#define kSoftVer2       "16"
+	#define kSoftLastUpdate "2015/04/26"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -59,6 +59,7 @@
 			combox result_index,,"完全勝利S\n勝利S\n勝利A\n戦術的勝利B\n戦術的敗北C\n敗北D\n敗北E"
 	gosub *exp_calc
 
+	//○号カウンター
 	screen kCountWindowID, kObjSpace * 6 + kSmallFontSize * 2 + 0.8 * kObjX * 4, kObjSpace * 2 + kObjSpaceY * 2 + kCounterY
 	gsel kCountWindowID, -1
 	title "○号カウンター"
@@ -95,6 +96,7 @@
 			button gosub "閉じる", *close_counter
 	gosub *redraw_counter
 
+	//入渠タイマー
 	screen kDockWindowID, kObjSpace * 2 + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5
 	gsel kDockWindowID, -1
 	title "入渠タイマー"
@@ -122,6 +124,35 @@
 	repeat 8
 		objenable cnt, 0
 	loop
+
+	//ソート一覧
+	screen kSortListWindowID, kObjSpace * 3 + (kObjX * 2) * 2, kObjSpace * 4 + (kObjY * 10) + kObjY * 2
+	gsel kSortListWindowID, -1
+	title "ソート一覧"
+	objsize 0.6 * kObjX, kObjY
+		pos kObjSpace                 , kObjSpace * 2 + (kObjY * 10)
+			button gosub "追加",   *add_sort_list
+		pos kObjSpace * 2 + 0.6 * kObjX    , kObjSpace * 2 + (kObjY * 10)
+			button gosub "↑",     *upper_sort_list
+		pos kObjSpace * 3 + 0.6 * kObjX * 2, kObjSpace * 2 + (kObjY * 10)
+			button gosub "↓",     *lower_sort_list
+		pos kObjSpace * 4 + 0.6 * kObjX * 3, kObjSpace * 2 + (kObjY * 10)
+			button gosub "削除",   *del_sort_list
+		pos kObjSpace * 5 + 0.6 * kObjX * 4, kObjSpace * 2 + (kObjY * 10)
+			button gosub "全削除", *alldel_sort_list
+	objsize kObjX, kObjY
+		pos kObjSpace                 , kObjSpace * 3 + (kObjY * 10) + kObjY
+			combox sort_width_index,,"出力：1列\n出力：2列\n出力：3列\n出力：4列\n出力：5列"
+		pos kObjSpace + kObjSpaceX    , kObjSpace * 3 + (kObjY * 10) + kObjY
+			button gosub "作成",   *make_sort_list
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace * 3 + (kObjY * 10) + kObjY
+			button gosub "閉じる", *close_sort_list
+	objsize kObjX * 2, kObjY * 10
+		pos kObjSpace, kObjSpace
+			listbox sort_index, 0, sort_list
+				sort_index_id = stat
+	//DrawSquare kObjSpace * 2 + kObjX * 2, kObjSpace, kObjX * 2, kObjY * 10
+	sort_index = -1
 
 	//メイン画面・サブ画面
 	//(ウィンドウを隣接して配置したいので表示位置を計算している)
@@ -177,7 +208,9 @@
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 10
 			chkbox "画面クロップ", cap_crop_flg
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 11
-			chkbox "ズレ補正",auto_set_flg
+			chkbox "ズレ補正",     auto_set_flg
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 12
+			chkbox "終了セーブ",   auto_save_flg
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 7
 			button gosub "経験値計算", *calc_exp
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 8
@@ -185,12 +218,14 @@
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 9
 			button gosub "○号カウンター", *count_task
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 10
-			combox fps_index,,fps_list
+			button gosub "ソート一覧", *show_sort_list
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 11
-			combox zooming_index,,zooming_list
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 12
-			button gosub "手動セーブ", *save_soft_data
+			combox fps_index,,fps_list
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 12
+			combox zooming_index,,zooming_list
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 13
+			button gosub "手動セーブ", *save_soft_data
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 13
 			button gosub "情報...", *about
 
 	objsize kObjSpace + kObjX * 2, kObjY
@@ -212,6 +247,8 @@
 	;BGM
 	bgm_type_ = -1
 	now_bgm = -1
+	;ソート一覧
+	sort_index_ = sort_index
 	//ループしつつ監視
 	repeat
 		SetTitle
@@ -335,17 +372,35 @@
 			bgm_type_ = bgm_type
 		}
 		//自動ズレ補正
-		if(get_pos_flg){
-			if(auto_set_time != gettime(6)){
-				if(auto_set_flg){
-					temp = CheckAutoSet()
-					if(CheckAutoSet()){
-						gosub *get_pos
+		if(manual_getpos_flg == FALSE){
+			;自動設定
+			if(get_pos_flg){						;一回以上座標補正を利用した場合のみ発動
+				if(auto_set_time != gettime(6)){	;1秒毎にズレ判定を行う
+					if(auto_set_flg){				;ズレ補正にチェックが入っていた場合のみ発動
+						if(CheckAutoSet()){			;ズレが存在する場合のみ発動
+							gosub *get_pos
+						}
 					}
+					auto_set_time = gettime(6)
 				}
-				auto_set_time = gettime(6)
+			}
+		}else{
+			;手動設定
+			if(get_pos_flg){						;一回以上座標補正を利用した場合のみ発動
+				diff = gettime(6) - auto_set_time
+				if(diff < 0) :diff += 60
+				if(diff >= 5){	;5秒毎にズレ判定を行う
+					if(auto_set_flg){				;ズレ補正にチェックが入っていた場合のみ発動
+						if(CheckAutoSet()){			;ズレが存在する場合のみ発動
+							gosub *get_pos
+						}
+					}
+					auto_set_time = gettime(6)
+				}
 			}
 		}
+		//ソート一覧
+		if(sort_index_ != sort_index) :gosub *redraw_sort_preview :sort_index_ = sort_index
 		// ウェイト
 		await 1000 / fps_num(fps_index)
 	loop
@@ -353,5 +408,8 @@
 //終了確認
 *exit
 	dialog "終了しますか？", 2, kSoftName
-	if(stat == 6) :WriteSaveData :end
+	if(stat == 6){
+		if(auto_save_flg) :WriteSaveData
+		end
+	}
 return

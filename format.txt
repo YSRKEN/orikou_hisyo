@@ -21,6 +21,7 @@ ShowCursor     (0|1)                 カーソルを表示するか否か
 CheckDeadZone  (0|1)                 大破チェックするか否か
 CaptureCrop    (0|1)                 スクショ時にクロップするか否か
 AutoPosSet     (0|1)                 自動ズレ補正機能を使うか否か
+ShutdownSave   (0|1)                 終了時セーブを行うか否か
 CounterA1      \d+                   あ号カウンターの出撃回数(非負)
 CounterA2      \d+                   あ号カウンターのボス到達回数(非負)
 CounterA3      \d+                   あ号カウンターのボス勝利回数(非負)

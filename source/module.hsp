@@ -215,9 +215,12 @@
 				gzoom zooming_num@(zooming_index@) * kFlashWX / 100, zooming_num@(zooming_index@) * kFlashWY / 100, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
 			redraw 1
 		return
+		//現在時刻を取得
+		#defcfunc NowTime
+		return strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
 		//ファイル名を自動設定
 		#defcfunc AutoFileName
-			file_name = strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
+			file_name = NowTime()
 			exist file_name + ".png"
 			if(strsize == -1) :return file_name + ".png"
 			number = 1
@@ -304,6 +307,7 @@
 			output += "CheckDeadZone\t"  + dead_zone_flg@ + "\n"
 			output += "CaptureCrop\t"    + cap_crop_flg@ + "\n"
 			output += "AutoPosSet\t"     + auto_set_flg@ + "\n"
+			output += "ShutdownSave\t"   + auto_save_flg@ + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -387,8 +391,11 @@
 				if(temp(0) == "CounterI")       :i_count@              = abs(int(temp(1)))
 				if(temp(0) == "GetFps")         :fps_index@            = limit(int(temp(1)), 0, length(fps_num@) - 1)
 				if(temp(0) == "Zooming")        :zooming_index@        = limit(int(temp(1)), 0, length(zooming_num@) - 1)
-				if(temp(0) == "FlashPositionX") :flash_px@             = int(temp(1)) :get_pos_flg@ = TRUE
-				if(temp(0) == "FlashPositionY") :flash_py@             = int(temp(1)) :get_pos_flg@ = TRUE
+				if(temp(0) == "FlashPositionX") :flash_px@             = int(temp(1))
+				if(temp(0) == "FlashPositionY") :flash_py@             = int(temp(1))
+				if(read_ver >= 16){
+					if(temp(0) == "ShutdownSave")   :auto_save_flg@        = limit(int(temp(1)), 0, 1)
+				}
 			next
 			;微修正
 			for k, 0, 3
@@ -420,6 +427,16 @@
 					gcopy kTempBufferID@, kFlashWX * (i + 2), j * kFlashWY, kFlashWX, kFlashWY
 				next
 			next
+		return
+		// 縦横比を一定にしたgzoom
+		#deffunc gzoom2 int wx2_, int wy2_, int buffer_id_, int px_, int py_, int wx_, int wy_
+			if(wx2_ * wy_ > wy2_ * wx_){
+				;より横長の範囲にコピーするので縦を合わせる
+				gzoom wx_ * wy2_ / wy_, wy2_, buffer_id_, px_, py_, wx_, wy_, 1
+			}else{
+				;より縦長の範囲にコピーするので横を合わせる
+				gzoom wx2_, wy_ * wx2_ / wx_, buffer_id_, px_, py_, wx_, wy_, 1
+			}
 		return
 	#global
 	#module get_num

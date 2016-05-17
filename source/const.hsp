@@ -22,6 +22,7 @@
 	#enum kExpCalcWindowID	;経験値計算機
 	#enum kDockWindowID		;入渠タイマー
 	#enum kCountWindowID	;○号カウンター
+	#enum kSortListWindowID	;ソート一覧
 	#enum kMatchBufferID	;マッチング用の捨てID
 	;バッファ用
 	#enum global kNumGetBufferID1	;数字認識用(64x64)
@@ -61,12 +62,18 @@
 	;改装画面のオフセット座標
 	#const kUnitPX 330
 	#const kUnitPY 100
+	;ソート画面のサイズ
+	#const kSortWX 194
+	#const kSortWY 279
+	;ソートのオフセット座標
+	#const kSortPX 398
+	#const kSortPY 154
 	;フォントサイズ
 	#const kSmallFontSize 12
 	#const kLargeFontSize 30
 	;メイン画面のサイズ
 	#const kMainWX kObjSpace + kObjSpaceX * 2
-	#const kMainWY kObjSpace * 4 + kObjSpaceY * 13
+	#const kMainWY kObjSpace * 4 + kObjSpaceY * 14
 	;カウンター画面
 	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
 	#const kCounterY 60
@@ -149,12 +156,16 @@
 	xpos.0 = 623, 634, 652, 663, 680, 691
 	ypos.0 = 136, 216, 298, 380
 	gosub *match_init
+	;ソート一覧
+	sdim sort_list, 1024
+	sort_list_size = 0
 	;各種フラグ
 	name_disable_flg = TRUE
 	cursor_flg       = TRUE
 	dead_zone_flg    = FALSE
 	cap_crop_flg     = FALSE
 	auto_set_flg     = TRUE
+	auto_save_flg    = TRUE
 	get_pos_flg      = FALSE	;座標取得するとTRUEになる
 	;その他
 	dim unit_count, kFleetNum
@@ -162,6 +173,7 @@
 	GetMonitorParam kDispX ,kDispY ,kOffsetX, kOffsetY
 	kFleetIdOffset = kCaptureBufferID + kSceneListSize
 	kUnitIdOffset = kFleetIdOffset + kFleetNum
+	kSortIdOffset = kUnitIdOffset + kFleetNum * kUnitNum
 	flash_px = -1
 	flash_py = -1
 	fps_index = 2

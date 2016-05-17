@@ -5,7 +5,7 @@ const.hsp……定数宣言と各種初期化担当
 │module.hsp……関数定義担当
 ││window.hsp……サブルーチン担当
 ↓↓↓
-orikou15.hsp……本体。画面描画を担当
+orikou16.hsp……本体。画面描画を担当
 
 area_exp.txt……マップ経験値一覧
 exp_table.txt……レベル―経験値対応表
@@ -56,6 +56,27 @@ cursor.png……カーソルアイコン画像
 　　アンダーバーで区別しないとそれなりに紛らわしい……。
 　　ちなみにモジュールからモジュール外の変数(定数)を読むには
 　　@を付ける必要がある(global宣言したものを除く)。
+　画面IDの対応表(enumである程度楽しているが)……
+　　ID                   意味                 数字
+　　kMainWindowID        メイン画面           0
+　　kPutWindowID         サブ画面             1
+　　kPutTempWindowID     サブ画面用バッファ   2
+　　kTempBufferID        テンポラリ画面       3
+　　kSelectWindowID      手動指定用画面       4
+　　kDeskBufferID        スクショ用           5
+　　kFlashBufferID       検索用               6
+　　kExpCalcWindowID     経験値計算機         7
+　　kDockWindowID        入渠タイマー         8
+　　kCountWindowID       ○号カウンター       9
+　　kSortListWindowID    ソート一覧           10
+　　kMatchBufferID       マッチング用の捨てID 11
+　　kNumGetBufferID1     数字認識用(64x64)    12
+　　kNumGetBufferID2     数字認識用(32x32)    13
+　　kCursorBufferID      カーソル用           14
+　　kCaptureBufferID以降 シーン保存用         15～15 + 保存シーン数 - 1
+　　kFleetIdOffset以降   編成画面用           15 + 保存シーン数～15 + 保存シーン数 + (4 - 1)
+　　kUnitIdOffset以降    改装画面用           15 + 保存シーン数 + 4～15 + 保存シーン数 + 4 + (4 * 6 - 1)
+　　kSortIdOffset以降    ソート画面用         15 + 保存シーン数 + 4 + 4 * 6～
 ・const.hsp
 　#enumで定義された定数群……
 　　画面IDを決定するためのもの。具体的には、IDがkCaptureBufferID
@@ -82,6 +103,10 @@ cursor.png……カーソルアイコン画像
 　　交戦結果や戦果報告を「bgm_type = 4」とでもすればいい。
 　　なお、mode_listはコンボボックス用、mode_list2は実行モード用、
 　　mode_list3は判定結果用である。
+　sort_list……
+　　ぶっちゃけ内容はほぼフェイクである。なぜならsort_indexとソート画面を
+　　保存したIDとは1:1対応しており、sort_listの中身なんて関係ないからである。
+　　「1」「2」だけじゃ味気ないのでとりあえず撮影日時を載せてはいるが。
 　*match_init(サブルーチン)……
 　　アルゴリズムとしては、
 　　「適当に大きな数字を出力」→「大津の方法で二値化」→
@@ -135,11 +160,19 @@ cursor.png……カーソルアイコン画像
 　BGM関係……
 　　now_bgmは現在流れているBGM、
 　　bgm_type_はメインループの前回におけるbgm_typeを保存しておく変数。
+　　また、bgm_index_idはBGMのcomboxのオブジェクトID。
 　入渠タイマー……
 　　各ドックごとに艦娘がいるか否かを判定した後、時間部分を
 　　うまく切り取って数字を判定し、タイマーに反映させる。
 　　後1秒以上残っていた場合は、定期的にデクリメントさせる。
-・orikou15.hsp
+　ソート一覧……
+　　sort_index_idはソート一覧のlistboxのオブジェクトID。
+　　実装としてはスタックに近いが、途中の削除も可能。
+　　ちなみにソート画面から艦船名とレベルをクロップする際ちょっと右に余らせて
+　　いるのは、ギリギリまで詰めるとリストを出力した際、すぐ隣りのリストの
+　　艦船名とレベルとが近すぎて見づらいため。あいにくケッコン大和型がいない
+　　ので、その辺のテストが足りないからちょっとヒヤヒヤしてるのはヒミツｗ
+・orikou16.hsp
 　now_level_など……
 　　経験値計算機にて、レベルなどの操作が即座に反映されるのは、
 　　これらの変数で監視し、変化したら即座に再計算しているから。
