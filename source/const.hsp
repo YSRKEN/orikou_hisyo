@@ -14,6 +14,7 @@
 	#enum global kCondMeterWindowID	;cond値メータのID
 	#enum global kBgmWindowID		;BGM機能のID
 	#enum global kBrowserWindowID	;内蔵ブラウザ用のID
+	#enum global kTaskWindowID		;任務一覧用のID
 	#enum kMascotWindowID			;マスコット表示用ID
 	#enum kSupplyFileWindowID		;資材管理用のID
 	;↑マウスで動かせるのはここまで
@@ -157,8 +158,20 @@
 	#define DIID_DWebBrowserEvents2  "{34A715A0-6587-11D0-924A-0020AFC7AC4D}"
 	#const DISPID_NAVIGATECOMPLETE2 252
 	#define kKanColleURL "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/"
+	// 任務一覧
+	#const kTaskColumnWX1 49
+	#const kTaskColumnWX2 251	;本来なら491だが、あえて短めにしている
+	#const kTaskColumnWY 18
+	#const kTaskColumnPX1 7
+	#const kTaskColumnPY1 36
+	#const kTaskColumnPX2 72
+	#const kTaskColumnPY2 -1
+	#const kMaxTasks 6
+	#const kTaskWindowX kTaskColumnWX1 + kTaskColumnWX2
+	#const kTaskWindowY kTaskColumnWY * kMaxTasks
+	#const kTaskInterval 1.0 / 24 / 60 / 60	;任務一覧の更新時間「1秒」
 	// その他
-	#const global kSavePositions kBrowserWindowID + 1
+	#const global kSavePositions kTaskWindowID + 1
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
 	#const global kMaxSelectScenes 10	;1カテゴリにおける最大シーン数
 	#const global kFleetNum 4	;艦隊数
@@ -187,6 +200,7 @@
 	#enum kBgmTypeBoss
 	#enum kMascotTypeCmd = 0	;マスコットにおけるコマンドの種類
 	#enum kMascotTypeTalk
+	#const kCheckPosInterval 1.0 / 24 / 60 / 60	;ズレチェックの更新時間「1秒」
 
 /* 初期設定 */
 	// 座標設定
@@ -417,6 +431,9 @@
 	home_bgm_text2 = "演習個別 艦隊選択"
 	// 内蔵ブラウザ
 	sdim browser_url, 512 :browser_url = kKanColleURL
+	// 任務一覧
+	task_pos_x = 144
+	task_pos_y = 110, 178, 246, 314, 382
 	// その他の初期設定
 	sdim soft_log, 32000
 	exe_path = dir_cur
@@ -429,3 +446,4 @@
 	sdim status_bar_str, 1024			;ステータスバーに表示する文字列
 	dim battle_index, kBattleType		;各画面のインデックス
 	show_mascot_area_flg = FALSE
+	shortcut_save_flg = FALSE

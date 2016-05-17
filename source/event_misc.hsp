@@ -38,7 +38,7 @@
 	dialog about_info
 return
 
-//*
+//*メイン画面の作成
 *make_main_window
 	switch main_width_index
 	case 0
@@ -96,6 +96,8 @@ return
 					button gosub "BGM機能", *show_bgm_window
 				POS_XY 1, 6
 					button gosub "内蔵ブラウザ", *show_browser
+				POS_XY 2, 6
+					button gosub "任務一覧", *show_task_window
 			}else{
 				POS_XY 0, 3
 					button gosub "↓↓↓↓", *change_pulldown
@@ -110,14 +112,14 @@ return
 	case 1
 		// 2列表示
 		if(main_pulldown_flg){
-			screen kMainWindowID, POS_X(2), POS_Y(15)
+			screen kMainWindowID, POS_X(2), POS_Y(16)
 		}else{
 			screen kMainWindowID, POS_X(2), POS_Y(11)
 		}
 		title kSoftName
 		gsel kMainWindowID, 2
 		if(main_pulldown_flg){
-			POS_XY 0, 10
+			POS_XY 0, 11
 		}else{
 			POS_XY 0, 6
 		}
@@ -162,6 +164,8 @@ return
 					button gosub "BGM機能", *show_bgm_window
 				POS_XY 1, 9
 					button gosub "内蔵ブラウザ", *show_browser
+				POS_XY 0, 10
+					button gosub "任務一覧", *show_task_window
 			}else{
 				POS_XY 0, 5
 					button gosub "↓↓↓↓", *change_pulldown
@@ -214,6 +218,23 @@ return
 	}
 	if((scene_result(0) == "出撃経過") && (scene_result(1) == "戦闘判定")){
 		if(sound_alert_flg) :PlayAlert "alert_res.wav"
+	}
+	// 任務一覧を、任務画面が開く度にリセットする
+	if(pre_scene_type != scene_result(0)){
+		if(pre_scene_type != "不明"){
+			if(scene_result(0) == "任務画面"){
+				for n, 0, scene_list_size
+					if(scene_list_category(n) != "任務画面") :_continue
+					if(instr(scene_list_name(n),,"ページ目") == -1) :_continue
+					index = show_scene_list_index(n)
+					if(index < 0) :_continue
+					gsel kSceneBufferID + index
+					color 255, 255, 255
+					boxf
+					show_scene_list_time(index) = 0.0
+				next
+			}
+		}
 	}
 return
 

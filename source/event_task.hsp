@@ -1,0 +1,51 @@
+/* 任務一覧機能に関するイベント処理 */
+
+//*任務一覧機能の画面を出す
+*show_task_window
+	gsel kTaskWindowID, 2
+	show_window(kTaskWindowID) = TRUE
+return
+
+*redraw_task_window
+	// 任務一覧を確認して、遂行中になっているものの位置を抽出する
+	dim task_list_index, kMaxTasks
+	dim task_list_column, kMaxTasks
+	count = 0
+	for n, 0, scene_list_size
+		if(scene_list_category(n) != "任務画面") :_continue
+		if(instr(scene_list_name(n),,"ページ目") == -1) :_continue
+		index = show_scene_list_index(n)
+		if(index < 0) :_continue
+		gsel kSceneBufferID + index
+		if(scene_list_name(n) == "１ページ目"){
+			// 大淀チェッカー
+			flg = FALSE
+			for k, 708, 774
+				if(NearColor(k, 380, 246, 239, 228) != TRUE){
+					flg = TRUE
+					_break
+				}
+			next
+			if(flg) :return
+		}
+		for k, 0, 5
+			if (NearColor(task_pos_x + 581, task_pos_y(k) + 38, 255, 132, 49) != TRUE) :_continue
+			task_list_index(count) = index
+			task_list_column(count) = k
+			count++
+			if(count >= kMaxTasks) :_break
+		next
+		if(count >= kMaxTasks) :_break
+	next
+	// 描画する
+	gsel kTaskWindowID
+	redraw 0
+		color 255, 255, 255 :boxf
+		for y, 0, count
+			pos 0, y * kTaskColumnWY
+			gcopy kSceneBufferID + task_list_index(y), task_pos_x + kTaskColumnPX1, task_pos_y(task_list_column(y)) + kTaskColumnPY1, kTaskColumnWX1, kTaskColumnWY
+			pos kTaskColumnWX1, y * kTaskColumnWY
+			gcopy kSceneBufferID + task_list_index(y), task_pos_x + kTaskColumnPX2, task_pos_y(task_list_column(y)) + kTaskColumnPY2, kTaskColumnWX2, kTaskColumnWY
+		next
+	redraw 1
+return

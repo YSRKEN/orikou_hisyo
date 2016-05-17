@@ -42,6 +42,9 @@
 		POS_XY 1, 1
 			combox main_width_index,,"3列表示\n2列表示"
 				main_width_index_id = stat
+		POS_XY 2, 1
+			chkbox "ショートカット", shortcut_command_flg
+				shortcut_command_id = stat
 		POS_XY 1, 2
 			combox sub_window_size_index,,sub_window_size_list
 				sub_window_size_id = stat
@@ -357,7 +360,7 @@
 	show_window(kBgmWindowID) = FALSE
 
 /* 資材管理用画面 */
-	screen kSupplyFileWindowID, POS_X(3), POS_Y(1) :title "資材管理"
+	screen kSupplyFileWindowID, POS_X(3), POS_Y(1), 4 :title "資材管理"
 	gsel kSupplyFileWindowID, -1
 	objsize SIZE_X(1), SIZE_Y(1)
 		POS_XY 0, 0
@@ -369,13 +372,16 @@
 	hwnd_window(kSupplyFileWindowID) = hwnd
 
 /* 内蔵ブラウザ用画面 */
-	screen kBrowserWindowID, kBrowserX, kBrowserY :title "内蔵ブラウザ"
-//	gsel kBrowserWindowID, -1
+	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "内蔵ブラウザ"
+	gsel kBrowserWindowID, -1
 	cls 1
-	objsize SIZE_X(5), SIZE_Y(1)
+	objsize SIZE_X(4), SIZE_Y(1)
 		pos 0, 0
 			input browser_url
 	objsize kObjX, kObjY
+		pos kBrowserX - kObjX * 5, 0
+			chkbox "最前面", browser_front_flg
+				browser_front_id = stat
 		pos kBrowserX - kObjX * 4, 0
 			button gosub "艦これ", *reset_url
 		pos kBrowserX - kObjX * 3, 0
@@ -389,6 +395,12 @@
 	ie->"Navigate" browser_url
 	hwnd_window(kBrowserWindowID) = hwnd
 	show_window(kBrowserWindowID) = FALSE
+
+/* 任務一覧用画面 */
+	screen kTaskWindowID, kTaskWindowX, kTaskWindowY, 4 :title "任務一覧"
+	//gsel kTaskWindowID, -1
+	hwnd_window(kTaskWindowID) = hwnd
+	show_window(kTaskWindowID) = FALSE
 
 /* メイン画面 */
 	gosub *make_main_window

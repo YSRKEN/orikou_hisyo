@@ -229,8 +229,11 @@ return
 	}
 	// ŠÍ‚±‚ê‚Ì‰æ–Ê‚ÌŽüˆÍ‚ÌRGB’l‚©‚çAƒYƒŒ‚ê‚Ä‚¢‚é‚Æ”»’è‚³‚ê‚½ê‡
 	if(check_move_flash_flg){
-		if(CheckMoveFlash(window_handle, flash_position)){
-			gosub *get_pos_local
+		if(flash_time - checkpos_start_time >= kCheckPosInterval){
+			checkpos_start_time = flash_time
+			if(CheckMoveFlash(window_handle, flash_position)){
+				gosub *get_pos_local
+			}
 		}
 	}
 return

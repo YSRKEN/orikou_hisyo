@@ -1,0 +1,26 @@
+#ifndef khHook
+
+;// ƒL[–¼Žæ“¾ƒ‚ƒWƒ…(‚¨‚Ü‚¯)
+#ifndef GetKeyName
+#module
+#uselib "user32.dll"
+#func GetKeyNameText "GetKeyNameTextA" int,prefstr,int
+#defcfunc GetKeyName@_khHook_ int _lparam
+GetKeyNameText _lparam, 64
+return refstr
+#global
+#endif
+
+#uselib "KeyHook.dll"
+#func _khHook@_khHook_ "_kh_hook@8" int, int
+#func _khHookLL@_khHook_ "_kh_hook_ll@8" int, int
+#func khUnhook onexit "_kh_unhook@0"
+
+#define khHook(%1) oncmd gosub %1, $9313 : _khHook@_khHook_ hWnd, $9313
+#define khHookLL(%1) oncmd gosub %1, $9313 : _khHookLL@_khHook_ hWnd, $9313
+#define khKeyCode (wParam & 0xFFFF)
+#define khKeyName GetKeyName@_khHook_(lParam)
+#define khStat (lParam >> 30 & 3)
+
+#endif
+

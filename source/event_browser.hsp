@@ -1,7 +1,7 @@
 /* 内蔵ブラウザに関するイベント処理 */
 
 *show_browser
-	gsel kBrowserWindowID, 2
+	gsel kBrowserWindowID, 1
 	show_window(kBrowserWindowID) = TRUE
 return
 

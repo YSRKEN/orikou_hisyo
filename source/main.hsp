@@ -1,31 +1,24 @@
-/* おりこうさんな秘書 Ver.3.0.7 */
+/* おりこうさんな秘書 Ver.3.0.8 */
 
 /* TODO:
  */
 
 /* 実装済:
- * ○資材ログをCSVから読み込んだ際に、バイナリ形式の資材ログに自動保存するようにした。
- * ○supply.datの読み込み耐性を強化した。
- * ○ヘルプのテキストを修正した。
- * ○簡単なIEコンポーネントブラウザを表示できるようにした。
- * ○特定編成の場合に出撃警告が出せるようにした。
- * ○戦闘中、夜戦確認と戦闘判定表示時に音を鳴らすことで注意を向かせる機能を追加した。
- * ○入渠ドックに入っている艦が何レベルの艦が入っているかを表示するようにした。
- * ○縦長表示(二列表示)にもできるようにした。
- * ○資材管理コマンドの中で、複数の資材ログを統合する「資材マージ」機能を追加した。
- * ○各種ツールの表示をボタン一つで畳めるようにした。
- * ○その他細かな不具合を修正した。
- * ×支援任務は母港帰還時に強制終了するように修正しようとしたが、原理的に難しい。
- * ×トレイアイコンで何かしら操作できるようにしようとしたが、HSPでの制御方法がまだ上手く掴めない。
- * ×画面取得方法について、旧式の方法を使えるようにしようとしたが、システムを根本から変えることになるので難しい。
+ * ○入渠ドックでクレーンを無視できるようにする
+ * ○内蔵ブラウザのサイズを変更禁止にする
+ * ○内臓ブラウザの最前面表示をON/OFFで切り替えられるようにする
+ * ○母港画面でズレチェックが延々と繰り返されるバグを何とかする
+ * ・資材グラフでデータが足りない際も近似でとりあえず表示できるようにする
+ * ○選択した任務一覧を記憶する新モードを実装する
+ * ○スクショをショートカットキー(Alt+Zキー)から行えるようにする
  */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.0.7"
-	#define kVerString  "307"
-	#define kLastUpdate "2015/11/24"
+	#define kVersion    "Ver.3.0.8"
+	#define kVerString  "308"
+	#define kLastUpdate "2016/02/03"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -39,6 +32,7 @@
 	#include "hspcv.as"
 	#include "hspext.as"
 	#include "module_lwm2.hsp"
+	#include "keyhook.hsp"
 	// 自作
 	#include "const.hsp"
 	#include "module_api.hsp"
@@ -66,6 +60,7 @@
 	#include "event_bgm.hsp"
 	#include "event_mascot.hsp"
 	#include "event_browser.hsp"
+	#include "event_task.hsp"
 
 /* メインルーチン */
 *main
@@ -76,6 +71,7 @@
 	gosub *redraw_cond
 	gosub *redraw_counter
 	gosub *redraw_bgm_window
+	gosub *redraw_task_window
 	gsel kMainWindowID, 2
 	// 状態変化検出用変数
 	sub_window_size_index_ = sub_window_size_index	//サブ画面のサイズを変えたか否か
@@ -98,8 +94,10 @@
 	redraw_counter_flg = FALSE
 	desktop_mascot_flg_ = desktop_mascot_flg
 	show_mascot_area_flg_ = show_mascot_area_flg
+	browser_front_flg_ = 1 - browser_front_flg
 	mascot_index_ = mascot_index
 	main_width_index_ = main_width_index
+	khHook *shortcut
 	// メインループ
 	repeat
 		if(exit_flg) :end
@@ -185,6 +183,11 @@
 				gosub *check_scene_change
 				pre_scene_type = scene_result(0)
 				pre_scene_name = scene_result(1)
+			}
+			// 定期的に任務一覧を更新する
+			if(flash_time - task_start_time >= kTaskInterval){
+				task_start_time = flash_time
+				gosub *redraw_task_window
 			}
 			// 各種タイマーを更新
 			if(time != gettime(6)){
@@ -294,6 +297,17 @@
 			gosub *make_main_window
 			main_width_index_ = main_width_index
 		}
+		// 内蔵ブラウザの最前面表示
+		if(show_window(kBrowserWindowID)){
+			if(browser_front_flg_ != browser_front_flg){
+				if(browser_front_flg){
+					gsel kBrowserWindowID, 2
+				}else{
+					gsel kBrowserWindowID, 1
+				}
+				browser_front_flg_ = browser_front_flg
+			}
+		}
 		// ウェイト
 		await 1000 / capture_fps(capture_fps_index)
 	loop
@@ -350,5 +364,23 @@ return
 				PutLog "ロック操作への制限が解除されました"
 			}
 		}
+	}
+return
+
+/* Alt+Zでスクショが保存できるようにする */
+*shortcut
+	if(khKeyCode == 18){
+		if(khStat != 3) :alt_key_flg = TRUE :else :alt_key_flg = FALSE
+	}
+	if(khKeyCode == 90){
+		if(khStat != 3) :z_key_flg = TRUE :else :z_key_flg = FALSE
+	}
+	if(alt_key_flg && z_key_flg){
+		if(shortcut_save_flg != TRUE){
+			if(shortcut_command_flg) :gosub *save_picture
+			shortcut_save_flg = TRUE
+		}
+	}else{
+		shortcut_save_flg = FALSE
 	}
 return
