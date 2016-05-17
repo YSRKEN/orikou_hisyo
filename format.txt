@@ -1,0 +1,33 @@
+○save.txtについて
+　Shift-JISのテキストで、各設定項目が「設定名\t設定内容」(\tはタブ)といった形式で
+記述されています。余計な空行及びコメントは許されません。各設定名の意味は次の通りです。
+なお、(0|1)とある場合、大抵はFALSE/TRUEを指します。
+
+設定名         設定内容(正規表現)    意味
+Version        \d+                   ソフトウェアのバージョン文字列
+ManualPosition (0|1)                 座標取得を手動設定にするか否か
+ShowMode       \d+                   表示モード(現在画面が0、0スタート)
+ShowFleet      [0-3]                 表示したい艦隊(編成画面)
+ShowUnit       ([0-9]|1[0-9]|2[0-3]) 表示したい艦娘(改装画面)
+SaveUnits      [0-5]                 保存したい編成まとめ画像(第1～4艦隊、連合艦隊、支援艦隊)
+HomeBGMMode    (0|1)                 母港BGMを鳴らすか否か
+HomeBGMPath    .+                    母港BGMの保存パス。空の場合は「<NONE>」など何かを書くこと。
+MapBGMMode     (0|1)                 マップBGMを鳴らすか否か
+MapBGMPath     .+                    マップBGMの保存パス。空の場合は「<NONE>」など何かを書くこと。
+BattleBGMMode  (0|1)                 戦闘BGMを鳴らすか否か
+BattleBGMPath  .+                    戦闘BGMの保存パス。空の場合は「<NONE>」など何かを書くこと。
+DisableName    (0|1)                 名前を隠すか否か
+ShowCursor     (0|1)                 カーソルを表示するか否か
+CheckDeadZone  (0|1)                 大破チェックするか否か
+CaptureCrop    (0|1)                 スクショ時にクロップするか否か
+AutoPosSet     (0|1)                 自動ズレ補正機能を使うか否か
+CounterA1      \d+                   あ号カウンターの出撃回数(非負)
+CounterA2      \d+                   あ号カウンターのボス到達回数(非負)
+CounterA3      \d+                   あ号カウンターのボス勝利回数(非負)
+CounterA4      \d+                   あ号カウンターのS勝利回数(非負)
+CounterR       \d+                   ろ号カウンターの値(非負)
+CounterI       \d+                   い号カウンターの値(非負)
+GetFps         [0-6]                 取得FPS。30,20,10,5,3,2,1fpsに対応。
+Zooming        [0-4]                 サブ画面の倍率。50,75,100,150,200％に対応。
+FlashPositionX (-|)\d+               艦これのディスプレイに対するX座標
+FlashPositionY (-|)\d+               艦これのディスプレイに対するY座標

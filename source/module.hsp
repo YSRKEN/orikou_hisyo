@@ -7,17 +7,31 @@
 		#cfunc CreateDC "CreateDCA" sptr,sptr,sptr,int
 		#func DeleteDC  "DeleteDC"  int
 		#func BitBlt    "BitBlt"    int,int,int,int,int,int,int,int,int
+		#uselib "user32.dll"
+		#cfunc GetSystemMetrics "GetSystemMetrics" int
 		// API用の定数
 		#const SRCCOPY    0x00CC0020
 		#const CAPTUREBLT 0x40000000
+		#const SM_CMONITORS 0x00000050
+		#const SM_CXVIRTUALSCREEN 0x0000004E
+		#const SM_CYVIRTUALSCREEN 0x0000004F
+		#const SM_XVIRTUALSCREEN  0x0000004C
+		#const SM_YVIRTUALSCREEN  0x0000004D
 		// 各種関数定義
+		//座標取得
+		#deffunc GetMonitorParam var all_size_x_, var all_size_y_, var all_offset_x_, var all_offset_y_
+			all_size_x_ =   GetSystemMetrics(SM_CXVIRTUALSCREEN)
+			all_size_y_ =   GetSystemMetrics(SM_CYVIRTUALSCREEN)
+			all_offset_x_ = GetSystemMetrics(SM_XVIRTUALSCREEN)
+			all_offset_y_ = GetSystemMetrics(SM_YVIRTUALSCREEN)
+		return
 		//デスクトップキャプチャ
 		#deffunc GetDesktopWindow int window_id_
-			buffer window_id_, kDispX, kDispY
+			buffer window_id_, kDispX@, kDispY@
 			//デスクトップのデバイスコンテキストを作成する
 			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
 			//デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, kDispX, kDispY, hdc_screen, 0, 0, SRCCOPY | CAPTUREBLT
+			BitBlt hdc, 0, 0, kDispX@, kDispY@, hdc_screen, kOffsetX@, kOffsetY@, SRCCOPY | CAPTUREBLT
 			//デバイスコンテキストを削除する
 			DeleteDC hdc_screen
 			redraw 1
@@ -28,7 +42,7 @@
 			//デスクトップのデバイスコンテキストを作成する
 			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
 			//デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, flash_px_, flash_py_, SRCCOPY | CAPTUREBLT
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, kOffsetX@ + flash_px_, kOffsetY@ + flash_py_, SRCCOPY | CAPTUREBLT
 			//デバイスコンテキストを削除する
 			DeleteDC hdc_screen
 			redraw 1
@@ -39,14 +53,37 @@
 			gsel window_id_
 			cvbuffer window_id_, ginfo_sx, ginfo_sy
 			cvputimg window_id_
-			//バッファ2:黒塗りの800x480の画像
+			//バッファ2:灰色の800x480の画像
 			buffer output_buffer_id_, kFlashWX, kFlashWY
-			boxf
+			color 100, 100, 100 :boxf
 			cvbuffer output_buffer_id_, kFlashWX, kFlashWY
 			cvputimg output_buffer_id_
 			//マッチング処理を行う
 			cvmatch px_, py_, CV_TM_SQDIFF, output_buffer_id_, window_id_
 		return
+		//艦これ画面がずれていないかを調べる
+		#defcfunc CheckAutoSet
+			buffer kTempBufferID@, kFlashWX + 2, kFlashWY + 2
+			//デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			//デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_screen, kOffsetX@ + flash_px@ - 1, kOffsetY@ + flash_py@ - 1, SRCCOPY | CAPTUREBLT
+			//デバイスコンテキストを削除する
+			DeleteDC hdc_screen
+			//四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
+			pget 0, 0
+			check_r = ginfo_r :check_g = ginfo_g :check_b = ginfo_b
+			auto_set_flg = FALSE
+			check_x.0 = kFlashWX / 2, kFlashWX + 1, kFlashWX + 1, kFlashWX + 1, kFlashWX / 2, 0, 0
+			check_y.0 = 0, 0, kFlashWX / 2, kFlashWY + 1, kFlashWY + 1, kFlashWY + 1, kFlashWX / 2
+			for k, 0, 6
+				pget check_x(k), check_y(k)
+				if((check_r != ginfo_r) || (check_g != ginfo_g) || (check_b != ginfo_b)){
+					auto_set_flg = TRUE
+					_break
+				}
+			next
+		return auto_set_flg
 	#global
 
 	// 汎用
@@ -214,6 +251,176 @@
 				}
 			next
 		return flg
+		// 艦隊ごとの艦娘数を更新する
+		#deffunc GetUnits int flash_id_, int screen_shot_type_, array unit_count__
+			gsel flash_id_
+			if(screen_shot_type_ >= kSceneListSize@ + kFleetNum + 1){
+				//改装画面
+				unit_k = (screen_shot_type_ - (kSceneListSize@ + kFleetNum + 1)) / kUnitNum
+				unit_count__(unit_k) = 0
+				for k, kUnitNum - 1, -1, -1
+					if(NearColor(160, 160 + 54 * k, 235, 218, 203) == FALSE){
+						if(NearColor(260, 180 + 54 * k, 234, 217, 202) == FALSE){
+							//艦娘がいた時点でカウントを終了させる
+							unit_count__(unit_k) = k + 1
+							_break
+						}
+					}
+				next
+			}else{
+				//編成画面
+				unit_k = screen_shot_type_- (kSceneListSize@ + 1)
+				unit_count__(unit_k) = 0
+				for k, kUnitNum - 1, -1, -1
+					x = k \ 2 :y = k / 2
+					if(NearColor(140 + 342 * x, 200 + 113 * y, 255, 242, 238)){
+						//艦娘がいた時点でカウントを終了させる
+						unit_count__(unit_k) = k + 1
+						_break
+					}
+				next
+			}
+		return
+		// ソフトのデータをセーブする
+		#deffunc WriteSaveData
+			gsel kPutWindowID@, 2
+			title "セーブ中..."
+			// テキスト
+			sdim output, 32000
+			output += "Version\t"        + kSoftVer2@         + "\n"
+			output += "ManualPosition\t" + manual_getpos_flg@ + "\n"
+			output += "ShowMode\t"       + mode_index@        + "\n"
+			output += "ShowFleet\t"      + fleets_index@      + "\n"
+			output += "ShowUnit\t"       + units_index@ + "\n"
+			output += "SaveUnits\t"      + commands_index@ + "\n"
+			output += "HomeBGMMode\t"    + bgm_list_flg@(0) + "\n"
+			output += "HomeBGMPath\t"    + bgm_list_filename@(0) + "\n"
+			output += "MapBGMMode\t"     + bgm_list_flg@(1) + "\n"
+			output += "MapBGMPath\t"     + bgm_list_filename@(1) + "\n"
+			output += "BattleBGMMode\t"  + bgm_list_flg@(2) + "\n"
+			output += "BattleBGMPath\t"  + bgm_list_filename@(2) + "\n"
+			output += "DisableName\t"    + name_disable_flg@ + "\n"
+			output += "ShowCursor\t"     + cursor_flg@ + "\n"
+			output += "CheckDeadZone\t"  + dead_zone_flg@ + "\n"
+			output += "CaptureCrop\t"    + cap_crop_flg@ + "\n"
+			output += "AutoPosSet\t"     + auto_set_flg@ + "\n"
+			output += "CounterA1\t"      + a_sortie_count@ + "\n"
+			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
+			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
+			output += "CounterA4\t"      + a_s_win_count@ + "\n"
+			output += "CounterR\t"       + r_count@ + "\n"
+			output += "CounterI\t"       + i_count@ + "\n"
+			output += "GetFps\t"         + fps_index@ + "\n"
+			output += "Zooming\t"        + zooming_index@ + "\n"
+			output += "FlashPositionX\t" + flash_px@ + "\n"
+			output += "FlashPositionY\t" + flash_py@ + "\n"
+			notesel output
+			notesave current_dir@ + "\\save.txt"
+			// 画像
+			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * kSceneListSize@
+			for k, 0, kSceneListSize@
+				pos 0, k * kFlashWY
+				gcopy kCaptureBufferID@ + k, 0, 0, kFlashWX, kFlashWY
+				//pos 0, k * kFlashWY
+				//mes "1-" + k
+			next
+			for k, 0, kFleetNum
+				pos kFlashWX, k * kFlashWY
+				gcopy kFleetIdOffset@ + k, 0, 0, kFlashWX, kFlashWY
+				//pos kFlashWX, k * kFlashWY
+				//mes "2-" + k
+			next
+			for i, 0, kFleetNum
+				for j, 0, kUnitNum
+					pos kFlashWX * (i + 2), j * kFlashWY
+					gcopy kUnitIdOffset@ + (i * kUnitNum + j), 0, 0, kFlashWX, kFlashWY
+					//pos kFlashWX * (i + 2), j * kFlashWY
+					//mes "3-" + i + "" + j
+				next
+			next
+			cvbuffer kCaptureBufferID@, ginfo_sx, ginfo_sy
+			cvputimg kCaptureBufferID@
+			cvsave current_dir@ + "\\save.png", kCaptureBufferID@
+		return
+		// ソフトのデータをロードする
+		#deffunc ReadSaveData
+			// テキスト
+			exist current_dir@ + "\\save.txt"
+			if(strsize == -1) :return
+			notesel text_buffer :noteload current_dir@ + "\\save.txt"
+			;とりあえずバージョンを取得する
+			read_ver = -1
+			for k, 0, notemax
+				noteget get, k
+				split get, "\t", temp
+				if(temp(0) == "Version"){
+					read_ver = abs(int(temp(1)))
+					_break
+				}
+			next
+			if(read_ver < 0) :return
+			;後は上から適当に読み込み
+			for k, 0, notemax
+				noteget get, k
+				split get, "\t", temp
+				if(temp(0) == "ManualPosition") :manual_getpos_flg@    = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "ShowMode")       :mode_index@           = limit(int(temp(1)), 0, kSceneListSize@ + 2)
+				if(temp(0) == "ShowFleet")      :fleets_index@         = limit(int(temp(1)), 0, kUnitNum@ - 1)
+				if(temp(0) == "ShowUnit")       :units_index@          = limit(int(temp(1)), 0, kFleetNum@ * kUnitNum@ - 1)
+				if(temp(0) == "SaveUnits")      :commands_index@       = limit(int(temp(1)), 0, kFleetNum@ + 1)
+				if(temp(0) == "HomeBGMMode")    :bgm_list_flg@(0)      = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "HomeBGMPath")    :bgm_list_filename@(0) = temp(1)
+				if(temp(0) == "MapBGMMode")     :bgm_list_flg@(1)      = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "MapBGMPath")     :bgm_list_filename@(1) = temp(1)
+				if(temp(0) == "BattleBGMMode")  :bgm_list_flg@(2)      = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "BattleBGMPath")  :bgm_list_filename@(2) = temp(1)
+				if(temp(0) == "DisableName")    :name_disable_flg@     = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "ShowCursor")     :cursor_flg@           = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "CheckDeadZone")  :dead_zone_flg@        = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "CaptureCrop")    :cap_crop_flg@         = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "AutoPosSet")     :auto_set_flg@         = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "CounterA1")      :a_sortie_count@       = abs(int(temp(1)))
+				if(temp(0) == "CounterA2")      :a_to_boss_count@      = abs(int(temp(1)))
+				if(temp(0) == "CounterA3")      :a_win_boss_count@     = abs(int(temp(1)))
+				if(temp(0) == "CounterA4")      :a_s_win_count@        = abs(int(temp(1)))
+				if(temp(0) == "CounterR")       :r_count@              = abs(int(temp(1)))
+				if(temp(0) == "CounterI")       :i_count@              = abs(int(temp(1)))
+				if(temp(0) == "GetFps")         :fps_index@            = limit(int(temp(1)), 0, length(fps_num@) - 1)
+				if(temp(0) == "Zooming")        :zooming_index@        = limit(int(temp(1)), 0, length(zooming_num@) - 1)
+				if(temp(0) == "FlashPositionX") :flash_px@             = int(temp(1)) :get_pos_flg@ = TRUE
+				if(temp(0) == "FlashPositionY") :flash_py@             = int(temp(1)) :get_pos_flg@ = TRUE
+			next
+			;微修正
+			for k, 0, 3
+				exist bgm_list_filename@(k)
+				if(strsize == -1){
+					bgm_list_flg@(k) = FALSE
+					bgm_list_filename@(k) = "<NONE>"
+				}
+			next
+			// 画像
+			exist current_dir@ + "\\save.png"
+			if(strsize == -1) :return
+			buffer kTempBufferID@
+			picload current_dir@ + "\\save.png"
+			for k, 0, kSceneListSize@
+				gsel kCaptureBufferID@ + k
+				pos 0, 0
+				gcopy kTempBufferID@, 0, k * kFlashWY, kFlashWX, kFlashWY
+			next
+			for k, 0, kFleetNum
+				gsel kFleetIdOffset@ + k
+				pos 0, 0
+				gcopy kTempBufferID@, kFlashWX, k * kFlashWY, kFlashWX, kFlashWY
+			next
+			for i, 0, kFleetNum
+				for j, 0, kUnitNum
+					gsel kUnitIdOffset@ + (i * kUnitNum + j)
+					pos 0, 0
+					gcopy kTempBufferID@, kFlashWX * (i + 2), j * kFlashWY, kFlashWX, kFlashWY
+				next
+			next
+		return
 	#global
 	#module get_num
 		#deffunc DrawSquare int px_, int py_, int wx_, int wy_

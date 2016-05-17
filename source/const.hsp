@@ -40,9 +40,6 @@
 	#const global kTypeUnknown 0	;デフォルトの判定結果
 	#const global kTypeNow     0	;現在画面
 	// オブジェクトのサイズ
-	;デスクトップ全体のサイズ
-	#define global kDispX ginfo_dispx
-	#define global kDispY ginfo_dispy
 	;Flash画面のサイズ
 	#const  global kFlashWX 800
 	#const  global kFlashWY 480
@@ -69,7 +66,7 @@
 	#const kLargeFontSize 30
 	;メイン画面のサイズ
 	#const kMainWX kObjSpace + kObjSpaceX * 2
-	#const kMainWY kObjSpace * 4 + kObjSpaceY * 12
+	#const kMainWY kObjSpace * 4 + kObjSpaceY * 13
 	;カウンター画面
 	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
 	#const kCounterY 60
@@ -104,6 +101,7 @@
 		bgm_list_name.0 = "母港", "マップ", "戦闘"
 		bgm_list_flg.0 = FALSE, FALSE, FALSE
 		sdim bgm_list_filename, 260, kBgmListSize
+		bgm_list_filename.0 = "<NONE>", "<NONE>", "<NONE>"
 		gosub *init_bgm_list
 	sdim fps_list, 1024	//fps一覧
 		fps_num.0 = 30, 20, 10, 5, 3, 2, 1
@@ -153,14 +151,51 @@
 	gosub *match_init
 	;各種フラグ
 	name_disable_flg = TRUE
-	cursor_flg = TRUE
+	cursor_flg       = TRUE
+	dead_zone_flg    = FALSE
+	cap_crop_flg     = FALSE
+	auto_set_flg     = TRUE
+	get_pos_flg      = FALSE	;座標取得するとTRUEになる
 	;その他
+	dim unit_count, kFleetNum
+	dim unit_count_, kFleetNum
+	GetMonitorParam kDispX ,kDispY ,kOffsetX, kOffsetY
 	kFleetIdOffset = kCaptureBufferID + kSceneListSize
 	kUnitIdOffset = kFleetIdOffset + kFleetNum
 	flash_px = -1
 	flash_py = -1
+	fps_index = 2
 	zooming_index_ = -1
 	dead_zone_flg_ = FALSE
+
+// バッファ初期化
+	//マウスカーソル
+	buffer kCursorBufferID
+	exist current_dir + "\\cursor.png"
+	if(strsize == -1) :end
+	picload current_dir + "\\cursor.png", 0
+	cursor_x = ginfo_sx :cursor_y = ginfo_sy
+
+	//保存用バッファ
+	;サブ画面用バッファ
+	buffer kPutTempWindowID, kFlashWX, kFlashWY
+	;各保存画面
+	repeat kSceneListSize
+		buffer kCaptureBufferID + cnt, kFlashWX, kFlashWY
+	loop
+	;編成画面
+	repeat kFleetNum
+		buffer kCaptureBufferID + kSceneListSize + cnt, kFlashWX, kFlashWY
+	loop
+	;改装画面
+	repeat kFleetNum * kUnitNum
+		buffer kCaptureBufferID + kSceneListSize + kFleetNum + cnt, kFlashWX, kFlashWY
+	loop
+	;認識用
+	buffer kNumGetBufferID1, 64, 64
+	buffer kNumGetBufferID2, 32, 32
+
+	ReadSaveData
 	goto *main1
 
 *init_bgm_list

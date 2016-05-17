@@ -9,7 +9,7 @@ goto *main2
 		GetDesktopWindow kDeskBufferID
 		//手動で枠を選択させる
 		;初期設定
-		bgscr kSelectWindowID, kDispX, kDispY, , 0, 0
+		bgscr kSelectWindowID, kDispX, kDispY, , kOffsetX, kOffsetY
 		gsel kSelectWindowID, 2
 		font msgothic, kLargeFontSize
 		;画面表示
@@ -75,6 +75,7 @@ goto *main2
 				GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
 				flash_px += square_x :flash_py += square_y
 				SetTitle
+				get_pos_flg = TRUE
 			}
 		}
 	}else{
@@ -84,6 +85,7 @@ goto *main2
 		//撮影した画像から座標を検索する
 		GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
 		SetTitle
+		get_pos_flg = TRUE
 	}
 return
 
@@ -155,8 +157,8 @@ return
 		if(bgm_index == bgm_type) :mmplay bgm_index :now_bgm = bgm_index
 		gosub *init_bgm_list
 		gsel kMainWindowID
-		objprm 22, bgm_list
-		objprm 22, bgm_index
+		objprm bgm_index_id, bgm_list
+		objprm bgm_index_id, bgm_index
 	}
 return
 //BGM切り替え
@@ -173,8 +175,8 @@ return
 	}
 	gosub *init_bgm_list
 	gsel kMainWindowID
-	objprm 22, bgm_list
-	objprm 22, bgm_index
+	objprm bgm_index_id, bgm_list
+	objprm bgm_index_id, bgm_index
 return
 //BGM再生
 *start_bgm
@@ -379,8 +381,13 @@ return
 	next
 return
 
+//データセーブ(手動)
+*save_soft_data
+	WriteSaveData
+return
+
 *about
-	dialog "ソフト名：" + kSoftName + " " + kSoftVer + "\n作成者：YSR\n最終更新日：2015/04/19",,kSoftName
+	dialog "ソフト名：" + kSoftName + " " + kSoftVer + "\n作成者：YSR\n最終更新日：" + kSoftLastUpdate,,kSoftName
 return
 
 *main2

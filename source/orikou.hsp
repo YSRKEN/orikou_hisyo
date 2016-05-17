@@ -1,14 +1,10 @@
-/* おりこうさんな秘書 Ver.1.4 */
-/* 更新点の概要：
- * ・ソースコード全面見直しに伴う種々のバグフィクス
- * ・ランキング画面など、対応するシーンの拡充
- * ・「編成画面で編成のみ」「改装画面で艦娘のみ」を保存可能にした
- */
+/* おりこうさんな秘書 Ver.1.5 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.1.4"
-	#define kSoftLastUpdate "2015/04/19"
+	#define kSoftVer        "Ver.1.5"
+	#define kSoftVer2       "15"
+	#define kSoftLastUpdate "2015/04/23"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -18,30 +14,6 @@
 
 /* メインルーチン */
 // ウィンドウ周りを初期設定
-	//マウスカーソル
-	buffer kCursorBufferID
-	picload "cursor.png", 0
-	cursor_x = ginfo_sx :cursor_y = ginfo_sy
-
-	//保存用バッファ
-	;サブ画面用バッファ
-	buffer kPutTempWindowID, kFlashWX, kFlashWY
-	;各保存画面
-	repeat kSceneListSize
-		buffer kCaptureBufferID + cnt, kFlashWX, kFlashWY
-	loop
-	;編成画面
-	repeat kFleetNum
-		buffer kCaptureBufferID + kSceneListSize + cnt, kFlashWX, kFlashWY
-	loop
-	;改装画面
-	repeat kFleetNum * kUnitNum
-		buffer kCaptureBufferID + kSceneListSize + kFleetNum + cnt, kFlashWX, kFlashWY
-	loop
-	;認識用
-	buffer kNumGetBufferID1, 64, 64
-	buffer kNumGetBufferID2, 32, 32
-
 	//経験値計算機
 	screen kExpCalcWindowID ,kObjSpace * 4 + kSmallFontSize * 8 + 0.6 * kObjX * 2, kObjSpace + kObjSpaceY * 6
 	gsel kExpCalcWindowID, -1
@@ -204,6 +176,8 @@
 			chkbox "大破チェック", dead_zone_flg
 		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 10
 			chkbox "画面クロップ", cap_crop_flg
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 11
+			chkbox "ズレ補正",auto_set_flg
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 7
 			button gosub "経験値計算", *calc_exp
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 8
@@ -212,14 +186,17 @@
 			button gosub "○号カウンター", *count_task
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 10
 			combox fps_index,,fps_list
-		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 11
-			combox zooming_index,,zooming_list
 		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 11
+			combox zooming_index,,zooming_list
+		pos kObjSpace             , kObjSpace * 4 + kObjSpaceY * 12
+			button gosub "手動セーブ", *save_soft_data
+		pos kObjSpace + kObjSpaceX, kObjSpace * 4 + kObjSpaceY * 12
 			button gosub "情報...", *about
 
 	objsize kObjSpace + kObjX * 2, kObjY
 		pos kObjSpace             , kObjSpace * 3 + kObjSpaceY * 4
 			combox bgm_index,,bgm_list
+			bgm_index_id = stat
 
 	onexit gosub *exit
 
@@ -245,6 +222,21 @@
 		if(screen_shot_type != kTypeUnknown){
 			gsel kCaptureBufferID + screen_shot_type - 1
 			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+		}
+		//艦隊における艦娘数を認識し、減少した場合はバッファを初期化する
+		if(screen_shot_type >= kSceneListSize + 1){
+			GetUnits kFlashBufferID, screen_shot_type, unit_count
+			for i, 0, kFleetNum
+				if(unit_count_(i) != unit_count(i)){
+					if(unit_count_(i) > unit_count(i)){
+						for j, unit_count(i), unit_count_(i)
+							gsel kUnitIdOffset + i * kUnitNum + j
+							color 255, 255, 255 :boxf
+						next
+					}
+					unit_count_(i) = unit_count(i)
+				}
+			next
 		}
 		// アプリの状態に合わせ表示を変更する
 		//サブ画面のサイズを変更する
@@ -311,11 +303,11 @@
 		if(mvp_flg_         != mvp_flg)         :gosub *exp_calc :mvp_flg_         = mvp_flg
 		if(result_index_    != result_index)    :gosub *exp_calc :result_index_    = result_index
 		//入渠タイマー
-		if(time != gettime(6)){
+		if(dock_time != gettime(6)){
 			gsel kDockWindowID
 			gosub *increment_dock
 			gosub *redraw_dock
-			time = gettime(6)
+			dock_time = gettime(6)
 		}
 		//BGM機能
 		;現在の状況を診断
@@ -342,6 +334,18 @@
 			}
 			bgm_type_ = bgm_type
 		}
+		//自動ズレ補正
+		if(get_pos_flg){
+			if(auto_set_time != gettime(6)){
+				if(auto_set_flg){
+					temp = CheckAutoSet()
+					if(CheckAutoSet()){
+						gosub *get_pos
+					}
+				}
+				auto_set_time = gettime(6)
+			}
+		}
 		// ウェイト
 		await 1000 / fps_num(fps_index)
 	loop
@@ -349,5 +353,5 @@
 //終了確認
 *exit
 	dialog "終了しますか？", 2, kSoftName
-	if(stat == 6) :end
+	if(stat == 6) :WriteSaveData :end
 return
