@@ -147,6 +147,7 @@ return
 
 //*大破・消耗チェック
 *check_stopper
+	logmes "" + show_stopper_flg1 + " " + show_stopper_flg2 + " " + CheckStopperType()
 	ShowStopperWindow stopper_type	//ウィンドウ表示
 	if(show_stopper_flg1){
 		// 表示を無くすかどうかの判定
@@ -201,6 +202,7 @@ return
 	if(show_locker_flg1){
 		// 表示を無くすかどうかの判定
 		if(show_locker_flg2){
+			locker_type = CheckLockerType()
 			switch locker_type
 				case kLockerKammusu
 					gsel kLockerWindowID
@@ -254,13 +256,6 @@ return
 		swend
 	}
 return
-
-//*戦闘シーンを見返す
-*show_battle
-	gsel kMainWindowID
-	objprm scene_list_id, battle_index(show_battle_type) + 1	;この+1は、「現在画面」の分のオフセット
-	show_battle_type = (show_battle_type + 1) \ kBattleType
-	goto *main
 
 /* 座標習得に関する処理 */
 //*艦これの画面の座標とハンドルを取得する
@@ -1739,7 +1734,7 @@ return
 	max_value_2 = (max_value_2 / 100 + 1) * 100
 	diff_value_1 = max_value_1 - min_value_1
 	diff_value_2 = max_value_2 - min_value_2
-	diff_time = supply_log_size - first_index - 1
+	diff_time = supply_time(supply_log_size - 1) - supply_time(first_index)
 	if(diff_time <= 0) :return
 	gsel kSupplyGraphWindowID
 	objprm min_value_1_id, min_value_1
@@ -1767,9 +1762,9 @@ return
 					swbreak
 			swend
 			for i, 0, supply_log_size - 1
-				x1 = 1.0 * (i - first_index) / diff_time * kGraphWX2
+				x1 = 1.0 * (supply_time(i) - supply_time(first_index)) / diff_time * kGraphWX2
 				y1 = (1.0 - 1.0 * (supply_value(j, i) - min_value_1) / (diff_value_1)) * kGraphWY2
-				x2 = 1.0 * (i - first_index + 1) / diff_time * kGraphWX2
+				x2 = 1.0 * (supply_time(i + 1) - supply_time(first_index)) / diff_time * kGraphWX2
 				y2 = (1.0 - 1.0 * (supply_value(j, i + 1) - min_value_1) / (diff_value_1)) * kGraphWY2
 				line x1, y1, x2, y2
 			next
@@ -1786,9 +1781,9 @@ return
 					swbreak
 			swend
 			for i, 0, supply_log_size - 1
-				x1 = 1.0 * (i - first_index) / diff_time * kGraphWX2
+				x1 = 1.0 * (supply_time(i) - supply_time(first_index)) / diff_time * kGraphWX2
 				y1 = (1.0 - 1.0 * (supply_value(j, i) - min_value_2) / (diff_value_2)) * kGraphWY2
-				x2 = 1.0 * (i - first_index + 1) / diff_time * kGraphWX2
+				x2 = 1.0 * (supply_time(i + 1) - supply_time(first_index)) / diff_time * kGraphWX2
 				y2 = (1.0 - 1.0 * (supply_value(j, i + 1) - min_value_2) / (diff_value_2)) * kGraphWY2
 				line x1, y1, x2, y2
 			next

@@ -154,7 +154,7 @@
 	#const global kStopperExhausted 2
 	#const global kLockerKammusu 1	;ロック機能
 	#const global kLockerWeapon  2
-	#const kBattleType 3	;戦闘の種類(昼戦・夜戦・現在画面)
+	#const kBattleType 2	;戦闘の種類(昼戦・夜戦)
 	#const global kCounterType 6	;○号カウンタでカウントする種類
 	#enum global kBattleRankS = 0
 	#enum global kBattleRankA
@@ -293,9 +293,6 @@
 	next
 	sort_pos_x.0 = 163, 172
 	sort_pos_y.0 = 0, 28, 55, 83, 111, 139, 167, 195, 223, 251
-	// 戦闘画面ボタン
-	show_battle_type = 0			;表示する画面(0～2が昼戦・夜戦・現在画面に対応)
-	dim battle_index, kBattleType	;各画面のインデックス
 	// ソート一覧
 	sdim sort_list, 1024, 2
 	sort_list_size.0 = 0, 0
@@ -388,3 +385,4 @@
 	dim hwnd_window, 10		;マウスで動かせるようにするウィンドウのハンドル
 	dim unit_count, kFleetNum	;各艦隊の艦娘数
 	sdim status_bar_str, 1024	;ステータスバーに表示する文字列
+	dim battle_index, kBattleType	;各画面のインデックス

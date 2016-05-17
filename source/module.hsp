@@ -35,7 +35,7 @@
 			;デスクトップのデバイスコンテキストを作成する
 			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
 			;デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, desktop_param(2), desktop_param(3), hdc_screen, desktop_param(0), desktop_param(1), SRCCOPY | CAPTUREBLT
+			BitBlt hdc, 0, 0, desktop_param(2), desktop_param(3), hdc_screen, desktop_param(0), desktop_param(1), SRCCOPY; | CAPTUREBLT
 			;デバイスコンテキストを削除する
 			DeleteDC hdc_screen
 		return
@@ -77,7 +77,7 @@
 			;ウィンドウのデバイスコンテキストを作成する
 			hdc_window = GetWindowDC(window_handle)
 			;ウィンドウの画像をコピーする
-			BitBlt hdc, 0, 0, window_param(2), window_param(3), hdc_window, 0, 0, SRCCOPY | CAPTUREBLT
+			BitBlt hdc, 0, 0, window_param(2), window_param(3), hdc_window, 0, 0, SRCCOPY; | CAPTUREBLT
 			;デバイスコンテキストを削除する
 			ReleaseDC window_handle, hdc_window
 		return
@@ -87,7 +87,7 @@
 			;デスクトップのデバイスコンテキストを作成する
 			hdc_window = GetWindowDC(window_handle)
 			;デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_window, flash_position(0), flash_position(1), SRCCOPY | CAPTUREBLT
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_window, flash_position(0), flash_position(1), SRCCOPY; | CAPTUREBLT
 			;デバイスコンテキストを削除する
 			ReleaseDC window_handle, hdc_window
 		return
@@ -97,7 +97,7 @@
 			;デスクトップのデバイスコンテキストを作成する
 			hdc_window = GetWindowDC(window_handle)
 			;デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_window, flash_position(0) - 1, flash_position(1) - 1, SRCCOPY | CAPTUREBLT
+			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_window, flash_position(0) - 1, flash_position(1) - 1, SRCCOPY; | CAPTUREBLT
 			;デバイスコンテキストを削除する
 			ReleaseDC window_handle, hdc_window
 			;RGB値で判定する。四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
@@ -1057,7 +1057,7 @@
 		// 時刻用に、読み取った数字を正規化する
 		#deffunc NormalizeTime array number
 			for k, 0, 6
-				if(k \ 2 == 0){
+				if((k \ 2 == 0) && (k != 0)){	//0を省いたのは、80時間遠征とかがあるため
 					number(k) = limit(number(k), 0, 5)
 				}else{
 					number(k) = limit(number(k), 0, 9)
@@ -1210,6 +1210,15 @@
 		return
 		// ログに追記
 		#deffunc PutLog str message
+			// ソフトのログが溢れそうになったら自動保存する
+			if(strlen(soft_log@) > 30 * 1000){
+				dirlist x, exe_path@ + "\\log", 5
+				if(stat == 0) :mkdir exe_path@ + "\\log"
+				notesel soft_log@
+				notesave exe_path@ + "\\log\\soft(" + NowTime() + ").log"
+				soft_log@ = ""
+			}
+			// 追記して反映する
 			soft_log@ += NowTimeMini() + " " + message + "\n"
 			gsel kMainWindowID
 			objprm 0, soft_log@

@@ -345,7 +345,7 @@
 		POS_XY 0, 5
 			button gosub "BGM‹@”\", *show_bgm_window
 		POS_XY 1, 5
-			button "í“¬‰æ–Ê", *show_battle
+			chkbox "í“¬‰æ–Ê", show_battle_flg
 		POS_XY 2, 5
 			button gosub "Šeíî•ñ", *about
 	objsize SIZE_X(2), SIZE_Y(1)

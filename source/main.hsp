@@ -1,11 +1,11 @@
-/* おりこうさんな秘書 Ver.3.0.1 */
+/* おりこうさんな秘書 Ver.3.0.2 */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.0.1"
-	#define kVerString  "301"
-	#define kLastUpdate "2015/09/26"
+	#define kVersion    "Ver.3.0.2"
+	#define kVerString  "302"
+	#define kLastUpdate "2015/09/27"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -81,7 +81,7 @@
 			gosub *check_stopper
 			// ロックチェック
 			gosub *check_locker
-			// 選択位置が変わった際に表示する画像を変更する
+			// ソート一覧で選択位置が変わった際に表示する画像を変更する
 			gosub *redraw_sort_preview
 			// 精度面の問題から、勝利判定は常時行うようにする
 			// (判定できない＝C以下と判定されるので、最大評価を取る)
@@ -112,6 +112,21 @@
 			if(bgm_type_now_ != bgm_type_now){
 				gosub *change_bgm
 				bgm_type_now_ = bgm_type_now
+			}
+			// 「戦闘画面」にチェックが入っている際は自動切り替え
+			if(show_battle_flg){
+				if(scene_list_index != battle_index(0) + 1){
+					if(scene_result(1) == "昼戦画面"){
+						gsel kMainWindowID
+						objprm scene_list_id, battle_index(0) + 1
+					}
+				}
+				if(scene_list_index != battle_index(1) + 1){
+					if(scene_result(1) == "夜戦画面"){
+						gsel kMainWindowID
+						objprm scene_list_id, battle_index(1) + 1
+					}
+				}
 			}
 			// 定期的に設定を保存しておく
 			if(flash_time - autosave_last_time >= kAutoSaveInterval){
@@ -185,6 +200,22 @@
 			gosub *draw_supply_graph
 			graph_scale_index_ = graph_scale_index
 		}
+		//「戦闘画面」チェックに関する処理
+		if(show_battle_flg_ != show_battle_flg){
+			if(show_battle_flg == FALSE){
+				gsel kMainWindowID
+				objprm scene_list_id, 0
+			}else{
+				if(show_scene_list_time(battle_index(0)) > show_scene_list_time(battle_index(1))){
+					gsel kMainWindowID
+					objprm scene_list_id, battle_index(0) + 1
+				}else{
+					gsel kMainWindowID
+					objprm scene_list_id, battle_index(1) + 1
+				}
+			}
+			show_battle_flg_ = show_battle_flg
+		}
 		// ウェイト
 		await 1000 / capture_fps(capture_fps_index)
 	loop
@@ -230,6 +261,8 @@ return
 			dialog "現在、ロック操作が制限されています。\nそれでもロック操作を行いますか？", 3, kSoftName
 			if(stat == 6){
 				gsel kLockerWindowID, -1
+				PutLog "【報告】"
+				PutLog "ロック操作への制限が解除されました"
 			}
 		}
 	}
