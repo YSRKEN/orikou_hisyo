@@ -214,10 +214,10 @@ return
 	}
 	// 音声通知
 	if((scene_result(0) == "出撃経過") && (scene_result(1) == "夜戦確認")){
-		if(sound_alert_flg) :PlayAlert "alert_sel.wav"
+		if(sound_alert_flg) :PlayAlert kAlertSel
 	}
 	if((scene_result(0) == "出撃経過") && (scene_result(1) == "戦闘判定")){
-		if(sound_alert_flg) :PlayAlert "alert_res.wav"
+		if(sound_alert_flg) :PlayAlert kAlertRes
 	}
 	// 任務一覧を、任務画面が開く度にリセットする
 	if(pre_scene_type != scene_result(0)){

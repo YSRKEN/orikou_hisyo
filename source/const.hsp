@@ -120,6 +120,7 @@
 	#enum global kGetPosClick
 	#enum global kGetPosCrop
 	#enum global kGetPosManual
+	#enum global kGetPosManual2
 	// キーボード・マウス操作
 	#const kStickEscKey 128
 	#const kStickMouse  256
@@ -429,6 +430,21 @@
 	battle_bgm_text = "交戦形態 昼戦画面 夜戦画面 砲撃・連撃 対空カットイン 昼カットイン 昼カットイン 魚雷カットイン 主砲カットイン 砲雷カットイン 中破画面 大破画面"
 	home_bgm_text1 = "母港画面 母港画面 編成画面 改装画面 工廠画面 入渠画面 補給画面 戦績表示 アイテム 任務画面 遠征出撃"
 	home_bgm_text2 = "演習個別 艦隊選択"
+	sdim alert_name, 64, 5
+	alert_name.0 = "alert_bld.wav", "alert_dck.wav", "alert_exp.wav", "alert_res.wav", "alert_sel.wav"
+	#const kAlertBld 0
+	#const kAlertDck 1
+	#const kAlertExp 2
+	#const kAlertRes 3
+	#const kAlertSel 4
+	dim alert_flg, 5
+	for k, 0, 5
+		exist dir_cur + "\\" + alert_name(k)
+		alert_flg(k) = FALSE
+		if(strsize == -1) :_continue
+		mmload dir_cur + "\\" + alert_name(k), k + 1, 0
+		alert_flg(k) = TRUE
+	next
 	// 内蔵ブラウザ
 	sdim browser_url, 512 :browser_url = kKanColleURL
 	// 任務一覧

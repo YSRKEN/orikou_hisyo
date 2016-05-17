@@ -30,6 +30,7 @@
 			objprm weapon_lock_id@, weapon_lock_flg@
 			objprm sound_alert_id@, sound_alert_flg@
 			objprm position_save_id@, position_save_flg@
+			objprm old_getpos_id@, old_getpos_flg@
 
 			objprm main_width_index_id@, main_width_index@
 			objprm check_special_id@, check_special_flg@
@@ -57,11 +58,8 @@
 		#defcfunc GetUnitID int fleet_num, int unit_num
 		return kSceneBufferID + scene_fleet_offset@ + fleet_num * kUnitNum + unit_num
 		// ÉAÉâÅ[ÉgÇñ¬ÇÁÇ∑
-		#deffunc PlayAlert str alert_name
-			exist exe_path@ + "\\" + alert_name
-			if(strsize == -1) :return
-			mmload exe_path@ + "\\" + alert_name, 1, 0
-			mmplay 1
+		#deffunc PlayAlert int alert_name_index
+			if(alert_flg@(alert_name_index)) :mmplay alert_name_index + 1
 		return
 	#global
 

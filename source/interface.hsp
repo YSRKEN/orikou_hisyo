@@ -39,6 +39,9 @@
 		POS_XY 3, 0
 			chkbox "”ÍˆÍ•\¦", show_mascot_area_flg
 				show_mascot_area_id = stat
+		POS_XY 0, 1
+			chkbox "æ“¾‘Îô", old_getpos_flg
+				old_getpos_id = stat
 		POS_XY 1, 1
 			combox main_width_index,,"3—ñ•\¦\n2—ñ•\¦"
 				main_width_index_id = stat

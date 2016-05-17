@@ -89,6 +89,16 @@
 			;デバイスコンテキストを削除する
 			ReleaseDC window_handle, hdc_window
 		return
+		// 艦これの画面のスクリーンショットを取得する(旧形式)
+		#deffunc FlashScreenShotOld int flash_buffer_id, array flash_position
+			gsel flash_buffer_id
+			;デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			;デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, flash_position(0), flash_position(1), SRCCOPY; | CAPTUREBLT
+			;デバイスコンテキストを削除する
+			DeleteDC hdc_screen
+		return
 		// 艦これの画面がズレていないかを判定する
 		#defcfunc CheckMoveFlash int window_handle, array flash_position
 			gsel kCheckBufferID
@@ -98,6 +108,37 @@
 			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_window, flash_position(0) - 1, flash_position(1) - 1, SRCCOPY; | CAPTUREBLT
 			;デバイスコンテキストを削除する
 			ReleaseDC window_handle, hdc_window
+			;RGB値で判定する。四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
+			dim clr, 8
+			for k, 0, 8
+				pget check_x@(k), check_y@(k)
+				clr(k) = (ginfo_r * 1000 + ginfo_g) * 1000 + ginfo_b
+			next
+			auto_set_flg = FALSE
+			if((clr(0) != clr(1)) && (clr(1) == clr(2))){
+				flash_position(0) += move_x@(0)
+				flash_position(1) += move_y@(0)
+				auto_set_flg = TRUE
+			}else{
+				for k, 1, 8
+					if(clr(0) != clr(k)){
+						flash_position(0) += move_x@(k)
+						flash_position(1) += move_y@(k)
+						auto_set_flg = TRUE
+						_break
+					}
+				next
+			}
+		return auto_set_flg
+		// 艦これの画面がズレていないかを判定する(旧形式)
+		#defcfunc CheckMoveFlashOld array flash_position
+			gsel kCheckBufferID
+			;デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			;デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_screen, flash_position(0) - 1, flash_position(1) - 1, SRCCOPY; | CAPTUREBLT
+			;デバイスコンテキストを削除する
+			DeleteDC hdc_screen
 			;RGB値で判定する。四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
 			dim clr, 8
 			for k, 0, 8

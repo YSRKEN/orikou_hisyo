@@ -175,38 +175,80 @@
 	if((get_pos_mode == kGetPosClick)  && (mouse_click_flg  == FALSE)) :return
 	if((get_pos_mode == kGetPosCrop)   && (mouse_crop_flg   == FALSE)) :return
 	if((get_pos_mode == kGetPosManual) && (mouse_manual_flg == FALSE)) :return
-	// 艦これの画面のハンドルを取得する
-	window_handle = GetWindowHandle(flash_point)
-	// 艦これの画面の座標を取得する
-	GetWindowParam window_handle, window_param
-	WindowScreenShot kDesktopBufferID, window_handle, window_param
-	if(get_pos_mode != kGetPosManual){
-		FlashPositionSearch kDesktopBufferID, flash_position
-	}else{
-		square.0 += desktop_param(0) - window_param(0)
-		square.1 += desktop_param(1) - window_param(1)
-		dim game_window_size, kPosDim
-		GamePositionSearch kDesktopBufferID, square, flash_position, game_window_size
-		if((game_window_size(0) != kFlashWX) || (game_window_size(1) != kFlashWY)){
-			PutLog "画面の捕捉に失敗しました。"
-			return
+	if(old_getpos_flg == FALSE){
+		// 艦これの画面のハンドルを取得する
+		window_handle = GetWindowHandle(flash_point)
+		// 艦これの画面の座標を取得する
+		GetWindowParam window_handle, window_param
+		WindowScreenShot kDesktopBufferID, window_handle, window_param
+		if(get_pos_mode != kGetPosManual){
+			FlashPositionSearch kDesktopBufferID, flash_position
+		}else{
+			square.0 += desktop_param(0) - window_param(0)
+			square.1 += desktop_param(1) - window_param(1)
+			dim game_window_size, kPosDim
+			GamePositionSearch kDesktopBufferID, square, flash_position, game_window_size
+			if((game_window_size(0) != kFlashWX) || (game_window_size(1) != kFlashWY)){
+				PutLog "画面の捕捉に失敗しました。"
+				return
+			}
 		}
+		get_pos_flg = TRUE
+		PutLog "ウィンドウハンドル：" + window_handle
+		PutLog "ウィンドウ左上座標：" + window_param(0) + "," + window_param(1)
+		PutLog "ウィンドウサイズ：" + window_param(2) + "," + window_param(3)
+		PutLog "艦これ相対左上座標：" + flash_position(0) + "," + flash_position(1)
+	}else{
+		// desktop_param……モニタ全体のオフセットとサイズ
+		// flash_point……モニタ全体から見たFlashの中央位置(おおよそ)。
+		//                そこからFlashPositionSearchでFlashの左上位置に修正される
+		switch get_pos_mode
+			// オート
+			case kGetPosAuto
+				flash_position(0) = flash_point(0) - kFlashWX / 2
+				flash_position(1) = flash_point(1) - kFlashWY / 2
+			swbreak
+			// クリック
+			case kGetPosClick
+				window_handle = GetWindowHandle(flash_point)
+				GetWindowParam window_handle, window_param
+				buffer kTempBufferID, window_param(2), window_param(3)
+				gcopy kDesktopBufferID, window_param(0) - desktop_param(0), window_param(1) - desktop_param(1), window_param(2), window_param(3)
+				buffer kDesktopBufferID, window_param(2), window_param(3)
+				gcopy kTempBufferID, 0, 0, window_param(2), window_param(3)
+				FlashPositionSearch kDesktopBufferID, flash_position
+				flash_position(0) = window_param(0) + flash_position(0)
+				flash_position(1) = window_param(1) + flash_position(1)
+			swbreak
+			// クロップ
+			case kGetPosCrop
+				flash_position(0) = flash_point(0) - kFlashWX / 2
+				flash_position(1) = flash_point(1) - kFlashWY / 2
+			swbreak
+			// マニュアル
+			case kGetPosManual
+				dim game_window_size, kPosDim
+				GamePositionSearch kDesktopBufferID, square, flash_position, game_window_size
+				if((game_window_size(0) != kFlashWX) || (game_window_size(1) != kFlashWY)){
+					PutLog "画面の捕捉に失敗しました。"
+					return
+				}
+				flash_position(0) += desktop_param(0)
+				flash_position(1) += desktop_param(1)
+			swbreak
+		swend
+		get_pos_flg = TRUE
+		PutLog "艦これ相対左上座標：" + flash_position(0) + "," + flash_position(1)
 	}
-	get_pos_flg = TRUE
-
-	PutLog "ウィンドウハンドル：" + window_handle
-	PutLog "ウィンドウ左上座標：" + window_param(0) + "," + window_param(1)
-	PutLog "ウィンドウサイズ：" + window_param(2) + "," + window_param(3)
-	PutLog "艦これ相対左上座標：" + flash_position(0) + "," + flash_position(1)
 return
 
 //*対象の状況を監視
 *check_pos
-	// 画面サイズを取得できない場合
-	GetWindowParam window_handle, window_param_
-	if((window_param_(2) == 0) || (window_param_(3) == 0)){
+	/// 取得モードが変更された場合
+	if(old_getpos_flg != old_getpos_flg_){
+		old_getpos_flg_ = old_getpos_flg
 		PutLog "【ズレ検出】"
-		PutLog "対象を見失いました。"
+		PutLog "座標取得方式が変更されました。"
 		get_pos_flg = FALSE
 		// ストッパー画面における処理
 		show_stopper_flg1 = FALSE
@@ -217,22 +259,59 @@ return
 		gsel kLockerWindowID, -1
 		return
 	}
-	// ウィンドウサイズが変わった＝画像位置が動いた可能性がある場合
-	// およびウィンドウ自体が動いた場合
-	if((window_param_(0) != window_param(0)) || (window_param_(1) != window_param(1)) || (window_param_(2) != window_param(2)) || (window_param_(3) != window_param(3))){
-		window_param(0) = window_param_(0)
-		window_param(1) = window_param_(1)
-		window_param(2) = window_param_(2)
-		window_param(3) = window_param_(3)
-		gosub *get_pos_local
-		return
-	}
-	// 艦これの画面の周囲のRGB値から、ズレれていると判定された場合
-	if(check_move_flash_flg){
-		if(flash_time - checkpos_start_time >= kCheckPosInterval){
-			checkpos_start_time = flash_time
-			if(CheckMoveFlash(window_handle, flash_position)){
-				gosub *get_pos_local
+	if(old_getpos_flg == FALSE){
+		// 画面サイズを取得できない場合
+		GetWindowParam window_handle, window_param_
+		if((window_param_(2) == 0) || (window_param_(3) == 0)){
+			PutLog "【ズレ検出】"
+			PutLog "対象を見失いました。"
+			get_pos_flg = FALSE
+			// ストッパー画面における処理
+			show_stopper_flg1 = FALSE
+			show_stopper_flg2 = FALSE
+			gsel kStopperWindowID, -1
+			show_locker_flg1 = FALSE
+			show_locker_flg2 = FALSE
+			gsel kLockerWindowID, -1
+			return
+		}
+		// ウィンドウサイズが変わった＝画像位置が動いた可能性がある場合
+		// およびウィンドウ自体が動いた場合
+		if((window_param_(0) != window_param(0)) || (window_param_(1) != window_param(1)) || (window_param_(2) != window_param(2)) || (window_param_(3) != window_param(3))){
+			window_param(0) = window_param_(0)
+			window_param(1) = window_param_(1)
+			window_param(2) = window_param_(2)
+			window_param(3) = window_param_(3)
+			gosub *get_pos_local
+			return
+		}
+		// 艦これの画面の周囲のRGB値から、ズレれていると判定された場合
+		if(check_move_flash_flg){
+			if(flash_time - checkpos_start_time >= kCheckPosInterval){
+				checkpos_start_time = flash_time
+				if(CheckMoveFlash(window_handle, flash_position)){
+					gosub *get_pos_local
+				}
+			}
+		}
+	}else{
+		// 艦これの画面の周囲のRGB値から、ズレれていると判定された場合
+		if(check_move_flash_flg){
+			if(flash_time - checkpos_start_time >= kCheckPosInterval){
+				checkpos_start_time = flash_time
+				if(CheckMoveFlashOld(flash_position)){
+					PutLog "【ズレ検出】"
+					PutLog "対象を見失いました。"
+					get_pos_flg = FALSE
+					// ストッパー画面における処理
+					show_stopper_flg1 = FALSE
+					show_stopper_flg2 = FALSE
+					gsel kStopperWindowID, -1
+					show_locker_flg1 = FALSE
+					show_locker_flg2 = FALSE
+					gsel kLockerWindowID, -1
+					return
+				}
 			}
 		}
 	}

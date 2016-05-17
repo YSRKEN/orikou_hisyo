@@ -23,7 +23,7 @@ return
 	;スクロール
 	pPW = pDoc("parentWindow")
 	pPW->"scrollBy" -2000, -2000
-	pPW->"scrollBy" 95, 60
+	pPW->"scrollBy" browser_offset_x, browser_offset_y
 	;スクロールバーを隠す
 	comres pBody
 	pDoc->"getElementsByTagName" "body"
@@ -56,6 +56,10 @@ return
 		delcom pBodyItemStyle
 		delcom pBodyItem
 	}
+	/*pElm = pDoc("documentElement")
+	browser_offset_x = pElm("scrollLeft")
+	browser_offset_y = pElm("scrollTop")
+	delcom pElm*/
 	delcom pBody
 	delcom pDoc
 return

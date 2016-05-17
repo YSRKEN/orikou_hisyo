@@ -10,7 +10,6 @@
 			if(NearColor(480, dck_pos_y(k), 33, 174, 178) == FALSE) :_continue
 			// クレーンの位置を検出して、レベルや時間に掛かっていそうな場合に無視する
 			crane_pos = GetCranePos(k)
-			logmes "" + crane_pos
 			if(crane_pos != -1){
 				if(crane_pos == limit(crane_pos, 490, 560)) :_continue
 				if(crane_pos == limit(crane_pos, 600, 760)) :_continue
@@ -88,7 +87,6 @@
 				if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,236,228,215)) :unit_number = 2
 				if(NearColor(525,180 + k * 30,237,229,217) && NearColor(523,180 + k * 30,239,231,219)) :unit_number = 3
 			}
-			logmes "" + k + " " + exp_small_name + " " + exp_large_name + " " + unit_number
 			if(unit_number == 0) :_continue
 			// 各桁の数字を読み取って、配列に代入する
 			dock_finish_time(unit_number - 1 + kDocks * 2) = 0.0
@@ -216,7 +214,7 @@ return
 					PutLog "入渠―第" + (k + 1) + "ドック"
 					gsel kMainWindowID
 					TasktrayPopup2 "第" + (k + 1) + "ドックの\n入渠がまもなく完了します。", kSoftName, 1, 1000
-					if(sound_alert_flg) :PlayAlert "alert_dck.wav"
+					if(sound_alert_flg) :PlayAlert kAlertDck
 				}
 				timer_output += "☆"
 			}
@@ -238,7 +236,7 @@ return
 					PutLog "建造―第" + (k + 1) + "ドック"
 					gsel kMainWindowID
 					TasktrayPopup2 "第" + (k + 1) + "ドックの\n建造がまもなく完了します。", kSoftName, 1, 1000
-					if(sound_alert_flg) :PlayAlert "alert_bld.wav"
+					if(sound_alert_flg) :PlayAlert kAlertBld
 				}
 				timer_output += "☆"
 			}
@@ -264,7 +262,7 @@ return
 					}
 					gsel kMainWindowID
 					TasktrayPopup2 "第" + (k + 2) + "艦隊の\n遠征がまもなく完了します。", kSoftName, 1, 1000
-					if(sound_alert_flg) :PlayAlert "alert_exp.wav"
+					if(sound_alert_flg) :PlayAlert kAlertExp
 				}
 				timer_output += "☆"
 			}else{

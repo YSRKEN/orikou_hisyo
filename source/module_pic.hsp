@@ -116,6 +116,43 @@
 					_break
 				}
 			next
+			// 任務画面の時は、ページ数まで判定を行う
+			if(scene_result(0) == "任務画面"){
+				// 画面下部を走査し、点灯している数字の位置を把握する
+				// 数字の左上座標は、おおよそ(349 + 52 * position, 457)
+				// 数字の大きさは、おおよそ12x16
+				position = -1
+				for k, 349, 349 + 52 * 4 + 12
+					pget k, 458
+					//logmes "" + k + " " + (ginfo_g - ginfo_r) + " " + (ginfo_b - ginfo_r)
+					if((ginfo_g - ginfo_r) > 50 && (ginfo_b - ginfo_r) > 50){
+						position = (k - 349) / 52
+						_break
+					}
+				next
+				// 数字の点灯が判別できなかった場合は、判定不能とする
+				if(position == -1){
+					n = scene_list_size@
+					scene_result(0) = "不明"
+					scene_result(1) = "不明"
+					return n
+				}
+				// 数字が点灯していた場合、その位置における数字を読み込む
+				// ただし、ワザとマージンを広めに取っている
+				dim number, 1
+				dim task_pos_x, 1 :task_pos_x(0) = 349 + 52 * position - 3
+				ReadNumber number, 1, task_pos_x, 457 - 3, 12 + 3 * 2, 16 + 3 * 2, 200, FALSE
+				if(limit(number, 1, 9) != number){
+					n = scene_list_size@
+					scene_result(0) = "不明"
+					scene_result(1) = "不明"
+					return n
+				}
+				n += number - 1
+				scene_result(1) = scene_list_name@(n)
+				logmes scene_result(1)
+				await 200
+			}
 		return n
 		// サブ画面を生成する
 		#deffunc MakeSubWindow

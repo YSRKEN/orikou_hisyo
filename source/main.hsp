@@ -1,24 +1,23 @@
-/* おりこうさんな秘書 Ver.3.0.8 */
+/* おりこうさんな秘書 Ver.3.0.9 */
 
 /* TODO:
+ * ・夜戦確認音声タイミングの調整
  */
 
 /* 実装済:
- * ○入渠ドックでクレーンを無視できるようにする
- * ○内蔵ブラウザのサイズを変更禁止にする
- * ○内臓ブラウザの最前面表示をON/OFFで切り替えられるようにする
- * ○母港画面でズレチェックが延々と繰り返されるバグを何とかする
- * ・資材グラフでデータが足りない際も近似でとりあえず表示できるようにする
- * ○選択した任務一覧を記憶する新モードを実装する
- * ○スクショをショートカットキー(Alt+Zキー)から行えるようにする
+ * ・内蔵ブラウザの座標ズレを修正
+ * ・6ページ目以降の任務一覧を取得できない問題の修正
+ * ・Chromeでうまく読み取れない系バグの確認および修正
+ * 　※flash_positionがFlashの左上座標
+ * 　(単純スクショにディスプレイオフセットを考慮したものでmousex/mouseyと同じ)
  */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.0.8"
-	#define kVerString  "308"
-	#define kLastUpdate "2016/02/03"
+	#define kVersion    "Ver.3.0.9"
+	#define kVerString  "309"
+	#define kLastUpdate "2016/05/16"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -76,6 +75,7 @@
 	// 状態変化検出用変数
 	sub_window_size_index_ = sub_window_size_index	//サブ画面のサイズを変えたか否か
 	show_status_flg_ = show_status_flg	//ステータスを表示するか否か
+	old_getpos_flg_ = old_getpos_flg	//座標取得方式を変えたか否か
 	pre_scene_name = ""			//前のシーンの名前
 	show_stopper_flg1 = FALSE	//進撃/出撃ストッパーの画面を出せる状態ならTRUE
 	show_stopper_flg2 = FALSE	//進撃/出撃ストッパーの画面を出していたらTRUE
@@ -104,7 +104,11 @@
 		// 座標取得した場合のみ行う処理
 		if(get_pos_flg){
 			// 艦これの画面のスクリーンショットを取得する
-			FlashScreenShot kMainBufferID, window_handle, flash_position
+			if(old_getpos_flg == FALSE){
+				FlashScreenShot kMainBufferID, window_handle, flash_position
+			}else{
+				FlashScreenShotOld kMainBufferID, flash_position
+			}
 			flash_time = GetFloatTime()
 			// 取得したものについて、どういったシーンかを判定する
 			scene_result_index = JudgeSituation(kMainBufferID, scene_result)
@@ -183,6 +187,7 @@
 				gosub *check_scene_change
 				pre_scene_type = scene_result(0)
 				pre_scene_name = scene_result(1)
+				logmes pre_scene_type + " " + pre_scene_name
 			}
 			// 定期的に任務一覧を更新する
 			if(flash_time - task_start_time >= kTaskInterval){
