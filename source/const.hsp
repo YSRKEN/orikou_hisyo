@@ -8,21 +8,25 @@
 	#enum global kOptionWindowID	;オプション画面のID
 	#enum global kTimerWindowID		;各種タイマー画面のID
 	#enum global kSortListWindowID	;ソート一覧画面のID
+	#enum global kSupplyGraphWindowID	;資材グラフ画面のID
 	#enum global kExpCalcWindowID	;経験値計算機のID
 	#enum global kCounterWindowID	;○号カウンタのID
 	#enum global kCondMeterWindowID	;cond値メータのID
 	#enum global kBgmWindowID		;BGM機能のID
 	;↑マウスで動かせるのはここまで
 	#enum kSelectWindowID			;選択画面のID
-	#enum global kStopperWindowID	;ストッパー画面用ID
+	#enum global kStopperWindowID	;進撃/出撃ストッパー画面用ID
+	#enum global kLockerWindowID	;ロック/ロック解除ストッパー画面用ID
 	//バッファ
 	#enum kDesktopBufferID			;デスクトップのスクショを保存するためのID
 	#enum global kFlashBufferID		;艦これの画面を探すためのID
 	#enum global kCheckBufferID		;座標ズレを検出するためのID
 	#enum global kMainBufferID		;艦これの画面を取得するためのID
 	#enum global kSubBufferID		;サブ画面に表示するためのID
-	#enum global kSortListBufferID	;ソート一覧を保存するためのID
+	#enum global kSortListBufferID	;ソート一覧を保存するためのID(艦娘)
+	#enum global kSort2ListBufferID	;ソート一覧を保存するためのID(装備)
 	#enum global kTempBufferID		;テンポラリ用バッファID
+	#enum global kGraphBufferID		;グラフ描画用バッファID
 	#enum global kSaveBufferID		;セーブ用バッファID
 	#enum global kNumGetBufferID	;画像認識用ID
 	;↑kSceneBufferID以外の全ての画面IDはここまで
@@ -38,6 +42,15 @@
 	#enum global kBossJudgeBufferID3	;マップ画像
 
 /* インターフェース */
+	// マクロ
+	#define ctype POS_X(%1)  (%1) * kObjX + ((%1) + 1) * kSpace
+	#define ctype POS_XX(%1)  (%1) * kObjX2 + ((%1) + 1) * kSpace
+	#define ctype POS_Y(%1)  (%1) * kObjY + ((%1) + 1) * kSpace
+	#define ctype SIZE_X(%1) (%1) * kObjX + ((%1) - 1) * kSpace
+	#define ctype SIZE_X2(%1) (%1) * kObjX2 + ((%1) - 1) * kSpace
+	#define ctype SIZE_Y(%1) (%1) * kObjY + ((%1) - 1) * kSpace
+	#define POS_XY(%1, %2) pos POS_X(%1), POS_Y(%2)
+	#define POS_X2Y(%1, %2) pos POS_XX(%1), POS_Y(%2)
 	// 各種オブジェクトのサイズ
 	;ボタン等のオブジェクトのサイズ
 	#const kObjX  80
@@ -56,11 +69,6 @@
 	#const kFleetWY 368
 	#const kFleetPX 110
 	#const kFleetPY 96
-	;ソート画面のサイズ・オフセット座標
-	#const kSortWX 194
-	#const kSortWY 279
-	#const kSortPX 398
-	#const kSortPY 154
 	;改装画面(通常画面)のサイズ・オフセット座標
 	#const kUnitWX 455
 	#const kUnitWY 365
@@ -71,6 +79,15 @@
 	#const kUnitWY2 375
 	#const kUnitPX2 116
 	#const kUnitPY2 95
+	;ソート画面のサイズ・オフセット座標
+	#const kSortWX 194
+	#const kSortWY 279
+	#const kSortPX 398
+	#const kSortPY 154
+	#const kSort2WX 198
+	#const kSort2WY 300
+	#const kSort2PX 200
+	#const kSort2PY 130
 	;資源画像用のパラメータ
 	#const kStockAllWX 229	;全体のサイズ
 	#const kStockAllWY 60
@@ -82,6 +99,12 @@
 	#const kStockOtherPY 9
 	#const kStockOtherWX kStockAllWX - kStockTimeWX	;資源部分のサイズ
 	#const kStockOtherWY kStockAllWY
+	;資材グラフ用のパラメータ
+	#const kGraphWX 5
+	#const kGraphWY 10
+	#const kGraphWX2 SIZE_X(kGraphWX)
+	#const kGraphWY2 SIZE_Y(kGraphWY)
+	#const kSupplyLogKinds 7
 	;
 	#const kLargeFontSize 30
 	#const kSmallFontSize 12
@@ -94,15 +117,6 @@
 	// キーボード・マウス操作
 	#const kStickEscKey 128
 	#const kStickMouse  256
-	// マクロ
-	#define ctype POS_X(%1)  (%1) * kObjX + ((%1) + 1) * kSpace
-	#define ctype POS_XX(%1)  (%1) * kObjX2 + ((%1) + 1) * kSpace
-	#define ctype POS_Y(%1)  (%1) * kObjY + ((%1) + 1) * kSpace
-	#define ctype SIZE_X(%1) (%1) * kObjX + ((%1) - 1) * kSpace
-	#define ctype SIZE_X2(%1) (%1) * kObjX2 + ((%1) - 1) * kSpace
-	#define ctype SIZE_Y(%1) (%1) * kObjY + ((%1) - 1) * kSpace
-	#define POS_XY(%1, %2) pos POS_X(%1), POS_Y(%2)
-	#define POS_X2Y(%1, %2) pos POS_XX(%1), POS_Y(%2)
 
 /* その他の定数 */
 	// 基本
@@ -123,6 +137,10 @@
 	#const kSortListHeight 10	;ソート一覧の縦サイズ
 	#const kSortWY2 28			;取得する際の縦幅
 	#const kSortWY3 27			;クロップする際の縦幅
+	#const kMaxSort2Pages 130	;ソート一覧(装備)の最大ページ数
+	#const kSort2ListHeight 10	;ソート一覧(装備)の縦サイズ
+	#const kSort2WY2 30			;取得する際の縦幅(装備)
+	#const kSort2WY3 30			;クロップする際の縦幅(装備)
 	#const kSortType 19			;艦種の種類数
 	#const kSortStrLength 40	;艦種データの長さ
 	// その他
@@ -134,6 +152,8 @@
 	#const global kMaxYear 2099	;サポートする最大年
 	#const global kStopperDeadZone  1	;ストッパー機能
 	#const global kStopperExhausted 2
+	#const global kLockerKammusu 1	;ロック機能
+	#const global kLockerWeapon  2
 	#const kBattleType 3	;戦闘の種類(昼戦・夜戦・現在画面)
 	#const global kCounterType 6	;○号カウンタでカウントする種類
 	#enum global kBattleRankS = 0
@@ -277,8 +297,11 @@
 	show_battle_type = 0			;表示する画面(0～2が昼戦・夜戦・現在画面に対応)
 	dim battle_index, kBattleType	;各画面のインデックス
 	// ソート一覧
-	sdim sort_list, 1024
-	sort_list_size = 0
+	sdim sort_list, 1024, 2
+	sort_list_size.0 = 0, 0
+	sort_key_flg = FALSE
+	sdim sort_kind_name, 64, 2
+	sort_kind_name.0 = "艦娘", "装備"
 	// 経験値計算機
 	sdim level_list, 1024
 		for k, 1, 150 + 1
@@ -333,7 +356,7 @@
 	// 1データに(2+1+1+1+1+1)+4*4+2*2+1=28Byteとすれば1MiBで37449件も記録できる。
 	// 1件につき10分間隔とすると260日分。ただ、件数も記録しておけば、毎回再確保して
 	// 延々とロギング可能。
-	dim supply_list, 7
+	dim supply_list, kSupplyLogKinds
 	supply_log_size = 0
 	sdim supply_log, 64	;64は適当なサイズ
 	supply_last_time = 0.0
@@ -342,6 +365,7 @@
 	supply_pos_x3.0 = 695, 704, 713, 722	;高速修復材
 	supply_pos_x4.0 = 760, 769, 778, 787	;開発資材
 	supply_pos_x5.0 = 395, 404, 413			;司令部レベル
+	graph_scale_interval.0 = 1.0, 7.0, 14.0, 30.0, 60.0, 90.0, 180.0, 365.0
 	// BGM機能
 	dim bgm_index, kBgmKinds
 	for k, 0, kBgmKinds
@@ -361,6 +385,6 @@
 	exe_path = dir_cur
 	sdim scene_result, 64, kPosDim
 	save_buffer_turn = 10	;セーブデータにおける縦の最大枚数
-	dim hwnd_window, 9		;マウスで動かせるようにするウィンドウのハンドル
+	dim hwnd_window, 10		;マウスで動かせるようにするウィンドウのハンドル
 	dim unit_count, kFleetNum	;各艦隊の艦娘数
 	sdim status_bar_str, 1024	;ステータスバーに表示する文字列

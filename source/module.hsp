@@ -197,6 +197,12 @@
 			line square_x2, square_y2, square_x1, square_y2
 			line square_x1, square_y2, square_x1, square_y1
 		return
+		#deffunc DrawLargeSquare int position_x, int position_y, int width_x, int height_y
+			line position_x + width_x    , position_y               , position_x              , position_y
+			line position_x + width_x - 1, position_y + height_y    , position_x + width_x - 1, position_y
+			line position_x + width_x - 1, position_y + height_y - 1, position_x              , position_y + height_y- 1
+			line position_x              , position_y + height_y    , position_x              , position_y
+		return
 		// カレントカラーではない色の領域をクロップする
 		#deffunc GetSquare var px__, var py__, var wx__, var wy__, array square
 			;カレントカラーを記憶しておく
@@ -441,6 +447,33 @@
 				}
 			}
 		return
+		// ロック画面を出せる状態かを判定する
+		#defcfunc CheckLockerType
+			if(scene_result@(1) == "ソート画面") :return kLockerKammusu
+			if(scene_result@(1) == "装備選択") :return kLockerWeapon
+		return 0
+		// ストッパー画面を表示する
+		#deffunc ShowLockerWindow int locker_type
+			if(show_locker_flg1@ == FALSE) :return
+			if(show_locker_flg2@ == FALSE){
+				if(scene_result@(1) == "ソート画面"){
+					bgscr kLockerWindowID, 40, 280, , window_param@(0) + flash_position@(0) + 737, window_param@(1) + flash_position@(1) + 154
+					//gcopy kMainBufferID, 737, 154, 40, 280
+					color 255, 0, 0
+					DrawLargeSquare 0, 0, 40 - 1, 280 - 1
+					gsel kLockerWindowID, 2
+					show_locker_flg2@ = TRUE
+				}
+				if(scene_result@(1) == "装備選択"){
+					bgscr kLockerWindowID, 30, 300, , window_param@(0) + flash_position@(0) + 770, window_param@(1) + flash_position@(1) + 132
+					//gcopy kMainBufferID, 770, 132, 30, 300
+					color 255, 0, 0
+					DrawLargeSquare 0, 0, 30 - 1, 300 - 1
+					gsel kLockerWindowID, 2
+					show_locker_flg2@ = TRUE
+				}
+			}
+		return
 		// 縦横比を一定にしたgzoom
 		#deffunc gzoom2 int wx2, int wy2, int buffer_id, int px_, int py_, int wx_, int wy_
 			if(wx2 * wy_ > wy2 * wx_){
@@ -521,6 +554,8 @@
 			show_status_flg@       = FALSE
 			check_deadzone_flg@    = TRUE
 			check_exhausted_flg@   = TRUE
+			kammusu_lock_flg@      = TRUE
+			weapon_lock_flg@       = TRUE
 			sub_window_size_index@ = 3
 			for k, 0, kCounterType
 				auto_count_flg@(k) = TRUE
@@ -613,6 +648,8 @@
 					if(param_name == "check_deadzone") :check_deadzone_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_exhausted") :check_exhausted_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "sub_window_size_index") :sub_window_size_index@ = limit(int(param_value), 0, length(sub_window_size_x@) - 1) :_continue
+					if(param_name == "kammusu_lock") :kammusu_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "weapon_lock") :weapon_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -711,6 +748,8 @@
 			text_buffer += "check_deadzone=" + check_deadzone_flg@ + "\n"
 			text_buffer += "check_exhausted=" + check_exhausted_flg@ + "\n"
 			text_buffer += "sub_window_size_index=" + sub_window_size_index@ + "\n"
+			text_buffer += "kammusu_lock=" + kammusu_lock_flg@ + "\n"
+			text_buffer += "weapon_lock=" + weapon_lock_flg@ + "\n"
 			notesel text_buffer
 			notesave exe_path@ + "\\save\\setting.ini"
 			// pngファイルを保存
@@ -933,6 +972,12 @@
 		//「日」を現在時刻に変換
 		#defcfunc CnvStrTime double float_time
 		return CnvStrDay(int(float_time)) + " " + CnvStrSec(float_time - double(int(float_time)))
+		#defcfunc CnvStrTime2 double float_time
+		ret_str = CnvStrDay(int(float_time)) + " " + CnvStrSec(float_time - double(int(float_time)))
+			strrep ret_str, "/", "-"
+			strrep ret_str, ":", "-"
+			strrep ret_str, ".", "-"
+		return ret_str
 	#global
 
 /* 文字認識用関数 */
@@ -1160,6 +1205,8 @@
 			objprm show_status_id@, show_status_flg@
 			objprm check_deadzone_id@, check_deadzone_flg@
 			objprm check_exhausted_id@, check_exhausted_flg@
+			objprm kammusu_lock_id@, kammusu_lock_flg@
+			objprm weapon_lock_id@, weapon_lock_flg@
 		return
 		// ログに追記
 		#deffunc PutLog str message

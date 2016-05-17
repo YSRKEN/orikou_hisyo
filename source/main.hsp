@@ -1,11 +1,11 @@
-/* おりこうさんな秘書 Ver.3.0.0 */
+/* おりこうさんな秘書 Ver.3.0.1 */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.0.0"
-	#define kVerString  "300"
-	#define kLastUpdate "2015/09/24"
+	#define kVersion    "Ver.3.0.1"
+	#define kVerString  "301"
+	#define kLastUpdate "2015/09/26"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -38,17 +38,21 @@
 	sub_window_size_index_ = sub_window_size_index	//サブ画面のサイズを変えたか否か
 	show_status_flg_ = show_status_flg	//ステータスを表示するか否か
 	pre_scene_name = ""			//前のシーンの名前
-	show_stopper_flg1 = FALSE	//ストッパーの画面を出せる状態ならTRUE
-	show_stopper_flg2 = FALSE	//ストッパーの画面を出していたらTRUE
+	show_stopper_flg1 = FALSE	//進撃/出撃ストッパーの画面を出せる状態ならTRUE
+	show_stopper_flg2 = FALSE	//進撃/出撃ストッパーの画面を出していたらTRUE
+	show_locker_flg1 = FALSE	//ロックストッパーの画面を出せる状態ならTRUE
+	show_locker_flg2 = FALSE	//ロックストッパーの画面を出していたらTRUE
 	sort_index_ = sort_index
+	sort_kind_ = sort_kind
 	dim cond_, kUnitNum
 	for k, 0, kUnitNum
 		cond_(k) = cond(k)
 	next
 	cond_step_ = cond_step
 	auto_calc_flg_ = auto_calc_flg
-	redraw_counter_flg = FALSE
 	bgm_type_now_ = bgm_type_now
+	graph_scale_index_ = graph_scale_index
+	redraw_counter_flg = FALSE
 	// メインループ
 	repeat
 		if(exit_flg) :end
@@ -75,6 +79,8 @@
 			GetUnits unit_count
 			// 大破・消耗チェック
 			gosub *check_stopper
+			// ロックチェック
+			gosub *check_locker
 			// 選択位置が変わった際に表示する画像を変更する
 			gosub *redraw_sort_preview
 			// 精度面の問題から、勝利判定は常時行うようにする
@@ -89,6 +95,19 @@
 			}
 			// 資材ログ機能
 			gosub *put_supply_log
+			// ソート一覧機能の切り替え操作
+			if(sort_kind_ != sort_kind){
+				gsel kSortListWindowID
+				if(sort_list_size(sort_kind) == 0){
+					title "ソート一覧(" + sort_kind_name(sort_kind) + ")"
+				}else{
+					title "ソート一覧(" + sort_kind_name(sort_kind) + "," + sort_list_size(sort_kind) + "枚)"
+				}
+				objprm sort_index_id, sort_list(sort_kind)
+				sort_index = -1
+				objprm sort_index_id, sort_index
+				sort_kind_ = sort_kind
+			}
 			// BGM切り替え
 			if(bgm_type_now_ != bgm_type_now){
 				gosub *change_bgm
@@ -161,6 +180,11 @@
 		}
 		if(cond_step_ != cond_step) :gosub *cond_enable :cond_step_ = cond_step
 		if(auto_calc_flg_ != auto_calc_flg) :gosub *redraw_cond :auto_calc_flg_ = auto_calc_flg
+		//資材グラフの更新処理
+		if(graph_scale_index_ != graph_scale_index){
+			gosub *draw_supply_graph
+			graph_scale_index_ = graph_scale_index
+		}
 		// ウェイト
 		await 1000 / capture_fps(capture_fps_index)
 	loop
@@ -200,6 +224,12 @@ return
 						show_stopper_flg2 = FALSE
 					}
 				}
+			}
+		}
+		if(ginfo_act == kLockerWindowID){
+			dialog "現在、ロック操作が制限されています。\nそれでもロック操作を行いますか？", 3, kSoftName
+			if(stat == 6){
+				gsel kLockerWindowID, -1
 			}
 		}
 	}

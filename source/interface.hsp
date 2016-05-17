@@ -5,7 +5,8 @@
 	buffer kCheckBufferID, kFlashWX + 2, kFlashWY + 2
 	buffer kMainBufferID, kFlashWX, kFlashWY
 	buffer kSubBufferID, kFlashWX, kFlashWY
-	buffer kSortListBufferID, kSortWX * kMaxSortPages, kSortWY
+	buffer kSortListBufferID,  kSortWX  * kMaxSortPages,  kSortWY
+	buffer kSort2ListBufferID, kSort2WX * kMaxSort2Pages, kSort2WY
 	for k, 0, show_scene_list_size
 		buffer kSceneBufferID + k, kFlashWX, kFlashWY
 	next
@@ -13,9 +14,10 @@
 	cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
 
 	screen kStopperWindowID, 10, 10 :gsel kStopperWindowID, -1
+	screen kLockerWindowID, 10, 10 :gsel kLockerWindowID, -1
 
 /* オプション画面 */
-	screen kOptionWindowID, POS_X(3), POS_Y(4), 4 :title "オプション画面"
+	screen kOptionWindowID, POS_X(3), POS_Y(5), 4 :title "オプション画面"
 	gsel kOptionWindowID, -1
 	objsize SIZE_X(1), SIZE_Y(1)
 		POS_XY 0, 0
@@ -35,14 +37,22 @@
 			chkbox "名前隠し", name_disable_flg
 				name_disable_id = stat
 		POS_XY 0, 3
-			chkbox "時刻等表示", show_status_flg
-				show_status_id = stat
-		POS_XY 1, 3
 			chkbox "大破チェック", check_deadzone_flg
 				check_deadzone_id = stat
-		POS_XY 2, 3
+		POS_XY 1, 3
 			chkbox "消耗チェック", check_exhausted_flg
 				check_exhausted_id = stat
+		POS_XY 2, 3
+			chkbox "時刻等表示", show_status_flg
+				show_status_id = stat
+		POS_XY 0, 4
+			chkbox "艦娘ロック", kammusu_lock_flg
+				kammusu_lock_id = stat
+		POS_XY 1, 4
+			chkbox "装備ロック", weapon_lock_flg
+				weapon_lock_id = stat
+		POS_XY 2, 4
+			button gosub "CSV書き出し", *write_supply_csv
 	objsize SIZE_X(3), SIZE_Y(1)
 		POS_XY 0, 2
 			input pic_save_path(1)
@@ -58,7 +68,7 @@
 	hwnd_window(kTimerWindowID) = hwnd
 
 /* ソート一覧 */
-	screen kSortListWindowID, POS_X(4), POS_Y(10), 4 :title "ソート一覧"
+	screen kSortListWindowID, POS_X(4), POS_Y(11), 4 :title "ソート一覧(艦娘)"
 	gsel kSortListWindowID, -1
 	objsize SIZE_X(2), SIZE_Y(8)
 		POS_XY 0, 0
@@ -69,20 +79,62 @@
 		POS_XY 0, 8
 			button gosub "追加", *add_sort_list
 		POS_XY 1, 8
-			button gosub "↑", *upper_sort_list
-		POS_XY 2, 8
-			combox sort_width_index,,"出力：1列\n出力：2列\n出力：3列\n出力：4列\n出力：5列\n艦種練度別"
+			button gosub "削除", *del_sort_list
 		POS_XY 3, 8
 			button gosub "全削除", *alldel_sort_list
 		POS_XY 0, 9
-			button gosub "削除", *del_sort_list
+			button gosub "↑", *upper_sort_list
 		POS_XY 1, 9
 			button gosub "↓", *lower_sort_list
+		POS_XY 0, 10
+			button gosub "↑↑", *upper_sort_list2
+		POS_XY 1, 10
+			button gosub "↓↓", *lower_sort_list2
+		POS_XY 2, 8
+			combox sort_kind,,"艦娘\n装備"
 		POS_XY 2, 9
-			combox direction_flg,,"方向：縦\n方向：横"
-		POS_XY 3, 9
+			combox sort_width_index,,"出力：1列\n出力：2列\n出力：3列\n出力：4列\n出力：5列"
+		POS_XY 2, 10
+			combox sort_type,,"入力順\nソート"
+		POS_XY 3, 10
 			button gosub "保存", *make_sort_list
 	hwnd_window(kSortListWindowID) = hwnd
+
+/* 資材グラフ */
+	max_value_1 = 30000 :min_value_1 = 1000 :max_value_2 = 500 :min_value_2 = 0
+	min_time = "2014/01/01" :max_time = "2015/01/01" :graph_scale_index = 2
+	screen kSupplyGraphWindowID, POS_X(kGraphWX + 2), POS_Y(kGraphWY + 1), 4 :title "資材グラフ"
+	gsel kSupplyGraphWindowID, -1
+	color :DrawLargeSquare POS_X(1), POS_Y(0), kGraphWX2, kGraphWY2
+	font msgothic, kSmallFontSize, 1
+		pos POS_X(kGraphWX + 1), POS_Y(1) + kObjOffset
+			color $00,$80,$00 :mes "燃料"
+		pos POS_X(kGraphWX + 1), POS_Y(2) + kObjOffset
+			color $66,$33,$00 :mes "弾薬"
+		pos POS_X(kGraphWX + 1), POS_Y(3) + kObjOffset
+			color $A0,$A0,$A0 :mes "鋼材"
+		pos POS_X(kGraphWX + 1), POS_Y(4) + kObjOffset
+			color $CC,$33,$00 :mes "ボーキ"
+		pos POS_X(kGraphWX + 1), POS_Y(5) + kObjOffset
+			color $F0, $80, $80 :mes "高速修復材"
+		pos POS_X(kGraphWX + 1), POS_Y(6) + kObjOffset
+			color $76, $99, $FF :mes "開発資材"
+	objsize SIZE_X(1), SIZE_Y(1)
+		POS_XY 0, 0
+			input max_value_1 :max_value_1_id = stat :objenable stat, 0
+		POS_XY 0, kGraphWY - 1
+			input min_value_1 :min_value_1_id = stat :objenable stat, 0
+		POS_XY kGraphWX + 1, 0
+			input max_value_2 :max_value_2_id = stat :objenable stat, 0
+		POS_XY kGraphWX + 1, kGraphWY - 1
+			input min_value_2 :min_value_2_id = stat :objenable stat, 0
+		POS_XY 0, kGraphWY
+			input min_time :min_time_id = stat :objenable stat, 0
+		POS_XY kGraphWX + 1, kGraphWY
+			input max_time :max_time_id = stat :objenable stat, 0
+		POS_XY kGraphWX / 2 + 1, kGraphWY
+			combox graph_scale_index,,"1日\n1週間\n2週間\n1ヶ月\n2ヶ月\n3ヶ月\n半年\n1年"
+	hwnd_window(kSupplyGraphWindowID) = hwnd
 
 /* 経験値計算機 */
 	now_level = 0 :goal_level = 69 :area_index = 11 :result_index = 1
@@ -103,7 +155,7 @@
 			mes "戦闘経験値"
 		pos POS_X(2), POS_Y(4) + kObjOffset
 			mes "必要周回数"
-	objsize SIZE_X(1), SIZE_Y(1) + kObjOffset
+	objsize SIZE_X(1), SIZE_Y(1)
 		POS_XY 1, 0
 			combox now_level,,level_list
 			now_level_id = stat
