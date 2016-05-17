@@ -1,0 +1,366 @@
+/* ファイル処理用関数 */
+	#module file
+		#uselib "shlwapi.dll"	//dirlistだとドライブ直下の判定ができないので……
+			#cfunc PathIsDirectory "PathIsDirectoryA" str
+		// 設定読み込み
+		#deffunc LoadSoftData
+			PutLog "【設定読み込み】"
+			PutLog "読み込み中..."
+			// デフォルト設定で初期化する
+			capture_fps_index@     = 2
+			check_move_flash_flg@  = TRUE
+			get_pos_mode@          = kGetPosAuto
+			name_disable_flg@      = TRUE
+			pic_save_path_flg      = FALSE
+			pic_save_path@(1)      = ""
+			show_status_flg@       = TRUE
+			check_deadzone_flg@    = TRUE
+			check_exhausted_flg@   = TRUE
+			kammusu_lock_flg@      = TRUE
+			weapon_lock_flg@       = TRUE
+			sub_window_size_index@ = 3
+			for k, 0, kCounterType
+				auto_count_flg@(k) = TRUE
+				count_num@(k) = 0
+			next
+			// iniファイルを読み込んで設定を反映する
+			exist exe_path@ + "\\save\\setting.ini"
+			if(strsize != -1){
+				// バッファに読み込む
+				notesel text_buffer
+				noteload exe_path@ + "\\save\\setting.ini"
+				// 1行づつ読み込んで処理する
+				sdim text_buffer_scene, 32000
+				sdim text_buffer_time, 32000
+				for k, 0, notemax
+					noteget getline, k
+					// コメントは削除する
+					p = instr(getline,,";")
+					if(p != -1) :getline = strmid(getline, 0, p)
+					// パラメータである場合のみ反映する
+					p = instr(getline,,"=")
+					if(p == -1) :_continue
+					sdim param_name, 1024
+					param_name = strmid(getline, 0, p)
+					sdim param_value, 1024
+					param_value = strmid(getline, p + 1, strlen(getline) - p - 1)
+					//パラメータの種類によって場合分け
+					if(param_name == "capture_fps_index") :capture_fps_index@    = limit(int(param_value), 0, length(capture_fps) - 1) :_continue
+					if(param_name == "check_move_flash")  :check_move_flash_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "get_pos_mode"){
+						if(param_value == "auto")   :get_pos_mode@ = kGetPosAuto
+						if(param_value == "click")  :get_pos_mode@ = kGetPosClick
+						if(param_value == "crop")   :get_pos_mode@ = kGetPosCrop
+						if(param_value == "manual") :get_pos_mode@ = kGetPosManual
+						_continue
+					}
+					if(param_name == "name_disable") :name_disable_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "pic_save_path_flg") :pic_save_path_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "pic_save_path"){
+						if(PathIsDirectory(param_value) != 0){
+							pic_save_path@(1) = param_value
+						}
+						_continue
+					}
+					if(strmid(param_name, 0, 16) == "dock_finish_time"){
+						dock_finish_time@(int(strmid(param_name, 17, strlen(param_name) - 17))) = double(param_value)
+						_continue
+					}
+					if(strmid(param_name, 0, 15) == "expedition_kind"){
+						expedition_kind@(int(strmid(param_name, 16, strlen(param_name) - 16))) = limit(int(param_value), 0, 39)
+						_continue
+					}
+					if(strmid(param_name, 0, 10) == "scene_list"){
+						text_buffer_scene += param_value + "\t" + strmid(param_name, 11, strlen(param_name) - 11) + "\n"
+						_continue
+					}
+					if(strmid(param_name, 0, 14) == "auto_count_flg"){
+						p = int(strmid(param_name, 15, strlen(param_name) - 15))
+						auto_count_flg@(p) = limit(int(param_value), FALSE, TRUE)
+						gsel kCounterWindowID
+						objprm auto_count_flg_id@ + p, auto_count_flg@(p)
+						_continue
+					}
+					if(strmid(param_name, 0, 9) == "count_num"){
+						if(int(param_value) > 0){
+							count_num@(int(strmid(param_name, 10, strlen(param_name) - 10))) = int(param_value)
+						}else{
+							count_num@(int(strmid(param_name, 10, strlen(param_name) - 10))) = 0
+						}
+						_continue
+					}
+					if(strmid(param_name, 0, 10) == "scene_time"){
+						text_buffer_time += param_value + "\n"
+						_continue
+					}
+					if(strmid(param_name, 0, 8) == "bgm_path"){
+						split param_name, "_", temp
+						bgm_list@(limit(int(temp(2)), 0, kBgmKinds - 1)) += param_value + "\n"
+						bgm_name_list@(limit(int(temp(2)), 0, kBgmKinds - 1)) += getpath(param_value, 1 + 8) + "\n"
+						_continue
+					}
+					if(strmid(param_name, 0, 7) == "bgm_flg"){
+						p = limit(int(strmid(param_name, 8, strlen(param_name) - 8)), 0, kBgmKinds - 1)
+						bgm_flg@(p) = limit(int(param_value), FALSE, TRUE)
+						gsel kBgmWindowID
+						objprm kBgmKinds + p, bgm_flg@(p)
+						_continue
+					}
+					if(param_name == "show_status") :show_status_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_deadzone") :check_deadzone_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_exhausted") :check_exhausted_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "sub_window_size_index") :sub_window_size_index@ = limit(int(param_value), 0, length(sub_window_size_x@) - 1) :_continue
+					if(param_name == "kammusu_lock") :kammusu_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "weapon_lock") :weapon_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+				next
+				for i, 0, kBgmKinds
+					notesel bgm_list@(i)
+					bgm_list_size@(i) = notemax
+				next
+				// pngファイルを読み込んでバッファを反映する
+				exist exe_path@ + "\\save\\buffer.png"
+				if(strsize != -1){
+					buffer kSaveBufferID
+					picload exe_path@ + "\\save\\buffer.png"
+					save_buffer_y = ginfo_sy / kFlashWY
+					for k, 0, show_scene_list_size@
+						scene_string = show_scene_list_category@(k) + "_" + show_scene_list_name@(k)
+						notesel text_buffer_scene
+						for n, 0, notemax
+							noteget get, n
+							split get, "\t", temp
+							if(temp(0) == scene_string){
+								gsel kSceneBufferID + k
+								pos 0, 0
+								gcopy kSaveBufferID, kFlashWX * (int(temp(1)) / save_buffer_y), kFlashWY * (int(temp(1)) \ save_buffer_y), kFlashWX, kFlashWY
+								notesel text_buffer_time
+								noteget get, n
+								show_scene_list_time@(k) = double(get)
+								_break
+							}
+						next
+					next
+				}
+				// datファイルを読み込んで資材量を反映する
+				exist exe_path@ + "\\save\\supply.dat"
+				if(strsize != -1){
+					supply_log_size@ = strsize / kSupplyLogBlockSize
+					sdim supply_log@, supply_log_size@ * kSupplyLogBlockSize
+					bload exe_path@ + "\\save\\supply.dat", supply_log@
+				}
+			}
+			// テーマ一覧を反映する
+			chdir exe_path@ + "\\theme"
+			sdim text_buffer, 32768
+			dirlist text_buffer, "*", 5
+			notesel text_buffer
+			sdim mascot_list@, 32768
+			mascot_list_size@ = 0
+			for k, 0, notemax
+				noteget get, k
+				exist exe_path@ + "\\theme\\" + get + "\\picture.png"
+				if(strsize == -1) :_continue
+				exist exe_path@ + "\\theme\\" + get + "\\config.csv"
+				if(strsize == -1) :_continue
+				mascot_list@ += get + "\n"
+				mascot_list_size@++
+			next
+			if(mascot_list_size@ == 0){
+				gsel kOptionWindowID
+				objenable desktop_mascot_id@, 0
+				objenable mascot_index_id@, 0
+			}else{
+				gsel kOptionWindowID
+				objprm mascot_index_id@, mascot_list@
+			}
+			PutLog "読み込み完了"
+			ResetObjParam
+		return
+		// 設定保存
+		// flgがTRUEだと、画像データ部分のセーブも行う
+		#deffunc SaveSoftData int flg
+			if(flg){
+				PutLog "【設定保存】"
+				PutLog "保存中..."
+			}
+			// iniファイルを保存
+			sdim text_buffer, 32000
+			text_buffer += "_version_=" + kVerString@ + "\n"
+			text_buffer += "capture_fps_index=" + capture_fps_index@    + "\n"
+			text_buffer += "check_move_flash="  + check_move_flash_flg@ + "\n"
+			;
+			get_pos_mode_string = "auto"
+			if(get_pos_mode@ == kGetPosAuto)   :get_pos_mode_string = "auto"
+			if(get_pos_mode@ == kGetPosClick)  :get_pos_mode_string = "click"
+			if(get_pos_mode@ == kGetPosCrop)   :get_pos_mode_string = "crop"
+			if(get_pos_mode@ == kGetPosManual) :get_pos_mode_string = "manual"
+			text_buffer += "get_pos_mode=" + get_pos_mode_string + "\n"
+			;
+			text_buffer += "name_disable=" + name_disable_flg@ + "\n"
+			text_buffer += "pic_save_path_flg=" + pic_save_path_flg@ + "\n"
+			text_buffer += "pic_save_path="     + pic_save_path@(1) + "\n"
+			;
+			for k, 0, show_scene_list_size@
+				text_buffer += "scene_list_" + k + "=" + show_scene_list_category@(k) + "_" + show_scene_list_name@(k) + "\n"
+				text_buffer += "scene_time_" + k + "=" + strf("%.16g", show_scene_list_time@(k)) + "\n"
+			next
+			;
+			for k, 0, kDocks * 2 + (kFleetNum - 1)
+				text_buffer += "dock_finish_time_" + k + "=" + strf("%.16g", dock_finish_time@(k)) + "\n"
+			next
+			for k, 0, (kFleetNum - 1)
+				text_buffer += "expedition_kind_" + k + "=" + expedition_kind@(k) + "\n"
+			next
+			;
+			for k, 0, kCounterType
+				text_buffer += "auto_count_flg_" + k + "=" + auto_count_flg@(k) + "\n"
+			next
+			for k, 0, kCounterType
+				text_buffer += "count_num_" + k + "=" + count_num@(k) + "\n"
+			next
+			;
+			for i, 0, kBgmKinds
+				notesel bgm_list@(i)
+				for j, 0, notemax
+					noteget get, j
+					text_buffer += "bgm_path_" + i + "_" + j + "=" + get + "\n"
+				next
+			next
+			for i, 0, kBgmKinds
+				text_buffer += "bgm_flg_" + i + "=" + bgm_flg@(i) + "\n"
+			next
+			;
+			text_buffer += "show_status=" + show_status_flg@ + "\n"
+			text_buffer += "check_deadzone=" + check_deadzone_flg@ + "\n"
+			text_buffer += "check_exhausted=" + check_exhausted_flg@ + "\n"
+			text_buffer += "sub_window_size_index=" + sub_window_size_index@ + "\n"
+			text_buffer += "kammusu_lock=" + kammusu_lock_flg@ + "\n"
+			text_buffer += "weapon_lock=" + weapon_lock_flg@ + "\n"
+			notesel text_buffer
+			notesave exe_path@ + "\\save\\setting.ini"
+			// pngファイルを保存
+			if(flg){
+				save_buffer_y = save_buffer_turn@
+				save_buffer_x = show_scene_list_size@ / save_buffer_y
+				if(show_scene_list_size@ \ save_buffer_y != 0) :save_buffer_x++
+				buffer kSaveBufferID, kFlashWX * save_buffer_x, kFlashWY * save_buffer_y
+				for k, 0, show_scene_list_size@
+					pos kFlashWX * (k / save_buffer_y), kFlashWY * (k \ save_buffer_y)
+					gcopy kSceneBufferID + k, 0, 0, kFlashWX, kFlashWY
+				next
+				cvbuffer kCVSaveBufferID, ginfo_sx, ginfo_sy
+				cvputimg kCVSaveBufferID
+				cvsave exe_path@ + "\\save\\buffer.png", kCVSaveBufferID
+			}
+			// ソフトのログを保存
+			//保存先フォルダが存在するかを判定
+			dirlist x, exe_path@ + "\\log", 5
+			if(stat == 0) :mkdir exe_path@ + "\\log"
+			//ログを保存する
+			notesel soft_log@
+			notesave exe_path@ + "\\log\\soft(" + NowTime() + ").log"
+
+			if(flg) :PutLog "保存完了"
+		return
+		// データ読み込み
+		#deffunc LoadSystemData
+			// 記録するシーン一覧
+			//テキストを読み込む
+			notesel text_buffer
+			noteload "show_scene.csv"
+			show_scene_list_size@ = notemax - 1
+			//行毎に処理する
+			sdim show_scene_list_category@, 64, show_scene_list_size@
+			sdim show_scene_list_name@,     64, show_scene_list_size@
+			ddim show_scene_list_time@, show_scene_list_size@
+			for n, 0, show_scene_list_size@
+				noteget get, n + 1
+				split get, ",", temp
+				show_scene_list_category@(n) = temp(0)
+				show_scene_list_name@(n) = temp(1)
+				;特別な画面について、予めインデックスを引き出しておく
+				if(temp(1) == "第１艦隊　１番艦"){
+					scene_fleet_offset@ = n
+				}
+				if(temp(1) == "第１艦隊"){
+					scene_unit_offset@ = n
+				}
+				if(temp(1) == "昼戦画面"){
+					battle_index@(0) = n
+				}
+				if(temp(1) == "夜戦画面"){
+					battle_index@(1) = n
+				}
+				if(temp(1) == "海域マップ"){
+					area_map_window_id@ = kSceneBufferID + n
+				}
+				if(temp(1) == "戦闘判定"){
+					win_judge_window_id@ = kSceneBufferID + n
+				}
+			next
+			battle_index@(2) = -1
+			//表示用のカタログを生成する
+			sdim scene_list_str@, 32000
+			scene_list_str@ = "現在画面\n"
+			for n, 0, show_scene_list_size@
+				scene_list_str@ += show_scene_list_category@(n) + "　" + show_scene_list_name@(n) + "\n"
+			next
+			// シーン一覧
+			//テキストを読み込む
+			notesel text_buffer
+			noteload "scene_list.csv"
+			scene_list_size@ = notemax - 1
+			//行毎に処理する
+			sdim scene_list_category@, 64, scene_list_size@
+			sdim scene_list_name@,     64, scene_list_size@
+			dim scene_list_points@, scene_list_size@
+			dim scene_list_x@, scene_list_size@, kMaxScenePoints
+			dim scene_list_y@, scene_list_size@, kMaxScenePoints
+			dim scene_list_r@, scene_list_size@, kMaxScenePoints
+			dim scene_list_g@, scene_list_size@, kMaxScenePoints
+			dim scene_list_b@, scene_list_size@, kMaxScenePoints
+			dim show_scene_list_index@, scene_list_size@
+			scene_list_count = 0
+			for n, 0, scene_list_size@
+				;普通に読み込み
+				noteget get, n + 1
+				split get, ",", temp
+				scene_list_category@(scene_list_count) = temp(0)
+				scene_list_name@(scene_list_count)     = temp(1)
+				scene_list_points@(scene_list_count)   = int(temp(2))
+				for k, 0, scene_list_points@(scene_list_count)
+					scene_list_x@(scene_list_count, k) = int(temp(3 + k * 5))
+					scene_list_y@(scene_list_count, k) = int(temp(4 + k * 5))
+					scene_list_r@(scene_list_count, k) = int(temp(5 + k * 5))
+					scene_list_g@(scene_list_count, k) = int(temp(6 + k * 5))
+					scene_list_b@(scene_list_count, k) = int(temp(7 + k * 5))
+				next
+				;show_scene_list_indexに関する処理
+				flg = FALSE
+				for i, 0, show_scene_list_size@
+					if(scene_list_category@(scene_list_count) == show_scene_list_category@(i)){
+						if(scene_list_name@(scene_list_count) == show_scene_list_name@(i)){
+							show_scene_list_index@(scene_list_count) = i
+							flg = TRUE
+							_break
+						}
+					}
+				next
+				if(flg == FALSE){
+					show_scene_list_index@(scene_list_count) = -1
+				}
+				scene_list_count++
+			next
+			scene_list_size@ = scene_list_count
+		return
+		// OpenCVで保存する(bmp, jpg, png等に対応)
+		#deffunc PicSave str file_name
+			cvbuffer kCVSaveBufferID, ginfo_sx, ginfo_sy
+			cvputimg kCVSaveBufferID
+			if(pic_save_path@(pic_save_path_flg@) != ""){
+				cvsave pic_save_path@(pic_save_path_flg@) + "\\" + file_name, kCVSaveBufferID
+			}else{
+				cvsave pic_save_path@(0) + "\\" + file_name, kCVSaveBufferID
+			}
+		return
+	#global

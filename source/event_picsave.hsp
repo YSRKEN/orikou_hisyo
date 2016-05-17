@@ -1,0 +1,106 @@
+/* 画像保存に関するイベント処理 */
+
+//*サブ画面に写った画像を保存する
+*save_picture
+	PutLog "【画像保存】"
+	gsel kSubBufferID
+	if(scene_list_index == 0){
+		file_name = CnvStrTime2(flash_time) + ".png"
+	}else{
+		file_name = CnvStrTime2(show_scene_list_time(scene_list_index - 1)) + ".png"
+	}
+	PicSave file_name
+	PutLog "ファイル名：" + file_name
+return
+
+//*トリミング保存
+*save_picture_trim
+	// 編成画面におけるトリミング(編成画像)
+	if((scene_result2(0) == "編成画面") && (scene_result2(1) != "ソート画面")){
+		PutLog "【トリミング】"
+		buffer kTempBufferID, kFleetWX, kFleetWY
+		gcopy kSubBufferID, kFleetPX, kFleetPY, kFleetWX, kFleetWY
+		file_name = NowTime() + ".png"
+		PicSave file_name
+		PutLog "ファイル名：" + file_name
+		return
+	}
+	// ソート画面におけるトリミング(ソート画像)
+	if((scene_result2(0) == "編成画面") && (scene_result2(1) == "ソート画面")){
+		PutLog "【トリミング】"
+		buffer kTempBufferID, kSortWX, kSortWY
+		gcopy kSubBufferID, kSortPX, kSortPY, kSortWX, kSortWY
+		file_name = NowTime() + ".png"
+		PicSave file_name
+		PutLog "ファイル名：" + file_name
+		return
+	}
+	// 改装画面におけるトリミング(艦娘画像)
+	if(scene_result2(0) == "改装画面"){
+		PutLog "【トリミング】"
+		if(scene_result2(1) != "近代化改修"){
+			buffer kTempBufferID, kUnitWX, kUnitWY
+			gcopy kSubBufferID, kUnitPX, kUnitPY, kUnitWX, kUnitWY
+		}else{
+			buffer kTempBufferID, kUnitWX2, kUnitWY2
+			gcopy kSubBufferID, kUnitPX2, kUnitPY2, kUnitWX2, kUnitWY2
+		}
+		file_name = NowTime() + ".png"
+		PicSave file_name
+		PutLog "ファイル名：" + file_name
+		return
+	}
+	// その他母港画面におけるトリミング(資材画像)
+	if(CheckHomeFlg(kSubBufferID)){
+		PutLog "【トリミング】"
+		buffer kTempBufferID, kStockAllWX, kStockAllWY
+		;時刻貼り付け
+		pos 0, 0
+		gcopy kSubBufferID, kStockTimePX, kStockTimePY, kStockTimeWX, kStockTimeWY
+		;資材貼り付け
+		pos kStockTimeWX, 0
+		gcopy kSubBufferID, kStockOtherPX, kStockOtherPY, kStockOtherWX, kStockOtherWY
+		;保存
+		file_name = NowTime() + ".png"
+		PicSave file_name
+		PutLog "ファイル名：" + file_name
+		return
+	}
+return
+
+//*艦隊画像を保存
+*save_fleet
+	PutLog "【艦隊画像】"
+	if(save_fleet_index < kFleetNum){
+		// 通常艦隊を保存
+		buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
+		count = 0
+		for y, 0, 2
+			if(count >= unit_count(save_fleet_index)) :_break
+			for x, 0, 3
+				if(count >= unit_count(save_fleet_index)) :_break
+				pos x * kUnitWX, y * kUnitWY
+				gcopy GetUnitID(save_fleet_index, y * 3 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+				count++
+			next
+		next
+	}else{
+		// 連合艦隊か支援艦隊を保存
+		buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3
+		for z, 0, 2
+			count = 0
+			for y, 0, 3
+				if(count >= unit_count((save_fleet_index - kFleetNum) * 2 + z)) :_break
+				for x, 0, 2
+					if(count >= unit_count((save_fleet_index - kFleetNum) * 2 + z)) :_break
+					pos (z * 2 + x) * kUnitWX, y * kUnitWY
+					gcopy GetUnitID((save_fleet_index - kFleetNum) * 2, z * 6 + y * 2 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+					count++
+				next
+			next
+		next
+	}
+	file_name = NowTime() + ".png"
+	PicSave file_name
+	PutLog "ファイル名：" + file_name
+return

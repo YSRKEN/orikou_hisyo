@@ -1,0 +1,74 @@
+/* その他色々 */
+	#module misc
+		#const EM_SCROLL 0x00B5
+		#const SB_BOTTOM 7
+		// 最大値
+		#defcfunc max int param_1, int param_2
+			if(param_1 > param_2) :return param_1
+		return param_2
+		// 最小値
+		#defcfunc min int param_1, int param_2
+			if(param_1 < param_2) :return param_1
+		return param_2
+		// オブジェクトの状態を読み込んだ状態に合わせて変更する
+		#deffunc ResetObjParam
+			gsel kMainWindowID
+			objprm get_pos_mode_id@, get_pos_mode@
+			gsel kOptionWindowID
+			objprm sub_window_size_id@, sub_window_size_index@
+			objprm capture_fps_id@, capture_fps_index@
+			objprm check_move_flash_id@, check_move_flash_flg@
+			objprm pic_save_path_id@, pic_save_path@(1)
+			objprm name_disable_id@, name_disable_flg@
+			objprm show_status_id@, show_status_flg@
+			objprm check_deadzone_id@, check_deadzone_flg@
+			objprm check_exhausted_id@, check_exhausted_flg@
+			objprm kammusu_lock_id@, kammusu_lock_flg@
+			objprm weapon_lock_id@, weapon_lock_flg@
+		return
+		// ログに追記
+		#deffunc PutLog str message
+			// ソフトのログが溢れそうになったら自動保存する
+			if(strlen(soft_log@) > 30 * 1000){
+				dirlist x, exe_path@ + "\\log", 5
+				if(stat == 0) :mkdir exe_path@ + "\\log"
+				notesel soft_log@
+				notesave exe_path@ + "\\log\\soft(" + NowTime() + ").log"
+				soft_log@ = ""
+			}
+			// 追記して反映する
+			soft_log@ += NowTimeMini() + " " + message + "\n"
+			gsel kMainWindowID
+			objprm 0, soft_log@
+			sendmsg hMesBox@, EM_SCROLL, SB_BOTTOM, 0
+		return
+		// 改装画面のバッファIDを算出
+		#defcfunc GetUnitID int fleet_num, int unit_num
+		return kSceneBufferID + scene_fleet_offset@ + fleet_num * kUnitNum + unit_num
+	#global
+
+	#module dtm
+		// バッファに読み込んだ画像を左・アルファブレンド用画像を右に書き込む
+		#deffunc AlphaLoad str file_name, var px, var py
+			al_id = 0
+			// 画像を読み込み、そこからバッファを新規作成する
+			alCreateImageByFile al_id, file_name
+			px = alGetWidth() :py = alGetHeight()
+			// 普通の画像を左側に表示する
+			buffer kMascotBufferMainID, px, py
+			alResetCopyMode
+			alCopyImageToScreen al_id, kMascotBufferMainID, 0, 0, px, py, 0, 0
+			// アルファブレンド用画像を右側に表示する
+			if(length(cmatrix) == 1){
+				// 変換用パラメータを指定
+				cmatrix(MAT_R) = 0.0, 0.0, 0.0, 1.0, 0.0
+				cmatrix(MAT_G) = 0.0, 0.0, 0.0, 1.0, 0.0
+				cmatrix(MAT_B) = 0.0, 0.0, 0.0, 1.0, 0.0
+				cmatrix(MAT_A) = 0.0, 0.0, 0.0, 0.0, 1.0
+			}
+			buffer kMascotBufferSubID, px, py
+			alCopyModeColorMatrix cmatrix
+			alCopyImageToScreen al_id, kMascotBufferSubID, 0, 0, px, py, 0, 0
+			alResetCopyMode
+		return
+	#global

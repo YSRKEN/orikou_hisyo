@@ -1,0 +1,199 @@
+/* 文字認識用関数 */
+	#module ocr
+		// 画像内で、黒部分の位置および大きさを求める
+		#deffunc GetSquare2 var px__, var py__, var wx__, var wy__
+			color 255, 255, 255
+			square.0 = 0, 0, kMatchSize, kMatchSize
+			GetSquare px__, py__, wx__, wy__, square
+		return
+		// 指定した座標から、縦横kMatchSizeの赤枠線を引く
+		#deffunc DrawCharSquare int px_, int py_
+			color 255, 0, 0
+			line px_ + kMatchSize    , py_                 , px_                 , py_
+			line px_ + kMatchSize - 1, py_ + kMatchSize    , px_ + kMatchSize - 1, py_
+			line px_ + kMatchSize - 1, py_ + kMatchSize - 1, px_                 , py_ + kMatchSize- 1
+			line px_                 , py_ + kMatchSize    , px_                 , py_
+		return
+		// 配列number(サイズ：len)に認識した数字を代入する
+		// pos_xとpos_yは左上座標(横方向に読む)、glyph_xとglyph_yは数字の大きさ
+		// thresholdは閾値、reverse_flgは色を反転させるか(反転処理の方が先)
+		// 配列毎の返却値は0～9、10(白ベタ)、11(黒ベタ)……としたかったが、誤認識回避のために
+		// 11が出たら1に修正している。これは、1とみなされるべき画像がベタッと横に広がる可能性
+		// があるため。意図的に11を使うことなんて無いので問題はないはず
+		#deffunc ReadNumber array number, int len, array pos_x, int pos_y, int glyph_x, int glyph_y, int threshold, int reverse_flg
+			read_buffer_id = ginfo_sel
+			buffer kTempBufferID, glyph_x, glyph_y
+			for n, 0, len
+				// バッファ1にコピーする
+				gsel kTempBufferID
+				gcopy read_buffer_id, pos_x(n), pos_y, glyph_x, glyph_y
+				// バッファ2にバッファ1を拡大コピーする
+				gsel kNumGetBufferID
+				pos 0, 0 :gzoom kMatchSize, kMatchSize, kTempBufferID, 0, 0, glyph_x, glyph_y, 1
+				;bmpsave "" + k@ + " " + k@ + " " + n + "-1.bmp"
+				// CVバッファにバッファ2をコピー。反転フラグが立っている場合は反転させる
+				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+				cvputimg kCVTempBufferID
+				cvconvert 0, kCVTempBufferID
+				if(reverse_flg) :cvxors ,,,kCVTempBufferID
+				// 二値化する(thresholdの値が大きいほど濃くなる)
+				if(threshold < 0){
+					// 大津の手法
+					cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
+				}else{
+					// 通常
+					cvthreshold CV_THRESH_BINARY, threshold, 255, kCVTempBufferID
+				}
+				// 一旦バッファ2に戻して、数字の位置および大きさを求める
+				//小さすぎる場合は認識結果として10を返す
+				cvgetimg kCVTempBufferID, 1
+				GetSquare2 px, py, wx, wy
+				if((wx * 4 < kMatchSize) || (wy * 4 < kMatchSize)){
+					number(n) = 10
+					_continue
+				}
+				// 数字をバッファ2全体に拡大して、CVバッファに再びコピーする
+				pos 0, 0 :gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy
+				;bmpsave "" + k@ + " " + k@ + " " + n + "-2.bmp"
+				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+				cvputimg kCVTempBufferID
+				cvconvert 0, kCVTempBufferID
+				// 二値化した後にバッファ2に戻して周囲に赤枠線を引き、再び戻す
+				cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
+				cvgetimg kCVTempBufferID, 1
+				DrawCharSquare 0, 0
+				;bmpsave "" + k@ + " " + k@ + " " + n + "-3.bmp"
+				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+				cvputimg kCVTempBufferID
+				// テンプレートとのマッチングを行い、結果を認識結果として返す
+				cvmatch px, py, CV_TM_SQDIFF, kCVTempBufferID, kCVMatchBufferID
+				num = limit(int(1.0 * px / (2 * kMatchSize) + 0.5), 0, 11)
+				if(num == 11) :num = 1
+				number(n) = num
+			next
+		return
+		// 時刻用に、読み取った数字を正規化する
+		#deffunc NormalizeTime array number
+			for k, 0, 6
+				if((k \ 2 == 0) && (k != 0)){	//0を省いたのは、80時間遠征とかがあるため
+					number(k) = limit(number(k), 0, 5)
+				}else{
+					number(k) = limit(number(k), 0, 9)
+				}
+			next
+		return
+		// 練度用に、読み取った数字を正規化する
+		#deffunc NormalizeLevel array number
+			for k, 0, 2
+				if(number(k) == 11) :number(k) = 1 :_continue
+				if(number(k) == 10) :number(k) = 0 :_continue
+			next
+		return
+		// 遠征名を取得する(小)
+		#defcfunc GetExpSmallName int exped_index
+			exp_small_name = -1
+			sdim temp_small_str, kExpStrLength
+			for k, 0, kExpStrLength
+				pget 151 + k, 172 + exped_index * 30
+				if(ginfo_r < 128){
+					temp_small_str += "1"
+				}else{
+					temp_small_str += "0"
+				}
+			next
+			for k, 0, kExpAllPage
+				if(temp_small_str == exped_small_str@(k)){
+					exp_small_name = k
+					_break
+				}
+			next
+		return exp_small_name
+		// 遠征名を取得する(大)
+		#defcfunc GetExpLargeName
+			exp_large_name = -1
+			sdim temp_large_str, kExpStrLength
+			for k, 0, kExpStrLength
+				pget 576 + k, 115
+				if(ginfo_r < 128){
+					temp_large_str += "1"
+				}else{
+					temp_large_str += "0"
+				}
+			next
+			for k, 0, kExpAllPage
+				if(temp_large_str == exped_large_str@(k)){
+					exp_large_name = k
+					_break
+				}
+			next
+		return exp_large_name
+		// 資材量を取得する
+		#deffunc GetSupply array supply_list
+			dim supnum, 6
+			// 燃料
+			gsel kMainBufferID
+			ReadNumber supnum, 6, supply_pos_x1@, 36, 7, 11, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(0) = CnvNumber(supnum)
+			// 弾薬
+			gsel kMainBufferID
+			ReadNumber supnum, 6, supply_pos_x1@, 55, 7, 11, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(1) = CnvNumber(supnum)
+			// 鋼材
+			gsel kMainBufferID
+			ReadNumber supnum, 6, supply_pos_x2@, 36, 7, 11, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(2) = CnvNumber(supnum)
+			// ボーキ
+			gsel kMainBufferID
+			ReadNumber supnum, 6, supply_pos_x2@, 55, 7, 11, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(3) = CnvNumber(supnum)
+
+			dim supnum, 4
+			// 高速修復材
+			gsel kMainBufferID
+			ReadNumber supnum, 4, supply_pos_x3@, 13, 9, 12, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(4) = CnvNumber(supnum)
+			// 開発資材
+			gsel kMainBufferID
+			ReadNumber supnum, 4, supply_pos_x4@, 13, 9, 12, 150, TRUE
+			NormalizeSupply supnum
+			supply_list(5) = CnvNumber(supnum)
+
+			dim supnum, 3
+			// 司令部レベル
+			gsel kMainBufferID
+			ReadNumber supnum, 3, supply_pos_x5@, 14, 9, 12, 150, TRUE
+			if(supnum(1) == 10){
+				supply_list(6) = limit(supnum(0), 1, 9)
+			}else{
+				if(supnum(2) == 10){
+					supply_list(6) = limit(supnum(0), 1, 9) * 10 + limit(supnum(1), 0, 9)
+				}else{
+					supply_list(6) = 100 + limit(supnum(1), 0, 2) * 10 + limit(supnum(2), 0, 9)
+				}
+			}
+		return
+		// 資源用に、読み取った数字を正規化する
+		#deffunc NormalizeSupply array number
+			for k, 0, length(number)
+				if(number(k) == 10) :number(k) = 0
+				if(k  == 0){
+					number(k) = limit(number(k), 0, 3)
+				}else{
+					number(k) = limit(number(k), 0, 9)
+				}
+			next
+		return
+		// 読み取った数字を各桁とみなして足し合わせる
+		#defcfunc CnvNumber array number
+			c_n = 0
+			for k, 0, length(number)
+				c_n += number(k)
+				if(k != length(number) - 1) :c_n *= 10
+			next
+		return c_n
+	#global

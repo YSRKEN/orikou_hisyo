@@ -1,0 +1,258 @@
+/* その他種々のイベント処理 */
+
+//*情報表示
+*about
+	sdim about_info, 1024
+	// ソフトウェア情報
+	about_info += "ソフト名：" + kSoftName + "\n"
+	about_info += "バージョン：" + kVersion + "\n"
+	about_info += "作者：YSR\n"
+	about_info += "最終更新日：" + kLastUpdate + "\n"
+	// 練度表示
+	if((scene_result(0) == "編成画面") && (strmid(scene_result(1), 0, 2) == "第")){
+		dim level_temp, kUnitNum
+		// 画像から練度を読み取る
+		for k, 0, kUnitNum
+			gsel kMainBufferID
+			x = k \ 2
+			y = k / 2
+			pget 342 * x + 256, 113 * y + 153
+			if(ginfo_r >= 128){
+				level_temp(k) = 100
+			}else{
+				level_temp(k) = 0
+			}
+			dim number, 2
+			unit_pos_x_.0 = 342 * x + unit_pos_x(0), 342 * x + unit_pos_x(1)
+			ReadNumber number, 2, unit_pos_x_, 113 * y + 149, 8, 12, 85, TRUE
+			NormalizeLevel number
+			level_temp(k) += number(0) * 10 + number(1)
+		next
+		about_info += "旗艦連度：" + level_temp(0) + "\n"
+		sum = 0
+		for k, 0, kUnitNum
+			sum += level_temp(k)
+		next
+		about_info += "艦隊総連度：" + sum + "\n"
+	}
+	dialog about_info
+return
+
+//*シーンが切り替わった際に行う処理
+*check_scene_change
+	// ○号カウンタ
+	//演習中であることを検出する
+	if((scene_result(0) == "演習出撃") && (scene_result(1) == "陣形選択")){
+		exercises_flg = TRUE
+	}
+	if(scene_result(0) == "母港画面"){
+		exercises_flg = FALSE
+	}
+	//自動カウント処理
+	gosub *counter_auto
+	// BGM機能
+	//現在の状況を更新する
+	gosub *check_bgm_type
+return
+
+//*サブ画面下の表示を更新する
+*redraw_status_bar
+	if(show_status_flg == FALSE) :return
+	redraw 0
+		// 消去する
+		color $FF, $FF, $FF
+		boxf 0, sub_window_size_y@(sub_window_size_index@), sub_window_size_x@(sub_window_size_index@), sub_window_size_y@(sub_window_size_index@) + show_status_flg@ * status_y@(sub_window_size_index@)
+		// 書き込むための内容を準備する
+		;最終更新日時
+		status_bar_str = ""
+		if(scene_list_index == 0){
+			status_bar_str += CnvStrTime(flash_time)
+		}else{
+			status_bar_str += CnvStrTime(show_scene_list_time(scene_list_index - 1))
+		}
+		;艦隊数
+		status_bar_str + = " ("
+		for k, 0, kFleetNum
+			if(k != 0) :status_bar_str += ", "
+			status_bar_str += "" + unit_count(k)
+		next
+		status_bar_str += ")"
+		// 書き込む
+		color
+		pos 0, sub_window_size_y@(sub_window_size_index@) - 2
+		font "Symbol", status_y@(sub_window_size_index@) - 2
+		mes status_bar_str
+	redraw 1
+return
+
+//*オプション画面を表示する
+*show_option
+	gsel kOptionWindowID, 2
+return
+
+//*画像の保存パスを指定する
+*browse_pic
+	selfolder pic_save_path(1),"保存先フォルダ"
+	gsel kOptionWindowID
+	objprm pic_save_path_id, pic_save_path(1)
+return
+
+//*名前隠し処理
+//CheckHomeFlg関数とかでkMainBufferIDではなくkSubBufferIDを引数にしているのは、
+//CheckHomeFlg関数が描画先を変更する関数なので、毎回gselするのが面倒だから
+*name_disable_filter
+	// 母港左上の提督名
+	if(CheckHomeFlg(kSubBufferID)){
+		color 38, 38, 38
+		boxf 111, 0, 273, 25
+	}
+	// その他特殊な画面に対する処理
+	if(scene_result2(1) == "艦隊司令部情報"){
+		color 241, 234, 221
+		boxf 201, 123, 496, 153
+	}
+	if(scene_result2(1) == "ランキング"){
+		color 54, 54, 54
+		boxf 225, 153, 375, 451
+	}
+	if(scene_result2(1) == "演習一覧"){
+		color 225, 209, 181
+		boxf 338, 178, 503, 192
+		color 237, 223, 207
+		boxf 338, 233, 503, 247
+		color 225, 209, 181
+		boxf 338, 288, 503, 302
+		color 237, 223, 207
+		boxf 338, 343, 503, 357
+		color 225, 209, 181
+		boxf 338, 398, 503, 412
+	}
+	if(scene_result2(1) == "演習個別"){
+		color 246, 239, 228
+		boxf 130, 87, 425, 117
+	}
+	if((scene_result2(1) == "交戦結果") || (scene_result2(1) == "戦闘判定")){
+		color 37, 44, 47
+		boxf 92, 82, 264, 106
+	}
+	if((scene_result2(0) == "出撃経過") && (scene_result2(1) == "戦果報告")){
+		color 37, 44, 47
+		boxf 56, 82, 228, 106
+	}
+	if((scene_result2(0) == "遠征出撃") && (scene_result2(1) == "戦果報告")){
+		color 37, 44, 47
+		boxf 65, 78, 237, 102
+	}
+return
+
+//*大破・消耗チェック
+*check_stopper
+	logmes "" + show_stopper_flg1 + " " + show_stopper_flg2 + " " + CheckStopperType()
+	ShowStopperWindow stopper_type	//ウィンドウ表示
+	if(show_stopper_flg1){
+		// 表示を無くすかどうかの判定
+		if(show_stopper_flg2){
+			if((check_deadzone_flg == FALSE) && (stopper_type == kStopperDeadZone)){
+				show_stopper_flg1 = FALSE
+				show_stopper_flg2 = FALSE
+				gsel kStopperWindowID, -1
+			}
+			if((check_exhausted_flg == FALSE) && (stopper_type == kStopperExhausted)){
+				show_stopper_flg1 = FALSE
+				show_stopper_flg2 = FALSE
+				gsel kStopperWindowID, -1
+			}
+			if((CheckStopperType() == 0) && (scene_result(1) != "進撃確認")){
+				show_stopper_flg1 = FALSE
+				show_stopper_flg2 = FALSE
+				gsel kStopperWindowID, -1
+			}
+		}else{
+			if(((check_deadzone_flg) && (stopper_type == kStopperDeadZone)) || ((check_exhausted_flg) && (stopper_type == kStopperExhausted))){
+				ShowStopperWindow stopper_type
+			}
+		}
+	}else{
+		// まだ表示していない場合の処理
+		stopper_type = CheckStopperType()
+		switch stopper_type
+			case kStopperDeadZone
+				if(check_deadzone_flg){
+					PutLog "【大破・消耗チェック】"
+					PutLog "判定結果：大破状態"
+					TasktrayPopup2 "艦娘が大破しています", kSoftName, 2, 1000
+					show_stopper_flg1 = TRUE
+				}
+			swbreak
+			case kStopperExhausted
+				if(check_exhausted_flg){
+					PutLog "【大破・消耗チェック】"
+					PutLog "判定結果：消耗状態"
+					TasktrayPopup2 "艦娘が消耗しています", kSoftName, 2, 1000
+					show_stopper_flg1 = TRUE
+				}
+			swbreak
+		swend
+	}
+return
+
+//*ロックチェック
+*check_locker
+	ShowLockerWindow locker_type	//ウィンドウ表示
+	if(show_locker_flg1){
+		// 表示を無くすかどうかの判定
+		if(show_locker_flg2){
+			locker_type = CheckLockerType()
+			switch locker_type
+				case kLockerKammusu
+					gsel kLockerWindowID
+					pos 0, 0
+					gcopy kMainBufferID, 737, 154, 40, 280
+					color 255, 0, 0
+					DrawLargeSquare 0, 0, 40 - 1, 280 - 1
+				swbreak
+				case kLockerWeapon
+					gsel kLockerWindowID
+					pos 0, 0
+					gcopy kMainBufferID, 770, 132, 30, 300
+					color 255, 0, 0
+					DrawLargeSquare 0, 0, 30 - 1, 300 - 1
+				swbreak
+			swend
+			if((kammusu_lock_flg == FALSE) && (locker_type == kLockerKammusu)){
+				show_locker_flg1 = FALSE
+				show_locker_flg2 = FALSE
+				gsel kLockerWindowID, -1
+			}
+			if((weapon_lock_flg == FALSE) && (locker_type == kLockerWeapon)){
+				show_locker_flg1 = FALSE
+				show_locker_flg2 = FALSE
+				gsel kLockerWindowID, -1
+			}
+			if(CheckLockerType() == 0){
+				show_locker_flg1 = FALSE
+				show_locker_flg2 = FALSE
+				gsel kLockerWindowID, -1
+			}
+		}else{
+			if(((kammusu_lock_flg) && (stopper_type == kLockerKammusu)) || ((weapon_lock_flg) && (stopper_type == kLockerWeapon))){
+				ShowLockerWindow locker_type
+			}
+		}
+	}else{
+		// まだ表示していない場合の処理
+		locker_type = CheckLockerType()
+		switch locker_type
+			case kLockerKammusu
+				if(kammusu_lock_flg){
+					show_locker_flg1 = TRUE
+				}
+			swbreak
+			case kLockerWeapon
+				if(weapon_lock_flg){
+					show_locker_flg1 = TRUE
+				}
+			swbreak
+		swend
+	}
+return

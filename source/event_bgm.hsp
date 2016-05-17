@@ -1,0 +1,101 @@
+/* BGM機能に関するイベント処理 */
+
+//*BGM機能の画面を出す
+*show_bgm_window
+	gsel kBgmWindowID, 2
+return
+
+*redraw_bgm_window
+	gsel kBgmWindowID
+	for k, 0, kBgmKinds
+		objprm k, bgm_name_list(k)
+	next
+return
+
+//*BGMを追加する
+*browse_bgm_1 :bgm_set_type = kBgmTypeHome   :gosub *browse_bgm :return
+*browse_bgm_2 :bgm_set_type = kBgmTypeMap    :gosub *browse_bgm :return
+*browse_bgm_3 :bgm_set_type = kBgmTypeBattle :gosub *browse_bgm :return
+*browse_bgm_4 :bgm_set_type = kBgmTypeBoss   :gosub *browse_bgm :return
+*browse_bgm
+	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
+	if(stat == 0) :return
+	bgm_list(bgm_set_type) += refstr + "\n"
+	bgm_name_list(bgm_set_type) += getpath(refstr, 1 + 8) + "\n"
+	bgm_list_size(bgm_set_type)++
+	gosub *redraw_bgm_window
+return
+
+//*BGMを削除する
+*del_bgm_1 :bgm_del_type = kBgmTypeHome   :gosub *del_bgm :return
+*del_bgm_2 :bgm_del_type = kBgmTypeMap    :gosub *del_bgm :return
+*del_bgm_3 :bgm_del_type = kBgmTypeBattle :gosub *del_bgm :return
+*del_bgm_4 :bgm_del_type = kBgmTypeBoss   :gosub *del_bgm :return
+*del_bgm
+	if(bgm_index(bgm_del_type) < 0) :return
+	notesel bgm_list(bgm_del_type)
+	notedel bgm_index(bgm_del_type)
+	notesel bgm_name_list(bgm_del_type)
+	notedel bgm_index(bgm_del_type)
+	bgm_list_size(bgm_del_type)--
+	gosub *redraw_bgm_window
+return
+
+//*BGMの強制開始
+*start_bgm
+	bgm_flg(bgm_type_now) = 1
+	gsel kBgmWindowID
+	objprm kBgmKinds + bgm_type_now, bgm_flg(bgm_type_now)
+	gosub *change_bgm
+return
+
+//*BGMの強制停止
+*stop_bgm
+	mmstop
+return
+
+//*現在状況を把握(BGM用)
+*check_bgm_type
+	;PutLog "　" + scene_result(0) + "　" + scene_result(1)
+	bgm_type_now = -1
+	if(scene_result(1) == "海域マップ") :bgm_type_now = kBgmTypeMap :return
+	if(scene_result(0) == "出撃経過"){
+		if(instr(battle_bgm_text,,scene_result(1)) != -1){
+			if(boss_battle_flg){
+				bgm_type_now = kBgmTypeBoss
+			}else{
+				bgm_type_now = kBgmTypeBattle
+			}
+			return
+		}else{
+			if(scene_result(1) == "ドロップ"){
+				bgm_type_now = -1	;建造でもドロップ画面が出るので
+			}else{
+				bgm_type_now = kBgmKinds
+			}
+			return
+		}
+	}
+	if(instr(home_bgm_text1,,scene_result(0)) != -1) :bgm_type_now = kBgmTypeHome :return
+	if(instr(home_bgm_text2,,scene_result(1)) != -1) :bgm_type_now = kBgmTypeHome :return
+return
+
+//*BGM切り替え
+*change_bgm
+	;PutLog "  " + bgm_type_now
+	// 不明なシーンなら無視する
+	if(bgm_type_now == -1) :return
+	// 特定シーンではBGMを止める
+	if(bgm_type_now >= kBgmKinds) :mmstop :return
+	// フラグによってBGMを鳴らすかを判定する
+	if(bgm_flg(bgm_type_now)){
+		// BGMを鳴らす
+		notesel bgm_list(bgm_type_now)
+		noteget get, rnd(bgm_list_size(bgm_type_now))
+		mmload get, 0, 1
+		mmplay 0
+	}else{
+		// BGMを止める
+		mmstop
+	}
+return

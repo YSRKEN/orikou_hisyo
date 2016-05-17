@@ -1,11 +1,11 @@
-/* おりこうさんな秘書 Ver.3.0.2 */
+/* おりこうさんな秘書 Ver.3.0.3 */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.0.2"
-	#define kVerString  "302"
-	#define kLastUpdate "2015/09/27"
+	#define kVersion    "Ver.3.0.3"
+	#define kVerString  "303"
+	#define kLastUpdate "2015/10/03"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -14,17 +14,36 @@
 	#pack "sort_type.csv"
 
 /* ライブラリ・サブルーチン */
+	// 他作
+	#include "a2d.hsp"
 	#include "hspcv.as"
 	#include "hspext.as"
+	#include "module_lwm2.hsp"
+	// 自作
 	#include "const.hsp"
-	#include "module.hsp"
+	#include "module_api.hsp"
+	#include "module_file.hsp"
+	#include "module_misc.hsp"
+	#include "module_ocr.hsp"
+	#include "module_pic.hsp"
+	#include "module_time.hsp"
 	LoadSystemData
 	#include "interface.hsp"
 	LoadSoftData
 	onexit gosub *exit
 	onclick gosub *move
 	goto *main
-	#include "event.hsp"
+	#include "event_misc.hsp"
+	#include "event_getpos.hsp"
+	#include "event_picsave.hsp"
+	#include "event_timer.hsp"
+	#include "event_sort.hsp"
+	#include "event_exp.hsp"
+	#include "event_counter.hsp"
+	#include "event_cond.hsp"
+	#include "event_supply.hsp"
+	#include "event_bgm.hsp"
+	#include "event_mascot.hsp"
 
 /* メインルーチン */
 *main
@@ -53,6 +72,9 @@
 	bgm_type_now_ = bgm_type_now
 	graph_scale_index_ = graph_scale_index
 	redraw_counter_flg = FALSE
+	desktop_mascot_flg_ = desktop_mascot_flg
+	show_mascot_area_flg_ = show_mascot_area_flg
+	mascot_index_ = mascot_index
 	// メインループ
 	repeat
 		if(exit_flg) :end
@@ -216,6 +238,32 @@
 			}
 			show_battle_flg_ = show_battle_flg
 		}
+		// マスコット表示に切り替えるかのフラグ
+		if(desktop_mascot_flg_ != desktop_mascot_flg){
+			if(mascot_index_id >= 0){
+				if(desktop_mascot_flg){
+					gsel kMainWindowID, -1
+					gosub *show_mascot
+				}else{
+					gsel kMascotWindowID, -1
+					gsel kMainWindowID, 2
+				}
+			}
+			desktop_mascot_flg_ = desktop_mascot_flg
+		}
+		if(show_mascot_area_flg_ != show_mascot_area_flg){
+			if(desktop_mascot_flg){
+				gosub *redraw_mascot
+			}
+			show_mascot_area_flg_ = show_mascot_area_flg
+		}
+		if(mascot_index_ != mascot_index){
+			if(desktop_mascot_flg){
+				gsel kMainWindowID, -1
+				gosub *show_mascot
+			}
+			mascot_index_ = mascot_index
+		}
 		// ウェイト
 		await 1000 / capture_fps(capture_fps_index)
 	loop
@@ -240,7 +288,11 @@ return
 *move
 	if(wparam == 1){
 		if(ginfo_act < kSelectWindowID){
-			sendmsg hwnd_window(ginfo_act), WM_NCLBUTTONDOWN, HTCAPTION, 0
+			if(ginfo_act == kMascotWindowID){
+				gosub *run_event
+			}else{
+				sendmsg hwnd_window(ginfo_act), WM_NCLBUTTONDOWN, HTCAPTION, 0
+			}
 		}
 		if(ginfo_act == kStopperWindowID){
 			dialog "現在、進撃・出撃を制限されています。\nそれでも進撃・出撃を行いますか？", 3, kSoftName

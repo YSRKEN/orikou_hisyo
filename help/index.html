@@ -14,7 +14,7 @@
 	</head>
 	<body>
 <!-- タイトル -->
-		<h1>おりこうさんな秘書 Ver.3.0.2</h1>
+		<h1>おりこうさんな秘書 Ver.3.0.3</h1>
 		Twitterアカウント：<a href="https://twitter.com/orikou_hisyo/">@orikou_hisyo</a><br>
 		公開ページ：<a href="http://www.vector.co.jp/soft/win95/game/se509326.html">http://www.vector.co.jp/soft/win95/game/se509326.html</a><br>
 		紹介動画：<a href="http://www.nicovideo.jp/watch/sm26755860">【艦これ】便利なスクショツール＋αを作ってみた</a><br>
@@ -35,7 +35,8 @@
 				<li><a href="#tools">各種ツール</a></li>
 				<li><a href="#save_data">セーブについて</a></li>
 				<li><a href="#option">オプション</a></li>
-				<li><a href="#about">その他</a></li>
+				<li><a href="#mascot">デスクトップマスコット作成について</a></li>
+				<li><a href="#about">各種情報</a></li>
 			</ul></li>
 			<li><a href="#caution">注意</a></li>
 			<li><a href="#thanks">謝辞</a></li>
@@ -65,6 +66,7 @@
 			<li>あ・い・ろ号を手動・自動でカウントして表示できる<strong>「○号カウンター」</strong></li>
 			<li>クリックするだけで艦娘のコンディションを簡単に計算できる<strong>「cond値メータ」</strong></li>
 			<li>母港・マップ・道中戦闘・ボス戦闘画面において<strong>「BGMを自動で流せる機能」</strong></li>
+			<li>メイン画面の表示を変更して<strong>「好きなデスクトップマスコットが使える機能」</strong></li>
 		</ul>
 		<p>　最新の開発状況や更新情報は、次のスレにまとめているので一度覗いてみてください。</p>
 		<div>【艦これ】おりこうさんな秘書【スクショ】<br>
@@ -80,6 +82,7 @@
 		<p>　ファイルをそのまま削除するだけです。レジストリは使用しません。</p>
 		<h2>ファイル構成</h2>
 		<p><strong>　先頭に☆が付いたファイルは、動作に必須なファイルです。</strong><br>
+		　プログラムを初めて実行した際は、picフォルダ・saveフォルダ・logフォルダ・themeフォルダが自動生成されます。<br>
 		　また、セーブ時には<a href="../save/save.ini">save.ini</a>および<a href="../save/buffer.png">buffer.png</a>が、資材ログ保存時はsupply.datがorikou.exeの1つ下のsaveフォルダに作成されます。<br>
 		　なお、セーブの際にはソフトウェアのログとしてlogフォルダにsoft(日付).logも保存されます。</p>
 		<table border="1" summary="orikou.exe・hspcv.dll・hspext.dllが必須で、他は必須ではありません">
@@ -114,10 +117,25 @@
 <!-- 操作方法 -->
 		<h1><a name="howto">操作方法</a></h1>
 		<h2><a name="window">画面構成</a></h2>
+		<p>どの画面においても、<strong>マウスでどの位置を掴んでもドラッグできる</strong>ようにしてあります。</p>
 			<h3><a name="main_window">メイン画面</a></h3>
+			<h4>・通常</h4>
 			<img src="./images/main_window.png" alt="メイン画面" width="274" height="343"><br>
 			<p>各ボタンの説明は以下を参照してください。また、画面の一番下に表示されているのはソフトウェアのログです。<br>
 			<strong>(ソフトウェア終了時、もしくは30KBを超えた際に、自動でlogフォルダ以下に保存される)</strong></p>
+			<h4>・マスコット</h4>
+			<img src="./images/mascot_1.png" alt="マスコット" width="414" height="407"><br>
+			<p><a href="#option">オプション</a>で、マスコット化をONにしていると<strong>メイン画面がこちらに変わります</strong>。<br>
+			とは言っても、通常のメイン画面が消滅するのではなく非表示にしているだけなので、通常のメイン画面での選択はそのままです。<br>
+			この表示(透過png対応なので透けている)だと、<strong>特定部分をクリックすると、座標取得や画像保存などの主要機能が利用できます</strong>。<br>
+			ただ、そんなのは初見じゃ分かりっこないので、その範囲を明示したのが次の図です。</p>
+			<h4>・マスコット(枠付き)</h4>
+			<img src="./images/mascot_2.png" alt="マスコット(範囲表示)" width="431" height="441"><br>
+			<p>詳しい説明は不要でしょう。<strong>長方形の枠をクリックすれば、それに合わせた機能が発動します</strong>。<br>
+			(通常のメイン画面でボタンを押すのと同じ)<br>
+			こちらの画面の場合、1つ上の状態(枠非表示)と異なり、背景が透過していません。<strong>まずはこれで位置を覚えましょう</strong>。<br>
+			枠の位置を変更・追加・削除したい？　新しいデスクトップマスコットを追加したい？<br>
+			そういった方は、<a href="#mascot">デスクトップマスコット作成について</a>をご覧ください。</p>
 			<h3><a name="sub_window">サブ画面</a></h3>
 			<a href="#showmode"><img src="./images/sub_window.png" alt="サブ画面" width="416" height="302"></a>
 			<h3>各種タイマー・ソート一覧・資材ログ・経験値計算機・○号カウンター・cond値メータ・BGM機能</h3>
@@ -400,7 +418,7 @@
 			　セーブデータを違うVerのおり秘書に移した場合、ある程度は修正できますが<strong>完全な互換性は保証されない</strong>のでご容赦ください。<br>
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="option">オプション</a></h2>
-			<img src="./images/option.png" alt="オプション画面" width="274" height="175">
+			<img src="./images/option.png" alt="オプション画面" width="274" height="203">
 			<p>　各項目について解説します。</p>
 			<table border="1" summary="オプションの各項目についての説明">
 				<tr>
@@ -452,7 +470,46 @@
 					<td>CSV書き出し</td>
 					<td>バイナリデータである資材データをCSV形式に書き出します。<strong>件数が多くなると重い処理になります</strong>のでご了承ください。</td>
 				</tr>
+				<tr>
+					<td>マスコット化</td>
+					<td>メイン画面の表示を、<strong>右のコンボボックスで選択したマスコット</strong>に変更します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
+				</tr>
+				<tr>
+					<td>範囲表示</td>
+					<td>マスコットにおける選択範囲を明示します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
+				</tr>
 			</table>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="mascot">デスクトップマスコット作成について</a></h2>
+			……まあサンプルの<a href="http://pronama.azurewebsites.net/pronama/">プロ生ちゃん</a>のファイルを適当に弄れば作れますが、重要なポイントを解説します。
+			説明の際、マスコット名称を《名前》と記述します。
+			<ul>
+				<li>orikou.exe直下に生成されるthemeフォルダに、まず《名前》フォルダを作成します。<br>
+				<strong>この名前がオプション画面のコンボボックスに表示されるテーマ名</strong>となります。</li>
+				<li>《名前》フォルダの直下に、picture.pngとconfig.csvを配置します。<br>
+				前者は透過付きpng(透過した場所が透けて見える)、後者はカンマ区切りのCSVです。</li>
+				<li>picture.pngについては細かい制限はありませんが、等倍で表示されるので保存サイズには注意。</li>
+				<li>config.csvは、1行目に列タイトルを入力します。サンプルの「左上X,左上Y,右下X,右下Y,種類,内容」のままでいいかと。<br>
+				そして2行目以降に、デスクトップマスコットにおける選択範囲を左上座標・右下座標・種類・内容を入力します。</li>
+				<li>「種類」には、「コマンド」か「会話」を入力します。前者は後述する各種操作用コマンド、後者は単なる会話文を意味します。</li>
+				<li>「種類」が「会話」だった場合、<strong>範囲をクリックすると「内容」のセリフをダイアログ表示</strong>します。</li>
+				<li>「種類」が「コマンド」だった場合、<strong>「内容」が以下の場合においてそれぞれのコマンドが実行</strong>されます。</li>
+				<li><ul>
+					<li>「座標取得」……<a href="#getpos">座標を取得します</a>。マスコット表示なので取得方法は選べません。</li>
+					<li>「画像保存」……<a href="#save_cap">画像を保存</a>します。</li>
+					<li>「オプション」……<a href="#option">オプション</a>画面を表示します。</li>
+					<li>「トリミング」……画像を<a href="#save_cap">トリミング保存</a>します。</li>
+					<li>「各種タイマー」……<a href="#tools">各種タイマー</a>を表示します。</li>
+					<li>「ソート一覧」……<a href="#tools">ソート一覧</a>を表示します。</li>
+					<li>「資材グラフ」……<a href="#tools">資材グラフ</a>を表示します。</li>
+					<li>「経験値計算機」……<a href="#tools">経験値計算機</a>を表示します。</li>
+					<li>「○号カウンタ」……<a href="#tools">○号カウンタ</a>を表示します。</li>
+					<li>「cond値メータ」……<a href="#tools">cond値メータ</a>を表示します。</li>
+					<li>「BGM機能」……<a href="#tools">BGM機能</a>を表示します。</li>
+					<li>「戦闘画面」……<a href="#showmode">戦闘画面</a>のチェックを切り替えるのと同じ効果です。</li>
+					<li>「各種情報」……<a href="#about">各種情報</a>を表示します。</li>
+				</ul></li>
+			</ul>
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="about">各種情報</a></h2>
 			<p>　ソフト名・おり秘書の作成者・最終更新日が表示されます。<br>
@@ -485,6 +542,8 @@
 			<li>このソフトは、<strong>Aeroを有効にしていると正常に動作しない</strong>ことがあります。</li>
 			<li>ブラウザを最前面表示している際などに、<strong>大破/消耗時の進撃/出撃を妨害する白い枠、<br>
 			および艦娘/装備ロックの操作を妨害する赤い枠が一時的に表示されないことがあります</strong>。</li>
+			<li>デスクトップマスコットのサンプルに入れてある画像は<a href="http://pronama.azurewebsites.net/pronama/">プロ生ちゃん</a>です。<br>
+			利用規約はReadme.txtを見ればだいたい分かりますが、素直に<strong>公式サイトで確認＆素材をダウンロード</strong>することを推奨します。</li>
 			<li>このソフトは「<a href="http://hsp.tv/">Hot Soup Processor</a>」というプログラミング言語で記述されています。<br>
 			<strong>文法も簡単</strong>だし、<strong>ツールやゲームを作る際には超便利</strong>なのでみんなも使ってみよう！</li>
 			<li>バグによる記録画像の消失など、ソフト使用によって生じた損失については責任を取れませんのでご了承下さい。</li>
@@ -572,6 +631,16 @@
 				<td>naia</td>
 				<td><a href="http://www.geocities.jp/toshi0619/module/Tasktray.txt">http://www.geocities.jp/toshi0619/module/Tasktray.txt</a></td>
 			</tr>
+			<tr>
+				<td>レイヤーウィンドウモジュール2</td>
+				<td>なたで</td>
+				<td><a href="http://www.placeark.com/program_hsp_module.html">http://www.placeark.com/program_hsp_module.html</a></td>
+			</tr>
+			<tr>
+				<td>プロ生ちゃん</td>
+				<td>Ixy</td>
+				<td><a href="http://pronama.azurewebsites.net/pronama/">http://pronama.azurewebsites.net/pronama/</a></td>
+			</tr>
 		</table>
 		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
@@ -583,6 +652,14 @@
 				<th abbr="バージョン">バージョン</th>
 				<th abbr="公開日">公開日</th>
 				<th abbr="変更箇所">変更箇所</th>
+			</tr>
+			<tr>
+				<td>Ver.3.0.3</td>
+				<td>2015/10/03</td>
+				<td>・表示モードが「現在画面」以外である際、ソート一覧機能で「追加」できなかった不具合を修正した。<br>
+				・コードを適宜分割して分かりやすくした。<br>
+				・<strong>まさかのデスクトップマスコット機能を搭載！　好きな画像をおり秘書のインターフェースにできるよ！！</strong><br>
+				</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.2</td>
@@ -828,7 +905,7 @@
 <!-- 著作権について -->
 		<h1><a name="copyright">著作権について</a></h1>
 		<div><dl>
-			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.0.2</dd>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.0.3</dd>
 			<dt>種別</dt><dd>フリーウェア</dd>
 			<dt>種類</dt><dd>攻略・プレイ支援</dd>
 			<dt>開発者</dt><dd>YSR</dd>
@@ -845,7 +922,10 @@
 
 <!-- コメント -->
 		<h1><a name="comment">コメント</a></h1>
-		<p>　みなぎるパワー！　高い回避力！　そして装甲！　翔鶴改二甲最高や！</p>
+		<p>Ｑ.なんでデスクトップマスコット機能なんか付けたの？<br>
+		Ａ.深い意味は無いです<br>
+		Ｑ.なんでプロ生ちゃんがそのサンプルなの？<br>
+		Ａ.50％の可愛さと50％の権利の自由さで出来ています(キリッ</p>
 		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 

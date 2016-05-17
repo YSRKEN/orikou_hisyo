@@ -1,0 +1,102 @@
+/* マスコット絡みの処理 */
+
+//*マスコットを表示する
+*show_mascot
+	// 画像を読み込む
+	mascot_index = limit(mascot_index, 0, mascot_list_size - 1)
+	notesel mascot_list
+	noteget get, mascot_index
+	AlphaLoad exe_path@ + "\\theme\\" + get + "\\picture.png", px, py
+	// イベントデータも読み込む
+	notesel text_buffer
+	noteload exe_path@ + "\\theme\\" + get + "\\config.csv"
+	mascot_cmd_size = notemax - 1
+	dim mascot_pos, mascot_cmd_size, 4
+	dim mascot_type, mascot_cmd_size
+	sdim mascot_str, 256, mascot_cmd_size
+	repeat mascot_cmd_size, 1
+		noteget get, cnt
+		split get, ",", temp
+		mascot_pos(cnt - 1, 0) = int(temp(0))
+		mascot_pos(cnt - 1, 1) = int(temp(1))
+		mascot_pos(cnt - 1, 2) = int(temp(2))
+		mascot_pos(cnt - 1, 3) = int(temp(3))
+		if(temp(4) == "コマンド"){
+			mascot_type(cnt - 1) = kMascotTypeCmd
+		}else{
+			mascot_type(cnt - 1) = kMascotTypeTalk
+		}
+		mascot_str(cnt - 1) = temp(5)
+	loop
+	// ウィンドウを表示する
+	bgscr kMascotWindowID, px, py
+	gsel kMascotWindowID, 2
+	hwnd_window(kMascotWindowID) = hwnd
+	gosub *redraw_mascot
+return
+
+//*マスコットを再描画する
+*redraw_mascot
+	if(show_mascot_area_flg == FALSE){
+		gsel kMascotWindowID
+		pos 0, 0
+		gcopy kMascotBufferMainID, 0, 0, px, py
+		enableAlphaBlendWindowRGB kMascotBufferSubID
+	}else{
+		gsel kMascotWindowID
+		pos 0, 0
+		gcopy kMascotBufferMainID, 0, 0, px, py
+		font msgothic, kSmallFontSize, 1
+		for k, 0, mascot_cmd_size
+			if(mascot_type(k) == kMascotTypeCmd){
+				color 255, 0, 0
+			}else{
+				color 0, 0, 255
+			}
+			DrawSquare mascot_pos(k, 0), mascot_pos(k, 1), mascot_pos(k, 2), mascot_pos(k, 3)
+			pos mascot_pos(k, 0), mascot_pos(k, 3) - kSmallFontSize
+			mes mascot_str(k)
+		next
+		disableAlphaBlendWindow
+	}
+	redraw 1
+return
+
+//*マスコットに対するコマンドを実行する
+*run_event
+	// マウス座標を取得して、単なる移動指示か、コマンドかを判別する
+	gsel ginfo_act
+	mx = mousex :my = mousey
+	command_type = -1
+	sdim command_str, 64
+	for k, 0, mascot_cmd_size
+		// 範囲外ならそもそも無視する
+		if(mx != limit(mx, mascot_pos(k, 0), mascot_pos(k, 2))) :_continue
+		if(my != limit(my, mascot_pos(k, 1), mascot_pos(k, 3))) :_continue
+		command_type = mascot_type(k)
+		command_str = mascot_str(k)
+		_break
+	next
+	// 
+	if(command_type < kMascotTypeCmd) :sendmsg hwnd_window(ginfo_act), WM_NCLBUTTONDOWN, HTCAPTION, 0 :return
+	// 単なる会話ならそのままこなす
+	if(command_type == kMascotTypeTalk) :dialog command_str, 0, kSoftName :return
+	// コマンド処理を行う
+	if(command_str == "座標取得")       :gosub *get_pos
+	if(command_str == "画像保存")       :gosub *save_picture
+	if(command_str == "オプション")     :gosub *show_option
+	if(command_str == "トリミング")     :gosub *save_picture_trim
+	if(command_str == "各種タイマー")   :gosub *show_timer
+	if(command_str == "ソート一覧")     :gosub *show_sort_list
+	if(command_str == "資材グラフ")     :gosub *show_supply_graph
+	if(command_str == "経験値計算機")   :gosub *show_exp_calc
+	if(command_str == "○号カウンタ")   :gosub *show_counter
+	if(command_str == "cond値メータ")   :gosub *show_cond_meter
+	if(command_str == "BGM機能")        :gosub *show_bgm_window
+	if(command_str == "戦闘画面")       :gosub *show_battle_flg_change
+	if(command_str == "各種情報")       :gosub *about
+return
+
+*show_battle_flg_change
+	show_battle_flg = 1 - show_battle_flg
+return

@@ -1,0 +1,244 @@
+#ifndef LayeredWindowModule_destructor
+#module LayeredWindowModule
+
+;┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;┃ [ レイヤーウィンドウモジュール2 ]
+;┃
+;┃現在の描画指定先のウィンドウを、簡単に半透明なウィンドウに切り替えます。
+;┃レイヤーウィンドウモジュール1を最適化して使いやすくなっています。
+;┃レイヤーウィンドウモジュール1と命令の互換性はありません。
+;┃このモジュールは、NYSLです。
+;┃Windows 2000/XP以上の環境で動作します。
+;┃
+;┃
+;┃命令はシンプル！
+;┃
+;┃
+;┃アルファブレンド系命令　3種類
+;┃
+;┃・enableAlphaBlendWindow p1
+;┃p1 … アルファ値を示したウィンドウID
+;┃p1 のウィンドウのRの値が、ウィンドウのブレンド率となります。
+;┃
+;┃・enableAlphaBlendWindowRGB p1
+;┃p1 … アルファ値を示したウィンドウID
+;┃p1 のウィンドウの各色の値が、ウィンドウのブレンド率となります。
+;┃
+;┃・disableAlphaBlendWindow
+;┃現在のウィンドウのレイヤードウィンドウを解除する
+;┃
+;┃現在のウィンドウを、アルファ値を利用したウィンドウに変更します。
+;┃2回目から前回と同じ大きさのウィンドウに実行すると、メモリの再確保を行わないため高速化します。
+;┃なおウィンドウにした場合、mesboxなどオブジェクト系は一般に利用できなくなります。
+;┃p1はメインウィンドウと同じ大きさのウィンドウを用意してください。
+;┃
+;┃
+;┃
+;┃クロマキー系命令　2種類
+;┃
+;┃・enableChromaKey p1
+;┃p1 … クロマキーに指定する色
+;┃
+;┃・disableChromaKey
+;┃現在のウィンドウのレイヤードウィンドウを解除する
+;┃
+;┃
+;┃
+;┃ 2008 3/20 レイヤーウィンドウモジュール1 公開
+;┃ 2013 4/28 レイヤーウィンドウモジュール2 公開
+;┃ 
+;┃[ placeark ]
+;┃ by natade
+;┃ url http://www.placeark.com/
+;┃ 
+;┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+#uselib "kernel32.dll"
+#func VirtualAllocLayeredWindowModule "VirtualAlloc" int, int, int, int
+#func VirtualFreeLayeredWindowModule "VirtualFree" int, int, int
+#define NULL                   0x00000000
+#define PAGE_EXECUTE_READWRITE 0x00000040
+#define MEM_COMMIT             0x00001000
+#define MEM_RESERVE            0x00002000
+#define MEM_DECOMMIT           0x00004000
+#define MEM_RELEASE            0x00008000
+
+#deffunc LayeredWindowModule_destructor onexit
+	if(NULL != make32bitdib_ptr) {
+		VirtualFreeLayeredWindowModule make32bitdib_ptr, 424, MEM_DECOMMIT
+		VirtualFreeLayeredWindowModule make32bitdib_ptr, 0, MEM_RELEASE
+		make32bitdib_ptr = NULL
+	}
+	if(NULL != make32bitdib_fast_ptr) {
+		VirtualFreeLayeredWindowModule make32bitdib_fast_ptr, 348, MEM_DECOMMIT
+		VirtualFreeLayeredWindowModule make32bitdib_fast_ptr, 0, MEM_RELEASE
+		make32bitdib_fast_ptr = NULL
+	}
+	return
+
+#deffunc LayeredWindowModule_constructor
+	VirtualAllocLayeredWindowModule NULL, 424, MEM_RESERVE, PAGE_EXECUTE_READWRITE
+	VirtualAllocLayeredWindowModule stat, 424, MEM_COMMIT, PAGE_EXECUTE_READWRITE
+	make32bitdib_ptr      = stat
+	dupptr make32bitdib_bin, stat, 424, vartype("int")
+	make32bitdib_bin(  0) = $0824548B, $8320EC83, $840F003A, $0000018E, $2C244C8B, $0F003983, $00018184, $7A8B5700
+	make32bitdib_bin(  8) = $247C8904, $04793B18, $0166850F, $428B0000, $08413B08, $015A850F, $7A830000, $850F000C
+	make32bitdib_bin( 16) = $00000146, $000C7983, $013C850F, $8B550000, $518B146A, $748D5614, $E683037F, $246C89FC
+	make32bitdib_bin( 24) = $24548910, $24748928, $0FC08524, $0001108E, $5C8B5300, $C9333424, $1C244C89, $38245C89
+	make32bitdib_bin( 32) = $20244489, $FF85D98B, $00D78E0F, $748B0000, $C58B3824, $C22BCA03, $10244489, $18247C89
+	make32bitdib_bin( 40) = $0241B60F, $0151B60F, $0339B60F, $3DC703C2, $000002FD, $448B2675, $B60F1024, $16890814
+	make32bitdib_bin( 48) = $2B44B60F, $08E0C101, $0689C20B, $2B54B60F, $00CA8102, $C1FFFFFF, $62EB10E2, $0475C085
+	make32bitdib_bin( 56) = $5EEB0689, $027DFA3B, $B60FFA8B, $F83B0241, $F88B027D, $1024448B, $0814B60F, $0F01B60F
+	make32bitdib_bin( 64) = $FAC1D0AF, $0F168908, $012B44B6, $0169B60F, $25C5AF0F, $0000FF00, $548BC20B, $06891424
+	make32bitdib_bin( 72) = $1354B60F, $69B60F02, $D5AF0F02, $14246C8B, $FF00E281, $E7C10000, $C1D70B10, $D00B08E2
+	make32bitdib_bin( 80) = $C6831689, $03C38304, $FF03C183, $0F18244C, $FFFF4B85, $247C8BFF, $24748B24, $24548B28
+	make32bitdib_bin( 88) = $244C8B2C, $BD048D1C, $00000000, $38244401, $4CFFCE03, $4C892024, $850F1C24, $FFFFFF04
+	make32bitdib_bin( 96) = $335D5E5B, $C4835FC0, $03B8C320, $5F000000, $C320C483, $000002B8, $C4835F00, $01B8C320
+	make32bitdib_bin(104) = $83000000, $00C320C4
+	VirtualAllocLayeredWindowModule NULL, 348, MEM_RESERVE, PAGE_EXECUTE_READWRITE
+	VirtualAllocLayeredWindowModule stat, 348, MEM_COMMIT, PAGE_EXECUTE_READWRITE
+	make32bitdib_fast_ptr     = stat
+	dupptr make32bitdib_fast_bin, stat, 348, vartype("int")
+	make32bitdib_fast_bin( 0) = $08244C8B, $8310EC83, $840F0039, $00000140, $1C24548B, $0F003A83, $00013384, $598B5300
+	make32bitdib_fast_bin( 8) = $045A3B04, $011C850F, $418B0000, $08423B08, $0110850F, $79830000, $850F000C, $000000FC
+	make32bitdib_fast_bin(16) = $000C7A83, $00F2850F, $498B0000, $14528B14, $5B6C8D55, $FCE58303, $14246C89, $8E0FC085
+	make32bitdib_fast_bin(24) = $000000D0, $24748B56, $24748920, $02728D24, $244C8957, $24748910, $24448914, $00498D18
+	make32bitdib_fast_bin(32) = $8E0FDB85, $00000081, $2824448B, $FF8BFB8B, $8316B60F, $FA8103C6, $000000FF, $B60F2275
+	make32bitdib_fast_bin(40) = $0F108911, $C10151B6, $100908E2, $0251B60F, $0910E2C1, $03C18310, $00000881, $43EBFF00
+	make32bitdib_fast_bin(48) = $0775D285, $C1831089, $0F38EB03, $AF0F29B6, $08FDC1EA, $B60F2889, $AF0F0169, $00E581EA
+	make32bitdib_fast_bin(56) = $090000FF, $69B60F28, $EAAF0F02, $FF00E581, $E5C10000, $8B280908, $C11C246C, $C18318E2
+	make32bitdib_fast_bin(64) = $83100903, $754F04C0, $244C8B87, $24748B10, $9D048D14, $00000000, $28244401, $F503CD03
+	make32bitdib_fast_bin(72) = $18244CFF, $10244C89, $14247489, $FF4E850F, $5E5FFFFF, $5BC0335D, $C310C483, $000003B8
+	make32bitdib_fast_bin(80) = $C4835B00, $02B8C310, $5B000000, $C310C483, $000001B8, $10C48300, $000000C3
+	return
+
+#define make32bitdib(%1, %2, %3) \
+	prm@LayeredWindowModule = varptr(%1), varptr(%2), varptr(%3):\
+	mref value@LayeredWindowModule, 64:\
+	value@LayeredWindowModule = callfunc(prm@LayeredWindowModule, make32bitdib_ptr@LayeredWindowModule, 3)
+
+#define make32bitdib_fast(%1, %2, %3) \
+	prm@LayeredWindowModule = varptr(%1), varptr(%2), varptr(%3):\
+	mref value@LayeredWindowModule, 64:\
+	value@LayeredWindowModule = callfunc(prm@LayeredWindowModule, make32bitdib_fast_ptr@LayeredWindowModule, 3)
+	
+#uselib "USER32.dll"
+#func ReleaseDC "ReleaseDC" sptr,sptr
+#cfunc GetDC "GetDC" sptr
+#func GetWindowLong "GetWindowLongA" int,int
+#func SetWindowLong "SetWindowLongA" int,int,int
+#func SetLayeredWindowAttributes "SetLayeredWindowAttributes" int,int,int,int
+#func UpdateLayeredWindow "UpdateLayeredWindow" int,int,int,int,int,int,int,int,int
+#define LWA_COLORKEY  0x00000001
+#define LWA_ALPHA     0x00000002
+#define WS_EX_LAYERED 0x00080000
+#define ULW_COLORKEY  0x00000001
+#define ULW_ALPHA     0x00000002
+#define ULW_OPAQUE    0x00000004
+#define AC_SRC_OVER   0x00000000
+#define AC_SRC_ALPHA  0x00000001
+#uselib "GDI32.dll"
+#cfunc CreateCompatibleDC "CreateCompatibleDC" sptr
+#cfunc CreateCompatibleBitmap "CreateCompatibleBitmap" sptr,sptr,sptr
+#func SelectObject "SelectObject" sptr,sptr
+#func DeleteObject "DeleteObject" sptr
+#func DeleteDC "DeleteDC" sptr
+#func StretchDIBits "StretchDIBits" sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr
+#define DIB_RGB_COLORS 0x0
+#define SRCCOPY        0x00CC0020
+
+#deffunc disableAlphaBlendWindow
+	GetWindowLong hwnd, -20
+	if (stat & WS_EX_LAYERED){
+		SetWindowLong hwnd,-20,stat^WS_EX_LAYERED
+	}
+	return
+
+#deffunc _enableAlphaBlendWindowRGB int lwaAlpha, int type,local ColorBMSCR,local AlphaBMSCR,local hdc_,local hMemDC,local hBitmap
+	GetWindowLong hwnd, -20
+	if((stat & WS_EX_LAYERED) == 0) {
+		SetWindowLong hwnd,-20, stat | WS_EX_LAYERED
+	}
+	if((biWidth != ginfo_sx)||(biHeight != ginfo_sy)) {
+		biWidth  = ginfo_sx
+		biHeight = ginfo_sy
+		// BITMAPINFOHEADER構造体
+		dim BITMAPINFOHEADER, 10
+		BITMAPINFOHEADER(0) = 40				// biSize
+		BITMAPINFOHEADER(1) = biWidth			// biWidth
+		BITMAPINFOHEADER(2) = biHeight			// biHeight
+		BITMAPINFOHEADER(3) = 1 | (32 << 16)	// biPlanes & biBitCount
+		BITMAPINFOHEADER(4) = BI_RGB			// biCompression
+		// BITMAPINFO構造体
+		dim BITMAPINFO, 2
+		BITMAPINFO(0) = varptr(BITMAPINFOHEADER)	//メンバをもつ
+		// 32bitDIBの準備
+		dim lpPixel, biWidth * biHeight
+		// psize
+		dim psize,2
+		psize(0) = ginfo(26)
+		psize(1) = ginfo(27)
+		// pptSrc
+		dim pptSrc,2
+		pptSrc(0) = 0
+		pptSrc(1) = 0
+		// pblend
+		sdim pblend, 4
+		poke pblend, 0, AC_SRC_OVER
+		poke pblend, 1, 0
+		poke pblend, 2, 255
+		poke pblend, 3, AC_SRC_ALPHA
+	}
+	;32bitDIBの準備
+	mref ColorBMSCR, 67
+	mref AlphaBMSCR, 96 + lwaAlpha
+	if(type == 0) {
+		make32bitdib lpPixel, ColorBMSCR, AlphaBMSCR
+	} else {
+		make32bitdib_fast lpPixel, ColorBMSCR, AlphaBMSCR
+	}
+	if(stat){
+		return
+	}
+	hdc_    = GetDC(hWnd)
+	hMemDC  = CreateCompatibleDC(hdc_)
+	hBitmap = CreateCompatibleBitmap(hdc_, biWidth, biHeight)
+	ReleaseDC hWnd,hdc_
+	SelectObject hMemDC,hBitmap
+	StretchDIBits hMemDC, 0, 0, biWidth, biHeight, 0, 0, biWidth, biHeight, varptr(lpPixel), BITMAPINFO, DIB_RGB_COLORS, SRCCOPY
+	UpdateLayeredWindow hwnd, hdc, 0, varptr(psize), hMemDC, varptr(pptSrc), 0, varptr(pblend), ULW_ALPHA
+	DeleteObject hBitmap
+	DeleteDC hMemDC
+	return
+
+#define global enableAlphaBlendWindowRGB(%1) _enableAlphaBlendWindowRGB %1, 0
+#define global enableAlphaBlendWindow(%1) _enableAlphaBlendWindowRGB %1, 1
+
+
+#define global disableChromaKey disableAlphaBlendWindow
+#deffunc _enableChromaKey int lwkColor,double lwkAlpha
+	GetWindowLong hwnd,-20
+	if((stat&WS_EX_LAYERED)=0){
+		SetWindowLong hwnd,-20,stat|WS_EX_LAYERED
+	}
+	if(lwkAlpha==0){
+		if(lwkColor==0xFFFFFFFF){
+			disableChromaKey
+		}else{
+			SetLayeredWindowAttributes hwnd,lwkColor,0,LWA_COLORKEY
+		}
+	}else{
+		if(lwkColor==0xFFFFFFFF){
+			SetLayeredWindowAttributes hwnd,0,int(255.0*(100.0-lwkAlpha)/100),LWA_ALPHA
+		}else{
+			SetLayeredWindowAttributes hwnd,lwkColor,int(255.0*(100.0-lwkAlpha)/100),LWA_COLORKEY|LWA_ALPHA
+		}
+	}
+	return
+#define global enableChromaKey(%1=0xFFFFFFFF,%2=0) _enableChromaKey %1,limitf(%2,0,100)
+
+#global
+LayeredWindowModule_constructor
+#endif
+
+

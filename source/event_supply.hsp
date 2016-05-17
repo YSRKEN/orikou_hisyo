@@ -1,0 +1,206 @@
+/* 資材ログに関するイベント処理 */
+
+//*資材ログに追記する
+*put_supply_log
+	if(flash_time - supply_last_time >= kPutSupplyLogInterval){
+		if(CheckHomeFlg(kMainBufferID) == FALSE) :return
+		supply_last_time = flash_time
+		PutLog "【資材ログ】"
+		GetSupply supply_list
+		// バッファを再作成してコピーする
+		sdim supply_log_, (supply_log_size + 1) * kSupplyLogBlockSize
+		memcpy supply_log_, supply_log, supply_log_size * kSupplyLogBlockSize
+		// 書き込む
+		p = supply_log_size * kSupplyLogBlockSize
+		//日時
+		wpoke supply_log_, p, gettime(0) :p += 2
+		poke  supply_log_, p, gettime(1) :p += 1
+		poke  supply_log_, p, gettime(3) :p += 1
+		poke  supply_log_, p, gettime(4) :p += 1
+		poke  supply_log_, p, gettime(5) :p += 1
+		poke  supply_log_, p, gettime(6) :p += 1
+		//燃料・弾薬・鋼材・ボーキ
+		lpoke supply_log_, p, supply_list(0) :p += 4
+		lpoke supply_log_, p, supply_list(1) :p += 4
+		lpoke supply_log_, p, supply_list(2) :p += 4
+		lpoke supply_log_, p, supply_list(3) :p += 4
+		//高速修復材・開発資材・司令部レベル
+		wpoke supply_log_, p, supply_list(4) :p += 2
+		wpoke supply_log_, p, supply_list(5) :p += 2
+		poke supply_log_, p, supply_list(6)
+		// 再コピーしてからファイルに保存する
+		sdim supply_log, (supply_log_size + 1) * kSupplyLogBlockSize
+		memcpy supply_log, supply_log_, (supply_log_size + 1) * kSupplyLogBlockSize
+		bsave exe_path + "\\save\\supply.dat", supply_log, (supply_log_size + 1) * kSupplyLogBlockSize
+		supply_log_size++
+		PutLog "追記完了"
+		gosub *draw_supply_graph
+	}
+return
+
+//*資材ログをCSV形式で書き出す
+*write_supply_csv
+	PutLog "【資材ログ】"
+	sdim text_buffer, 64
+	text_buffer += "日付,燃料,弾薬,鋼材,ボーキ,高速修復材,開発資材,司令部レベル\n"
+	p = 0
+	for k, 0, supply_log_size
+		if(time != gettime(6)){
+			PutLog "出力率：" + strf("%.1f", 100.0 * (k + 1) / supply_log_size) + "％"
+			time = gettime(6)
+		}
+		// 日時
+		text_buffer += strf("%04d-", wpeek(supply_log, p)) :p += 2
+		text_buffer += strf("%02d-",  peek(supply_log, p)) :p += 1
+		text_buffer += strf("%02d ",  peek(supply_log, p)) :p += 1
+		text_buffer += strf("%02d:",  peek(supply_log, p)) :p += 1
+		text_buffer += strf("%02d:",  peek(supply_log, p)) :p += 1
+		text_buffer += strf("%02d,",  peek(supply_log, p)) :p += 1
+		// 燃料・弾薬・鋼材・ボーキ
+		text_buffer += "" + lpeek(supply_log, p) + "," :p += 4
+		text_buffer += "" + lpeek(supply_log, p) + "," :p += 4
+		text_buffer += "" + lpeek(supply_log, p) + "," :p += 4
+		text_buffer += "" + lpeek(supply_log, p) + "," :p += 4
+		// 高速修復材・開発資材・司令部レベル
+		text_buffer += "" + wpeek(supply_log, p) + ","  :p += 2
+		text_buffer += "" + wpeek(supply_log, p) + ","  :p += 2
+		text_buffer += "" +  peek(supply_log, p) + "\n" :p += 1
+	next
+	notesel text_buffer
+	notesave exe_path + "\\save\\supply.csv"
+	PutLog "出力終了"
+	exec exe_path + "\\save\\supply.csv", 16
+return
+
+//*資材グラフを表示する
+*show_supply_graph
+	gsel kSupplyGraphWindowID, 2
+	// 描画処理
+	gosub *draw_supply_graph
+return
+
+//*資材グラフの描画処理を行う
+*draw_supply_graph
+	if(supply_log_size < 2) :return
+	// バイナリデータを読みだす
+	ddim supply_time, supply_log_size
+	dim supply_value, kSupplyLogKinds, supply_log_size
+	p = 0
+	for k, 0, supply_log_size
+		// 日時
+		v1 = wpeek(supply_log, p) :p += 2
+		v2 =  peek(supply_log, p) :p += 1
+		v3 =  peek(supply_log, p) :p += 1
+		v4 =  peek(supply_log, p) :p += 1
+		v5 =  peek(supply_log, p) :p += 1
+		v6 =  peek(supply_log, p) :p += 1
+		supply_time(k) = 1.0 * CnvFloatDay(v1, v2, v3) + CnvFloatSec(v4, v5, v6, 0.0)
+		// 燃料・弾薬・鋼材・ボーキ
+		supply_value(0, k) = lpeek(supply_log, p) :p += 4
+		supply_value(1, k) = lpeek(supply_log, p) :p += 4
+		supply_value(2, k) = lpeek(supply_log, p) :p += 4
+		supply_value(3, k) = lpeek(supply_log, p) :p += 4
+		// 高速修復材・開発資材・司令部レベル
+		supply_value(4, k) = wpeek(supply_log, p) :p += 2
+		supply_value(5, k) = wpeek(supply_log, p) :p += 2
+		supply_value(6, k) =  peek(supply_log, p) :p += 1
+	next
+	// データを日付順にソートする
+	sortval supply_time
+	dim supply_value_, kSupplyLogKinds, supply_log_size
+	for k, 0, supply_log_size
+		sortget p, k	;a(k)に入ってる値は元はa(p)にあった
+		memcpy supply_value_, supply_value, kSupplyLogKinds * 4, k * kSupplyLogKinds * 4, p * kSupplyLogKinds * 4
+	next
+	memcpy supply_value, supply_value_, kSupplyLogKinds * 4 * supply_log_size
+	// ソートしたデータから、表示に必要な範囲におけるものを抜き出す
+	last_time = supply_time(supply_log_size - 1)
+	first_time = last_time - graph_scale_interval(graph_scale_index)
+	first_index = 0
+	for k, 1, supply_log_size - 1
+		if(supply_time(k)> first_time){
+			first_index = k - 1
+			_break
+		}
+	next
+	// 範囲内における上下スケールを自動で算出する
+	min_value_1 = supply_value(0, 0)
+	max_value_1 = supply_value(0, 0)
+	min_value_2 = supply_value(4, 0)
+	max_value_2 = supply_value(4, 0)
+	for i, first_index, supply_log_size
+		for j, 0, 4
+			if(min_value_1 > supply_value(j, i)) :min_value_1 = supply_value(j, i)
+			if(max_value_1 < supply_value(j, i)) :max_value_1 = supply_value(j, i)
+		next
+		for j, 4, 6
+			if(min_value_2 > supply_value(j, i)) :min_value_2 = supply_value(j, i)
+			if(max_value_2 < supply_value(j, i)) :max_value_2 = supply_value(j, i)
+		next
+	next
+	min_value_1 = (min_value_1 / 1000) * 1000
+	max_value_1 = (max_value_1 / 1000 + 1) * 1000
+	min_value_2 = (min_value_2 / 100) * 100
+	max_value_2 = (max_value_2 / 100 + 1) * 100
+	diff_value_1 = max_value_1 - min_value_1
+	diff_value_2 = max_value_2 - min_value_2
+	diff_time = supply_time(supply_log_size - 1) - supply_time(first_index)
+	if(diff_time <= 0) :return
+	gsel kSupplyGraphWindowID
+	objprm min_value_1_id, min_value_1
+	objprm max_value_1_id, max_value_1
+	objprm min_value_2_id, min_value_2
+	objprm max_value_2_id, max_value_2
+	objprm min_time_id, CnvStrDay(int(first_time))
+	objprm max_time_id, CnvStrDay(int(last_time))
+	// その範囲におけるグラフを別バッファに描画する
+	buffer kGraphBufferID, kGraphWX2, kGraphWY2
+	if(diff_value_1 != 0){
+		for j, 0, 4
+			switch j
+				case 0	;燃料
+					color $00,$80,$00
+					swbreak
+				case 1	;弾薬
+					color $66,$33,$00
+					swbreak
+				case 2	;鋼材
+					color $A0,$A0,$A0
+					swbreak
+				case 3	;ボーキ
+					color $CC,$33,$00
+					swbreak
+			swend
+			for i, 0, supply_log_size - 1
+				x1 = 1.0 * (supply_time(i) - supply_time(first_index)) / diff_time * kGraphWX2
+				y1 = (1.0 - 1.0 * (supply_value(j, i) - min_value_1) / (diff_value_1)) * kGraphWY2
+				x2 = 1.0 * (supply_time(i + 1) - supply_time(first_index)) / diff_time * kGraphWX2
+				y2 = (1.0 - 1.0 * (supply_value(j, i + 1) - min_value_1) / (diff_value_1)) * kGraphWY2
+				line x1, y1, x2, y2
+			next
+		next
+	}
+	if(diff_value_2 != 0){
+		for j, 4, 6
+			switch j
+				case 4	;バケツ
+					color $F0, $80, $80
+					swbreak
+				case 5	;開発資材
+					color $76, $99, $FF
+					swbreak
+			swend
+			for i, 0, supply_log_size - 1
+				x1 = 1.0 * (supply_time(i) - supply_time(first_index)) / diff_time * kGraphWX2
+				y1 = (1.0 - 1.0 * (supply_value(j, i) - min_value_2) / (diff_value_2)) * kGraphWY2
+				x2 = 1.0 * (supply_time(i + 1) - supply_time(first_index)) / diff_time * kGraphWX2
+				y2 = (1.0 - 1.0 * (supply_value(j, i + 1) - min_value_2) / (diff_value_2)) * kGraphWY2
+				line x1, y1, x2, y2
+			next
+		next
+	}
+	gsel kSupplyGraphWindowID
+	pos POS_X(1), POS_Y(0)
+	gcopy kGraphBufferID, 0, 0, kGraphWX2, kGraphWY2
+	color :DrawLargeSquare POS_X(1), POS_Y(0), kGraphWX2, kGraphWY2
+return

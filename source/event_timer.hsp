@@ -1,0 +1,158 @@
+/* 各種タイマーに関するイベント処理 */
+
+//*各種タイマーの値を更新する
+*check_timer
+	// 入渠画面
+	if((scene_result(0) == "入渠画面") && (scene_result(1) == "通常時")){
+		for k, 0, kDocks
+			dock_finish_time(k) = 0.0
+			dock_finish_flg(k) = 0
+			// ドックに誰もいなければ無視する
+			gsel kMainBufferID
+			if(NearColor(480, dck_pos_y(k), 33, 174, 178) == FALSE) :_continue
+			// 各桁の数字を読み取って、配列に代入する
+			dim number, 6
+			ReadNumber number, 6, dck_pos_x, dck_pos_y(k) + 25, 11, 16, 170, FALSE
+			// 正規化して、終了時刻を代入する
+			NormalizeTime number
+			d_time = CnvFloatSec(number(0) * 10 + number(1), number(2) * 10 + number(3), number(4) * 10 + number(5), 0)
+			dock_finish_time(k) = GetFloatTime() + d_time
+		next
+	}
+	// 工廠画面
+	if((scene_result(0) == "工廠画面") && (scene_result(1) == "通常時")){
+		for k, 0, kDocks
+			dock_finish_time(k + kDocks) = 0.0
+			dock_finish_flg(k + Docks) = 0
+			// ドックに誰もいなければ無視する
+			gsel kMainBufferID
+			if(NearColor(730, bld_pos_y(k), 204, 128, 73) == FALSE) :_continue
+			// 各桁の数字を読み取って、配列に代入する
+			dim number, 6
+			ReadNumber number, 6, bld_pos_x, bld_pos_y(k), 11, 16, 170, FALSE
+			// 正規化して、終了時刻を代入する
+			NormalizeTime number
+			d_time = CnvFloatSec(number(0) * 10 + number(1), number(2) * 10 + number(3), number(4) * 10 + number(5), 0)
+			dock_finish_time(k + kDocks) = GetFloatTime() + d_time
+		next
+	}
+	// 遠征画面
+	if(scene_result(1) == "遠征詳細"){
+		for k, 0, kExpPagePer
+			gsel kMainBufferID
+			// まず旗が立っているかを判別する
+			if(NearColor(517,180 + k * 30,76,168,168) == FALSE) :_continue
+			// 次に、右上の遠征名とリストの遠征名が一致しているかを調べる
+			// 「名前が一致している」か「全くリスト外の新遠征である」場合のみ認識対象とする
+			exp_small_name = GetExpSmallName(k)
+			exp_large_name = GetExpLargeName()
+			if((exp_small_name != exp_large_name) && (exp_small_name != -1) && (exp_large_name != -1)) :_continue
+			// そして、旗の番号を判別する
+			// 遠征対象が第(unit_number + 1)艦隊となることに注意
+			unit_number = 0
+			if(NearColor(525,180 + k * 30,224,230,227) && NearColor(523,180 + k * 30, 84,176,174)) :unit_number = 1
+			if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,236,228,215)) :unit_number = 2
+			if(NearColor(525,180 + k * 30,237,229,217) && NearColor(523,180 + k * 30,239,231,219)) :unit_number = 3
+			if(unit_number == 0) :_continue
+			// 各桁の数字を読み取って、配列に代入する
+			dock_finish_time(unit_number - 1 + kDocks * 2) = 0.0
+			dock_finish_flg(unit_number - 1 + kDocks * 2) = 0
+			expedition_kind(unit_number - 1) = -1
+			dim number, 6
+			ReadNumber number, 6, exp_pos_x, exp_pos_y, 9, 13, 190, FALSE
+			// 正規化して、終了時刻を代入する
+			NormalizeTime number
+			d_time = CnvFloatSec(number(0) * 10 + number(1), number(2) * 10 + number(3), number(4) * 10 + number(5), 0)
+			dock_finish_time(unit_number - 1 + kDocks * 2) = GetFloatTime() + d_time
+			if(exp_small_name == exp_large_name){
+				expedition_kind(unit_number - 1) = exp_small_name
+			}
+		next
+	}
+return
+
+//*各種タイマーの表示を更新する
+*redraw_timer
+	timer_output = "【入渠ドック】\n"
+	now_time = GetFloatTime()
+	for k, 0, kDocks
+		time_diff = dock_finish_time(k) - now_time
+		if((dock_finish_time(k) != 0.0) && (time_diff > 0.0)){
+			timer_output += "" + (k + 1) + "→" + CnvStrSec2(time_diff)
+			if(time_diff < 1.0 / 24 / 60){
+				if(dock_finish_flg(k) == 0){
+					dock_finish_flg(k) = 1
+					PutLog "【終了通知】"
+					PutLog "入渠―第" + (k + 1) + "ドック"
+					gsel kMainWindowID
+					TasktrayPopup2 "第" + (k + 1) + "ドックの\n入渠がまもなく完了します。", kSoftName, 1, 1000
+				}
+				timer_output += "☆"
+			}
+			timer_output += "\n"
+		}else{
+			timer_output += "" + (k + 1) + "→00:00:00　空\n"
+			dock_finish_flg(k) = 0
+		}
+	next
+	timer_output += "【建造ドック】\n"
+	for k, 0, kDocks
+		time_diff = dock_finish_time(k + kDocks) - now_time
+		if((dock_finish_time(k + kDocks) != 0.0) && (time_diff > 0.0)){
+			timer_output += "" + (k + 1) + "→" + CnvStrSec2(time_diff)
+			if(time_diff < 1.0 / 24 / 60){
+				if(dock_finish_flg(k + kDocks) == 0){
+					dock_finish_flg(k + kDocks) = 1
+					PutLog "【終了通知】"
+					PutLog "建造―第" + (k + 1) + "ドック"
+					gsel kMainWindowID
+					TasktrayPopup2 "第" + (k + 1) + "ドックの\n建造がまもなく完了します。", kSoftName, 1, 1000
+				}
+				timer_output += "☆"
+			}
+			timer_output += "\n"
+		}else{
+			timer_output += "" + (k + 1) + "→00:00:00　空\n"
+			dock_finish_flg(k + kDocks) = 0
+		}
+	next
+	timer_output += "【遠征艦隊】\n"
+	for k, 0, kFleetNum - 1
+		time_diff = dock_finish_time(k + kDocks * 2) - now_time
+		if((dock_finish_time(k + kDocks * 2) != 0.0) && (time_diff > 0.0)){
+			timer_output += "" + (k + 2) + "→" + CnvStrSec2(time_diff)
+			if(time_diff < 1.0 / 24 / 60){
+				if(dock_finish_flg(k + kDocks * 2) == 0){
+					dock_finish_flg(k + kDocks * 2) = 1
+					PutLog "【終了通知】"
+					if(expedition_kind(k) != -1){
+						PutLog "遠征―第" + (k + 2) + "艦隊" + "(" + exped_name(expedition_kind(k)) + ")"
+					}else{
+						PutLog "遠征―第" + (k + 2) + "艦隊"
+					}
+					gsel kMainWindowID
+					TasktrayPopup2 "第" + (k + 2) + "艦隊の\n遠征がまもなく完了します。", kSoftName, 1, 1000
+				}
+				timer_output += "☆"
+			}else{
+				timer_output += "　"
+			}
+			if(expedition_kind(k) != -1){
+				timer_output += exped_name(expedition_kind(k)) + "\n"
+			}else{
+				timer_output += "？\n"
+			}
+		}else{
+			timer_output += "" + (k + 2) + "→00:00:00\n"
+			dock_finish_flg(k + kDocks * 2) = 0
+		}
+	next
+	gsel kTimerWindowID
+	objprm 0, timer_output
+return
+
+//*各種タイマーを表示する
+*show_timer
+	gsel kTimerWindowID, 2
+return
+

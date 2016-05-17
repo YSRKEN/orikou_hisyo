@@ -1,0 +1,100 @@
+/* 時間絡み */
+	#module time
+		// 現在時刻を取得
+		#defcfunc NowTime
+		return strf("%04d-%02d-%02d %02d-%02d-%02d-%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
+		#defcfunc NowTimeMini
+		return strf("%02d:%02d:%02d", gettime(4), gettime(5), gettime(6))
+		//年月日を「日」に変換
+		#defcfunc CnvFloatDay int year, int month, int day
+			leap_years = (year - 1) / 4 - (year - 1) / 100 + (year - 1) / 400
+			leap_flg = (year \ 4 == 0) - (year \ 100 == 0) + (year \ 400 == 0)
+		return (year - 1) * 365 + leap_years + yearplus@(month - 1, leap_flg) + day
+		//時分秒ミリ秒を「日」に変換
+		#defcfunc CnvFloatSec int hour, int minute, int second, int milli
+		return ((((1.0 * milli / 1000) + second) / 60 + minute) / 60 + hour) / 24
+		//現在時刻を「日」に変換
+		#defcfunc GetFloatTime
+			float_time_day = CnvFloatDay(gettime(0), gettime(1), gettime(3))
+			float_time_sec = CnvFloatSec(gettime(4), gettime(5), gettime(6), gettime(7))
+		return 1.0 * float_time_day + float_time_sec
+		//「日」を年月日に変換
+		#defcfunc CnvStrDay int float_day
+			sdim output, 64
+			float_day_ = float_day
+			//年を特定する
+			for k, 1, kMaxYear + 1
+				if(year_offset@(k) >= float_day_){
+					output += strf("%04d/", k)
+					float_day_ -= year_offset@(k - 1)
+					leap_flg = (k \ 4 == 0) - (k \ 100 == 0) + (k \ 400 == 0)
+					_break
+				}
+			next
+			//月を特定する
+			for k, 1, 12 + 1
+				if(yearplus@(k, leap_flg) >= float_day_){
+					output += strf("%02d/", k)
+					float_day_ -= yearplus@(k - 1, leap_flg)
+					_break
+				}
+			next
+			//日を特定する
+			output += strf("%02d", float_day_)
+		return output
+		//「日」を時分秒ミリ秒に変換
+		#defcfunc CnvStrSec double float_sec
+			sdim output, 64
+			float_sec_ = float_sec
+			if(absf(float_sec_ - 0.04170138) < 0.0001) :assert
+			//時
+			float_sec_ *= 24
+			hour_ = int(float_sec_)
+			output += strf("%02d:", hour_)
+			float_sec_ -= double(hour_)
+			//分
+			float_sec_ *= 60
+			minute_ = int(float_sec_)
+			output += strf("%02d:", minute_)
+			float_sec_ -= double(minute_)
+			//秒
+			float_sec_ *= 60
+			second_ = int(float_sec_)
+			output += strf("%02d.", second_)
+			float_sec_ -= double(second_)
+			//ミリ秒
+			float_sec_ *= 1000
+			milli_ = int(float_sec_ + 0.5)
+			output += strf("%03d", milli_)
+		return output
+		//「日」を時分秒に変換
+		#defcfunc CnvStrSec2 double float_sec
+			sdim output, 64
+			float_sec_ = float_sec
+			if(absf(float_sec_ - 0.04170138) < 0.0001) :assert
+			//時
+			float_sec_ *= 24
+			hour_ = int(float_sec_)
+			output += strf("%02d:", hour_)
+			float_sec_ -= double(hour_)
+			//分
+			float_sec_ *= 60
+			minute_ = int(float_sec_)
+			output += strf("%02d:", minute_)
+			float_sec_ -= double(minute_)
+			//秒
+			float_sec_ *= 60
+			second_ = int(float_sec_ + 0.5)
+			output += strf("%02d", second_)
+			float_sec_ -= double(second_)
+		return output
+		//「日」を現在時刻に変換
+		#defcfunc CnvStrTime double float_time
+		return CnvStrDay(int(float_time)) + " " + CnvStrSec(float_time - double(int(float_time)))
+		#defcfunc CnvStrTime2 double float_time
+		ret_str = CnvStrDay(int(float_time)) + " " + CnvStrSec(float_time - double(int(float_time)))
+			strrep ret_str, "/", "-"
+			strrep ret_str, ":", "-"
+			strrep ret_str, ".", "-"
+		return ret_str
+	#global

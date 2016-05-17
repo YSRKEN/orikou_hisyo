@@ -1,0 +1,250 @@
+/* 座標習得に関するイベント処理 */
+
+//*艦これの画面の座標とハンドルを取得する
+*get_pos
+	PutLog "【座標取得】"
+	// デスクトップのスクリーンショットを取得する
+	dim desktop_param, kRectDim	;モニタ全体のオフセットとサイズ
+	GetDesktopParam desktop_param
+	DesktopScreenShot kDesktopBufferID, desktop_param
+	// そこから艦これの画面を探す
+	dim flash_point, kPosDim	;艦これの画面内部の座標
+	switch get_pos_mode
+		// オート
+		case kGetPosAuto
+			;艦これの画面を直接探す
+			FlashPositionSearch kDesktopBufferID, flash_position
+			flash_point(0) = desktop_param(0) + flash_position(0) + kFlashWX / 2
+			flash_point(1) = desktop_param(1) + flash_position(1) + kFlashWY / 2
+		swbreak
+		// クリック
+		case kGetPosClick
+			;画面のスクショを最前面に表示する
+			bgscr kSelectWindowID, desktop_param(2), desktop_param(3), , desktop_param(0), desktop_param(1)
+			gsel kSelectWindowID, 2
+			gcopy kDesktopBufferID, 0, 0, desktop_param(2), desktop_param(3)
+			;相手に選択させる
+			font msgothic, kLargeFontSize
+			color
+			mes "艦これの画面をクリックして下さい。(Escで終了)"
+			mouse_click_flg = FALSE
+			repeat
+				stick key, kStickMouse
+				if(key & kStickEscKey){
+					PutLog "キャンセルされました。"
+					break
+				}
+				if(key & kStickMouse){
+					flash_point(0) = ginfo(0)
+					flash_point(1) = ginfo(1)
+					mouse_click_flg = TRUE
+					break
+				}
+				wait 5
+			loop
+			gsel kSelectWindowID, -1
+		swbreak
+		// クロップ
+		case kGetPosCrop
+			;画面のスクショを最前面に表示する
+			bgscr kSelectWindowID, desktop_param(2), desktop_param(3), , desktop_param(0), desktop_param(1)
+			gsel kSelectWindowID, 2
+			gcopy kDesktopBufferID, 0, 0, desktop_param(2), desktop_param(3)
+			;相手に選択させる
+			font msgothic, kLargeFontSize
+			color
+			mes "艦これの画面を選択して下さい。(Escで終了)"
+			mouse_button_flg = FALSE
+			mouse_crop_flg = FALSE
+			dim rect, kRectDim
+			repeat
+				stick key, kStickMouse
+				if(key & kStickEscKey){
+					PutLog "キャンセルされました。"
+					gsel kSelectWindowID, -1
+					break
+				}
+				if(key & kStickMouse){
+					if(mouse_button_flg){
+						// 選択途中
+						redraw 0
+							pos 0, 0
+							gcopy kDesktopBufferID, 0, 0, desktop_param(2), desktop_param(3)
+							color
+							mes "艦これの画面を選択して下さい。(Escで終了)"
+							DrawMouseSquare rect(0), rect(1), mousex, mousey
+						redraw 1
+					}else{
+						// 選択開始
+						rect(0) = mousex
+						rect(1) = mousey
+						mouse_button_flg = TRUE
+					}
+				}else{
+					if(mouse_button_flg){
+						mouse_button_flg = FALSE
+						// 選択終了
+						rect(2) = mousex
+						rect(3) = mousey
+						;選択サイズがFlashのサイズ以上かを判定
+						square_x1 = min(rect(0), rect(2))
+						square_y1 = min(rect(1), rect(3))
+						square_x2 = max(rect(0), rect(2))
+						square_y2 = max(rect(1), rect(3))
+						if((square_x2 - square_x1 >= kFlashWX) && (square_y2 - square_y1 >= kFlashWY)){
+							;艦これの画面の位置を探し、その中央の位置を返す
+							;(つまり、オートモードでの探索範囲を制限したVerってこと)
+							dim screen_param, kRectDim
+							screen_param(0) = square_x1 + desktop_param(0)
+							screen_param(1) = square_y1 + desktop_param(1)
+							screen_param(2) = square_x2 - square_x1
+							screen_param(3) = square_y2 - square_y1
+							gsel kSelectWindowID, -1
+							DesktopScreenShot kDesktopBufferID, screen_param
+							FlashPositionSearch kDesktopBufferID, flash_position
+							flash_point(0) = screen_param(0) + flash_position(0) + kFlashWX / 2
+							flash_point(1) = screen_param(1) + flash_position(1) + kFlashWY / 2
+							mouse_crop_flg = TRUE
+							break
+						}
+					}
+				}
+				wait 5
+			loop
+		swbreak
+		// マニュアル
+		case kGetPosManual
+			;画面のスクショを最前面に表示する
+			bgscr kSelectWindowID, desktop_param(2), desktop_param(3), , desktop_param(0), desktop_param(1)
+			gsel kSelectWindowID, 2
+			gcopy kDesktopBufferID, 0, 0, desktop_param(2), desktop_param(3)
+			;相手に選択させる
+			font msgothic, kLargeFontSize
+			color
+			mes "艦これの画面を選択して下さい。(Escで終了)"
+			mouse_button_flg = FALSE
+			mouse_manual_flg = FALSE
+			dim rect, kRectDim
+			repeat
+				stick key, kStickMouse
+				if(key & kStickEscKey){
+					PutLog "キャンセルされました。"
+					gsel kSelectWindowID, -1
+					break
+				}
+				if(key & kStickMouse){
+					if(mouse_button_flg){
+						// 選択途中
+						redraw 0
+							pos 0, 0
+							gcopy kDesktopBufferID, 0, 0, desktop_param(2), desktop_param(3)
+							color
+							mes "艦これの画面を選択して下さい。(Escで終了)"
+							DrawMouseSquare rect(0), rect(1), mousex, mousey
+						redraw 1
+					}else{
+						// 選択開始
+						rect(0) = mousex
+						rect(1) = mousey
+						mouse_button_flg = TRUE
+					}
+				}else{
+					if(mouse_button_flg){
+						mouse_button_flg = FALSE
+						// 選択終了
+						rect(2) = mousex
+						rect(3) = mousey
+						;とりあえず中央の位置を返す(このモードだけ処理が特殊)
+						flash_point(0) = desktop_param(0) + (rect(0) + rect(2)) / 2
+						flash_point(1) = desktop_param(1) + (rect(1) + rect(3)) / 2
+						;認識用に選択した座標・サイズを記憶しておく
+						dim square, kRectDim
+						square.0 = min(rect(0), rect(2))
+						square.1 = min(rect(1), rect(3))
+						square.2 = max(rect(0), rect(2)) - min(rect(0), rect(2))
+						square.3 = max(rect(1), rect(3)) - min(rect(1), rect(3))
+						gsel kSelectWindowID, -1
+						mouse_manual_flg = TRUE
+						break
+					}
+				}
+				wait 5
+			loop
+		swbreak
+	swend
+	if((get_pos_mode == kGetPosClick)  && (mouse_click_flg  == FALSE)) :return
+	if((get_pos_mode == kGetPosCrop)   && (mouse_crop_flg   == FALSE)) :return
+	if((get_pos_mode == kGetPosManual) && (mouse_manual_flg == FALSE)) :return
+	// 艦これの画面のハンドルを取得する
+	window_handle = GetWindowHandle(flash_point)
+	// 艦これの画面の座標を取得する
+	GetWindowParam window_handle, window_param
+	WindowScreenShot kDesktopBufferID, window_handle, window_param
+	if(get_pos_mode != kGetPosManual){
+		FlashPositionSearch kDesktopBufferID, flash_position
+	}else{
+		square.0 += desktop_param(0) - window_param(0)
+		square.1 += desktop_param(1) - window_param(1)
+		dim game_window_size, kPosDim
+		GamePositionSearch kDesktopBufferID, square, flash_position, game_window_size
+		if((game_window_size(0) != kFlashWX) || (game_window_size(1) != kFlashWY)){
+			PutLog "画面の捕捉に失敗しました。"
+			return
+		}
+	}
+	get_pos_flg = TRUE
+
+	PutLog "ウィンドウハンドル：" + window_handle
+	PutLog "ウィンドウ左上座標：" + window_param(0) + "," + window_param(1)
+	PutLog "ウィンドウサイズ：" + window_param(2) + "," + window_param(3)
+	PutLog "艦これ相対左上座標：" + flash_position(0) + "," + flash_position(1)
+return
+
+//*対象の状況を監視
+*check_pos
+	// 画面サイズを取得できない場合
+	GetWindowParam window_handle, window_param_
+	if((window_param_(2) == 0) || (window_param_(3) == 0)){
+		PutLog "【ズレ検出】"
+		PutLog "対象を見失いました。"
+		get_pos_flg = FALSE
+		// ストッパー画面における処理
+		show_stopper_flg1 = FALSE
+		show_stopper_flg2 = FALSE
+		gsel kStopperWindowID, -1
+		show_locker_flg1 = FALSE
+		show_locker_flg2 = FALSE
+		gsel kLockerWindowID, -1
+		return
+	}
+	// ウィンドウサイズが変わった＝画像位置が動いた可能性がある場合
+	// およびウィンドウ自体が動いた場合
+	if((window_param_(0) != window_param(0)) || (window_param_(1) != window_param(1)) || (window_param_(2) != window_param(2)) || (window_param_(3) != window_param(3))){
+		window_param(0) = window_param_(0)
+		window_param(1) = window_param_(1)
+		window_param(2) = window_param_(2)
+		window_param(3) = window_param_(3)
+		gosub *get_pos_local
+		return
+	}
+	// 艦これの画面の周囲のRGB値から、ズレれていると判定された場合
+	if(check_move_flash_flg){
+		if(CheckMoveFlash(window_handle, flash_position)){
+			gosub *get_pos_local
+		}
+	}
+return
+
+//*艦これの座標を取得し直す
+*get_pos_local
+	PutLog "【ズレ検出】"
+	GetWindowParam window_handle, window_param
+	WindowScreenShot kDesktopBufferID, window_handle, window_param
+	FlashPositionSearch kDesktopBufferID, flash_position
+	PutLog "艦これ相対左上座標：" + flash_position(0) + "," + flash_position(1)
+	//ストッパー画面を再表示
+	show_stopper_flg2 = FALSE
+	ShowStopperWindow stopper_type
+	show_locker_flg2 = FALSE
+	ShowLockerWindow locker_type
+return

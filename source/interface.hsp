@@ -17,7 +17,7 @@
 	screen kLockerWindowID, 10, 10 :gsel kLockerWindowID, -1
 
 /* オプション画面 */
-	screen kOptionWindowID, POS_X(3), POS_Y(5), 4 :title "オプション画面"
+	screen kOptionWindowID, POS_X(3), POS_Y(6), 4 :title "オプション画面"
 	gsel kOptionWindowID, -1
 	objsize SIZE_X(1), SIZE_Y(1)
 		POS_XY 0, 0
@@ -53,6 +53,16 @@
 				weapon_lock_id = stat
 		POS_XY 2, 4
 			button gosub "CSV書き出し", *write_supply_csv
+		POS_XY 0, 5
+			chkbox "マスコット化", desktop_mascot_flg
+				desktop_mascot_id = stat
+		POS_XY 1, 5
+			mascot_list = ""
+			combox mascot_index,,mascot_list
+				mascot_index_id = stat
+		POS_XY 2, 5
+			chkbox "範囲表示", show_mascot_area_flg
+				show_mascot_area_id = stat
 	objsize SIZE_X(3), SIZE_Y(1)
 		POS_XY 0, 2
 			input pic_save_path(1)

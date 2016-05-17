@@ -13,6 +13,7 @@
 	#enum global kCounterWindowID	;○号カウンタのID
 	#enum global kCondMeterWindowID	;cond値メータのID
 	#enum global kBgmWindowID		;BGM機能のID
+	#enum kMascotWindowID			;マスコット表示用ID
 	;↑マウスで動かせるのはここまで
 	#enum kSelectWindowID			;選択画面のID
 	#enum global kStopperWindowID	;進撃/出撃ストッパー画面用ID
@@ -29,6 +30,8 @@
 	#enum global kGraphBufferID		;グラフ描画用バッファID
 	#enum global kSaveBufferID		;セーブ用バッファID
 	#enum global kNumGetBufferID	;画像認識用ID
+	#enum global kMascotBufferMainID	;マスコット表示用ID(通常)
+	#enum global kMascotBufferSubID		;マスコット表示用ID(アルファ値)
 	;↑kSceneBufferID以外の全ての画面IDはここまで
 	#enum global kSceneBufferID		;各シーン保存用ID
 	// OpenCVの画面ID
@@ -156,18 +159,20 @@
 	#const global kLockerWeapon  2
 	#const kBattleType 2	;戦闘の種類(昼戦・夜戦)
 	#const global kCounterType 6	;○号カウンタでカウントする種類
-	#enum global kBattleRankS = 0
+	#enum global kBattleRankS = 0	;戦闘結果におけるランク
 	#enum global kBattleRankA
 	#enum global kBattleRankB
 	#enum global kBattleRankLoss
-	#const global kSupplyLogBlockSize 28
-	#const kPutSupplyLogInterval 10.0 / 60 / 24
-	#const kAutoSaveInterval 10.0 / 60 / 24
+	#const global kSupplyLogBlockSize 28	;ログの1件あたりのブロックサイズ
+	#const kPutSupplyLogInterval 10.0 / 60 / 24	;資材ログの更新間隔
+	#const kAutoSaveInterval 10.0 / 60 / 24		;自動設定セーブの更新間隔
 	#const global kBgmKinds 4
-	#enum kBgmTypeHome = 0
+	#enum kBgmTypeHome = 0	;BGMの種類
 	#enum kBgmTypeMap
 	#enum kBgmTypeBattle
 	#enum kBgmTypeBoss
+	#enum kMascotTypeCmd = 0	;マスコットにおけるコマンドの種類
+	#enum kMascotTypeTalk
 
 /* 初期設定 */
 	// 座標設定
@@ -190,6 +195,9 @@
 	dirlist x, pic_save_path(0), 5
 	if(stat == 0) :mkdir pic_save_path(0)
 	pic_save_path_flg = FALSE
+	// テーマ用の保存フォルダを作成
+	dirlist x, dir_cur + "\\theme", 5
+	if(stat == 0) :mkdir dir_cur + "\\theme"
 	// サブ画面の状況
 	sdim sub_window_size_list, 1024
 		sub_window_size_list = "300%\n200%\n150%\n100%\n75%\n50%\n25%"
@@ -275,7 +283,7 @@
 	cvgetimg kCVMatchBufferID
 	color :boxf kMatchSize * 22, 0, kMatchSize * 23, kMatchSize
 	for k, 0, 12
-		DrawSquare k * kMatchSize * 2, 0
+		DrawCharSquare k * kMatchSize * 2, 0
 	next
 	//CVバッファ側に書き込む
 	cvbuffer kCVMatchBufferID, kMatchSize * 23, kMatchSize
@@ -382,7 +390,8 @@
 	exe_path = dir_cur
 	sdim scene_result, 64, kPosDim
 	save_buffer_turn = 10	;セーブデータにおける縦の最大枚数
-	dim hwnd_window, 10		;マウスで動かせるようにするウィンドウのハンドル
+	dim hwnd_window, 11		;マウスで動かせるようにするウィンドウのハンドル
 	dim unit_count, kFleetNum	;各艦隊の艦娘数
 	sdim status_bar_str, 1024	;ステータスバーに表示する文字列
 	dim battle_index, kBattleType	;各画面のインデックス
+	show_mascot_area_flg = FALSE

@@ -1,0 +1,142 @@
+/* ○号カウンタに関するイベント処理 */
+
+//*○号カウンタを表示する
+*show_counter
+	gsel kCounterWindowID, 2
+return
+
+//*○号カウンタを更新する
+*redraw_counter
+	if((count_num(0) >= 36) && (count_num(1) >= 24) && (count_num(2) >= 12) && (count_num(3) >= 6)){
+		counter_output = "【あ号(達成)】\n"
+	}else{
+		counter_output = "【あ号(未達成)】\n"
+	}
+	counter_output += "海域出撃：" + count_num(0) + " / 36回"
+	if(count_num(0) >= 36) :counter_output += "(OK)"
+	counter_output += "\nボス到達：" + count_num(1) + " / 24回"
+	if(count_num(1) >= 24) :counter_output += "(OK)"
+	counter_output += "\nボス勝利" + count_num(2) + " / 12回"
+	if(count_num(2) >= 12) :counter_output += "(OK)"
+	counter_output += "\nS勝利判定" + count_num(3) + " / 6回"
+	if(count_num(3) >= 6) :counter_output += "(OK)"
+
+	if(count_num(4) >= 50){
+		counter_output += "\n【ろ号(達成)】"
+	}else{
+		counter_output += "\n【ろ号(未達成)】"
+	}
+	counter_output += "\n補給船撃沈：" + count_num(4) + " / 50回\n"
+
+	if(count_num(5) >= 20){
+		counter_output += "【い号(達成)】\n"
+	}else{
+		counter_output += "【い号(未達成)】\n"
+	}
+	counter_output += "空母系撃沈：" + count_num(5) + " / 20回"
+	gsel kCounterWindowID
+	objprm 0, counter_output
+return
+
+//*ボタン操作
+*counter_type_1 :count_num(0)++ :redraw_counter_flg = TRUE :return
+*counter_type_2 :count_num(1)++ :redraw_counter_flg = TRUE :return
+*counter_type_3 :count_num(2)++ :redraw_counter_flg = TRUE :return
+*counter_type_4 :count_num(3)++ :redraw_counter_flg = TRUE :return
+*counter_type_5 :count_num(4)++ :redraw_counter_flg = TRUE :return
+*counter_type_6 :count_num(5)++ :redraw_counter_flg = TRUE :return
+
+*counter_reset_1 :count_num(0) = 0 :redraw_counter_flg = TRUE :return
+*counter_reset_2 :count_num(1) = 0 :redraw_counter_flg = TRUE :return
+*counter_reset_3 :count_num(2) = 0 :redraw_counter_flg = TRUE :return
+*counter_reset_4 :count_num(3) = 0 :redraw_counter_flg = TRUE :return
+*counter_reset_5 :count_num(4) = 0 :redraw_counter_flg = TRUE :return
+*counter_reset_6 :count_num(5) = 0 :redraw_counter_flg = TRUE :return
+
+//*カウンターの自動更新処理
+*counter_auto
+	//海域出撃カウント
+	if((pre_scene_type == "海域出撃") && (pre_scene_name == "艦隊選択") && (scene_result(1) == "出撃画面")){
+		if(auto_count_flg(0) && (exercises_flg == FALSE)){
+			count_num(0)++
+			redraw_counter_flg = TRUE
+		}
+	}
+	//ボス到達カウント
+	if(pre_scene_name == "海域マップ"){
+		// HSPはIF文の判定途中で処理を切り上げないので、
+		// こうして処理を分けないとpre_scene_name != "海域マップ"でも
+		// CheckBossOfAeraMap()が実行されてしまう
+		if(CheckBossOfAeraMap()){
+			if(auto_count_flg(1) && (exercises_flg == FALSE)){
+				count_num(1)++
+				redraw_counter_flg = TRUE
+			}
+			boss_battle_flg = TRUE
+		}
+	}
+	if(scene_result(0) == "母港画面"){
+		boss_battle_flg = FALSE
+	}
+	if(scene_result(1) == "戦果報告"){
+		//ボス勝利カウント
+		if((boss_battle_flg) && (battle_rank < kBattleRankLoss)){
+			if(auto_count_flg(2) && (exercises_flg == FALSE)){
+				count_num(2)++
+				redraw_counter_flg = TRUE
+			}
+			boss_battle_flg = FALSE
+		}
+		//S勝利判定カウント
+		if(battle_rank == kBattleRankS){
+			if(auto_count_flg(3) && (exercises_flg == FALSE)){
+				count_num(3)++
+				redraw_counter_flg = TRUE
+			}
+		}
+	}
+	if(scene_result(1) == "交戦結果"){
+		// 最後の戦闘が昼戦か夜戦かを、最終更新日時で判断する
+		if(show_scene_list_time(battle_index(0)) > show_scene_list_time(battle_index(1))){
+			gsel kSceneBufferID + battle_index(0)
+		}else{
+			gsel kSceneBufferID + battle_index(1)
+		}
+		//輸送船撃沈カウント
+		for k, 0, kUnitNum
+			if(NearColor(767,173 + 45 * k,77,166,223)){
+				if(NearColor(669,178 + 45 * k,254,254,254)){
+					if(NearColor(649,157 + 45 * k,133,133,133)){
+						if(auto_count_flg(4) && (exercises_flg == FALSE)){
+							count_num(4)++
+							redraw_counter_flg = TRUE
+						}
+					}
+				}
+			}
+		next
+		//空母系撃沈カウント
+		for k, 0, kUnitNum
+			if(NearColor(767,173 + 45 * k,77,166,223)){
+				;正規空母
+				if(NearColor(670,176 + 45 * k,167,167,167)){
+					if(NearColor(671,157 + 45 * k,215,215,215)){
+						if(auto_count_flg(5) && (exercises_flg == FALSE)){
+							count_num(5)++
+							redraw_counter_flg = TRUE
+						}
+					}
+				}
+				;軽空母
+				if(NearColor(667,177 + 45 * k,183,183,183)){
+					if(NearColor(664,170 + 45 * k,252,252,252)){
+						if(auto_count_flg(5) && (exercises_flg == FALSE)){
+							count_num(5)++
+							redraw_counter_flg = TRUE
+						}
+					}
+				}
+			}
+		next
+	}
+return

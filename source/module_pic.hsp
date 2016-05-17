@@ -1,0 +1,362 @@
+/* 画像処理用関数 */
+	#module pic
+		// 長方形枠を描画
+		#deffunc DrawMouseSquare int mouse_x1, int mouse_y1, int mouse_x2, int mouse_y2
+			square_x1 = min(mouse_x1, mouse_x2)
+			square_y1 = min(mouse_y1, mouse_y2)
+			square_x2 = max(mouse_x1, mouse_x2)
+			square_y2 = max(mouse_y1, mouse_y2)
+			color 0, 255, 255
+			line square_x1, square_y1, square_x2, square_y1
+			line square_x2, square_y1, square_x2, square_y2
+			line square_x2, square_y2, square_x1, square_y2
+			line square_x1, square_y2, square_x1, square_y1
+		return
+		#deffunc DrawSquare int mouse_x1, int mouse_y1, int mouse_x2, int mouse_y2
+			square_x1 = min(mouse_x1, mouse_x2)
+			square_y1 = min(mouse_y1, mouse_y2)
+			square_x2 = max(mouse_x1, mouse_x2)
+			square_y2 = max(mouse_y1, mouse_y2)
+			line square_x1, square_y1, square_x2, square_y1
+			line square_x2, square_y1, square_x2, square_y2
+			line square_x2, square_y2, square_x1, square_y2
+			line square_x1, square_y2, square_x1, square_y1
+		return
+		#deffunc DrawLargeSquare int position_x, int position_y, int width_x, int height_y
+			line position_x + width_x    , position_y               , position_x              , position_y
+			line position_x + width_x - 1, position_y + height_y    , position_x + width_x - 1, position_y
+			line position_x + width_x - 1, position_y + height_y - 1, position_x              , position_y + height_y- 1
+			line position_x              , position_y + height_y    , position_x              , position_y
+		return
+		// カレントカラーではない色の領域をクロップする
+		#deffunc GetSquare var px__, var py__, var wx__, var wy__, array square
+			;カレントカラーを記憶しておく
+			rr = ginfo_r
+			gg = ginfo_g
+			bb = ginfo_b
+			;検索範囲を整理する
+			x_min = square.0
+			x_max = square.0 + square.2
+			y_min = square.1
+			y_max = square.1 + square.3
+			;検索する(上・左・下・右の順)
+			for x, x_min, x_max
+				flg = FALSE
+				for y, y_min, y_max
+					pget x, y
+					if((ginfo_r != rr) || (ginfo_g != gg) || (ginfo_b != bb)) :flg = TRUE :_break
+				next
+				if(flg) :px__ = x :_break
+			next
+			for y, y_min, y_max
+				flg = FALSE
+				for x, x_min, x_max
+					pget x, y
+					if((ginfo_r != rr) || (ginfo_g != gg) || (ginfo_b != bb)) :flg = TRUE :_break
+				next
+				if(flg) :py__ = y :_break
+			next
+			for x, x_max - 1, x_min - 1, -1
+				flg = FALSE
+				for y, y_min, y_max
+					pget x, y
+					if((ginfo_r != rr) || (ginfo_g != gg) || (ginfo_b != bb)) :flg = TRUE :_break
+				next
+				if(flg) :wx__ = x - px__ + 1 :_break
+			next
+			for y, y_max - 1, y_min - 1, -1
+				flg = FALSE
+				for x, x_min, x_max
+					pget x, y
+					if((ginfo_r != rr) || (ginfo_g != gg) || (ginfo_b != bb)) :flg = TRUE :_break
+				next
+				if(flg) :wy__ = y - py__ + 1 :_break
+			next
+		return
+		// ゲームの画面を探索する
+		#deffunc GamePositionSearch int desktop_buffer_id, array square, array flash_position, array game_window_size
+			;選択範囲の左上をカレントカラーとする
+			gsel desktop_buffer_id
+			pget square(0), square(1)
+			;クロップ処理
+			GetSquare px, py, wx, wy, square
+			;左上座標およびサイズを取得
+			flash_position(0) = px
+			flash_position(1) = py
+			game_window_size(0) = wx
+			game_window_size(1) = wy
+		return
+		// 特定座標における色が一致するかを判定する
+		// この閾値500というのは実は適当。100ぐらいでも編成・改装画面の認識はできるが、
+		// 100だと入渠画面で各ドックを認識することが出来ないっぽいので……
+		#defcfunc NearColor int nc_x, int nc_y, int nc_r, int nc_g, int nc_b
+			pget nc_x, nc_y
+			diff_r = ginfo_r - nc_r
+			diff_g = ginfo_g - nc_g
+			diff_b = ginfo_b - nc_b
+			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
+			if(diff > 500) :return FALSE
+		return TRUE
+		// どういったシーンかを判定する
+		#defcfunc JudgeSituation int buffer_id, array scene_result
+			scene_result(0) = "不明"
+			scene_result(1) = "不明"
+			gsel buffer_id
+			for n, 0, scene_list_size@
+				flg = TRUE
+				for k, 0, scene_list_points@(n)
+					if(NearColor(scene_list_x@(n, k), scene_list_y@(n, k), scene_list_r@(n, k), scene_list_g@(n, k), scene_list_b@(n, k)) == FALSE){
+						flg = FALSE
+						_break
+					}
+				next
+				if(flg){
+					scene_result(0) = scene_list_category@(n)
+					scene_result(1) = scene_list_name@(n)
+					_break
+				}
+			next
+		return n
+		// サブ画面を生成する
+		#deffunc MakeSubWindow
+			screen kSubWindowID, sub_window_size_x@(sub_window_size_index@), sub_window_size_y@(sub_window_size_index@) + show_status_flg@ * status_y@(sub_window_size_index@), 4
+			title "サブ画面"
+			gsel kSubWindowID, 2
+			hwnd_window@(kSubWindowID) = hwnd
+		return
+		// サブ画面に画像を表示する
+		#deffunc SetSubWindow
+			gsel kSubWindowID
+			pos 0, 0
+			gzoom sub_window_size_x@(sub_window_size_index@), sub_window_size_y@(sub_window_size_index@), kSubBufferID, 0, 0, kFlashWX, kFlashWY, 1
+		return
+		// 「母港画面」(提督名や資源量が表示されている状態)かを判定する
+		#defcfunc CheckHomeFlg int buffer_id
+			// バケツアイコン→ボーキアイコンの順で調べる
+			// (本当は帰投画面と音量設定でも隠せるが、需要があまりない上、
+			// 資材ログ機能でロギングする際にたまたま帰投画面だったりしたら
+			// 認識精度が下がりかねないのでコメントアウトしている)
+			gsel buffer_id
+			//通常画面
+			if(NearColor(665, 42, 83, 159, 73)){
+				if(NearColor(736, 61, 172, 128, 95)){
+					return TRUE
+				}
+			}
+			//帰投画面
+			//if(NearColor(665, 42, 225, 222, 203)){if(NearColor(736, 61, 155, 115, 85)){return TRUE}}
+			//音量設定
+			//if(NearColor(665, 42, 17, 32, 15)){if(NearColor(736, 61, 35, 26, 19)){return TRUE}}
+		return FALSE
+		// 記録された画像から艦隊数を取得する
+		#deffunc GetUnits array unit_count
+			// 改装画面
+			if((scene_result@(0) == "改装画面") && (strmid(scene_result@(1), 0, 2) == "第")){
+				gsel kMainBufferID
+				for k, kUnitNum - 1, -1, -1
+					if(NearColor(160, 180 + 54 * k, 235, 218, 203) == FALSE){
+						if(NearColor(260, 180 + 54 * k, 234, 217, 202) == FALSE){
+							unit_count((show_scene_list_index@(scene_result_index@) - scene_fleet_offset@) / kUnitNum) = k + 1
+							_break
+						}
+					}
+				next
+			}
+			// 編成画面
+			if((scene_result@(0) == "編成画面") && (strmid(scene_result@(1), 0, 2) == "第")){
+				gsel kMainBufferID
+				for k, kUnitNum - 1, -1, -1
+					x = k \ 2 :y = k / 2
+					if(NearColor(140 + 342 * x, 200 + 113 * y, 255, 242, 238)){
+						unit_count(show_scene_list_index@(scene_result_index@) - scene_unit_offset@) = k + 1
+						_break
+					}
+				next
+			}
+		return
+		// 大破、もしくは消耗状態かを判定する
+		#defcfunc CheckStopperType
+			// 戦果報告画面(大破判定のみ)
+			if(scene_result@(1) == "戦果報告"){
+				gsel kMainBufferID
+				type = 0
+				for k, 0, kUnitNum
+					if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
+						type = kStopperDeadZone
+						_break
+					}
+				next
+				return type
+			}
+			// 出撃画面(大破・消耗判定)
+			if((scene_result@(1) == "艦隊選択") && (scene_result@(0) != "演習出撃")){
+				// 大破判定
+				gsel kMainBufferID
+				flg = 0
+				for k, 0, kUnitNum
+					;大破
+					if(NearColor(482, 137 + 50 * k, 251, 114, 94)){
+						if(NearColor(489, 146 + 50 * k, 106, 46, 42)){
+							flg = kStopperDeadZone
+							_break
+						}
+					}
+					;橙疲労+大破
+					if(NearColor(482, 137 + 50 * k, 250, 99, 53)){
+						if(NearColor(489, 146 + 50 * k, 180, 73, 20)){
+							flg = kStopperDeadZone
+							_break
+						}
+					}
+					;赤疲労+大破
+					if(NearColor(482, 137 + 50 * k, 251, 58, 54)){
+						if(NearColor(489, 146 + 50 * k, 180, 22, 20)){
+							flg = kStopperDeadZone
+							_break
+						}
+					}
+				next
+				// 消耗判定
+				for k, 0, kUnitNum
+					;燃料
+					if(NearColor(488, 167 + 50 * k, 255, 222, 0)){
+						flg = kStopperExhausted
+						_break
+					}
+					if(NearColor(488, 167 + 50 * k, 221, 42, 42)){
+						flg = kStopperExhausted
+						_break
+					}
+					;弾薬
+					if(NearColor(514, 167 + 50 * k, 255, 222, 0)){
+						flg = kStopperExhausted
+						_break
+					}
+					if(NearColor(514, 167 + 50 * k, 221, 42, 42)){
+						flg = kStopperExhausted
+						_break
+					}
+				next
+				return flg
+			}
+		return 0
+		// ストッパー画面を表示する
+		#deffunc ShowStopperWindow int stopper_type
+			if(show_stopper_flg1@ == FALSE) :return
+			if(show_stopper_flg2@ == FALSE){
+				if(scene_result@(1) == "進撃確認"){
+					bgscr kStopperWindowID, 180, 130, , window_param@(0) + flash_position@(0) + 200, window_param@(1) + flash_position@(1) + 180
+					gsel kStopperWindowID, 2
+					color 255, 0, 0
+					font msgothic, 36
+					pos 10, 10
+					mes "大破した\n 艦娘が\nいます！"
+					show_stopper_flg2@ = TRUE
+				}
+				if((scene_result@(1) == "艦隊選択") && (scene_result@(0) != "演習出撃")){
+					bgscr kStopperWindowID, 180, 50, , window_param@(0) + flash_position@(0) + 540, window_param@(1) + flash_position@(1) + 420
+					gsel kStopperWindowID, 2
+					color 255, 0, 0
+					font msgothic, 32
+					pos 10, 10
+					switch stopper_type
+						case kStopperDeadZone
+							mes "大破艦あり"
+							show_stopper_flg2@ = TRUE
+						swbreak
+						case kStopperExhausted
+							mes "消耗艦あり"
+							show_stopper_flg2@ = TRUE
+						swbreak
+					swend
+				}
+			}
+		return
+		// ロック画面を出せる状態かを判定する
+		#defcfunc CheckLockerType
+			if(scene_result@(1) == "ソート画面") :return kLockerKammusu
+			if(scene_result@(1) == "装備選択") :return kLockerWeapon
+		return 0
+		// ストッパー画面を表示する
+		#deffunc ShowLockerWindow int locker_type
+			if(show_locker_flg1@ == FALSE) :return
+			if(show_locker_flg2@ == FALSE){
+				if(scene_result@(1) == "ソート画面"){
+					bgscr kLockerWindowID, 40, 280, , window_param@(0) + flash_position@(0) + 737, window_param@(1) + flash_position@(1) + 154
+					//gcopy kMainBufferID, 737, 154, 40, 280
+					color 255, 0, 0
+					DrawLargeSquare 0, 0, 40 - 1, 280 - 1
+					gsel kLockerWindowID, 2
+					show_locker_flg2@ = TRUE
+				}
+				if(scene_result@(1) == "装備選択"){
+					bgscr kLockerWindowID, 30, 300, , window_param@(0) + flash_position@(0) + 770, window_param@(1) + flash_position@(1) + 132
+					//gcopy kMainBufferID, 770, 132, 30, 300
+					color 255, 0, 0
+					DrawLargeSquare 0, 0, 30 - 1, 300 - 1
+					gsel kLockerWindowID, 2
+					show_locker_flg2@ = TRUE
+				}
+			}
+		return
+		// 縦横比を一定にしたgzoom
+		#deffunc gzoom2 int wx2, int wy2, int buffer_id, int px_, int py_, int wx_, int wy_
+			if(wx2 * wy_ > wy2 * wx_){
+				;より横長の範囲にコピーするので縦を合わせる
+				gzoom wx_ * wy2 / wy_, wy2, buffer_id, px_, py_, wx_, wy_, 1
+			}else{
+				;より縦長の範囲にコピーするので横を合わせる
+				gzoom wx2, wy_ * wx2 / wx_, buffer_id, px_, py_, wx_, wy_, 1
+			}
+		return
+		// ボスマスに自艦隊があるかを判定する
+		#defcfunc CheckBossOfAeraMap
+			gsel area_map_window_id@
+			cvputimg kBossJudgeBufferID3
+			cvmatch boss_icon_x,  boss_icon_y,  CV_TM_SQDIFF, kBossJudgeBufferID1, kBossJudgeBufferID3
+			cvmatch fleet_icon_x, fleet_icon_y, CV_TM_SQDIFF, kBossJudgeBufferID2, kBossJudgeBufferID3
+			icon_x_diff = boss_icon_x - fleet_icon_x
+			icon_y_diff = boss_icon_y - fleet_icon_y
+			icon_r2_diff = icon_x_diff * icon_x_diff + icon_y_diff * icon_y_diff
+			;ポイント～ポイント間はおよそ630ピクセル、
+			;マッチング時は最大30ピクセルほどなので判定は容易い？
+			if(icon_r2_diff < 10000) :return TRUE
+		return FALSE
+		// 勝利判定の画面で、どの判定に当たるのかを判断する
+		// S・A・B・C以下を0・1・2・3とする
+		#defcfunc JudgeBattleRank
+			gsel win_judge_window_id@
+			// 完全勝利S
+			if(NearColor(23,43,28,181,184)){
+				if(NearColor(628,218,183,144, 2)){
+					if(NearColor(30,243,173,141,  2)){
+						return kBattleRankS
+					}
+				}
+			}
+			// 勝利S
+			if(NearColor(23,43,29,189,192)){
+				if(NearColor(604,240,251,228,83)){
+					if(NearColor(258,196,135,164,164)){
+						return kBattleRankS
+					}
+				}
+			}
+			// 勝利A
+			if(NearColor(23,43,29,179,182)){
+				if(NearColor(605,236,143,13,4)){
+					if(NearColor(258,196,136,165,165)){
+						return kBattleRankA
+					}
+				}
+			}
+			// 戦術的勝利B
+			if(NearColor(23,43,28,186,189)){
+				if(NearColor(605,269,251,160,23)){
+					if(NearColor(276,199,205,232,236)){
+						return kBattleRankB
+					}
+				}
+			}
+		return kBattleRankLoss
+	#global

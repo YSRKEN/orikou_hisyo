@@ -1,0 +1,129 @@
+/* 経験値計算機に関するイベント処理 */
+
+//*計算機の画面を表示する
+*show_exp_calc
+	gsel kExpCalcWindowID, 2
+return
+
+//*経験値を計算し、反映する
+*exp_calc
+	// 補完機能についての処理
+	if((exp_ss_flg) && (scene_result(0) == "編成画面") && (strmid(scene_result(1), 0, 2) == "第")){
+		// レベル補間
+		if(exp_option_index != 1){
+			// 画像から練度を読み取る
+			gsel kMainBufferID
+			x = exp_unit_index \ 2
+			y = exp_unit_index / 2
+			pget 342 * x + 256, 113 * y + 153
+			if(ginfo_r >= 128){
+				now_level_ = 100
+			}else{
+				now_level_ = 0
+			}
+			dim number, 2
+			unit_pos_x_.0 = 342 * x + unit_pos_x(0), 342 * x + unit_pos_x(1)
+			dim number, 2
+			ReadNumber number, 2, unit_pos_x_, 113 * y + 149, 8, 12, 85, TRUE
+			NormalizeLevel number
+			now_level__ = number(0) * 10 + number(1)
+			if(now_level_ + now_level__ > 0){
+				now_level = now_level_ + now_level__ - 1	//-1するのはコンボボックスの都合
+				// 読み取った練度を画面に反映する
+				gsel kExpCalcWindowID
+				objprm now_level_id, now_level
+			}
+		}
+		// 経験値補間
+		if(exp_option_index != 0){
+			// 画像から経験値の割合を読み取る
+			gsel kMainBufferID
+			unit_exp_double = 1.0
+			x = exp_unit_index \ 2
+			y = exp_unit_index / 2
+			for k, 0, 160
+				if(NearColor(342 * x + 284 + k, 113 * y + 194, 165, 232, 208) == FALSE){
+					unit_exp_double = 1.0 * k / 160
+					_break
+				}
+			next
+			// 練度の値から、経験値補正がどれほどあるかを算出する
+			if(now_level + 1 != 150){
+				now_exp_plus = int(unit_exp_double * (need_exp_table(now_level + 1) - need_exp_table(now_level)))
+			}else{
+				now_exp_plus = 0
+			}
+		}else{
+			now_exp_plus = 0
+		}
+	}else{
+		now_exp_plus = 0
+	}
+	// レベル補正についての処理
+	if(now_level > goal_level){
+		if(now_level != now_level_){
+			goal_level = now_level
+			gsel kExpCalcWindowID
+			objprm goal_level_id, goal_level
+		}
+		if(goal_level != goal_level_){
+			now_level = goal_level
+			gsel kExpCalcWindowID
+			objprm now_level_id, now_level
+		}
+	}
+	// 経験値の計算処理
+	//必要経験値を計算
+	now_exp = need_exp_table(now_level) + now_exp_plus
+	goal_exp = need_exp_table(goal_level)
+	need_exp = goal_exp - now_exp
+	//戦闘経験値を計算
+	battle_exp = 1.0 * exp_data(area_index)
+	if(reader_ship_flg) :battle_exp *= 1.5
+	if(mvp_flg) :battle_exp *= 2.0
+	switch result_index
+		case 0	;完全S
+			battle_exp *= 1.2
+			swbreak
+		case 1	;勝利S
+			battle_exp *= 1.2
+			swbreak
+		case 2	;勝利A
+			battle_exp *= 1.0
+			swbreak
+		case 3	;勝利B
+			battle_exp *= 1.0
+			swbreak
+		case 4	;敗北C
+			battle_exp *= 0.8
+			swbreak
+		case 5	;敗北D
+			battle_exp *= 0.7
+			swbreak
+		case 6	;敗北E
+			battle_exp *= 0.5
+			if(mvp_flg) :battle_exp *= 0.5	;MVP無効
+	swend
+	battle_exp = int(battle_exp)
+	//必要周回数を計算
+	need_battles = need_exp / battle_exp
+	if(need_exp \ battle_exp != 0) :need_battles++
+	// 出力処理
+	gsel kExpCalcWindowID
+	objprm need_exp_id, need_exp
+	objprm battle_exp_id, battle_exp
+	objprm need_battles_id, need_battles
+return
+
+//*計算機の更新をチェックする
+*check_exp_calc
+	if(now_level_        != now_level)        :gosub *exp_calc :now_level_        = now_level
+	if(goal_level_       != goal_level)       :gosub *exp_calc :goal_level_       = goal_level
+	if(area_index_       != area_index)       :gosub *exp_calc :area_index_       = area_index
+	if(result_index_     != result_index)     :gosub *exp_calc :result_index_     = result_index
+	if(reader_ship_flg_  != reader_ship_flg)  :gosub *exp_calc :reader_ship_flg_  = reader_ship_flg
+	if(mvp_flg_          != mvp_flg)          :gosub *exp_calc :mvp_flg_          = mvp_flg
+	if(exp_ss_flg_       != exp_ss_flg)       :gosub *exp_calc :exp_ss_flg_       = exp_ss_flg
+	if(exp_unit_index_   != exp_unit_index)   :gosub *exp_calc :exp_unit_index_   = exp_unit_index
+	if(exp_option_index_ != exp_option_index) :gosub *exp_calc :exp_option_index_ = exp_option_index
+return

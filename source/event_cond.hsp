@@ -1,0 +1,196 @@
+/* cond値メータに関するイベント処理 */
+
+//*cond値メータを表示する
+*show_cond_meter
+	gsel kCondMeterWindowID, 2
+return
+
+//*cond値メータを更新する
+*redraw_cond
+	// cond値を正規化する
+	for k, 0, kUnitNum
+		cond(k) = limit(cond(k), 0, 100)
+	next
+	// 表示を修正する
+	for k, 0, kUnitNum
+		cond_msg(k) = "" + (k + 1) + "番艦・"
+		if(cond(k) >= 50) :cond_msg(k) += "キラ" :_continue
+		if(cond(k) >= 40) :cond_msg(k) += "通常" :_continue
+		if(cond(k) >= 30) :cond_msg(k) += "間宮" :_continue
+		if(cond(k) >= 20) :cond_msg(k) += "橙点灯" :_continue
+		cond_msg(k) += "赤点灯"
+	next
+	// 結果を反映する
+	if(auto_calc_flg){
+		gsel kCondMeterWindowID
+		for k, 0, kUnitNum
+			objprm cond_id + k, cond(k)
+			objprm cond_msg_id + k, cond_msg(k)
+		next
+	}
+return
+
+//*オブジェクトの状態を変更する
+*cond_enable
+	gsel kCondMeterWindowID
+	switch cond_step
+		case 0
+			for k, 0, 3
+				objenable battle_type_id + k, 1
+			next
+			for k, 0, 6
+				objenable win_type_id + k, 0
+			next
+			for k, 0, kUnitNum
+				objenable mvp_id + k, 0
+			next
+			for k, 0, kUnitNum
+				objenable cond_reset_id + k,1 
+			next
+			objenable set_kira3_id, 1
+			objenable return_home_id, 1
+		swbreak
+		case 1
+			for k, 0, 3
+				objenable battle_type_id + k, 0
+			next
+			for k, 0, 6
+				objenable win_type_id + k, 1
+			next
+			for k, 0, kUnitNum
+				objenable mvp_id + k, 0
+			next
+			for k, 0, kUnitNum
+				objenable cond_reset_id + k, 0
+			next
+			objenable set_kira3_id, 0
+			objenable return_home_id, 0
+		swbreak
+		case 2
+			for k, 0, 3
+				objenable battle_type_id + k, 0
+			next
+			for k, 0, 6
+				objenable win_type_id + k, 0
+			next
+			for k, 0, kUnitNum
+				objenable mvp_id + k, 1
+			next
+			for k, 0, kUnitNum
+				objenable cond_reset_id + k, 0
+			next
+			objenable set_kira3_id, 0
+			objenable return_home_id, 0
+		swbreak
+		case 3
+			gosub *cond_calc
+			cond_step = 0
+			gosub *cond_enable
+		swbreak
+	swend
+return
+
+//*cond値を更新する
+*cond_calc
+	// 戦闘突入時の増減
+	if(battle_type < 2){
+		for k, 0, kUnitNum
+			if(cond(k) >= 30){
+				cond(k) -= 3
+			}else{
+				cond(k) -= 9
+			}
+		next
+	}
+	if(battle_type > 0){
+		for k, 0, kUnitNum
+			cond(k) -= 2
+		next
+	}
+	for k, 0, kUnitNum
+		if(cond(k) < 0) :cond(k) = 0
+	next
+	// MVP獲得による増加
+	cond(mvp_num) += 10
+	// 旗艦補正
+	if(win_type != 5) :cond(0) += 3
+	// 戦闘結果による増減
+	for k, 0, kUnitNum
+		switch win_type
+			case 0	;完全S
+				cond(k) += 4
+			swbreak
+			case 1	;勝利S
+				cond(k) += 4
+			swbreak
+			case 2	;勝利A
+				cond(k) += 3
+			swbreak
+			case 3	;勝利B
+				cond(k) += 2
+			swbreak
+			case 4	;勝利C
+				cond(k) += 1
+			swbreak
+		swend
+	next
+return
+
+//*交戦形態
+*battle_type_1 :battle_type = 0 :cond_step = 1 :return
+*battle_type_2 :battle_type = 1 :cond_step = 1 :return
+*battle_type_3 :battle_type = 2 :cond_step = 1 :return
+
+//*戦闘結果
+*win_type_ss :win_type = 0 :cond_step = 2 :return
+*win_type_s  :win_type = 1 :cond_step = 2 :return
+*win_type_a  :win_type = 2 :cond_step = 2 :return
+*win_type_b  :win_type = 3 :cond_step = 2 :return
+*win_type_c  :win_type = 4 :cond_step = 2 :return
+*win_type_de :win_type = 5 :cond_step = 2 :return
+
+//*MVP
+*mvp_1 :mvp_num = 0 :cond_step = 3 :return
+*mvp_2 :mvp_num = 1 :cond_step = 3 :return
+*mvp_3 :mvp_num = 2 :cond_step = 3 :return
+*mvp_4 :mvp_num = 3 :cond_step = 3 :return
+*mvp_5 :mvp_num = 4 :cond_step = 3 :return
+*mvp_6 :mvp_num = 5 :cond_step = 3 :return
+
+//*リセット
+*cond_reset_1 :cond(0) = 49 :return
+*cond_reset_2 :cond(1) = 49 :return
+*cond_reset_3 :cond(2) = 49 :return
+*cond_reset_4 :cond(3) = 49 :return
+*cond_reset_5 :cond(4) = 49 :return
+*cond_reset_6 :cond(5) = 49 :return
+
+//*その他
+*set_kira3
+	for k, 0, kUnitNum
+		cond(k) = 85
+	next
+return
+*auto_recover
+	for k, 0, kUnitNum
+		if(cond(k) < 49){
+			cond(k) = 49
+		}
+	next
+return
+*return_home
+	for k, 0, kUnitNum
+		if(cond(k) > 30){
+			cond(k) -= 15
+		}else{
+			cond(k) -= 30
+		}
+	next
+return
+*reset_all
+	for k, 0, kUnitNum
+		cond(k) = 49
+	next
+	cond_step = 0
+	gosub *cond_enable
+return
