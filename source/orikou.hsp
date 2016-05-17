@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.2.0.1 */
+/* おりこうさんな秘書 Ver.2.0.2 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.2.0.1"
-	#define kSoftVer2       "201"
-	#define kSoftLastUpdate "2015/05/04"
+	#define kSoftVer        "Ver.2.0.2"
+	#define kSoftVer2       "202"
+	#define kSoftLastUpdate "2015/05/08"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -16,7 +16,7 @@
 /* メインルーチン */
 // ウィンドウ周りを初期設定
 	//オプション画面
-	screen kOptionWindowID, kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 5, 4
+	screen kOptionWindowID, kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 6, 4
 	gsel kOptionWindowID, -1
 	title "オプション"
 	font msgothic, kSmallFontSize
@@ -40,10 +40,14 @@
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 2
 			button gosub "参照...", *browse_folder
 		pos kObjSpace                 , kObjSpace + kObjSpaceY * 4
-			combox fps_index,,fps_list
+			chkbox "資源ログ(分)",     auto_supply_flg
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 4
+			combox logging_index,,"1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
+		pos kObjSpace                 , kObjSpace + kObjSpaceY * 5
+			combox fps_index,,fps_list
+		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 5
 			combox zooming_index,,zooming_list
-		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 4
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5
 			button gosub "閉じる", *close_option
 
 	//経験値計算機
@@ -539,7 +543,7 @@
 			if(screen_shot_type <= kSceneListSize){
 				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面")){
 					for k, 0, 7
-						last_up_date(44, k) = last_up_date(screen_shot_type - 1, k)
+						last_up_date(kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum, k) = last_up_date(screen_shot_type - 1, k)
 					next
 				}
 			}
@@ -579,6 +583,18 @@
 				mes "[" + unit_count(0) + "," + unit_count(1) + "," + unit_count(2) + "," + unit_count(3) + "]"
 			}
 		redraw 1
+		// 資源ログ機能
+		if(auto_supply_flg){
+			if(CheckHomeFlg(kFlashBufferID)){
+				if((supply_last_time == -1) || (timeGetTime() - supply_last_time > 1000 * 60 * (logging_index + 1))){
+					supply_last_time = timeGetTime()
+					GetSupply kFlashBufferID, supply_list
+					supply_log += NowTime() + "," + supply_list(0) + "," + supply_list(1) + "," + supply_list(2) + "," + supply_list(3) + "\n"
+					notesel supply_log :notesave "supply.csv"
+					gsel kMainWindowID
+				}
+			}
+		}
 		// ウェイト
 		await 1000 / fps_num(fps_index)
 	loop

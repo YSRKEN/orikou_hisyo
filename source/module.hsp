@@ -1,5 +1,8 @@
 /* モジュール */
 
+	#uselib "winmm.dll"
+	#cfunc timeGetTime "timeGetTime"
+
 	// API用
 	#module api
 		// API呼び出し
@@ -287,7 +290,18 @@
 				gsel flash_id_
 				flg = FALSE
 				for k, 0, kUnitNum
+					;大破
 					if(NearColor(482, 137 + 50 * k, 251, 114, 94)){
+						flg = TRUE
+						_break
+					}
+					;橙疲労+大破
+					if(NearColor(482, 137 + 50 * k, 250, 99, 53)){
+						flg = TRUE
+						_break
+					}
+					;赤疲労+大破
+					if(NearColor(482, 137 + 50 * k, 251, 58, 54)){
 						flg = TRUE
 						_break
 					}
@@ -382,6 +396,8 @@
 			output += "ShutdownSave\t"   + auto_save_flg@ + "\n"
 			output += "MySaveFolder\t"   + my_folder_flg@ + "\n"
 			output += "SaveFolderPath\t" + pic_save_path@(1) + "\n"
+			output += "SupplyLogging\t"  + auto_supply_flg@ + "\n"
+			output += "LoggingTime\t" + (logging_index@ + 1) + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -480,7 +496,7 @@
 						unit_count@(k) = f
 					}
 					if(strmid(temp(0), 0, 10) == "LastUpdate"){
-						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, 45)
+						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum)
 						;バージョンによってtにオフセットを掛ける(間違えて上書きされる対策)
 						if((read_ver <= 19) && (t >= 16)) :t += 2
 						if((read_ver == 20) && (t >= 17)) :t += 1
@@ -495,10 +511,14 @@
 					}
 				}
 				if(read_ver >= 20){
-					if(temp(0) == "MySaveFolder")   :my_folder_flg@ = int(temp(1))
+					if(temp(0) == "MySaveFolder")   :my_folder_flg@ = limit(int(temp(1)), 0, 1)
 					if(temp(0) == "SaveFolderPath") :pic_save_path@(1) = temp(1)
 					;セーブデータについて判定を行う
 					if(CheckSaveFolder(pic_save_path@(1)) == FALSE) :pic_save_path@(1) = ""
+				}
+				if(read_ver >= 202){
+					if(temp(0) == "SupplyLogging") :auto_supply_flg@ = limit(int(temp(1)), 0, 1)
+					if(temp(0) == "LoggingTime")   :logging_index@  = limit(int(temp(1)), 1, 10) - 1
 				}
 			next
 			;微修正
@@ -558,6 +578,66 @@
 		// 時刻を表示するためのラッパー関数
 		#defcfunc GetLastUpdate int index_
 		return strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", last_up_date@(index_, 0), last_up_date@(index_, 1), last_up_date@(index_, 2), last_up_date@(index_, 3), last_up_date@(index_, 4), last_up_date@(index_, 5), last_up_date@(index_, 6))
+		// 資源量を取得
+		#deffunc GetSupply int flash_id_, array supply_list_
+			;燃料
+			fuel = 0
+			for k, 0, 6
+				buffer kTempBufferID@, 7, 11
+				gcopy flash_id_, 683 + k * 7, 36, 7, 11
+				number = MatchNumber(165, TRUE)
+				;assert
+				if(number < 10){
+					fuel *= 10
+					if(k == 0) :number = limit(number, 0, 3)
+					fuel += number
+				}
+			next
+			;弾薬
+			ammo = 0
+			for k, 0, 6
+				buffer kTempBufferID@, 8, 11
+				gcopy flash_id_, 680 + k * 8, 55, 8, 11
+				number = MatchNumber(165, TRUE)
+				;assert
+				if(number < 10){
+					ammo *= 10
+					if(k == 0) :number = limit(number, 0, 3)
+					ammo += number
+				}
+			next
+			;鋼材
+			steel = 0
+			for k, 0, 6
+				buffer kTempBufferID@, 8, 11
+				gcopy flash_id_, 749 + k * 8, 36, 8, 11
+				number = MatchNumber(165, TRUE)
+				;assert
+				if(number < 10){
+					steel *= 10
+					if(k == 0) :number = limit(number, 0, 3)
+					steel += number
+				}
+			next
+			;ボーキ
+			bauxite = 0
+			for k, 0, 6
+				buffer kTempBufferID@, 8, 11
+				gcopy flash_id_, 749 + k * 8, 55, 8, 11
+				number = MatchNumber(165, TRUE)
+				;assert
+				if(number < 10){
+					bauxite *= 10
+					if(k == 0) :number = limit(number, 0, 3)
+					bauxite += number
+				}
+			next
+			;代入
+			supply_list_(0) = fuel
+			supply_list_(1) = ammo
+			supply_list_(2) = steel
+			supply_list_(3) = bauxite
+		return
 	#global
 	#module get_num
 		#deffunc DrawSquare int px_, int py_, int wx_, int wy_
@@ -567,11 +647,20 @@
 			line px_ + wx_ - 1, py_ + wy_ - 1, px_ , py_ + wy_ - 1
 			line px_      , py_ + wy_, px_      , py_
 		return
-		#deffunc OtsuThreshold
+		#deffunc OtsuThreshold int reverse_flg_
 			cvbuffer kCVTempBufferID, ginfo_sx, ginfo_sy
 			cvputimg kCVTempBufferID
 			cvconvert 0, kCVTempBufferID
+			if(reverse_flg_) :cvxors ,,,kCVTempBufferID
 			cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
+			cvgetimg kCVTempBufferID, 1
+		return
+		#deffunc NormalThreshold int thres_, int reverse_flg_
+			cvbuffer kCVTempBufferID, ginfo_sx, ginfo_sy
+			cvputimg kCVTempBufferID
+			cvconvert 0, kCVTempBufferID
+			if(reverse_flg_) :cvxors ,,,kCVTempBufferID
+			cvthreshold CV_THRESH_BINARY, thres_, 255, kCVTempBufferID
 			cvgetimg kCVTempBufferID, 1
 		return
 		#deffunc GetSquare var px__, var py__, var wx__, var wy__
@@ -608,20 +697,26 @@
 				if(flg) :wy__ = y - py__ + 1 :_break
 			next
 		return
-		#defcfunc MatchNumber int ii, int jj
+		#defcfunc MatchNumber int thres_, int reverse_flg_
 			id = ginfo_sel :sx = ginfo_sx :sy = ginfo_sy
-			gsel kNumGetBufferID1 :color 255, 255, 255 :boxf
+			gsel kNumGetBufferID :color 255, 255, 255 :boxf
 			pos 0, 0
-			gzoom 64, 64, id, 0, 0, sx, sy, 1
-			OtsuThreshold
+			gzoom kMatchSize, kMatchSize, id, 0, 0, sx, sy, 1
+			if(thres_ < 0){
+				OtsuThreshold reverse_flg_
+			}else{
+				NormalThreshold thres_, reverse_flg_
+			}
 			GetSquare px, py, wx, wy
-			gsel kNumGetBufferID2 :color 255, 255, 255 :boxf
+			gsel kNumGetBufferID
 			pos 0, 0
-			gzoom 32, 32, kNumGetBufferID1, px, py, wx, wy
-			OtsuThreshold
-			DrawSquare 0, 0, 32, 32
-			cvbuffer kCVNumBufferID, 32, 32
+			gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy
+			;bmpsave "hoge_" + strf("%05d", ttt@) + ".bmp"
+			;ttt@++
+			OtsuThreshold FALSE
+			DrawSquare 0, 0, kMatchSize, kMatchSize
+			cvbuffer kCVNumBufferID, kMatchSize, kMatchSize
 			cvputimg kCVNumBufferID
 			cvmatch px, py, CV_TM_SQDIFF, kCVNumBufferID, kCVMatchBufferID
-		return limit(int(1.0 * px / 64 + 0.5), 0, 9)
+		return limit(int(1.0 * px / (2 * kMatchSize) + 0.5), 0, 11)
 	#global

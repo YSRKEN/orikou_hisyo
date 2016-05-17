@@ -27,8 +27,7 @@
 	#enum kMatchBufferID	;マッチング用の捨てID
 	#enum kDeadZoneWindowID	;大破進撃を阻止するための画面
 	;バッファ用
-	#enum global kNumGetBufferID1	;数字認識用(64x64)
-	#enum global kNumGetBufferID2	;数字認識用(32x32)
+	#enum global kNumGetBufferID	;数字認識用
 	#enum kCursorBufferID	;カーソル用
 	#enum kBattleBufferID	;戦闘画面(特殊)
 	#enum kCaptureBufferID	;各保存画面
@@ -100,6 +99,7 @@
 	// 認識用
 	#const global kPoints 3	;3点に対して、
 	#const global kParams 5	;xy座標+RGBの5つの数字でチェックする
+	#const global kMatchSize 64	;認識時のブロックサイズ
 
 // 変数初期化
 	// コンボボックスの内容
@@ -177,6 +177,17 @@
 	;ソート一覧
 	sdim sort_list, 1024
 	sort_list_size = 0
+	;資源ログ
+	exist "supply.csv"
+	if(strsize != -1){
+		notesel supply_log
+		noteload "supply.csv"
+	}else{
+		sdim supply_log, 32000
+		supply_log = "時間,燃料,弾薬,鋼材,ボーキ\n"
+	}
+	supply_last_time = -1
+	logging_index = 9
 	;各種フラグ
 	name_disable_flg  = TRUE
 	cursor_flg        = TRUE
@@ -193,6 +204,7 @@
 	dim unit_count, kFleetNum
 	dim unit_count_, kFleetNum
 	dim last_up_date, kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 1, 7
+	dim supply_list, 4
 	GetMonitorParam kDispX ,kDispY ,kOffsetX, kOffsetY
 	kFleetIdOffset = kCaptureBufferID + kSceneListSize
 	kUnitIdOffset = kFleetIdOffset + kFleetNum
@@ -229,8 +241,7 @@
 		buffer kCaptureBufferID + kSceneListSize + kFleetNum + cnt, kFlashWX, kFlashWY
 	loop
 	;認識用
-	buffer kNumGetBufferID1, 64, 64
-	buffer kNumGetBufferID2, 32, 32
+	buffer kNumGetBufferID, kMatchSize, kMatchSize
 
 	ReadSaveData
 	goto *main1
@@ -306,23 +317,24 @@ return
 
 //マッチング処理の初期化
 *match_init
-	buffer kMatchBufferID, 32 * 19, 32
+	buffer kMatchBufferID, kMatchSize * 23, kMatchSize
 	for k, 0, 10
-		buffer kNumGetBufferID1, 64, 64
+		buffer kNumGetBufferID, kMatchSize, kMatchSize
 		color 255, 255, 255 :boxf :color
-		font msgothic, 64
+		font "Symbol", kMatchSize, 1
 		mes k
-		OtsuThreshold
+		OtsuThreshold FALSE
 		GetSquare px, py, wx, wy
 		gsel kMatchBufferID
-		pos k * 64, 0
-		gzoom 32, 32, kNumGetBufferID1, px, py, wx, wy, 1
+		pos k * kMatchSize * 2, 0
+		gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy, 1
 	next
-	OtsuThreshold
-	for k, 0, 10
-		DrawSquare k * 64, 0, 32, 32
+	OtsuThreshold FALSE
+	color :boxf kMatchSize * 22, 0, kMatchSize * 23, kMatchSize
+	for k, 0, 12
+		DrawSquare k * kMatchSize * 2, 0, kMatchSize, kMatchSize
 	next
-	cvbuffer kCVMatchBufferID, 32 * 19, 32
+	cvbuffer kCVMatchBufferID, kMatchSize * 23, kMatchSize
 	cvputimg kCVMatchBufferID
 return
 

@@ -74,14 +74,13 @@ cursor.png……カーソルアイコン画像
 　　kSortListWindowID    ソート一覧           11
 　　kMatchBufferID       マッチング用の捨てID 12
 　　kDeadZoneWindowID    大破進撃阻止用画面   13
-　　kNumGetBufferID1     数字認識用(64x64)    14
-　　kNumGetBufferID2     数字認識用(32x32)    15
-　　kCursorBufferID      カーソル用           16
-　　kBattleBufferID      戦闘画面(特殊)       17
-　　kCaptureBufferID以降 シーン保存用         18～18 + 保存シーン数 - 1
-　　kFleetIdOffset以降   編成画面用           18 + 保存シーン数～18 + 保存シーン数 + (4 - 1)
-　　kUnitIdOffset以降    改装画面用           18 + 保存シーン数 + 4～18 + 保存シーン数 + 4 + (4 * 6 - 1)
-　　kSortIdOffset以降    ソート画面用         18 + 保存シーン数 + 4 + 4 * 6～
+　　kNumGetBufferID1     数字認識用           14
+　　kCursorBufferID      カーソル用           15
+　　kBattleBufferID      戦闘画面(特殊)       16
+　　kCaptureBufferID以降 シーン保存用         17～17 + 保存シーン数 - 1
+　　kFleetIdOffset以降   編成画面用           17 + 保存シーン数～17 + 保存シーン数 + (4 - 1)
+　　kUnitIdOffset以降    改装画面用           17 + 保存シーン数 + 4～17 + 保存シーン数 + 4 + (4 * 6 - 1)
+　　kSortIdOffset以降    ソート画面用         17 + 保存シーン数 + 4 + 4 * 6～
 ・const.hsp
 　#enumで定義された定数群……
 　　画面IDを決定するためのもの。具体的には、IDがkCaptureBufferID
@@ -170,9 +169,12 @@ cursor.png……カーソルアイコン画像
 　　なお、画像保存のせいでWriteSaveDataはちょっと重いので注意。
 　SetLastUpdateなど最終更新日時関係……
 　　見たまんまなので詳細略。ミリ秒まで記録しております
+　GetSupply……
+　　資源が写ってる画面で自動的に資源量を読み取る。
 　OtsuThreshold……
 　　大津の方法(判別分析法)によって自動的な二値化を行う。
 　　なぜかこの機能の存在がHSPのヘルプにないというのは謎すぎる……。
+　　ちなみにcvxorsで色反転が可能(NormalThresholdも同様)
 ・window.hsp
 　*save_fleets……
 　　要するに、バッファを切り取ってコピーする作業を6回or12回行い
@@ -209,6 +211,10 @@ cursor.png……カーソルアイコン画像
 　最終更新日時関係……
 　　サブ画面の上の方(画像表示部分)と共に、毎フレームごとに書き換えてるけど、
 　　この程度の負荷なんて誤差、だよね？
+　資源ログ……
+　　timeGetTime()関数で間隔を測って、一定以上経ったら記録する。
+　　ただ、戦闘などで設定時間以上に母港から離れた場合は、母港を発見した直後から
+　　記録を開始する。また、ソフト起動時も自動で記録される。
 　ウェイト……
 　　awaitは「次にawaitが呼ばれるまでの時間」を指定するので、
 　　一定の間隔で刻む必要がある場合に都合がいい。1000が30などで

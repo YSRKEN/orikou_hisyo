@@ -377,7 +377,7 @@ return
 				for j, 0, 6
 					gsel kTempBufferID
 					gcopy kFlashBufferID, xpos(j), ypos(i) + 25, 11, 16
-					number(j) = MatchNumber(i, j)
+					number(j) = limit(MatchNumber(170, FALSE), 0, 9)
 					if(j == 0) :number(j) = limit(number(j), 0, 5)
 					if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
 				next

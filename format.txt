@@ -24,6 +24,8 @@ AutoPosSet     (0|1)                 自動ズレ補正機能を使うか否か
 ShutdownSave   (0|1)                 終了時セーブを行うか否か
 MySaveFolder   (0|1)                 保存フォルダを自分で指定するか否か
 SaveFolderPath .+                    スクリーンショットの保存パス(自分で指定する場合)
+SupplyLogging  (0|1)                 資源ログを残すか否か
+LoggingTime    ([1-9]|10)            資源ログを残す間隔(分単位)
 CounterA1      \d+                   あ号カウンターの出撃回数(非負)
 CounterA2      \d+                   あ号カウンターのボス到達回数(非負)
 CounterA3      \d+                   あ号カウンターのボス勝利回数(非負)

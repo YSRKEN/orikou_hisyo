@@ -14,7 +14,7 @@
 	</head>
 	<body>
 <!-- タイトル -->
-		<h1>おりこうさんな秘書 Ver.2.0.1</h1>
+		<h1>おりこうさんな秘書 Ver.2.0.2</h1>
 		<a href="http://www.vector.co.jp/soft/win95/game/se509326.html">http://www.vector.co.jp/soft/win95/game/se509326.html</a>
 		<hr>
 
@@ -75,7 +75,7 @@
 		<p>　ファイルをそのまま削除するだけです。レジストリは使用しません。</p>
 		<h2>ファイル構成</h2>
 		<p><strong>　先頭に☆が付いたファイルは、動作に必須なファイルです。</strong><br>
-		　また、セーブ時には<a href="../save.txt">save.txt</a>および<a href="../save.png">save.png</a>がorikou.exeと同フォルダに作成されます。</p>
+		　また、セーブ時には<a href="../save.txt">save.txt</a>および<a href="../save.png">save.png</a>が、資材ログ保存時は<a href="../supply.csv">supply.csv</a>がorikou.exeと同フォルダに作成されます。</p>
 		<table border="1" summary="orikou.exe・hspcv.dll・hspext.dll・cursor.pngが必須で、他は必須ではありません">
 			<tr>
 				<th abbr="ファイル・フォルダ名">ファイル・フォルダ名</th>
@@ -347,6 +347,7 @@
 			　(もちろん、<a href="../format.txt">format.txt</a>を読みつつちまちま修正すればいいのですが)
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="option">オプション</a></h2>
+			<img src="./images/option.png" alt="オプション画面" width="288" height="214">
 			<p>　各項目について解説します。</p>
 			<table border="1" summary="オプションの各項目についての説明">
 				<tr>
@@ -388,6 +389,13 @@
 					その下に表示されているフォルダに保存されます。もちろん「参照」ボタンでフォルダを変更可能です。</td>
 				</tr>
 				<tr>
+					<td>資材ログ(分)</td>
+					<td>「右上に資材量が映っている状態(要するに出撃してない状態)」の際、資材量を認識して記録します。<br>
+					記録ファイル(<a href="../supply.csv">supply.csv</a>)は、1行目が説明、2行目以降がカンマ区切りの記録となっています。<br>
+					このチェックの右のコンボボックスの指定通り、指定時間の間隔で自動ロギングされます。<br>
+					なお、ソフト起動時や、指定時間経過後に出撃していた時は、<strong>最初に資材量が見えた際に即座に記録を開始します</strong>。</td>
+				</tr>
+				<tr>
 					<td>fps</td>
 					<td>画面を記録するfpsを設定します。30・20・15・10・5・3・2・1fpsを指定出来ます。</td>
 				</tr>
@@ -416,6 +424,7 @@
 			<li>画像保存機能およびセーブデータ保存でドライブに書き込む際、セキュリティに阻まれることがあります。<br>
 			具体的にはWindows SmartScreenや、各種セキュリティソフトなどで警告が表示されることがあります。<br>
 			もちろん<strong>おり秘書はウイルスではありませんしウイルスチェックもしています</strong>が……。</li>
+			<li>前述のように通信は一切拾わず画像認識で処理していますので、<strong>資材ログも正確な値とは限りません</strong>。</li>
 			<li>装備まとめ画像作成時に、艦娘の順番を変更及び外した場合の対応が<strong>雑</strong>です。<br>
 			例えば「吹雪」「白雪」「初雪」といった艦隊において、編成画面で吹雪や白雪を外した場合、<br>
 			まとめ画像を保存すると吹雪や白雪ではなく初雪が外された画像になってしまいます。<br>
@@ -508,6 +517,15 @@
 				<th abbr="バージョン">バージョン</th>
 				<th abbr="公開日">公開日</th>
 				<th abbr="変更箇所">変更箇所</th>
+			</tr>
+			<tr>
+				<td>Ver.2.0.2</td>
+				<td>2015/05/08</td>
+				<td>・戦闘画面の日付が更新されていない不具合を修正した。<br>
+				・赤疲労+大破、もしくは橙疲労+大破の際、出撃時の大破チェックが効かない不具合を修正した。<br>
+				・文字認識の精度を向上させた(資源ログおよび入渠タイマー機能にて)。<br>
+				<strong>・資源をロギングする機能を実装した。</strong><br>
+				・(ヘルプにおける)艦これ自体の著作権表記を修正した。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.1</td>
@@ -626,7 +644,7 @@
 <!-- 著作権について -->
 		<h1><a name="copyright">著作権について</a></h1>
 		<div><dl>
-			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.2.0.1</dd>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.2.0.2</dd>
 			<dt>種別</dt><dd>フリーウェア</dd>
 			<dt>種類</dt><dd>攻略・プレイ支援</dd>
 			<dt>開発者</dt><dd>YSR</dd>
@@ -637,13 +655,13 @@
 			<dt>転載</dt><dd>自由です。ただし、私の名前も一緒に乗せてください。</dd>
 		</dl></div>
 		<p>※艦隊これくしょんは角川ゲームズ／DMM.comが製作、運営しているオンラインゲームです。<br>
-		(C)2014 DMM.com POWERCHORD STUDIO/KADOKAWA GAMES All Rights Reserved.</p>
+		(C) 2015 DMM.com POWERCHORD STUDIO / C2 / KADOKAWA All Rights Reserved.</p>
 		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
 <!-- コメント -->
 		<h1><a name="comment">コメント</a></h1>
-		<p>　誰か私に天津風ちゃんを下さい……。</p>
+		<p>　天津風は手に入れたけど、Roma掘りで凄まじく詰まっている件について……。</p>
 		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
