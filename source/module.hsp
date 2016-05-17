@@ -49,7 +49,7 @@
 			//デスクトップのデバイスコンテキストを作成する
 			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
 			//デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, kOffsetX@ + flash_px_, kOffsetY@ + flash_py_, SRCCOPY | CAPTUREBLT
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, flash_px_, flash_py_, SRCCOPY | CAPTUREBLT
 			//デバイスコンテキストを削除する
 			DeleteDC hdc_screen
 			redraw 1
@@ -129,6 +129,15 @@
 	#global
 
 	// 汎用
+	#module misc_
+		//screen_shot_typeを文字列に変換
+		#defcfunc SstToStr int screen_shot_type_
+			if(screen_shot_type_ >= kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum + 1) :return ""
+			if(screen_shot_type_ >= kSceneListSize@ + kFleetNum + 1) :return "改装画面"
+			if(screen_shot_type_ >= kSceneListSize@ + 1) :return "編成画面"
+			if(screen_shot_type_ < 0) :return ""
+		return mode_list3@(screen_shot_type_)
+	#global
 	#module misc
 		//長方形枠を描画
 		#deffunc DrawMouseSquare int mouse_x1_, int mouse_y1_, int mouse_x2_, int mouse_y2_
@@ -160,13 +169,9 @@
 			//判定結果
 			if(kTypeDropFlg@ == TRUE){
 				title_str += "ドロップ画面 - "
-			}else{if(screen_shot_type@ >= kSceneListSize@ + kFleetNum + 1){
-				title_str += "改装画面 - "
-			}else{if(screen_shot_type@ >= kSceneListSize@ + 1){
-				title_str += "編成画面 - "
 			}else{
-				title_str += mode_list3@(screen_shot_type@) + " - "
-			}}}
+				title_str += SstToStr(screen_shot_type@) + " - "
+			}
 			//艦これ画面の座標
 			title_str += "(" + flash_px@ + ","  +flash_py@ + ")"
 			//反映
@@ -359,31 +364,28 @@
 			}
 		return FALSE
 		//「大破した艦娘」がいるかどうかを判定する
-		#defcfunc CheckDeadZone int flash_id_, int screen_shot_type_
-			if(mode_list3@(screen_shot_type_) == "出撃画面"){
+		#defcfunc CheckDeadZone int flash_id_, int sst
+			if(SstToStr(sst) == "出撃画面"){
 				gsel flash_id_
 				flg = FALSE
 				for k, 0, kUnitNum
 					;大破
 					if(NearColor(482, 137 + 50 * k, 251, 114, 94)){
-						;場当たり的な対策(赤疲労中破まるゆ対策)
-						if(NearColor(503, 171 + 50 * k, 251, 57, 28) == FALSE){
+						if(NearColor(489, 146 + 50 * k, 106, 46, 42)){
 							flg = TRUE
 							_break
 						}
 					}
 					;橙疲労+大破
 					if(NearColor(482, 137 + 50 * k, 250, 99, 53)){
-						;場当たり的な対策(赤疲労中破まるゆ対策)
-						if(NearColor(503, 171 + 50 * k, 251, 57, 28) == FALSE){
+						if(NearColor(489, 146 + 50 * k, 180, 73, 20)){
 							flg = TRUE
 							_break
 						}
 					}
 					;赤疲労+大破
 					if(NearColor(482, 137 + 50 * k, 251, 58, 54)){
-						;場当たり的な対策(赤疲労中破まるゆ対策)
-						if(NearColor(503, 171 + 50 * k, 251, 57, 28) == FALSE){
+						if(NearColor(489, 146 + 50 * k, 180, 22, 20)){
 							flg = TRUE
 							_break
 						}
@@ -391,7 +393,7 @@
 				next
 				return flg
 			}
-			if(mode_list3@(screen_shot_type_) == "戦果報告"){
+			if(SstToStr(sst) == "戦果報告"){
 				gsel flash_id_
 				flg = FALSE
 				for k, 0, kUnitNum
@@ -401,6 +403,63 @@
 					}
 				next
 				return flg
+			}
+		return FALSE
+		//「消耗した艦娘」がいるかどうかを判定する
+		#defcfunc CheckExhausted int flash_id_, int sst
+			if(SstToStr(sst) == "出撃画面"){
+				gsel flash_id_
+				flg = FALSE
+				for k, 0, kUnitNum
+					;燃料
+					if(NearColor(488, 167 + 50 * k, 255, 222, 0)){
+						flg = TRUE
+						_break
+					}
+					if(NearColor(488, 167 + 50 * k, 221, 42, 42)){
+						flg = TRUE
+						_break
+					}
+					;弾薬
+					if(NearColor(514, 167 + 50 * k, 255, 222, 0)){
+						flg = TRUE
+						_break
+					}
+					if(NearColor(514, 167 + 50 * k, 221, 42, 42)){
+						flg = TRUE
+						_break
+					}
+				next
+				return flg
+			}
+			if(NearColor(616, 119, 66, 66, 66)){
+				if(NearColor(721, 381, 255, 246, 242)){
+					if(NearColor(568, 459, 248, 239, 92)){
+						gsel flash_id_
+						flg = FALSE
+						for k, 0, kUnitNum
+							;燃料
+							if(NearColor(488, 167 + 50 * k, 255, 222, 0)){
+								flg = TRUE
+								_break
+							}
+							if(NearColor(488, 167 + 50 * k, 221, 42, 42)){
+								flg = TRUE
+								_break
+							}
+							;弾薬
+							if(NearColor(514, 167 + 50 * k, 255, 222, 0)){
+								flg = TRUE
+								_break
+							}
+							if(NearColor(514, 167 + 50 * k, 221, 42, 42)){
+								flg = TRUE
+								_break
+							}
+						next
+						return flg
+					}
+				}
 			}
 		return FALSE
 		//選択画面かを判定する
@@ -418,11 +477,11 @@
 			if(NearColor(726, 381, 255, 246, 242) == FALSE) :flg = FALSE
 		return flg
 		// 艦隊ごとの艦娘数を更新する
-		#deffunc GetUnits int flash_id_, int screen_shot_type_, array unit_count__
+		#deffunc GetUnits int flash_id_, int sst, array unit_count__
 			gsel flash_id_
-			if(screen_shot_type_ >= kSceneListSize@ + kFleetNum + 1){
+			if(sst >= kSceneListSize@ + kFleetNum + 1){
 				//改装画面
-				unit_k = (screen_shot_type_ - (kSceneListSize@ + kFleetNum + 1)) / kUnitNum
+				unit_k = (sst - (kSceneListSize@ + kFleetNum + 1)) / kUnitNum
 				unit_count__(unit_k) = 0
 				for k, kUnitNum - 1, -1, -1
 					if(NearColor(160, 180 + 54 * k, 235, 218, 203) == FALSE){
@@ -435,7 +494,7 @@
 				next
 			}else{
 				//編成画面
-				unit_k = screen_shot_type_- (kSceneListSize@ + 1)
+				unit_k = sst- (kSceneListSize@ + 1)
 				unit_count__(unit_k) = 0
 				for k, kUnitNum - 1, -1, -1
 					x = k \ 2 :y = k / 2
@@ -454,7 +513,7 @@
 			dirlist xx, path, 5
 		return stat
 		// ソフトのデータをセーブする
-		#deffunc WriteSaveData
+		#deffunc WriteSaveData int mode
 			gsel kPutWindowID@, 2
 			title "セーブ中..."
 			// テキスト
@@ -485,6 +544,8 @@
 			output += "Denoise\t"        + denoise_flg@ + "\n"
 			output += "AutoCountSet\t"   + auto_count_flg@ + "\n"
 			output += "AutoTimeSet\t"    + auto_time_set_flg@ + "\n"
+			output += "AutoSaveText\t"   + auto_save_flg2@ + "\n"
+			output += "CheckExhausted\t" + exhausted_flg@ + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -509,31 +570,33 @@
 			if(CheckHomeFlg(kFlashBufferID@)){
 				GetSupply kFlashBufferID@, supply_list@
 				supply_log@ += NowTime() + "," + supply_list@(0) + "," + supply_list@(1) + "," + supply_list@(2) + "," + supply_list@(3) + "," + supply_list@(4) + "\n"
-				notesel supply_log@ :notesave "supply.csv"
+				notesel supply_log@ :notesave pic_save_path@(0) + "\\supply.csv"
 			}
 			// 画像
-			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 2)
-			for k, 0, kSceneListSize@
-				pos 0, k * kFlashWY
-				gcopy kCaptureBufferID@ + k, 0, 0, kFlashWX, kFlashWY
-			next
-			pos 0, kSceneListSize@ * kFlashWY
-			gcopy kBattleBufferID@, 0, 0, kFlashWX, kFlashWY
-			pos 0, (kSceneListSize@ + 1) * kFlashWY
-			gcopy kDropBufferID@, 0, 0, kFlashWX, kFlashWY
-			for k, 0, kFleetNum
-				pos kFlashWX, k * kFlashWY
-				gcopy kFleetIdOffset@ + k, 0, 0, kFlashWX, kFlashWY
-			next
-			for i, 0, kFleetNum
-				for j, 0, kUnitNum
-					pos kFlashWX * (i + 2), j * kFlashWY
-					gcopy kUnitIdOffset@ + (i * kUnitNum + j), 0, 0, kFlashWX, kFlashWY
+			if(mode){
+				buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 2)
+				for k, 0, kSceneListSize@
+					pos 0, k * kFlashWY
+					gcopy kCaptureBufferID@ + k, 0, 0, kFlashWX, kFlashWY
 				next
-			next
-			cvbuffer kCaptureBufferID@, ginfo_sx, ginfo_sy
-			cvputimg kCaptureBufferID@
-			cvsave pic_save_path@(0) + "\\save.png", kCaptureBufferID@
+				pos 0, kSceneListSize@ * kFlashWY
+				gcopy kBattleBufferID@, 0, 0, kFlashWX, kFlashWY
+				pos 0, (kSceneListSize@ + 1) * kFlashWY
+				gcopy kDropBufferID@, 0, 0, kFlashWX, kFlashWY
+				for k, 0, kFleetNum
+					pos kFlashWX, k * kFlashWY
+					gcopy kFleetIdOffset@ + k, 0, 0, kFlashWX, kFlashWY
+				next
+				for i, 0, kFleetNum
+					for j, 0, kUnitNum
+						pos kFlashWX * (i + 2), j * kFlashWY
+						gcopy kUnitIdOffset@ + (i * kUnitNum + j), 0, 0, kFlashWX, kFlashWY
+					next
+				next
+				cvbuffer kCaptureBufferID@, ginfo_sx, ginfo_sy
+				cvputimg kCaptureBufferID@
+				cvsave pic_save_path@(0) + "\\save.png", kCaptureBufferID@
+			}
 		return
 		// ソフトのデータをロードする
 		#deffunc ReadSaveData
@@ -619,11 +682,15 @@
 					if(temp(0) == "ShowLastDate") :show_date_flg@ = limit(int(temp(1)), 0, 1)
 				}
 				if(read_ver >= 206){
-					if(temp(0) == "Denoise") :denoise_flg@ += limit(int(temp(1)), 0, 1)
+					if(temp(0) == "Denoise") :denoise_flg@ = limit(int(temp(1)), 0, 1)
 				}
 				if(read_ver >= 207){
-					if(temp(0) == "AutoCountSet") :auto_count_flg@ += limit(int(temp(1)), 0, 1)
-					if(temp(0) == "AutoTimeSet") :auto_time_set_flg@ += limit(int(temp(1)), 0, 1)
+					if(temp(0) == "AutoCountSet") :auto_count_flg@ = limit(int(temp(1)), 0, 1)
+					if(temp(0) == "AutoTimeSet") :auto_time_set_flg@ = limit(int(temp(1)), 0, 1)
+				}
+				if(read_ver >= 208){
+					if(temp(0) == "AutoSaveText") :auto_save_flg2@ = limit(int(temp(1)), 0, 1)
+					if(temp(0) == "CheckExhausted") :exhausted_flg@ = limit(int(temp(1)), 0, 1)
 				}
 			next
 			;微修正

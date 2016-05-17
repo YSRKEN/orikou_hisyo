@@ -28,6 +28,7 @@
 	#enum kGraphBufferID
 	#enum kMatchBufferID	;マッチング用の捨てID
 	#enum kDeadZoneWindowID	;大破進撃を阻止するための画面
+	#enum kExhaustedWindowID	;消耗出撃を阻止するための画面
 	;バッファ用
 	#enum global kNumGetBufferID	;数字認識用
 	#enum kCursorBufferID	;カーソル用
@@ -129,6 +130,7 @@
 	// コンボボックスの内容
 	sdim mode_list, 1024	//実行モード
 		gosub *init_mode_list
+		error_log += NowTime() + ",init_mode_list,\n"
 	sdim fleets_list, 1024	//第○艦隊
 		for k, 1, kFleetNum + 1
 			fleets_list += "第" + k + "艦隊\n"
@@ -151,6 +153,7 @@
 		sdim bgm_list_filename, 260, kBgmListSize
 		bgm_list_filename.0 = "<NONE>", "<NONE>", "<NONE>"
 		gosub *init_bgm_list
+		error_log += NowTime() + ",init_bgm_list,\n"
 	sdim fps_list, 1024	//fps一覧
 		fps_num.0 = 30, 20, 15, 10, 5, 3, 2, 1
 		for k, 0, length(fps_num)
@@ -167,6 +170,7 @@
 		next
 	sdim area_list, 1024
 		gosub *area_init
+		error_log += NowTime() + ",area_init,\n"
 	// その他設定
 	;カレントディレクトリを記憶
 	sdim pic_save_path, 260, 2
@@ -217,14 +221,15 @@
 	dim edock_second, kDocks - 1
 	expos.0 = 722, 731, 745, 754, 768, 777
 	gosub *match_init
+	error_log += NowTime() + ",match_init,\n"
 	;ソート一覧
 	sdim sort_list, 1024
 	sort_list_size = 0
 	;資源ログ
-	exist "supply.csv"
+	exist pic_save_path(0) + "\\supply.csv"
 	if(strsize != -1){
 		notesel supply_log
-		noteload "supply.csv"
+		noteload pic_save_path(0) + "\\supply.csv"
 		dim supply_log_int, 100, 2 + 5	;2は日時の部分
 		supply_log_size = LoadLog(supply_log, supply_log_int)
 	}else{
@@ -233,6 +238,7 @@
 		supply_log_size = 0
 	}
 	supply_last_time = -1
+	save_last_time = -1
 	logging_index = 9
 	;資源グラフ
 	scale_mode = 0	;モード(1日・1週間・2週間・1ヶ月・2ヶ月・3ヶ月・半年・1年)
@@ -250,6 +256,7 @@
 	denoise_flg       = FALSE
 	auto_count_flg    = FALSE
 	auto_time_set_flg = FALSE
+	exhausted_flg     = FALSE
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
 	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
 	get_handle_flg    = TRUE	;ズレ補正時だけOFFになる
@@ -271,6 +278,8 @@
 	zooming_index_ = -1
 	dead_zone_flg_ = FALSE
 	dead_zone_flg__ = FALSE
+	exhausted_flg_ = FALSE
+	exhausted_flg__ = FALSE
 
 // バッファ初期化
 	//マウスカーソル
@@ -304,6 +313,7 @@
 
 	ReadSaveData
 	gosub *init_bgm_list
+	error_log += NowTime() + ",init_bgm_list,\n"
 	goto *main1
 
 *init_bgm_list

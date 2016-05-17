@@ -3,6 +3,7 @@ goto *main2
 
 // 座標取得
 *get_pos
+	error_log += NowTime() + ",get_pos," + manual_getpos_flg + "\n"
 	switch manual_getpos_flg
 		case 0
 			// 座標を自動で取得する
@@ -10,6 +11,9 @@ goto *main2
 			GetDesktopWindow kDeskBufferID
 			//撮影した画像から座標を検索する
 			GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+			//座標補正
+			flash_px += kOffsetX :flash_py += kOffsetY
+			;
 			SetTitle
 			get_pos_flg = TRUE
 			other_get_pos_flg = FALSE
@@ -86,6 +90,9 @@ goto *main2
 				}else{
 					GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
 					flash_px += square_x :flash_py += square_y
+					;座標補正
+					flash_px += kOffsetX :flash_py += kOffsetY
+					;
 					SetTitle
 					get_pos_flg = TRUE
 					other_get_pos_flg = FALSE
@@ -118,6 +125,7 @@ return
 
 //画像保存
 *save_picture
+	error_log += NowTime() + ",save_picture," + cap_crop_flg + "+" + denoise_flg + "\n"
 	//画面クロップにチェックが入っているかで対応が変わる
 	screen_shot_type2 = JudgeSituation(kPutTempWindowID, 0)
 	if((cap_crop_flg) && (screen_shot_type2 >= kSceneListSize)){
@@ -159,6 +167,7 @@ return
 
 //艦隊画像保存
 *save_fleets
+	error_log += NowTime() + ",save_fleets," + commands_index + "\n"
 	if(commands_index < kFleetNum){
 		// 第1～第4艦隊
 		buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
@@ -202,10 +211,12 @@ return
 		gsel kMainWindowID
 		objprm bgm_index_id, bgm_list
 		objprm bgm_index_id, bgm_index
+		error_log += NowTime() + ",browse_bgm," + bgm_index + "-" + bgm_list_filename(bgm_index) + "\n"
 	}
 return
 //BGM切り替え
 *switch_bgm
+	error_log += NowTime() + ",switch_bgm," + bgm_index + "\n"
 	if(bgm_list_flg(bgm_index)){
 		bgm_list_flg(bgm_index) = FALSE
 		if(bgm_index == bgm_type) :mmstop
@@ -223,6 +234,7 @@ return
 return
 //BGM再生
 *start_bgm
+	error_log += NowTime() + ",start_bgm," + bgm_type + "\n"
 	if((bgm_type >= 0) && (bgm_type < kBgmListSize)){
 		if(bgm_list_flg(bgm_type)){
 			mmplay bgm_type
@@ -233,15 +245,18 @@ return
 return
 //BGM停止
 *stop_bgm
+	error_log += NowTime() + ",stop_bgm,\n"
 	mmstop
 return
 
 //経験値計算機を閉じる
 *close_exp
+	error_log += NowTime() + ",close_exp,\n"
 	gsel kExpCalcWindowID, -1
 return
 //経験値の計算
 *exp_calc
+	error_log += NowTime() + ",exp_calc,\n"
 	now_id = ginfo_sel
 	gsel kExpCalcWindowID
 	;レベルの矛盾を修正
@@ -300,11 +315,13 @@ return
 return
 //経験値計算機を出す
 *calc_exp
+	error_log += NowTime() + ",calc_exp,\n"
 	gsel kExpCalcWindowID, 2
 return
 
 //カウンターリセット
 *reset_counter_a
+	error_log += NowTime() + ",reset_counter,a\n"
 	a_sortie_count = 0			;あ号出撃
 	a_to_boss_count = 0			;あ号ボス到達
 	a_win_boss_count = 0		;あ号ボス勝利
@@ -312,19 +329,23 @@ return
 	gosub *redraw_counter
 return
 *reset_counter_r
+	error_log += NowTime() + ",reset_counter,r\n"
 	r_count = 0					;ろ号
 	gosub *redraw_counter
 return
 *reset_counter_i
+	error_log += NowTime() + ",reset_counter,i\n"
 	i_count = 0					;い号
 	gosub *redraw_counter
 return
 //カウンターを閉じる
 *close_counter
+	error_log += NowTime() + ",close_counter,\n"
 	gsel kCountWindowID, -1
 return
 //カウンターを出す
 *count_task
+	error_log += NowTime() + ",count_task,\n"
 	gsel kCountWindowID, 2
 return
 //カウントする
@@ -336,6 +357,7 @@ return
 *count_i :i_count++ :gosub *redraw_counter :return
 //カウンター再描画
 *redraw_counter
+	error_log += NowTime() + ",redraw_counter,\n"
 	count_result = ""
 	;あ号
 	count_result += "あ号：" + a_sortie_count + "回/" + a_to_boss_count + "回/" + a_win_boss_count + "回/" + a_s_win_count + "回("
@@ -358,16 +380,19 @@ return
 
 //タイマーを出す
 *dock_timer
+	error_log += NowTime() + ",dock_timer,\n"
 	gsel kDockWindowID, 2
 return
 //タイマーを閉じる
 *close_dock
+	error_log += NowTime() + ",close_dock,\n"
 	gsel kDockWindowID, -1
 return
 //時間を取得
 *get_dock
 	if(screen_shot_type >= kSceneListSize + 1) :return
-	if(mode_list3(screen_shot_type) == "入渠画面"){
+	if(sst_str == "入渠画面"){
+		error_log += NowTime() + ",get_dock,normal\n"
 		buffer kTempBufferID, 11, 16
 		dim number, 6
 		for i, 0, kDocks
@@ -391,7 +416,8 @@ return
 			gosub *redraw_dock
 		next
 	}
-	if(mode_list3(screen_shot_type) == "工廠画面"){
+	if(sst_str == "工廠画面"){
+		error_log += NowTime() + ",get_dock,b\n"
 		buffer kTempBufferID, 11, 16
 		dim number, 6
 		for i, 0, kDocks
@@ -422,6 +448,7 @@ return
 	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44) && NearColor(585,393,35,158,159)){
 		;次に、時間が表示されているかを判定
 		if(NearColor(598,451,118,113,114)){
+			error_log += NowTime() + ",get_dock,e2\n"
 			;そして、第何艦隊が対象かを判定
 			;「旗左下から1つ上」基準で、上から
 			;x=517, y=180, 210, 240, ..., 390(約R76 G168 B168)
@@ -463,6 +490,7 @@ return
 	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44) && NearColor(585,393,35,158,159)){
 		;次に、時間が表示されているかを判定
 		if(NearColor(598,451,118,113,114)){
+			error_log += NowTime() + ",get_dock,e3\n"
 			;そして、第何艦隊が対象かを判定
 			;「旗左下から1つ上」基準で、上から
 			;x=517, y=180, 210, 240, ..., 390(約R76 G168 B168)
@@ -500,6 +528,7 @@ return
 		;次に、時間が表示されているかを判定
 		if(NearColor(598,451,118,113,114)){
 			;そして、第何艦隊が対象かを判定
+			error_log += NowTime() + ",get_dock,e4\n"
 			for k, 0, 8
 				if(NearColor(517,180 + k * 30,76,168,168)){
 					if(NearColor(525,180 + k * 30,237,229,217) && NearColor(523,180 + k * 30,239,231,219)){
@@ -611,15 +640,18 @@ return
 
 //ソート一覧画面を出す
 *show_sort_list
+	error_log += NowTime() + ",show_sort_list,\n"
 	gsel kSortListWindowID, 2
 return
 //ソート一覧画面を閉じる
 *close_sort_list
+	error_log += NowTime() + ",close_sort_list,\n"
 	gsel kSortListWindowID, -1
 return
 //追加
 *add_sort_list
-	if(mode_list3(JudgeSituation(kPutTempWindowID, 0)) == "ソート画面"){
+	if(SstToStr(JudgeSituation(kPutTempWindowID, 0)) == "ソート画面"){
+		error_log += NowTime() + ",add_sort_list,\n"
 		;バッファの追加
 		buffer kSortIdOffset + sort_list_size, kSortWX, kSortWY
 		gcopy kPutTempWindowID, kSortPX, kSortPY, kSortWX, kSortWY
@@ -633,6 +665,7 @@ return
 //↑
 *upper_sort_list
 	if((sort_index >= 1) && (sort_index < sort_list_size)){
+		error_log += NowTime() + ",upper_sort_list,\n"
 		;バッファの入れ替え
 		buffer kTempBufferID, kSortWX, kSortWY
 		gcopy kSortIdOffset + sort_index - 1, 0, 0, kSortWX, kSortWY
@@ -653,6 +686,7 @@ return
 //↓
 *lower_sort_list
 	if((sort_index >= 0) && (sort_index < sort_list_size - 1)){
+		error_log += NowTime() + ",lower_sort_list,\n"
 		;バッファの入れ替え
 		buffer kTempBufferID, kSortWX, kSortWY
 		gcopy kSortIdOffset + sort_index + 1, 0, 0, kSortWX, kSortWY
@@ -673,6 +707,7 @@ return
 //削除
 *del_sort_list
 	if((sort_index >= 0) && (sort_index < sort_list_size)){
+		error_log += NowTime() + ",del_sort_list,\n"
 		;バッファの削除
 		for k, sort_index, sort_list_size - 1
 			gsel kSortIdOffset + k
@@ -688,6 +723,7 @@ return
 return
 //全削除
 *alldel_sort_list
+	error_log += NowTime() + ",alldel_sort_list,\n"
 	sort_list = ""
 	gsel kSortListWindowID
 	objprm sort_index_id, sort_list
@@ -695,6 +731,7 @@ return
 return
 //画像を出力
 *make_sort_list
+	error_log += NowTime() + ",make_sort_list,\n"
 	;出力用バッファを準備
 	ListSizeX = (sort_width_index + 1) * kSortWX
 	ListSizeY = sort_list_size / (sort_width_index + 1) * kSortWY
@@ -714,6 +751,7 @@ return
 //リストクリックに応じて画像変更
 *redraw_sort_preview
 	if((sort_index >= 0) && (sort_index < sort_list_size)){
+		error_log += NowTime() + ",redraw_sort_preview,\n"
 		gsel kSortListWindowID
 		pos kObjSpace * 2 + kObjX * 2, kObjSpace
 		gzoom2 kObjX * 2, kObjY * 10, kSortIdOffset + sort_index, 0, 0, kSortWX, kSortWY
@@ -722,14 +760,17 @@ return
 
 //資材グラフを出す
 *show_graph
+	error_log += NowTime() + ",show_graph,\n"
 	gsel kSupplyGraphID, 2
 return
 //資材グラフを閉じる
 *close_graph
+	error_log += NowTime() + ",close_graph,\n"
 	gsel kSupplyGraphID, -1
 return
 //資材グラフを作成する
 *make_graph
+	error_log += NowTime() + ",make_graph,\n"
 	// 日付の最小値・最大値を取り出す
 	day_first = ConvertDay(supply_log_int(0, 0))
 	day_last  = ConvertDay(supply_log_int(supply_log_size - 1, 0))
@@ -850,6 +891,7 @@ return
 return
 //資材グラフのスクショを保存
 *save_graph
+	error_log += NowTime() + ",save_graph,\n"
 	gsel kSupplyGraphID
 	cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
 	cvputimg kCaptureBufferID
@@ -859,6 +901,7 @@ return
 //資源画像を保存
 *save_stock
 	if(CheckHomeFlg(kPutTempWindowID)){
+		error_log += NowTime() + ",save_stock,\n"
 		buffer kTempBufferID, kStockAllWX, kStockAllWY
 		pos 0, 0
 		gcopy kPutTempWindowID, kStockTimePX, kStockTimePY, kStockTimeWX, kStockTimeWY
@@ -873,12 +916,14 @@ return
 
 //オプション画面を閉じる
 *close_option
+	error_log += NowTime() + ",close_option,\n"
 	gsel kOptionWindowID, -1
 return
 //保存フォルダを参照する
 *browse_folder
 	selfolder pic_save_path(1), "保存フォルダ..."
 	if(strlen(pic_save_path(1)) == 3) :pic_save_path(1) = strmid(pic_save_path(1), 0, 2)	;ドライブ直下対策
+	error_log += NowTime() + ",browse_folder," + pic_save_path(1) + "\n"
 	gsel kOptionWindowID
 	redraw 0
 		color 255, 255, 255 :boxf
@@ -891,16 +936,21 @@ return
 return
 //オプション画面を開く
 *show_option
+	error_log += NowTime() + ",show_option,\n"
 	gsel kOptionWindowID, 2
 return
 
 //データセーブ(手動)
 *save_soft_data
-	WriteSaveData
+	error_log += NowTime() + ",save_soft_data,\n"
+	notesel error_log
+	notesave pic_save_path(0) + "\\soft.log"
+	WriteSaveData 1
 return
 
 //このソフトについて
 *about
+	error_log += NowTime() + ",about,\n"
 	dialog "ソフト名：" + kSoftName + " " + kSoftVer + "\n作成者：YSR\n最終更新日：" + kSoftLastUpdate,,kSoftName
 return
 

@@ -1,10 +1,18 @@
-/* おりこうさんな秘書 Ver.2.0.7 */
+/* おりこうさんな秘書 Ver.2.0.8 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.2.0.7"
-	#define kSoftVer2       "207"
-	#define kSoftLastUpdate "2015/07/23"
+	#define kSoftVer        "Ver.2.0.8"
+	#define kSoftVer2       "208"
+	#define kSoftLastUpdate "2015/07/24"
+
+	sdim error_log, 1024 * 1024
+	exist dir_cur + "\\soft.log"
+	if(strsize != -1){
+		notesel error_log
+		noteload dir_cur + "\\soft.log"
+	}
+	onerror *error_msg
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -16,7 +24,7 @@
 /* メインルーチン */
 // ウィンドウ周りを初期設定
 	//オプション画面
-	screen kOptionWindowID, kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 6, 4
+	screen kOptionWindowID, kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 7, 4
 	gsel kOptionWindowID, -1
 	title "オプション"
 	font msgothic, kSmallFontSize
@@ -34,24 +42,28 @@
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY
 			chkbox "ズレ補正",     auto_set_flg
 		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY
-			chkbox "終了セーブ",   auto_save_flg
+			chkbox "消耗チェック", exhausted_flg
 		pos kObjSpace                 , kObjSpace + kObjSpaceY * 2
 			chkbox "フォルダ指定", my_folder_flg
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 2
 			button gosub "参照...", *browse_folder
-		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 2
-			chkbox "デノイズ", denoise_flg
 		pos kObjSpace                 , kObjSpace + kObjSpaceY * 4
-			chkbox "資源ログ(分)",     auto_supply_flg
+			chkbox "定期セーブ",       auto_save_flg2
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 4
-			combox logging_index,,"1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
+			chkbox "終了セーブ",   auto_save_flg
 		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 4
-			chkbox "更新日時",     show_date_flg
+			chkbox "デノイズ", denoise_flg
 		pos kObjSpace                 , kObjSpace + kObjSpaceY * 5
-			combox fps_index,,fps_list
+			chkbox "資源ログ(分)",     auto_supply_flg
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 5
-			combox zooming_index,,zooming_list
+			combox logging_index,,"1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
 		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5
+			chkbox "更新日時",     show_date_flg
+		pos kObjSpace                 , kObjSpace + kObjSpaceY * 6
+			combox fps_index,,fps_list
+		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 6
+			combox zooming_index,,zooming_list
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 6
 			button gosub "閉じる", *close_option
 
 	//経験値計算機
@@ -378,13 +390,14 @@
 		}
 		// 結果を判定し、自動で格納する
 		screen_shot_type = JudgeSituation(kFlashBufferID, 1)
+		sst_str = SstToStr(screen_shot_type)
 		if(screen_shot_type != kTypeUnknown){
 			if(screen_shot_type != kTypeDrop){
 				gsel kCaptureBufferID + screen_shot_type - 1
 				gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
 				if(screen_shot_type <= kSceneListSize){
 					;戦闘画面(昼戦画面と夜戦画面と夜戦マス)ならば再度コピーする
-					if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面") || (mode_list3(screen_shot_type) == "夜戦マス")){
+					if((sst_str == "昼戦画面") || (sst_str == "夜戦画面") || (sst_str == "夜戦マス")){
 						gsel kBattleBufferID
 						gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
 					}
@@ -399,6 +412,7 @@
 			GetUnits kFlashBufferID, screen_shot_type, unit_count
 			for i, 0, kFleetNum
 				if(unit_count_(i) != unit_count(i)){
+					error_log += NowTime() + ",change_units," + unit_count_(i) + "→" + unit_count(i) + "\n"
 					if(unit_count_(i) > unit_count(i)){
 						for j, unit_count(i), unit_count_(i)
 							gsel kUnitIdOffset + i * kUnitNum + j
@@ -447,12 +461,13 @@
 				color :boxf 111, 0, 273, 25
 			}
 			screen_shot_type2 = JudgeSituation(kPutTempWindowID, 0)
+			sst_str2 = SstToStr(screen_shot_type2)
 			if(screen_shot_type2 < kSceneListSize){
-				if(mode_list3(screen_shot_type2) == "戦績表示")   :color :boxf 201, 123, 496, 153
-				if(mode_list3(screen_shot_type2) == "ランキング") :color :boxf 225, 153, 375, 451
-				if(mode_list3(screen_shot_type2) == "交戦結果")   :color :boxf  92,  82, 264, 106
-				if(mode_list3(screen_shot_type2) == "戦果報告")   :color :boxf  56,  82, 228, 106
-				if(mode_list3(screen_shot_type2) == "演習一覧"){
+				if(sst_str2 == "戦績表示")   :color :boxf 201, 123, 496, 153
+				if(sst_str2 == "ランキング") :color :boxf 225, 153, 375, 451
+				if(sst_str2 == "交戦結果")   :color :boxf  92,  82, 264, 106
+				if(sst_str2 == "戦果報告")   :color :boxf  56,  82, 228, 106
+				if(sst_str2 == "演習一覧"){
 					color
 					boxf 338, 178, 503, 192
 					boxf 338, 233, 503, 247
@@ -460,7 +475,7 @@
 					boxf 338, 343, 503, 357
 					boxf 338, 398, 503, 412
 				}
-				if(mode_list3(screen_shot_type2) == "演習個別") :color :boxf 130,  87, 425, 117
+				if(sst_str2 == "演習個別") :color :boxf 130,  87, 425, 117
 			}
 		}
 		// デノイズを行う
@@ -471,12 +486,12 @@
 		;dead_zone_flg_に関する処理
 		if(screen_shot_type <= kSceneListSize){
 			if(CheckDeadZone(kFlashBufferID, screen_shot_type)){
-				if((mode_list3(screen_shot_type) == "出撃画面") || (mode_list3(screen_shot_type) == "戦果報告")){
+				if((sst_str == "出撃画面") || (sst_str == "戦果報告")){
 					dead_zone_flg_ = TRUE
 				}
 			}
 			if(screen_shot_type != kTypeUnknown){
-				if((mode_list3(screen_shot_type) != "出撃画面") && (mode_list3(screen_shot_type) != "戦果報告")){
+				if((sst_str != "出撃画面") && (sst_str != "戦果報告")){
 					dead_zone_flg_ = FALSE
 				}
 			}
@@ -494,6 +509,7 @@
 						pos 10, 10
 						mes "大破した\n 艦娘が\nいます！"
 						dead_zone_flg__ = TRUE
+						error_log += NowTime() + ",stop_move,d\n"
 					}
 					if(CheckSelect2(kFlashBufferID)){
 						//大破出撃阻止用画面
@@ -504,6 +520,7 @@
 						pos 10, 10
 						mes "大破艦あり"
 						dead_zone_flg__ = TRUE
+						error_log += NowTime() + ",stop_go,d\n"
 					}
 				}
 			}
@@ -521,6 +538,7 @@
 							pos 10, 10
 							mes "大破した\n 艦娘が\nいます！"
 							dead_zone_flg__ = TRUE
+							error_log += NowTime() + ",stop_move,d\n"
 						}
 						if(CheckSelect2(kFlashBufferID)){
 							//大破出撃阻止用画面
@@ -531,6 +549,7 @@
 							pos 10, 10
 							mes "大破艦あり"
 							dead_zone_flg__ = TRUE
+							error_log += NowTime() + ",stop_go,d\n"
 						}
 					}
 				}
@@ -558,12 +577,12 @@
 		bgm_type = -1
 		if(CheckHomeFlg(kFlashBufferID)) :bgm_type = 0
 		if(screen_shot_type <= kSceneListSize){
-			if(mode_list3(screen_shot_type) == "マップ画面") :bgm_type = 1
-			if(mode_list3(screen_shot_type) == "昼戦画面")   :bgm_type = 2
-			if(mode_list3(screen_shot_type) == "夜戦画面")   :bgm_type = 2
-			if(mode_list3(screen_shot_type) == "夜戦マス")   :bgm_type = 2
-			if(mode_list3(screen_shot_type) == "交戦結果")   :bgm_type = 3
-			if(mode_list3(screen_shot_type) == "戦果報告")   :bgm_type = 3
+			if(sst_str == "マップ画面") :bgm_type = 1
+			if(sst_str == "昼戦画面")   :bgm_type = 2
+			if(sst_str == "夜戦画面")   :bgm_type = 2
+			if(sst_str == "夜戦マス")   :bgm_type = 2
+			if(sst_str == "交戦結果")   :bgm_type = 3
+			if(sst_str == "戦果報告")   :bgm_type = 3
 		}
 		;現在の状況が変化した際、BGMを再生/停止する
 		if((bgm_type_ != bgm_type) && (bgm_type != -1)){
@@ -639,7 +658,11 @@
 				swbreak
 		swend
 		//ソート一覧
-		if(sort_index_ != sort_index) :gosub *redraw_sort_preview :sort_index_ = sort_index
+		if(sort_index_ != sort_index){
+			gosub *redraw_sort_preview
+			error_log += NowTime() + ",sort_preview," + sort_index_ + "→" + sort_index + "\n"
+			sort_index_ = sort_index
+		}
 		//ステータスバーに最終更新日時を表示する
 		;記録処理
 		if(screen_shot_type != kTypeUnknown){
@@ -650,7 +673,7 @@
 				}else{
 					SetLastUpdate screen_shot_type - 1
 					if(screen_shot_type <= kSceneListSize){
-						if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面") || (mode_list3(screen_shot_type) == "夜戦マス")){
+						if((sst_str == "昼戦画面") || (sst_str == "夜戦画面") || (sst_str == "夜戦マス")){
 							for k, 0, 7
 								last_up_date(kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum, k) = last_up_date(screen_shot_type - 1, k)
 							next
@@ -703,11 +726,12 @@
 					supply_last_time = timeGetTime()
 					GetSupply kFlashBufferID, supply_list
 					supply_log += NowTime() + "," + supply_list(0) + "," + supply_list(1) + "," + supply_list(2) + "," + supply_list(3) + "," + supply_list(4) + "\n"
-					notesel supply_log :notesave "supply.csv"
+					notesel supply_log :notesave pic_save_path(0) + "\\supply.csv"
 					supply_log_size = LoadLog(supply_log, supply_log_int)
 					gosub *make_graph
 					gosub *plot_graph
 					gsel kMainWindowID
+					error_log += NowTime() + ",supply_log," + supply_log_size + "\n"
 				}
 			}
 		}
@@ -746,40 +770,29 @@
 			//(何故か普通のスクショと色合いが異なる？らしいのでコメントアウトで表現)
 			;勝利S
 			ac_win_s = FALSE
-			if(NearColor(/*23,43,53,188,190*/23,43,29,189,192)){
-				if(NearColor(/*604,240,248,230,91*/604,240,251,228,83)){
-					if(NearColor(/*258,196,135,163,162*/258,196,135,164,164)){
+			if(NearColor(23,43,29,189,192)){
+				if(NearColor(604,240,251,228,83)){
+					if(NearColor(258,196,135,164,164)){
 						ac_win_s = TRUE
 					}
 				}
 			}
 			;完全勝利S
 			gsel kFlashBufferID
-			if(NearColor(/*23,43,51,180,182*/23,43,28,181,184)){
-				if(NearColor(/*628,218,179,144, 29*/628,218,183,144, 2)){
-					if(NearColor(/*30,243,169,141,29*/ 30,243,173,141,  2)){
+			if(NearColor(23,43,28,181,184)){
+				if(NearColor(628,218,183,144, 2)){
+					if(NearColor(30,243,173,141,  2)){
 						ac_win_s = TRUE
 					}
 				}
 			}
 			if(screen_shot_type < kSceneListSize + 1){
-				if(mode_list3(screen_shot_type) == "交戦結果"){
+				if(sst_str == "交戦結果"){
 					gsel kBattleBufferID
 					//補給艦撃沈
 					ac_kill_sup_count = 0
 					ac_kill_sup = FALSE
 					for k, 0, kUnitNum
-						/*if(NearColor(536,215 + 45 * k,77,166,223)){
-							if(NearColor(583,192 + 45 * k,255,255,255)){
-								if(NearColor(600,196 + 45 * k,255,255,255)){
-									if(NearColor(603,202 + 45 * k,255,255,255)){
-										ac_kill_sup_count++
-										ac_kill_sup = TRUE
-									}
-								}
-							}
-						}*/
-						;669,403<-438,445　+231,-42
 						if(NearColor(767,173 + 45 * k,77,166,223)){
 							if(NearColor(669,178 + 45 * k,254,254,254)){
 								if(NearColor(649,157 + 45 * k,133,133,133)){
@@ -793,26 +806,6 @@
 					ac_kill_air_count = 0
 					ac_kill_air = FALSE
 					for k, 0, kUnitNum
-						/*if(NearColor(536,215 + 45 * k,77,166,223)){
-							;正規空母
-							if(NearColor(586,193 + 45 * k,255,255,255)){
-								if(NearColor(602,192 + 45 * k,255,255,255)){
-									if(NearColor(582,202 + 45 * k,255,255,255)){
-										ac_kill_air_count++
-										ac_kill_air = TRUE
-									}
-								}
-							}
-							;軽空母
-							if(NearColor(584,192 + 45 * k,255,255,255)){
-								if(NearColor(602,192 + 45 * k,255,255,255)){
-									if(NearColor(598,194 + 45 * k,235,238,240)){
-										ac_kill_air_count++
-										ac_kill_air = TRUE
-									}
-								}
-							}
-						}*/
 						if(NearColor(767,173 + 45 * k,77,166,223)){
 							;正規空母
 							if(NearColor(670,176 + 45 * k,167,167,167)){
@@ -846,13 +839,10 @@
 					a_sortie_count++
 					gosub *redraw_counter
 					wait 50
+					error_log += NowTime() + ",auto_count,sortie\n"
 				}
 			}else{
 				if(ac_sortie_ == TRUE){
-					/*if(mode_list3(screen_shot_type) == "マップ画面"){
-						a_sortie_count++
-						gosub *redraw_counter
-					}*/
 					ac_sortie_ = ac_sortie
 				}
 			}
@@ -862,6 +852,7 @@
 					ac_win_s_ = ac_win_s
 					a_s_win_count++
 					gosub *redraw_counter
+					error_log += NowTime() + ",auto_count,win_s\n"
 				}
 			}else{
 				if(ac_win_s_ == TRUE){
@@ -876,6 +867,7 @@
 					ac_kill_sup_ = ac_kill_sup
 					r_count += ac_kill_sup_count
 					gosub *redraw_counter
+					error_log += NowTime() + ",auto_count,kill_sup\n"
 				}
 			}else{
 				if(ac_kill_sup_ == TRUE){
@@ -888,6 +880,7 @@
 					ac_kill_air_ = ac_kill_air
 					i_count += ac_kill_air_count
 					gosub *redraw_counter
+					error_log += NowTime() + ",auto_count,kill_air\n"
 				}
 			}else{
 				if(ac_kill_air_ == TRUE){
@@ -899,8 +892,8 @@
 		if(auto_time_set_flg){
 			if(screen_shot_type <= kSceneListSize){
 				if(screen_shot_type_ != screen_shot_type){
-					if(mode_list3(screen_shot_type) == "入渠画面") :gosub *get_dock
-					if(mode_list3(screen_shot_type) == "工廠画面") :gosub *get_dock
+					if(sst_str == "入渠画面") :gosub *get_dock
+					if(sst_str == "工廠画面") :gosub *get_dock
 				}
 			}
 			if(NearColor(509,113,252,180,88)){
@@ -916,8 +909,74 @@
 				}
 			}
 		}
+		// 自動セーブ
+		if(auto_save_flg2){
+			if((save_last_time == -1) || (timeGetTime() - save_last_time > 1000 * 60 * 5)){
+				save_last_time = timeGetTime()
+				WriteSaveData 0
+				error_log += NowTime() + ",auto_save,\n"
+				notesel error_log
+				notesave pic_save_path(0) + "\\soft.log"
+				gsel kMainWindowID
+			}
+		}
+		// 消耗チェック
+		;exhausted_flg_
+		if(screen_shot_type <= kSceneListSize){
+			if(CheckExhausted(kFlashBufferID, screen_shot_type)){
+				exhausted_flg_ = TRUE
+			}
+			if(screen_shot_type != kTypeUnknown){
+				if((sst_str != "出撃画面") && (sst_str != "遠征画面")){
+					exhausted_flg_ = FALSE
+				}
+			}
+		}
+		;exhausted_flg__
+		if(exhausted_flg__ == FALSE){
+			if(exhausted_flg){
+				if(exhausted_flg_){
+					if(CheckSelect2(kFlashBufferID)){
+						//消耗出撃阻止用画面
+						bgscr kExhaustedWindowID, 180, 50, , flash_px + 540, flash_py + 420
+						gsel kExhaustedWindowID, 2
+						color 255, 0, 0
+						font msgothic, 32
+						pos 10, 10
+						mes "消耗艦あり"
+						exhausted_flg__ = TRUE
+						error_log += NowTime() + ",stop_go,e\n"
+					}
+				}
+			}
+		}else{
+			;座標がズレた場合に再表示する処理
+			if(get_pos_flg2){
+				if(exhausted_flg){
+					if(exhausted_flg_){
+						if(CheckSelect2(kFlashBufferID)){
+							//消耗出撃阻止用画面
+							bgscr kExhaustedWindowID, 180, 50, , flash_px + 540, flash_py + 420
+							gsel kExhaustedWindowID, 2
+							color 255, 0, 0
+							font msgothic, 32
+							pos 10, 10
+							mes "消耗艦あり"
+							exhausted_flg__ = TRUE
+							error_log += NowTime() + ",stop_go,e\n"
+						}
+					}
+				}
+			}
+			;白い枠を非表示にする処理
+			if(exhausted_flg == FALSE)  :gsel kExhaustedWindowID, -1 :exhausted_flg__ = FALSE
+			if(exhausted_flg_ == FALSE) :gsel kExhaustedWindowID, -1 :exhausted_flg__ = FALSE
+		}
 		// ウェイト
 		await 1000 / fps_num(fps_index)
+		if(screen_shot_type_ != screen_shot_type){
+			error_log += NowTime() + ",scene_change," + screen_shot_type_ + "→" + screen_shot_type + "\n"
+		}
 		screen_shot_type_ = screen_shot_type
 	loop
 
@@ -925,7 +984,19 @@
 *exit
 	dialog "終了しますか？", 2, kSoftName
 	if(stat == 6){
-		if(auto_save_flg) :WriteSaveData
+		if(auto_save_flg) :WriteSaveData 1
+		error_log += NowTime() + ",exit_soft,\n"
+		notesel error_log
+		notesave pic_save_path(0) + "\\soft.log"
 		exit_flg = TRUE
 	}
 return
+
+//エラー処理
+*error_msg
+	dialog "エラーが発生しました。\nエラー番号：" + wparam, 1, kSoftName
+	error_log += NowTime() + ",error_soft," + wparam + "-" + lparam + "\n"
+	notesel error_log
+	notesave pic_save_path(0) + "\\soft.log"
+	exit_flg = TRUE
+	end

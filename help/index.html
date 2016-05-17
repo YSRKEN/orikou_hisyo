@@ -14,7 +14,7 @@
 	</head>
 	<body>
 <!-- タイトル -->
-		<h1>おりこうさんな秘書 Ver.2.0.7</h1>
+		<h1>おりこうさんな秘書 Ver.2.0.8</h1>
 		Twitterアカウント：<a href="https://twitter.com/orikou_hisyo/">@orikou_hisyo</a><br>
 		公開ページ：<a href="http://www.vector.co.jp/soft/win95/game/se509326.html">http://www.vector.co.jp/soft/win95/game/se509326.html</a><br>
 		紹介動画：<a href="http://www.nicovideo.jp/watch/sm26755860">【艦これ】便利なスクショツール＋αを作ってみた</a>
@@ -78,7 +78,8 @@
 		<p>　ファイルをそのまま削除するだけです。レジストリは使用しません。</p>
 		<h2>ファイル構成</h2>
 		<p><strong>　先頭に☆が付いたファイルは、動作に必須なファイルです。</strong><br>
-		　また、セーブ時には<a href="../save.txt">save.txt</a>および<a href="../save.png">save.png</a>が、資材ログ保存時は<a href="../supply.csv">supply.csv</a>がorikou.exeと同フォルダに作成されます。</p>
+		　また、セーブ時には<a href="../save.txt">save.txt</a>および<a href="../save.png">save.png</a>が、資材ログ保存時は<a href="../supply.csv">supply.csv</a>がorikou.exeと同フォルダに作成されます。<br>
+		　なお、セーブの際にはソフトウェアのログとして<a href="../soft.log">soft.log</a>も保存されますが、デバッグ時以外は特に必要ではありません。</p>
 		<table border="1" summary="orikou.exe・hspcv.dll・hspext.dll・cursor.pngが必須で、他は必須ではありません">
 			<tr>
 				<th abbr="ファイル・フォルダ名">ファイル・フォルダ名</th>
@@ -326,7 +327,8 @@
 			</dl></div>
 			<p>　これらのBGMは、それぞれのシーンに入った際に鳴りだし、別のシーンに移動すると鳴り止みます。<br>
 			　具体的には、マップ画面に入るまでは<strong>母港BGM</strong>、マップ画面では<strong>マップBGM</strong>、戦闘画面では<strong>戦闘BGM</strong>が鳴ります。<br>
-			　<span class="underline">交戦結果～進撃撤退の選択画面までは無音となる</span>ことに注意してください。</p>
+			　<span class="underline">交戦結果～進撃撤退の選択画面までは無音となる</span>ことに注意してください。<br>
+			　また、HSPの仕様上、<strong><span class="underline">ファイルパスに空白を含んでいたり、64bitOSでファイルパスに「Program Files」というフォルダを含んでいたりすると音声が再生できない</span></strong>ことがあります。</p>
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="tools">各種ツール</a></h2>
 			<p>　だいたい見たまんまなので、それぞれではポイントを書くだけに留めます。</p>
@@ -368,7 +370,7 @@
 			　(もちろん、<a href="../format.txt">format.txt</a>を読みつつちまちま修正すればいいのですが)
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="option">オプション</a></h2>
-			<img src="./images/option.png" alt="オプション画面" width="288" height="215">
+			<img src="./images/option.png" alt="オプション画面" width="288" height="243">
 			<p>　各項目について解説します。</p>
 			<table border="1" summary="オプションの各項目についての説明">
 				<tr>
@@ -399,6 +401,15 @@
 					<td>ブラウザの位置を動かしたりして、艦これの画面がズレた際、それを自動で検知して修正します。<br>
 					当然、「手動設定」の際はズレる度に選択を強いられるのでご了承下さい。<br>
 					ちなみにこの検知は、「手動設定」では5秒間隔、それ以外では1秒間隔で行われます。</td>
+				</tr>
+				<tr>
+					<td>消耗チェック</td>
+					<td>出撃画面or遠征画面の際に未補給艦が存在していた場合、出撃ボタンを白い枠で押せなくします。<br>
+					この枠は他のシーンに移るか、「消耗チェック」のチェックを外すと消えます。<strong>チェック推奨</strong>。</td>
+				</tr>
+				<tr>
+					<td>定期セーブ</td>
+					<td>5分毎に自動でセーブされます。手動セーブ・終了セーブと異なり、<a href="../save.png">save.png</a>は更新しませんのでご注意下さい。<strong>チェック推奨</strong>。</td>
 				</tr>
 				<tr>
 					<td>終了セーブ</td>
@@ -550,6 +561,19 @@
 				<th abbr="変更箇所">変更箇所</th>
 			</tr>
 			<tr>
+				<td>Ver.2.0.8</td>
+				<td>2015/07/24</td>
+				<td>
+				・<strong>エラーログ機能を実装した。</strong><br>
+				・場面判定で、関数をラップすることで<strong>添字エラーを解消</strong>した。<br>
+				・補給してない状態で出撃遠征することを阻止する機能を追加した。<br>
+				・<strong>自動保存機能を実装した。</strong>エラーで落ちても安心。<br>
+				・supply.csvの保存パスがおかしかった不具合を修正した。<br>
+				・ファイルパスに空白が入っていると読めない＆Program Filesの制限を明記した。<br>
+				・出撃時の大破判定の精度を向上させた。<br>
+				・<strong>大破チェッカー・消耗チェッカーでのウィンドウ位置が、自動設定II以外ではおかしかった不具合を修正した。</strong></td>
+			</tr>
+			<tr>
 				<td>Ver.2.0.7</td>
 				<td>2015/07/23</td>
 				<td>・<strong>各種タイマーおよび○号カウンターを自動でカウント</strong>できるようにした。<br>
@@ -571,7 +595,7 @@
 			<tr>
 				<td>Ver.2.0.4</td>
 				<td>2015/07/18</td>
-				<td>・夜戦マップで夜戦と認識してくれない不具合を修正。と言うか夜戦マスの項目を追加した。<br>
+				<td>・夜戦マップで夜戦と認識してくれない不具合を修正……と言うか夜戦マスの項目を追加した。<br>
 				・赤疲労まるゆ中破を大破と勘違いする不具合を修正した。<br>
 				・改装画面での認識ミスを修正した。<br>
 				<strong>・資源グラフ機能を追加した。</strong><br>
@@ -710,12 +734,12 @@
 <!-- 著作権について -->
 		<h1><a name="copyright">著作権について</a></h1>
 		<div><dl>
-			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.2.0.7</dd>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.2.0.8</dd>
 			<dt>種別</dt><dd>フリーウェア</dd>
 			<dt>種類</dt><dd>攻略・プレイ支援</dd>
 			<dt>開発者</dt><dd>YSR</dd>
 			<dt>動作環境</dt><dd>Microsoft Windows 98,Me,2000,XP(NT4.0以降を含む),Vista,7,8,8.1</dd>
-			<dt>開発言語</dt><dd>Hot Soup Processor ver.3.5</dd>
+			<dt>開発言語</dt><dd>Hot Soup Processor ver.3.5beta2</dd>
 			<dt>連絡先</dt><dd><a href="mailto:ysr.ken@gmail.com">ysr.ken@gmail.com</a></dd>
 			<dt>Webページ</dt><dd><a href="http://www.vector.co.jp/vpack/browse/person/an050622.html">http://www.vector.co.jp/vpack/browse/person/an050622.html</a></dd>
 			<dt>転載</dt><dd>自由です。ただし、私の名前も一緒に乗せてください。</dd>
