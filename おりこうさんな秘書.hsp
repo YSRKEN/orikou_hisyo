@@ -1,10 +1,11 @@
-/* おりこうさんな秘書 Ver.1.1
+/* おりこうさんな秘書 Ver.1.2
  */
 
-	#packopt name "orikou11"
+	#packopt name "orikou12"
 	#include "hspcv.as"		;画像処理でOpenCVを使うためのライブラリ
 	#pack "area_exp.txt"
 	#pack "exp_table.txt"
+	//#pack "cursor.png"	;あえてpackしないことで変更できるようにした
 
 // 通常の定数
 	// 真偽
@@ -19,6 +20,7 @@
 	#enum kSubWindowID		;手動指定用画面
 	#enum kDeskBufferID		;スクショ用
 	#enum kFlashBufferID	;検索用
+	#enum global kCursorBufferID	;マウスカーソル表示用
 	#enum global kTempBufferID		;テンポラリ用
 	#enum global kNumGetBufferID1	;数字認識用(64x64)
 	#enum global kNumGetBufferID2	;数字認識用(32x32)
@@ -87,9 +89,9 @@
 	#enum global  kModeFleet		;編成画面
 	kModeUnit = kModeFleet + kFleetNum	;改装画面
 	// その他フラグなど
-	#define kSoftName "おりこうさんな秘書 Ver.1.1"	;ソフト名
+	#define kSoftName "おりこうさんな秘書 Ver.1.2"	;ソフト名
 	#const kMainWX kObjX * 2 + kObjSpace * 3	;メイン画面のサイズ
-	#const kMainWY kObjY * 17 + kObjSpace * 22
+	#const kMainWY kObjY * 18 + kObjSpace * 23
 	sdim current_dir, 260		;カレントディレクトリ
 		current_dir = dir_cur	;デバッグ用
 		//current_dir = dir_exe	;実行用
@@ -136,6 +138,12 @@
 	buffer kNumGetBufferID1, 64, 64
 	buffer kNumGetBufferID2, 32, 32
 	gosub *match_init
+	;fps
+	fps_num.0 = 30, 20, 10, 5, 3, 2, 1
+	sdim fps_list, 1024
+	for k, 0, length(fps_num)
+		fps_list += "" + fps_num(k) + "fps\n"
+	next
 	;その他
 	sdim home_bgm_path, 260		;母港BGM
 	sdim map_bgm_path, 260		;マップBGM
@@ -146,11 +154,13 @@
 	units_index = 0				;艦娘の番号
 	commands_index = 0			;保存したい艦隊の種類
 	zooming_index = 2			;サブ画面の倍率
+	fps_index = 0				;fps設定
 	home_bgm_flg = FALSE		;母港画面でのBGM
 	map_bgm_flg = FALSE			;マップ画面でのBGM
 	battle_bgm_flg = FALSE		;戦闘画面でのBGM
 	name_disable_flg = FALSE	;名前を隠すか
 	most_front_flg = FALSE		;最前面表示
+	cursor_flg = FALSE			;サブ画面にカーソルを表示するか
 	flash_px = 0 :flash_py = 0	;Flashの左上座標
 
 // モジュール
@@ -167,7 +177,21 @@
 		// 各種関数定義
 		//サブ画面にコピー
 		#deffunc PutWindowSet int window_id_, int buffer_id_
+			//カーソルを擬似的に表示させる(オプション)
+			if(cursor_flg@){
+				gsel buffer_id_
+				mx = ginfo_mx - flash_px@ :my = ginfo_my - flash_py@
+				;カーソルを描画する
+				color 255, 0, 0
+				gmode 4,0,0,256
+				pos mx, my
+				gcopy kCursorBufferID, 0, 0, cursor_x@, cursor_y@
+				gmode 0
+				pos 0, 0
+			}
+			//サブ画面に画像を転送する
 			gsel window_id_
+			pos 0, 0
 			redraw 0
 				switch zooming_index@
 					case 0	;200％
@@ -586,6 +610,10 @@
 		buffer kOffsetBufferID + k, kFlashWX, kFlashWY
 	next
 	buffer kPutTempWindowID, kFlashWX, kFlashWY
+	//マウスカーソル
+	buffer kCursorBufferID
+	picload "cursor.png", 0
+	cursor_x = ginfo_sx :cursor_y = ginfo_sy
 	//メインウィンドウ
 	screen kExpCalcWindowID ,kObjSpace * 4 + kSmallFontSize * 8 + 0.6 * kObjX * 2, kObjSpace + kObjSpaceY * 6
 	gsel kExpCalcWindowID, -1
@@ -732,11 +760,15 @@
 			chkbox "名前隠し", name_disable_flg
 		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 14
 			combox zooming_index,,"倍率200％\n倍率150％\n倍率100％\n倍率75％\n倍率50％"
-		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 15
-			button gosub "入渠タイマー", *dock_timer
 		pos kObjSpace             , kObjSpace * 5 + kObjSpaceY * 15
+			chkbox "カーソル", cursor_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 15
+			combox fps_index,,fps_list
+		pos kObjSpace             , kObjSpace * 5 + kObjSpaceY * 16
 			button gosub "経験値計算", *calc_exp
 		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 16
+			button gosub "入渠タイマー", *dock_timer
+		pos kObjSpace + kObjSpaceX, kObjSpace * 5 + kObjSpaceY * 17
 			button gosub "情報...", *about
 
 // 自動更新を行う
@@ -896,7 +928,7 @@
 			gosub *increment_dock
 			time = gettime(6)
 		}
-		await 1000 / 30
+		await 1000 / fps_num(fps_index)
 	loop
 
 //経験値処理の初期化
@@ -1087,7 +1119,7 @@ return
 	gsel kDockWindowID, -1
 return
 *about
-	dialog "ソフト名：" + kSoftName + "\n作成者：YSR\n最終更新日：2015/02/18",,kSoftName
+	dialog "ソフト名：" + kSoftName + "\n作成者：YSR\n最終更新日：2015/02/19",,kSoftName
 return
 
 //座標取得
