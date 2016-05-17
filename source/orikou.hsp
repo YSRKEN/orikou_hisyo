@@ -1,13 +1,14 @@
-/* おりこうさんな秘書 Ver.1.6 */
+/* おりこうさんな秘書 Ver.1.7 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.1.6"
-	#define kSoftVer2       "16"
-	#define kSoftLastUpdate "2015/04/26"
+	#define kSoftVer        "Ver.1.7"
+	#define kSoftVer2       "17"
+	#define kSoftLastUpdate "2015/04/27"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
+	#include "hspext.as"
 	#include "const.hsp"
 	#include "module.hsp"
 	#include "window.hsp"
@@ -173,7 +174,7 @@
 	objsize kObjX, kObjY
 		;1段目
 		pos kObjSpace             , kObjSpace
-			combox manual_getpos_flg,,"自動設定\n手動設定"
+			combox manual_getpos_flg,,"自動設定\n手動設定\n自動設定II"
 		pos kObjSpace + kObjSpaceX, kObjSpace
 			button gosub "座標取得", *get_pos
 		;2段目
@@ -253,7 +254,13 @@
 	repeat
 		SetTitle
 		// Flash画面を自動取得
-		GetFlashWindow kFlashBufferID, flash_px, flash_py
+		if(other_get_pos_flg == FALSE){
+			;ディスプレイ全体からBitBltするタイプ
+			GetFlashWindow kFlashBufferID, flash_px, flash_py
+		}else{
+			;ブラウザからBitBltするタイプ
+			GetFlashWindow2 handle, kFlashBufferID, flash_px, flash_py
+		}
 		// 結果を判定し、自動で格納する
 		screen_shot_type = JudgeSituation(kFlashBufferID)
 		if(screen_shot_type != kTypeUnknown){
@@ -372,33 +379,50 @@
 			bgm_type_ = bgm_type
 		}
 		//自動ズレ補正
-		if(manual_getpos_flg == FALSE){
-			;自動設定
-			if(get_pos_flg){						;一回以上座標補正を利用した場合のみ発動
-				if(auto_set_time != gettime(6)){	;1秒毎にズレ判定を行う
-					if(auto_set_flg){				;ズレ補正にチェックが入っていた場合のみ発動
-						if(CheckAutoSet()){			;ズレが存在する場合のみ発動
-							gosub *get_pos
+		switch manual_getpos_flg
+			case 0
+				;自動設定
+				if(get_pos_flg){						;一回以上座標補正を利用した場合のみ発動
+					if(auto_set_time != gettime(6)){	;1秒毎にズレ判定を行う
+						if(auto_set_flg){				;ズレ補正にチェックが入っていた場合のみ発動
+							if(CheckAutoSet()){			;ズレが存在する場合のみ発動
+								gosub *get_pos
+							}
 						}
+						auto_set_time = gettime(6)
 					}
-					auto_set_time = gettime(6)
 				}
-			}
-		}else{
-			;手動設定
-			if(get_pos_flg){						;一回以上座標補正を利用した場合のみ発動
-				diff = gettime(6) - auto_set_time
-				if(diff < 0) :diff += 60
-				if(diff >= 5){	;5秒毎にズレ判定を行う
-					if(auto_set_flg){				;ズレ補正にチェックが入っていた場合のみ発動
-						if(CheckAutoSet()){			;ズレが存在する場合のみ発動
-							gosub *get_pos
+				swbreak
+			case 1
+				;手動設定
+				if(get_pos_flg){						;一回以上座標補正を利用した場合のみ発動
+					diff = gettime(6) - auto_set_time
+					if(diff < 0) :diff += 60
+					if(diff >= 5){	;5秒毎にズレ判定を行う
+						if(auto_set_flg){				;ズレ補正にチェックが入っていた場合のみ発動
+							if(CheckAutoSet()){			;ズレが存在する場合のみ発動
+								gosub *get_pos
+							}
 						}
+						auto_set_time = gettime(6)
 					}
-					auto_set_time = gettime(6)
 				}
-			}
-		}
+				swbreak
+			case 2
+				if(get_pos_flg){						;一回以上座標補正を利用した場合のみ発動
+					if(auto_set_time != gettime(6)){	;1秒毎にズレ判定を行う
+						if(auto_set_flg){				;ズレ補正にチェックが入っていた場合のみ発動
+							if(CheckAutoSet()){			;ズレが存在する場合のみ発動
+								get_handle_flg = FALSE
+								gosub *get_pos
+								get_handle_flg = TRUE
+							}
+						}
+						auto_set_time = gettime(6)
+					}
+				}
+				swbreak
+		swend
 		//ソート一覧
 		if(sort_index_ != sort_index) :gosub *redraw_sort_preview :sort_index_ = sort_index
 		// ウェイト

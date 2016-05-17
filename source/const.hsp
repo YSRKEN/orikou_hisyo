@@ -160,13 +160,15 @@
 	sdim sort_list, 1024
 	sort_list_size = 0
 	;各種フラグ
-	name_disable_flg = TRUE
-	cursor_flg       = TRUE
-	dead_zone_flg    = FALSE
-	cap_crop_flg     = FALSE
-	auto_set_flg     = TRUE
-	auto_save_flg    = TRUE
-	get_pos_flg      = FALSE	;座標取得するとTRUEになる
+	name_disable_flg  = TRUE
+	cursor_flg        = TRUE
+	dead_zone_flg     = FALSE
+	cap_crop_flg      = FALSE
+	auto_set_flg      = TRUE
+	auto_save_flg     = TRUE
+	get_pos_flg       = FALSE	;座標取得するとTRUEになる
+	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
+	get_handle_flg = TRUE		;ズレ補正時だけOFFになる
 	;その他
 	dim unit_count, kFleetNum
 	dim unit_count_, kFleetNum

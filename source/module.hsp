@@ -9,6 +9,10 @@
 		#func BitBlt    "BitBlt"    int,int,int,int,int,int,int,int,int
 		#uselib "user32.dll"
 		#cfunc GetSystemMetrics "GetSystemMetrics" int
+		#cfunc GetForegroundWindow   "GetForegroundWindow"
+		#func GetClientRect "GetClientRect" int, int
+		#cfunc GetDC        "GetDC"         int
+		#func ReleaseDC     "ReleaseDC"     int, int
 		// API用の定数
 		#const SRCCOPY    0x00CC0020
 		#const CAPTUREBLT 0x40000000
@@ -64,12 +68,18 @@
 		//艦これ画面がずれていないかを調べる
 		#defcfunc CheckAutoSet
 			buffer kTempBufferID@, kFlashWX + 2, kFlashWY + 2
-			//デスクトップのデバイスコンテキストを作成する
-			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
-			//デスクトップの画像をコピーする
-			BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_screen, kOffsetX@ + flash_px@ - 1, kOffsetY@ + flash_py@ - 1, SRCCOPY | CAPTUREBLT
-			//デバイスコンテキストを削除する
-			DeleteDC hdc_screen
+			if(manual_getpos_flg@ != 2){
+				//デスクトップのデバイスコンテキストを作成する
+				hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+				//デスクトップの画像をコピーする
+				BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_screen, kOffsetX@ + flash_px@ - 1, kOffsetY@ + flash_py@ - 1, SRCCOPY | CAPTUREBLT
+				//デバイスコンテキストを削除する
+				DeleteDC hdc_screen
+			}else{
+				hdc_browser = GetDC(handle@)
+				BitBlt hdc, 0, 0, kFlashWX + 2, kFlashWY + 2, hdc_browser, flash_px@ - 1, flash_py@ - 1, SRCCOPY | CAPTUREBLT
+				ReleaseDC handle@, hdc_browser
+			}
 			//四隅と各辺の中央の色を取得し、1つでも違うものがあればアウト
 			pget 0, 0
 			check_r = ginfo_r :check_g = ginfo_g :check_b = ginfo_b
@@ -84,6 +94,34 @@
 				}
 			next
 		return auto_set_flg
+		//艦これを開いているブラウザのハンドルを取得する
+		#defcfunc GetKanColleHandle
+			gsel kPutWindowID@
+			title "5秒以内に艦これの画面をアクティブにしてください..."
+			aplsel@ "艦隊これくしょん～艦これ～"
+			aplact@
+			wait 500
+		return GetForegroundWindow()
+		//ブラウザのクライアント領域のサイズを取得する
+		#deffunc GetClientSize int handle_, var wx__, var wy__
+			dim rect, 4
+			GetClientRect handle_, varptr(rect)
+			wx__ = rect(2) - rect(0) :wy__ = rect(3) - rect(1)
+		return
+		//艦これを開いているブラウザの画像を取得する
+		#deffunc GetKanColleWindow int handle_, int window_id_, int wx_, int wy_
+			buffer window_id_, wx_, wy_
+			hdc_browser = GetDC(handle_)
+			BitBlt hdc, 0, 0, wx_, wy_, hdc_browser, 0, 0, SRCCOPY | CAPTUREBLT
+			ReleaseDC handle_, hdc_browser
+		return
+		//デスクトップの一部をキャプチャ2
+		#deffunc GetFlashWindow2 int handle_, int buffer_id_, int flash_px_, int flash_py_
+			gsel buffer_id_
+			hdc_browser = GetDC(handle_)
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_browser, flash_px_, flash_py_, SRCCOPY | CAPTUREBLT
+			ReleaseDC handle_, hdc_browser
+		return
 	#global
 
 	// 汎用
@@ -367,7 +405,7 @@
 			for k, 0, notemax
 				noteget get, k
 				split get, "\t", temp
-				if(temp(0) == "ManualPosition") :manual_getpos_flg@    = limit(int(temp(1)), 0, 1)
+				if(temp(0) == "ManualPosition") :manual_getpos_flg@    = limit(int(temp(1)), 0, 2)
 				if(temp(0) == "ShowMode")       :mode_index@           = limit(int(temp(1)), 0, kSceneListSize@ + 2)
 				if(temp(0) == "ShowFleet")      :fleets_index@         = limit(int(temp(1)), 0, kUnitNum@ - 1)
 				if(temp(0) == "ShowUnit")       :units_index@          = limit(int(temp(1)), 0, kFleetNum@ * kUnitNum@ - 1)

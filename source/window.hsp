@@ -3,90 +3,111 @@ goto *main2
 
 // 座標取得
 *get_pos
-	if(manual_getpos_flg){
-		// 座標を手動で取得する
-		//デスクトップを撮影する
-		GetDesktopWindow kDeskBufferID
-		//手動で枠を選択させる
-		;初期設定
-		bgscr kSelectWindowID, kDispX, kDispY, , kOffsetX, kOffsetY
-		gsel kSelectWindowID, 2
-		font msgothic, kLargeFontSize
-		;画面表示
-		gcopy kDeskBufferID, 0, 0, kDispX, kDispY
-		color :mes "枠を選択して下さい。(Escで終了)"
-		;選択操作
-		is_mouse_button = FALSE
-		is_mouse_select = FALSE
-		mouse_pos_x1 = 0 :mouse_pos_y1 = 0
-		repeat
-			stick key, kStickMouse
-			if(key & kStickEscKey) :break
-			if(key & kStickMouse){
-				if(is_mouse_button){
-					// 選択中
-					redraw 0
-						pos 0, 0
-						gcopy kDeskBufferID, 0, 0, kDispX, kDispY
-						color :mes "枠を選択して下さい。(Escで終了)"
-						DrawMouseSquare mousex, mousey, mouse_pos_x1, mouse_pos_y1
-					redraw 1
+	switch manual_getpos_flg
+		case 0
+			// 座標を自動で取得する
+			//デスクトップを撮影する
+			GetDesktopWindow kDeskBufferID
+			//撮影した画像から座標を検索する
+			GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+			SetTitle
+			get_pos_flg = TRUE
+			other_get_pos_flg = FALSE
+			swbreak
+		case 1
+			// 座標を手動で取得する
+			//デスクトップを撮影する
+			GetDesktopWindow kDeskBufferID
+			//手動で枠を選択させる
+			;初期設定
+			bgscr kSelectWindowID, kDispX, kDispY, , kOffsetX, kOffsetY
+			gsel kSelectWindowID, 2
+			font msgothic, kLargeFontSize
+			;画面表示
+			gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+			color :mes "枠を選択して下さい。(Escで終了)"
+			;選択操作
+			is_mouse_button = FALSE
+			is_mouse_select = FALSE
+			mouse_pos_x1 = 0 :mouse_pos_y1 = 0
+			repeat
+				stick key, kStickMouse
+				if(key & kStickEscKey) :break
+				if(key & kStickMouse){
+					if(is_mouse_button){
+						// 選択中
+						redraw 0
+							pos 0, 0
+							gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+							color :mes "枠を選択して下さい。(Escで終了)"
+							DrawMouseSquare mousex, mousey, mouse_pos_x1, mouse_pos_y1
+						redraw 1
+					}else{
+						// 選択開始
+						mouse_pos_x1 = mousex
+						mouse_pos_y1 = mousey
+						is_mouse_button = TRUE
+					}
 				}else{
-					// 選択開始
-					mouse_pos_x1 = mousex
-					mouse_pos_y1 = mousey
-					is_mouse_button = TRUE
+					if(is_mouse_button){
+						// 選択終了
+						mouse_pos_x2 = mousex
+						mouse_pos_y2 = mousey
+						if(mouse_pos_x1 < mouse_pos_x2){
+							square_x = mouse_pos_x1
+							square_xsize = mouse_pos_x2 - mouse_pos_x1 + 1
+						}else{
+							square_x = mouse_pos_x2
+							square_xsize = mouse_pos_x1 - mouse_pos_x2 + 1
+						}
+						if(mouse_pos_y1 < mouse_pos_y2){
+							square_y = mouse_pos_y1
+							square_ysize = mouse_pos_y2 - mouse_pos_y1 + 1
+						}else{
+							square_y = mouse_pos_y2
+							square_ysize = mouse_pos_y1 - mouse_pos_y2 + 1
+						}
+						is_mouse_button = FALSE
+						is_mouse_select = TRUE
+						break
+					}else{
+						// 何もしていない
+					}
 				}
-			}else{
-				if(is_mouse_button){
-					// 選択終了
-					mouse_pos_x2 = mousex
-					mouse_pos_y2 = mousey
-					if(mouse_pos_x1 < mouse_pos_x2){
-						square_x = mouse_pos_x1
-						square_xsize = mouse_pos_x2 - mouse_pos_x1 + 1
-					}else{
-						square_x = mouse_pos_x2
-						square_xsize = mouse_pos_x1 - mouse_pos_x2 + 1
-					}
-					if(mouse_pos_y1 < mouse_pos_y2){
-						square_y = mouse_pos_y1
-						square_ysize = mouse_pos_y2 - mouse_pos_y1 + 1
-					}else{
-						square_y = mouse_pos_y2
-						square_ysize = mouse_pos_y1 - mouse_pos_y2 + 1
-					}
-					is_mouse_button = FALSE
-					is_mouse_select = TRUE
-					break
+				wait 5
+			loop
+			;選択結果から検索を行う
+			gsel kSelectWindowID, -1
+			if(is_mouse_select){
+				buffer kTempBufferID, square_xsize, square_ysize
+				gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
+				if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
 				}else{
-					// 何もしていない
+					GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
+					flash_px += square_x :flash_py += square_y
+					SetTitle
+					get_pos_flg = TRUE
+					other_get_pos_flg = FALSE
 				}
 			}
-			wait 5
-		loop
-		;選択結果から検索を行う
-		gsel kSelectWindowID, -1
-		if(is_mouse_select){
-			buffer kTempBufferID, square_xsize, square_ysize
-			gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
-			if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
-			}else{
-				GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
-				flash_px += square_x :flash_py += square_y
-				SetTitle
-				get_pos_flg = TRUE
+			swbreak
+		case 2
+			// 座標を自動で取得する(ウィンドウ相手にBitBltするVer)
+			//艦これを開いているブラウザを撮影する
+			if(get_handle_flg){
+				handle = GetKanColleHandle()
+				if(handle == 0) :dialog "ハンドルを取得できませんでした", 0, kSoftName :swbreak
 			}
-		}
-	}else{
-		// 座標を自動で取得する
-		//デスクトップを撮影する
-		GetDesktopWindow kDeskBufferID
-		//撮影した画像から座標を検索する
-		GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
-		SetTitle
-		get_pos_flg = TRUE
-	}
+			GetClientSize handle, wx, wy
+			if((wx < kFlashWX) || (wy < kFlashWY)) :dialog "画面サイズを取得できませんでした", 0, kSoftName :swbreak
+			GetKanColleWindow handle, kDeskBufferID, wx, wy
+			//撮影した画像から座標を検索する
+			GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+			SetTitle
+			get_pos_flg = TRUE
+			other_get_pos_flg = TRUE
+			swbreak
+	swend
 return
 
 //画像保存
