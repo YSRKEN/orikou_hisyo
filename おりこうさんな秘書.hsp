@@ -1,7 +1,7 @@
-/* おりこうさんな秘書 改四点一
+/* おりこうさんな秘書 改四点二
  */
 
-	#packopt name "oriko41"
+	#packopt name "oriko42"
 	#include "hspcv.as"		;画像処理でOpenCVを使うためのライブラリ
 
 // 通常の定数
@@ -71,7 +71,7 @@
 	#enum global  kModeFleet		;編成画面
 	kModeUnit = kModeFleet + kFleetNum	;改装画面
 	// その他フラグなど
-	#define kSoftName "おりこうさんな秘書 改四点一"	;ソフト名
+	#define kSoftName "おりこうさんな秘書 改四点二"	;ソフト名
 	#const kMainWX kObjX * 2 + kObjSpace * 3	;メイン画面のサイズ
 	#const kMainWY kObjY * 14 + kObjSpace * 18
 	sdim current_dir, 260		;カレントディレクトリ
@@ -98,6 +98,7 @@
 	sdim map_bgm_path, 260		;マップBGM
 	sdim battle_bgm_path, 260	;戦闘BGM
 	auto_getpos_flg = TRUE		;座標取得モード
+	dead_zone_flg = TRUE		;大破チェッカー機能
 	fleets_index = 0			;艦隊の番号
 	units_index = 0				;艦娘の番号
 	commands_index = 0			;保存したい艦隊の種類
@@ -300,7 +301,9 @@
 			//マップ画面
 			if(NearColor(221, 448, 21, 69, 93)){
 				if(NearColor(64, 301, 147, 122, 40)){
-					return kTypeMap
+					if(NearColor(799, 239, 61, 139, 180)){
+						return kTypeMap
+					}
 				}
 			}
 			//戦果報告交戦結果
@@ -320,8 +323,8 @@
 				;中央の白縦棒(上中)
 				if(NearColor(395, 77, 255, 246, 242)){
 					if(NearColor(395, 289, 255, 246, 242)){
-						;左下(ガシャン対策)
-						if(NearColor(37, 461, 33, 36, 38)){
+						;左上(ガシャン対策)
+						if(NearColor(0, 0, 36, 54, 63)){
 							return kTypeResult2
 						}
 					}
@@ -355,6 +358,7 @@
 		return kTypeUnknown
 		//「母港画面」かどうかを判定する(BGM・名前隠し用)
 		#defcfunc CheckHomeFlg int flash_id_
+			gsel flash_id_
 			;通常時
 			if(NearColor(665, 42, 83, 159, 73)){		;バケツアイコン
 				if(NearColor(736, 61, 172, 128, 95)){	;ボーキアイコン
@@ -368,6 +372,17 @@
 				}
 			}
 		return FALSE
+		//「大破した艦娘」がいるかどうかを判定する
+		#defcfunc CheckDeadZone int flash_id_
+			gsel flash_id_
+			flg = FALSE
+			for k, 0, kUnitNum
+				if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
+					flg = TRUE
+					_break
+				}
+			next
+		return flg
 	#global
 
 	onexit gosub *exit
@@ -411,6 +426,8 @@
 			button gosub "交戦結果", *mode_result1
 		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 4
 			button gosub "戦果報告", *mode_result2
+		pos kObjSpace             , kObjSpace * 2 + kObjSpaceY * 5
+			chkbox "大破チェック", dead_zone_flg
 		pos kObjSpace + kObjSpaceX, kObjSpace * 2 + kObjSpaceY * 5
 			button gosub "【画像保存】", *save_picture
 
@@ -449,6 +466,7 @@
 			button gosub "情報...", *about
 
 // 自動更新を行う
+	dead_zone_flg_ = FALSE
 	zooming_index_ = zooming_index
 	most_front_flg_ = most_front_flg
 	home_bgm_flg_   = FALSE
@@ -560,6 +578,23 @@
 			home_bgm_flg_ = FALSE
 			map_bgm_flg_ = FALSE
 			battle_bgm_flg_ = FALSE
+		}
+		//大破チェッカー機能
+		if(screen_shot_type == kTypeResult2){
+			if(CheckDeadZone(kFlashBufferID)){
+				if(dead_zone_flg){
+					if(dead_zone_flg_ == FALSE){
+						dialog "大破した艦娘がいます！！", 1, kSoftName
+						dead_zone_flg_ = TRUE
+					}
+				}else{
+					dead_zone_flg_ = FALSE
+				}
+			}else{
+				dead_zone_flg_ = FALSE
+			}
+		}else{
+			dead_zone_flg_ = FALSE
 		}
 		await 1000 / 30
 	loop
@@ -728,7 +763,7 @@ return
 		next
 		cvbuffer kCVTempBufferID, kUnitWX * 4, kUnitWY * 3
 		cvputimg kCVTempBufferID
-		cvsave AutoFileName(), kCVTempBufferID
+		cvsave current_dir + "\\" + AutoFileName(), kCVTempBufferID
 		gsel kMainWindowID
 	}
 return
