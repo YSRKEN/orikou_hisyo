@@ -3,6 +3,7 @@
 	#pack "scene_list.txt"
 	#pack "area_exp.txt"
 	#pack "exp_table.txt"
+	#pack "expedition.txt"
 
 // 通常の定数
 	// 真偽
@@ -49,7 +50,7 @@
 	#const global kFleetNum    4	;艦隊数
 	#const global kUnitNum     6	;艦隊毎の艦娘数
 	#const global kDocks       4	;ドック数
-	#const global kBgmListSize 3	;BGMの種類数
+	#const global kBgmListSize 4	;BGMの種類数
 	#const global kTypeUnknown 0	;デフォルトの判定結果
 	#const global kTypeNow     0	;現在画面
 	// オブジェクトのサイズ
@@ -114,9 +115,13 @@
 	#const kStickEscKey 128
 	#const kStickMouse  256
 	// 認識用
-	#const global kPoints 3	;3点に対して、
-	#const global kParams 5	;xy座標+RGBの5つの数字でチェックする
+	#const global kPoints 3		;3点に対して、
+	#const global kParams 5		;xy座標+RGBの5つの数字でチェックする
 	#const global kMatchSize 64	;認識時のブロックサイズ
+	#const kExpPagePer 8		;遠征のページ毎の数
+	#const kExpPages 5			;遠征のページ数
+	#const global kExpAllPage kExpPages * kExpPagePer
+	#const global kExpStrLength 128	;遠征データの長さ
 
 	dim yearplus,13,2
 	yearplus(0,0)=0		:yearplus(0,1)=0
@@ -142,6 +147,10 @@
 		for k, 1, kFleetNum + 1
 			fleets_list += "第" + k + "艦隊\n"
 		next
+	sdim unit_list, 1024	//第○番艦
+		for k, 1, kUnitNum + 1
+			unit_list += "第" + k + "番艦\n"
+		next
 	sdim units_list, 10240	//第○艦隊○番艦
 		for i, 1, kFleetNum + 1
 			for j, 1, kUnitNum + 1
@@ -155,10 +164,10 @@
 		commands_list += "連合艦隊\n"
 		commands_list += "支援艦隊\n"
 	sdim bgm_list, 1024	//BGM一覧
-		bgm_list_name.0 = "母港", "マップ", "戦闘"
-		bgm_list_flg.0 = FALSE, FALSE, FALSE
+		bgm_list_name.0 = "母港", "マップ", "戦闘", "ボス"
+		bgm_list_flg.0 = FALSE, FALSE, FALSE, FALSE
 		sdim bgm_list_filename, 260, kBgmListSize
-		bgm_list_filename.0 = "<NONE>", "<NONE>", "<NONE>"
+		bgm_list_filename.0 = "<NONE>", "<NONE>", "<NONE>", "<NONE>"
 		gosub *init_bgm_list
 		error_log += NowTime() + ",init_bgm_list,\n"
 	sdim fps_list, 1024	//fps一覧
@@ -227,11 +236,26 @@
 	dim edock_minute, kDocks - 1
 	dim edock_second, kDocks - 1
 	expos.0 = 722, 731, 745, 754, 768, 777
+	sdim exped_small_str, kExpStrLength, kExpAllPage	;リスト内の表示
+	sdim exped_large_str, kExpStrLength, kExpAllPage	;右上の表示
+		notesel text_buffer
+		noteload "expedition.txt"
+		for k, 0, kExpAllPage
+			noteget get, k + 1
+			split get, "\t", temp
+			exped_small_str(k) = temp(0)
+			exped_large_str(k) = temp(1)
+		next
 	gosub *match_init
 	error_log += NowTime() + ",match_init,\n"
 	;ソート一覧
 	sdim sort_list, 1024
 	sort_list_size = 0
+	supply_last_time = -1
+	save_last_time = -1
+	logging_index = 9
+	supply_xpos.0 = 680, 689, 697, 704, 712, 719
+	supply_xpos.6 = 749, 758, 766, 773, 781, 788
 	;資源ログ
 	exist pic_save_path(0) + "\\supply.csv"
 	if(strsize != -1){
@@ -244,9 +268,6 @@
 		supply_log = "時間,燃料,弾薬,鋼材,ボーキ,バケツ\n"
 		supply_log_size = 0
 	}
-	supply_last_time = -1
-	save_last_time = -1
-	logging_index = 9
 	;資源グラフ
 	scale_mode = 0	;モード(1日・1週間・2週間・1ヶ月・2ヶ月・3ヶ月・半年・1年)
 	scale_zooming.0  = 12, 7,  7, 10, 10, 12,   6,  12	;縦線の数
@@ -266,6 +287,7 @@
 	auto_count_flg_i  = FALSE
 	auto_time_set_flg = FALSE
 	exhausted_flg     = FALSE
+	zero_interpolation_flg = FALSE
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
 	get_handle_flg    = TRUE	;ズレ補正時だけOFFになる
 	show_date_flg     = TRUE	;最終更新日時を表示するか否か
@@ -288,8 +310,6 @@
 	dead_zone_flg__ = FALSE
 	exhausted_flg_ = FALSE
 	exhausted_flg__ = FALSE
-	save_picture_size_x = 0
-	save_picture_size_y = 0
 
 // バッファ初期化
 	//マウスカーソル

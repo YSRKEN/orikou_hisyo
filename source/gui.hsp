@@ -1,7 +1,7 @@
 /* GUI部分の記述 */
 
 	//オプション画面
-	screen kOptionWindowID, kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 7, 4
+	screen kOptionWindowID, kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 8, 4
 	gsel kOptionWindowID, -1
 	title "オプション"
 	font msgothic, kSmallFontSize
@@ -39,14 +39,16 @@
 		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 5
 			chkbox "更新日時",     show_date_flg
 		pos kObjSpace                 , kObjSpace + kObjSpaceY * 6
+			chkbox "グラフ零補間", zero_interpolation_flg
+		pos kObjSpace                 , kObjSpace + kObjSpaceY * 7
 			combox fps_index,,fps_list
-		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 6
+		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 7
 			combox zooming_index,,zooming_list
-		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 6
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 7
 			button gosub "閉じる", *close_option
 
 	//経験値計算機
-	screen kExpCalcWindowID ,kObjSpace * 4 + kSmallFontSize * 8 + 0.6 * kObjX * 2, kObjSpace + kObjSpaceY * 6, 4
+	screen kExpCalcWindowID ,kObjSpace * 4 + kSmallFontSize * 8 + 0.6 * kObjX * 2, kObjSpace + kObjSpaceY * 7, 4
 	gsel kExpCalcWindowID, -1
 	title "経験値計算機"
 	font msgothic, kSmallFontSize
@@ -56,11 +58,11 @@
 			mes "周回海域"
 		pos kObjSpace, kObjSpace + kObjSpaceY * 2 + kObjOffset
 			mes "オプション"
-		pos kObjSpace, kObjSpace + kObjSpaceY * 3 + kObjOffset
-			mes "必要経験値"
 		pos kObjSpace, kObjSpace + kObjSpaceY * 4 + kObjOffset
-			mes "戦闘経験値"
+			mes "必要経験値"
 		pos kObjSpace, kObjSpace + kObjSpaceY * 5 + kObjOffset
+			mes "戦闘経験値"
+		pos kObjSpace, kObjSpace + kObjSpaceY * 6 + kObjOffset
 			mes "必要周回数"
 	objsize 0.6 * kObjX, kObjY
 		pos kObjSpace * 2 + kSmallFontSize * 8, kObjSpace
@@ -73,18 +75,22 @@
 			chkbox "旗艦", reader_ship_flg
 		pos kObjSpace * 3 + kSmallFontSize * 5 + 0.6 * kObjX, kObjSpace + kObjSpaceY * 2
 			chkbox "MVP", mvp_flg
-		pos kObjSpace * 3 + kSmallFontSize * 5 + kObjX, kObjSpace + kObjSpaceY * 5
+		pos kObjSpace * 3 + kSmallFontSize * 5 + kObjX, kObjSpace + kObjSpaceY * 6
 			button gosub "閉じる", *close_exp
 	objsize kObjX, kObjY
-		pos kObjSpace * 2 + kSmallFontSize * 5, kObjSpace + kObjSpaceY * 3
-			input need_exp
-			objenable 6, 0
+		pos kObjSpace, kObjSpace + kObjSpaceY * 3
+			chkbox "経験値補間", exp_ss_flg
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 3
+			combox exp_unit_index,, unit_list
 		pos kObjSpace * 2 + kSmallFontSize * 5, kObjSpace + kObjSpaceY * 4
-			input battle_exp
-			objenable 7, 0
+			input need_exp
+			objenable stat, 0
 		pos kObjSpace * 2 + kSmallFontSize * 5, kObjSpace + kObjSpaceY * 5
+			input battle_exp
+			objenable stat, 0
+		pos kObjSpace * 2 + kSmallFontSize * 5, kObjSpace + kObjSpaceY * 6
 			input need_battles
-			objenable 8, 0
+			objenable stat, 0
 	objsize 1.2 * kObjX, kObjY
 		pos kObjSpace * 3 + kSmallFontSize * 4 + 0.6 * kObjX, kObjSpace + kObjSpaceY
 			combox result_index,,"完全勝利S\n勝利S\n勝利A\n戦術的勝利B\n戦術的敗北C\n敗北D\n敗北E"
@@ -136,7 +142,7 @@
 	//各種タイマー
 	screen kDockWindowID, kObjSpace + kObjSpaceX * 6, kObjSpace * 2 + kObjSpaceY * 5 + kSmallFontSize, 4
 	gsel kDockWindowID, -1
-	title "各種時間"
+	title "各種タイマー"
 	font msgothic, kSmallFontSize
 		pos kObjSpace, kObjSpace
 			mes "【入渠時間】"

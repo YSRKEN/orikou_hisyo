@@ -172,10 +172,11 @@ return
 	if(screen_shot_type <= kSceneListSize){
 		if(CheckExhausted(kFlashBufferID, screen_shot_type)){
 			exhausted_flg_ = TRUE
-		}
-		if(screen_shot_type != kTypeUnknown){
-			if((sst_str != "出撃画面") && (sst_str != "遠征画面")){
-				exhausted_flg_ = FALSE
+		}else{
+			if(screen_shot_type != kTypeUnknown){
+				if((sst_str != "出撃画面") && (sst_str != "遠征画面")){
+					exhausted_flg_ = FALSE
+				}
 			}
 		}
 	}
@@ -183,9 +184,13 @@ return
 	if(exhausted_flg__ == FALSE){
 		if(exhausted_flg){
 			if(exhausted_flg_){
-				if(CheckSelect2(kFlashBufferID)){
+				if((CheckSelect2(kFlashBufferID) || exercises_ex_flg)){
 					//消耗出撃阻止用画面
-					bgscr kExhaustedWindowID, 180, 50, , flash_px + 540, flash_py + 420
+					if(exercises_ex_flg){
+						bgscr kExhaustedWindowID, 180, 50, , flash_px + 372, flash_py + 407
+					}else{
+						bgscr kExhaustedWindowID, 180, 50, , flash_px + 540, flash_py + 420
+					}
 					gsel kExhaustedWindowID, 2
 					color 255, 0, 0
 					font msgothic, 32
@@ -201,9 +206,13 @@ return
 		if(get_pos_flg2){
 			if(exhausted_flg){
 				if(exhausted_flg_){
-					if(CheckSelect2(kFlashBufferID)){
+					if((CheckSelect2(kFlashBufferID) || exercises_ex_flg)){
 						//消耗出撃阻止用画面
-						bgscr kExhaustedWindowID, 180, 50, , flash_px + 540, flash_py + 420
+						if(exercises_ex_flg){
+							bgscr kExhaustedWindowID, 180, 50, , flash_px + 372, flash_py + 407
+						}else{
+							bgscr kExhaustedWindowID, 180, 50, , flash_px + 540, flash_py + 420
+						}
 						gsel kExhaustedWindowID, 2
 						color 255, 0, 0
 						font msgothic, 32
@@ -223,6 +232,36 @@ return
 
 // ○号カウンターの自動化
 *auto_count_routine
+	if(exercises_flg) :return
+	;ボスマス判定(BGM機能にも使うのでループ外に出した)
+	if(ac_boss_battle == FALSE){
+		;絵がマップ画面から切り替わった際に、
+		;艦隊アイコンとボスアイコンが十分近ければOK
+		if(screen_shot_type_ != screen_shot_type){
+			if(SstToStr(screen_shot_type_) == "マップ画面"){
+				;領域のマッチング
+				gsel kMapBufferID
+				pos 0, 0
+				cvputimg kBossJudgeBufferID3
+				cvmatch boss_icon_x,  boss_icon_y,  CV_TM_SQDIFF, kBossJudgeBufferID1, kBossJudgeBufferID3
+				cvmatch fleet_icon_x, fleet_icon_y, CV_TM_SQDIFF, kBossJudgeBufferID2, kBossJudgeBufferID3
+				icon_x_diff = boss_icon_x - fleet_icon_x
+				icon_y_diff = boss_icon_y - fleet_icon_y
+				icon_r2_diff = icon_x_diff * icon_x_diff + icon_y_diff * icon_y_diff
+				;ポイント～ポイント間はおよそ630ピクセル、
+				;マッチング時は最大30ピクセルほどなので判定は容易い？
+				if(icon_r2_diff < 10000){
+					ac_boss_battle = TRUE
+				}else{
+					ac_boss_battle = FALSE
+				}
+			}
+		}
+	}else{
+		if(SstToStr(screen_shot_type_) == "母港画面"){
+			ac_boss_battle = FALSE
+		}
+	}
 	if(auto_count_flg_a){
 		// 各フラグの判定
 		//出撃判定
@@ -233,35 +272,6 @@ return
 				if(NearColor(504,297,154,134,14)){
 					ac_sortie   = TRUE
 				}
-			}
-		}
-		;ボスマス判定
-		if(ac_boss_battle == FALSE){
-			;絵がマップ画面から切り替わった際に、
-			;艦隊アイコンとボスアイコンが十分近ければOK
-			if(screen_shot_type_ != screen_shot_type){
-				if(SstToStr(screen_shot_type_) == "マップ画面"){
-					;領域のマッチング
-					gsel kMapBufferID
-					pos 0, 0
-					cvputimg kBossJudgeBufferID3
-					cvmatch boss_icon_x,  boss_icon_y,  CV_TM_SQDIFF, kBossJudgeBufferID1, kBossJudgeBufferID3
-					cvmatch fleet_icon_x, fleet_icon_y, CV_TM_SQDIFF, kBossJudgeBufferID2, kBossJudgeBufferID3
-					icon_x_diff = boss_icon_x - fleet_icon_x
-					icon_y_diff = boss_icon_y - fleet_icon_y
-					icon_r2_diff = icon_x_diff * icon_x_diff + icon_y_diff * icon_y_diff
-					;ポイント～ポイント間はおよそ630ピクセル、
-					;マッチング時は最大30ピクセルほどなので判定は容易い？
-					if(icon_r2_diff < 10000){
-						ac_boss_battle = TRUE
-					}else{
-						ac_boss_battle = FALSE
-					}
-				}
-			}
-		}else{
-			if(SstToStr(screen_shot_type_) == "母港画面"){
-				ac_boss_battle = FALSE
 			}
 		}
 		;ボス勝利
@@ -459,6 +469,7 @@ return
 				if(sst_str == "工廠画面") :gosub *get_dock
 			}
 		}
+		gsel kFlashBufferID
 		if(NearColor(509,113,252,180,88)){
 			if(NearColor(286,139,54,70,44)){
 				if(NearColor(585,393,35,158,159)){
@@ -466,7 +477,7 @@ return
 						gosub *get_dock_e2
 						gosub *get_dock_e3
 						gosub *get_dock_e4
-						wait 20
+						wait 5
 					}
 				}
 			}

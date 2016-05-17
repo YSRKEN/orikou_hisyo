@@ -444,10 +444,10 @@
 				next
 				return flg
 			}
+			gsel flash_id_
 			if(NearColor(616, 119, 66, 66, 66)){
 				if(NearColor(721, 381, 255, 246, 242)){
 					if(NearColor(568, 459, 248, 239, 92)){
-						gsel flash_id_
 						flg = FALSE
 						for k, 0, kUnitNum
 							;燃料
@@ -469,6 +469,37 @@
 								_break
 							}
 						next
+						return flg
+					}
+				}
+			}
+			gsel flash_id_
+			exercises_ex_flg@ = FALSE
+			if(NearColor(17, 17, 0, 0, 0)){
+				if(NearColor(563,360,255,246,242)){
+					if(NearColor(79,55,195,168,86)){
+						flg = FALSE
+						for k, 0, kUnitNum
+							;燃料
+							if(NearColor(315, 145 + 50 * k, 255, 222, 0)){
+								flg = TRUE
+								_break
+							}
+							if(NearColor(315, 145 + 50 * k, 221, 42, 42)){
+								flg = TRUE
+								_break
+							}
+							;弾薬
+							if(NearColor(340, 145 + 50 * k, 255, 222, 0)){
+								flg = TRUE
+								_break
+							}
+							if(NearColor(340, 145 + 50 * k, 221, 42, 42)){
+								flg = TRUE
+								_break
+							}
+						next
+						exercises_ex_flg@ = flg
 						return flg
 					}
 				}
@@ -542,6 +573,8 @@
 			output += "MapBGMPath\t"     + bgm_list_filename@(1) + "\n"
 			output += "BattleBGMMode\t"  + bgm_list_flg@(2) + "\n"
 			output += "BattleBGMPath\t"  + bgm_list_filename@(2) + "\n"
+			output += "BossBGMMode\t"  + bgm_list_flg@(3) + "\n"
+			output += "BossBGMPath\t"  + bgm_list_filename@(3) + "\n"
 			output += "DisableName\t"    + name_disable_flg@ + "\n"
 			output += "ShowCursor\t"     + cursor_flg@ + "\n"
 			output += "CheckDeadZone\t"  + dead_zone_flg@ + "\n"
@@ -561,6 +594,7 @@
 			output += "AutoSaveText\t"   + auto_save_flg2@ + "\n"
 			output += "CheckExhausted\t" + exhausted_flg@ + "\n"
 			output += "MultiShotName\t" + save_picture2_index@ + "\n"
+			output += "ZeroIntPol\t" + zero_interpolation_flg@ + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -713,6 +747,14 @@
 					if(temp(0) == "AutoCountSetR") :auto_count_flg_r@ = limit(int(temp(1)), 0, 1)
 					if(temp(0) == "AutoCountSetI") :auto_count_flg_i@ = limit(int(temp(1)), 0, 1)
 				}
+				if(read_ver >= 210){
+					if(temp(0) == "ZeroIntPol") :zero_interpolation_flg@ = limit(int(temp(1)), 0, 1)
+					if(temp(0) == "BossBGMMode")  :bgm_list_flg@(3)      = limit(int(temp(1)), 0, 1)
+					if(temp(0) == "BossBGMPath")  :bgm_list_filename@(3) = temp(1)
+				}else{
+					bgm_list_flg@(3)      = bgm_list_flg@(2)
+					bgm_list_filename@(3) = bgm_list_filename@(2)
+				}
 			next
 			;微修正
 			for k, 0, 3
@@ -780,7 +822,7 @@
 			fuel = 0 :keta = 1
 			for k, 5, -1, -1
 				buffer kTempBufferID@, 7, 11
-				gcopy flash_id_, 683 + k * 7, 36, 7, 11
+				gcopy flash_id_, supply_xpos@(k), 36, 7, 11
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
 					if(k == 0) :number = limit(number, 0, 3)
@@ -791,8 +833,8 @@
 			;弾薬
 			ammo = 0 :keta = 1
 			for k, 5, -1, -1
-				buffer kTempBufferID@, 8, 11
-				gcopy flash_id_, 680 + k * 8, 55, 8, 11
+				buffer kTempBufferID@, 7, 11
+				gcopy flash_id_, supply_xpos@(k), 55, 7, 11
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
 					if(k == 0) :number = limit(number, 0, 3)
@@ -803,8 +845,8 @@
 			;鋼材
 			steel = 0 :keta = 1
 			for k, 5, -1, -1
-				buffer kTempBufferID@, 8, 11
-				gcopy flash_id_, 749 + k * 8, 36, 8, 11
+				buffer kTempBufferID@, 7, 11
+				gcopy flash_id_, supply_xpos@(k + 6), 36, 7, 11
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
 					if(k == 0) :number = limit(number, 0, 3)
@@ -815,8 +857,8 @@
 			;ボーキ
 			bauxite = 0 :keta = 1
 			for k, 5, -1, -1
-				buffer kTempBufferID@, 8, 11
-				gcopy flash_id_, 749 + k * 8, 55, 8, 11
+				buffer kTempBufferID@, 7, 11
+				gcopy flash_id_, supply_xpos@(k + 6), 55, 7, 11
 				number = MatchNumber(150, TRUE)
 				if(number < 10){
 					if(k == 0) :number = limit(number, 0, 3)
@@ -890,7 +932,7 @@
 					supply_log += str(supply_log_int(k, 6)) + "\n"
 				next
 			}
-			title "おりこうさんな秘書"
+			title kSoftName@
 		return supply_log_size
 		// 日付を統一日付にコンバートする
 		#defcfunc ConvertDay int day
@@ -943,6 +985,68 @@
 			cvsmooth CV_BILATERAL, 30, 30, 0, kCVDenoiseBufferID
 			cvgetimg kCVDenoiseBufferID
 		return
+		// 遠征名を取得する(小)
+		#defcfunc GetExpSmallName int exped_index
+			exp_small_name = -1
+			sdim temp_small_str, kExpStrLength
+			for k, 0, kExpStrLength
+				pget 151 + k, 172 + exped_index * 30
+				if(ginfo_r < 128){
+					temp_small_str += "1"
+				}else{
+					temp_small_str += "0"
+				}
+			next
+			for k, 0, kExpAllPage
+				if(temp_small_str == exped_small_str@(k)){
+					exp_small_name = k
+					_break
+				}
+			next
+		return exp_small_name
+		// 遠征名を取得する(大)
+		#defcfunc GetExpLargeName
+			exp_large_name = -1
+			sdim temp_large_str, kExpStrLength
+			for k, 0, kExpStrLength
+				pget 576 + k, 115
+				if(ginfo_r < 128){
+					temp_large_str += "1"
+				}else{
+					temp_large_str += "0"
+				}
+			next
+			for k, 0, kExpAllPage
+				if(temp_large_str == exped_large_str@(k)){
+					exp_large_name = k
+					_break
+				}
+			next
+		return exp_large_name
+		// 編成画面でレベルを取得する
+		#defcfunc GetLevel int exp_unit_index_
+			level = 0 :keta = 1
+			for k, 2, -1, -1
+				buffer kTempBufferID@, 8, 13
+				gcopy kFlashBufferID@, 254 + k * 8 + (exp_unit_index_ \ 2) * 344, 149 + (exp_unit_index_ / 2) * 113, 8, 13
+				number = MatchNumber(85, TRUE)
+				if(number < 10){
+					if(k == 0) :number = limit(number, 0, 1)
+					level += number * keta
+				}
+				keta *= 10
+			next
+		return level
+		// 編成画面で経験値ゲージを取得する
+		#defcfunc GetUnitExp int exp_unit_index_
+			unit_exp_double = 1.0
+			for k, 0, 160
+				if(NearColor(284 + (exp_unit_index_ \ 2) * 344 + k, 194 + (exp_unit_index_ / 2) * 113, 165, 232, 208) == FALSE){
+					unit_exp_double = 1.0 * k / 160
+					_break
+				}
+			next
+		return unit_exp_double
 	#global
 	#module get_num
 		#deffunc DrawSquare int px_, int py_, int wx_, int wy_
@@ -1022,6 +1126,7 @@
 			pos 0, 0
 			gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy
 			OtsuThreshold FALSE
+			;bmpsave "" + k@misc + "_.bmp"
 			DrawSquare 0, 0, kMatchSize, kMatchSize
 			cvbuffer kCVNumBufferID, kMatchSize, kMatchSize
 			cvputimg kCVNumBufferID

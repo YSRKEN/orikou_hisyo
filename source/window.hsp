@@ -156,7 +156,12 @@ return
 	dim rect, 4
 	GetClientSize handle, rect
 	wx = rect(2) - rect(0) :wy = rect(3) - rect(1)
-	if((wx < kFlashWX) || (wy < kFlashWY)) :dialog "画面サイズを取得できませんでした", 0, kSoftName :return
+	if((wx < kFlashWX) || (wy < kFlashWY)){
+		if(get_handle_flg){
+			dialog "画面サイズを取得できませんでした", 0, kSoftName
+		}
+		return
+	}
 	GetKanColleWindow handle, kDeskBufferID, wx, wy
 	//撮影した画像から座標を検索する
 	GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
@@ -194,27 +199,25 @@ return
 			save_picture2_count++
 		}
 	}else{
-		if((save_picture_size_x != ginfo_sx) || (save_picture_size_y != ginfo_sy)){
-			cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
-			save_picture_size_x = ginfo_sx
-			save_picture_size_y = ginfo_sy
-		}
-		cvputimg kCaptureBufferID
+		//毎回バッファを初期化し直すのは、他画像保存モードでもこのバッファを使いまわすため
+		//(Ver.2.1.0におけるバグ修正)
+		cvbuffer kCVTempBufferID, ginfo_sx, ginfo_sy
+		cvputimg kCVTempBufferID
 		if(mode_index == kTypeNow){
 			;現在画面
-			cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCaptureBufferID
+			cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCVTempBufferID
 		}else{if(mode_index == kSceneListSize + 1){
 			;編成画面
-			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + fleets_index) + ".png", kCaptureBufferID
+			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + fleets_index) + ".png", kCVTempBufferID
 		}else{if(mode_index == kSceneListSize + 2){
 			;改装画面
-			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + kFleetNum + units_index) + ".png", kCaptureBufferID
+			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + kFleetNum + units_index) + ".png", kCVTempBufferID
 		}else{if(mode_index == kSceneListSize + 3){
 			;戦闘画面
-			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum) + ".png", kCaptureBufferID
+			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum) + ".png", kCVTempBufferID
 		}else{
 			;その他
-			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(mode_index - 1) + ".png", kCaptureBufferID
+			cvsave pic_save_path(my_folder_flg) + "\\" + GetLastUpdate(mode_index - 1) + ".png", kCVTempBufferID
 		}}}}
 	}
 	gsel kMainWindowID
@@ -249,9 +252,9 @@ return
 				gcopy kUnitIdOffset + commands_index * kUnitNum + (y * 3 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
 			next
 		next
-		cvbuffer kCaptureBufferID, kUnitWX * 3, kUnitWY * 2
-		cvputimg kCaptureBufferID
-		cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCaptureBufferID
+		cvbuffer kCVTempBufferID, kUnitWX * 3, kUnitWY * 2
+		cvputimg kCVTempBufferID
+		cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCVTempBufferID
 	}else{
 		// 連合・支援艦隊
 		buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3
@@ -330,6 +333,27 @@ return
 *exp_calc
 	error_log += NowTime() + ",exp_calc,\n"
 	now_id = ginfo_sel
+	;レベル・経験値自動補完機能
+	if((exp_ss_flg) && (sst_str == "編成画面")){
+		;レベル補間
+		gsel kFlashBufferID
+		now_level = limit(GetLevel(exp_unit_index), 1, 150) - 1
+		now_level_ = now_level
+		gsel kExpCalcWindowID
+		objprm 0, now_level
+		if(now_level >= goal_level){
+			goal_level = now_level + 1
+			objprm 1, goal_level
+		}
+		;経験値補間
+		gsel kFlashBufferID
+		unit_exp_double = GetUnitExp(exp_unit_index)
+		if(now_level != 150 - 1){
+			now_exp_plus = int(unit_exp_double * (need_exp_table(now_level + 1) - need_exp_table(now_level)))
+		}
+	}else{
+		now_exp_plus = 0
+	}
 	gsel kExpCalcWindowID
 	;レベルの矛盾を修正
 	if(now_level > goal_level){
@@ -343,10 +367,10 @@ return
 		}
 	}
 	;必要経験値を計算
-	now_exp = need_exp_table(now_level)
+	now_exp = need_exp_table(now_level) + now_exp_plus
 	goal_exp = need_exp_table(goal_level)
 	diff_exp = goal_exp - now_exp
-	objprm 6, diff_exp
+	objprm 8, diff_exp
 	;戦闘経験値を計算
 	battle_exp = 1.0 * exp_data(area_index)
 	if(reader_ship_flg) :battle_exp *= 1.5
@@ -375,14 +399,14 @@ return
 			if(mvp_flg) :battle_exp *= 0.5	;MVP無効
 	swend
 	battle_exp = int(battle_exp)
-	objprm 7, battle_exp
+	objprm 9, battle_exp
 	;必要周回数を計算
 	if(need_exp \ battle_exp == 0){
 		need_battles = need_exp / battle_exp
 	}else{
 		need_battles = need_exp / battle_exp + 1
 	}
-	objprm 8, need_battles
+	objprm 10, need_battles
 	gsel now_id
 return
 //経験値計算機を出す
@@ -462,6 +486,7 @@ return
 return
 //時間を取得
 *get_dock
+	gsel kFlashBufferID
 	if(screen_shot_type >= kSceneListSize + 1) :return
 	if(sst_str == "入渠画面"){
 		error_log += NowTime() + ",get_dock,normal\n"
@@ -515,6 +540,7 @@ return
 	}
 return
 *get_dock_e2
+	gsel kFlashBufferID
 	//遠征時間の計測は地味に面倒臭い……
 	;まず遠征の画面かを判定
 	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44) && NearColor(585,393,35,158,159)){
@@ -524,33 +550,38 @@ return
 			;そして、第何艦隊が対象かを判定
 			;「旗左下から1つ上」基準で、上から
 			;x=517, y=180, 210, 240, ..., 390(約R76 G168 B168)
-			for k, 0, 8
+			for k, 0, kExpPagePer
 				if(NearColor(517,180 + k * 30,76,168,168)){
 					;(517,180+k*30)を基準とした場合、、
 					;(+8,0)が第2→R224 G230 B227、第3→R47  G164 B165、第4→R237 G229 B217
 					;(+6,0)が第2→R84  G176 B174、第3→R236 G228 B215、第4→R239 G231 B219
 					;として判別可能
 					if(NearColor(525,180 + k * 30,224,230,227) && NearColor(523,180 + k * 30, 84,176,174)){
-						buffer kTempBufferID, 9, 13
-						dim number, 6
-						gsel kFlashBufferID
-						i = 0
-						edock_hour(i) = 0
-						edock_minute(i) = 0
-						edock_second(i) = 0
-						for j, 0, 6
-							gsel kTempBufferID
-							gcopy kFlashBufferID, expos(j), 387, 9, 13
-							number(j) = limit(MatchNumber(190, FALSE), 0, 9)
-							if(j == 0) :number(j) = limit(number(j), 0, 5)
-							if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
-						next
-						edock_hour(i)   = number(0) * 10 + number(1)
-						edock_minute(i) = number(2) * 10 + number(3)
-						edock_second(i) = number(4) * 10 + number(5)
-						gsel kDockWindowID
-						gosub *redraw_dock
-						_break
+						;右上の遠征名とリストの遠征名が一致しているかをチェックする
+						exp_small_name = GetExpSmallName(k)
+						exp_large_name = GetExpLargeName()
+						if((exp_small_name == exp_large_name) || (exp_small_name == -1) || (exp_large_name == -1)){
+							buffer kTempBufferID, 9, 13
+							dim number, 6
+							gsel kFlashBufferID
+							i = 0
+							edock_hour(i) = 0
+							edock_minute(i) = 0
+							edock_second(i) = 0
+							for j, 0, 6
+								gsel kTempBufferID
+								gcopy kFlashBufferID, expos(j), 387, 9, 13
+								number(j) = limit(MatchNumber(190, FALSE), 0, 9)
+								if(j == 0) :number(j) = limit(number(j), 0, 5)
+								if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
+							next
+							edock_hour(i)   = number(0) * 10 + number(1)
+							edock_minute(i) = number(2) * 10 + number(3)
+							edock_second(i) = number(4) * 10 + number(5)
+							gsel kDockWindowID
+							gosub *redraw_dock
+							_break
+						}
 					}
 				}
 			next
@@ -558,6 +589,7 @@ return
 	}
 return
 *get_dock_e3
+	gsel kFlashBufferID
 	;まず遠征の画面かを判定
 	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44) && NearColor(585,393,35,158,159)){
 		;次に、時間が表示されているかを判定
@@ -569,25 +601,31 @@ return
 			for k, 0, 8
 				if(NearColor(517,180 + k * 30,76,168,168)){
 					if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,236,228,215)){
-						buffer kTempBufferID, 9, 13
-						dim number, 6
-						gsel kFlashBufferID
-						i = 1
-						edock_hour(i) = 0
-						edock_minute(i) = 0
-						edock_second(i) = 0
-						for j, 0, 6
-							gsel kTempBufferID
-							gcopy kFlashBufferID, expos(j), 387, 9, 13
-							number(j) = limit(MatchNumber(190, FALSE), 0, 9)
-							if(j == 0) :number(j) = limit(number(j), 0, 5)
-							if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
-						next
-						edock_hour(i)   = number(0) * 10 + number(1)
-						edock_minute(i) = number(2) * 10 + number(3)
-						edock_second(i) = number(4) * 10 + number(5)
-						gsel kDockWindowID
-						gosub *redraw_dock
+						;右上の遠征名とリストの遠征名が一致しているかをチェックする
+						exp_small_name = GetExpSmallName(k)
+						exp_large_name = GetExpLargeName()
+						if((exp_small_name == exp_large_name) || (exp_small_name == -1) || (exp_large_name == -1)){
+							buffer kTempBufferID, 9, 13
+							dim number, 6
+							gsel kFlashBufferID
+							i = 1
+							edock_hour(i) = 0
+							edock_minute(i) = 0
+							edock_second(i) = 0
+							for j, 0, 6
+								gsel kTempBufferID
+								gcopy kFlashBufferID, expos(j), 387, 9, 13
+								number(j) = limit(MatchNumber(190, FALSE), 0, 9)
+								if(j == 0) :number(j) = limit(number(j), 0, 5)
+								if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
+							next
+							edock_hour(i)   = number(0) * 10 + number(1)
+							edock_minute(i) = number(2) * 10 + number(3)
+							edock_second(i) = number(4) * 10 + number(5)
+							gsel kDockWindowID
+							gosub *redraw_dock
+							_break
+						}
 					}
 				}
 			next
@@ -595,6 +633,7 @@ return
 	}
 return
 *get_dock_e4
+	gsel kFlashBufferID
 	;まず遠征の画面かを判定
 	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44) && NearColor(585,393,35,158,159)){
 		;次に、時間が表示されているかを判定
@@ -604,25 +643,31 @@ return
 			for k, 0, 8
 				if(NearColor(517,180 + k * 30,76,168,168)){
 					if(NearColor(525,180 + k * 30,237,229,217) && NearColor(523,180 + k * 30,239,231,219)){
-						buffer kTempBufferID, 9, 13
-						dim number, 6
-						gsel kFlashBufferID
-						i = 2
-						edock_hour(i) = 0
-						edock_minute(i) = 0
-						edock_second(i) = 0
-						for j, 0, 6
-							gsel kTempBufferID
-							gcopy kFlashBufferID, expos(j), 387, 9, 13
-							number(j) = limit(MatchNumber(190, FALSE), 0, 9)
-							if(j == 0) :number(j) = limit(number(j), 0, 5)
-							if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
-						next
-						edock_hour(i)   = number(0) * 10 + number(1)
-						edock_minute(i) = number(2) * 10 + number(3)
-						edock_second(i) = number(4) * 10 + number(5)
-						gsel kDockWindowID
-						gosub *redraw_dock
+						;右上の遠征名とリストの遠征名が一致しているかをチェックする
+						exp_small_name = GetExpSmallName(k)
+						exp_large_name = GetExpLargeName()
+						if((exp_small_name == exp_large_name) || (exp_small_name == -1) || (exp_large_name == -1)){
+							buffer kTempBufferID, 9, 13
+							dim number, 6
+							gsel kFlashBufferID
+							i = 2
+							edock_hour(i) = 0
+							edock_minute(i) = 0
+							edock_second(i) = 0
+							for j, 0, 6
+								gsel kTempBufferID
+								gcopy kFlashBufferID, expos(j), 387, 9, 13
+								number(j) = limit(MatchNumber(190, FALSE), 0, 9)
+								if(j == 0) :number(j) = limit(number(j), 0, 5)
+								if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
+							next
+							edock_hour(i)   = number(0) * 10 + number(1)
+							edock_minute(i) = number(2) * 10 + number(3)
+							edock_second(i) = number(4) * 10 + number(5)
+							gsel kDockWindowID
+							gosub *redraw_dock
+							_break
+						}
 					}
 				}
 			next
@@ -953,7 +998,19 @@ return
 			p2 = kGraphWY - 1.0 * (supply_log_int(n, k) - min_param) / diff_param * kGraphWY
 			p3 = ((ConvertDay(supply_log_int(n + 1, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n + 1, 1)) * kGraphWX) / scale_blocking(scale_mode)
 			p4 = kGraphWY - 1.0 * (supply_log_int(n + 1, k) - min_param) / diff_param * kGraphWY
-			line p1, p2, p3, p4
+			if((zero_interpolation_flg) && (supply_log_int(n + 1, k) == 0)){
+				for n2, n + 2, supply_log_size
+					if(supply_log_int(n2, k) != 0){
+						p3 = ((ConvertDay(supply_log_int(n2, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n2, 1)) * kGraphWX) / scale_blocking(scale_mode)
+						p4 = kGraphWY - 1.0 * (supply_log_int(n2, k) - min_param) / diff_param * kGraphWY
+						line p1, p2, p3, p4
+						n = n2 - 1
+						_break
+					}
+				next
+			}else{
+				line p1, p2, p3, p4
+			}
 		next
 	next
 	;バケツ
@@ -963,7 +1020,19 @@ return
 		p2 = kGraphWY - 1.0 * (supply_log_int(n, 6) - min_bucket) / diff_bucket * kGraphWY
 		p3 = ((ConvertDay(supply_log_int(n + 1, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n + 1, 1)) * kGraphWX) / scale_blocking(scale_mode)
 		p4 = kGraphWY - 1.0 * (supply_log_int(n + 1, 6) - min_bucket) / diff_bucket * kGraphWY
-		line p1, p2, p3, p4
+		if((zero_interpolation_flg) && (supply_log_int(n + 1, 6) == 0)){
+			for n2, n + 2, supply_log_size
+				if(supply_log_int(n2, k) != 0){
+					p3 = ((ConvertDay(supply_log_int(n2, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n2, 1)) * kGraphWX) / scale_blocking(scale_mode)
+					p4 = kGraphWY - 1.0 * (supply_log_int(n2, 6) - min_bucket) / diff_bucket * kGraphWY
+					line p1, p2, p3, p4
+					n = n2 - 1
+					_break
+				}
+			next
+		}else{
+			line p1, p2, p3, p4
+		}
 	next
 	//日付
 	color 0, 0, 255
@@ -1014,9 +1083,9 @@ return
 		gcopy kPutTempWindowID, kStockTimePX, kStockTimePY, kStockTimeWX, kStockTimeWY
 		pos kStockTimeWX, 0
 		gcopy kPutTempWindowID, kStockOtherPX, kStockOtherPY, kStockOtherWX, kStockOtherWY
-		cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
-		cvputimg kCaptureBufferID
-		cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCaptureBufferID
+		cvbuffer kCVTempBufferID, ginfo_sx, ginfo_sy
+		cvputimg kCVTempBufferID
+		cvsave pic_save_path(my_folder_flg) + "\\" + AutoFileName(), kCVTempBufferID
 		gsel kMainWindowID
 	}
 return

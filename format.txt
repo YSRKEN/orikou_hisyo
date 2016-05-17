@@ -16,6 +16,8 @@ MapBGMMode     (0|1)                 マップBGMを鳴らすか否か
 MapBGMPath     .+                    マップBGMの保存パス。空の場合は「<NONE>」など何かを書くこと
 BattleBGMMode  (0|1)                 戦闘BGMを鳴らすか否か
 BattleBGMPath  .+                    戦闘BGMの保存パス。空の場合は「<NONE>」など何かを書くこと
+BossBGMMode    (0|1)                 ボス戦BGMを鳴らすか否か
+BossBGMPath    .+                    ボス戦BGMの保存パス。空の場合は「<NONE>」など何かを書くこと
 DisableName    (0|1)                 名前を隠すか否か
 ShowCursor     (0|1)                 カーソルを表示するか否か
 CheckDeadZone  (0|1)                 大破チェックするか否か
@@ -35,6 +37,7 @@ AutoTimeSet    (0|1)                 各種タイマーの取得を自動化するか否か
 AutoSaveText   (0|1)                 自動セーブするか否か
 CheckExhausted (0|1)                 消耗チェッカーを動かすか否か
 MultiShotName  [0-1]                 連番保存時のファイル名(通常・連番)
+ZeroIntPol     (0|1)                 グラフの零補間をするか否か
 CounterA1      \d+                   あ号カウンターの出撃回数(非負)
 CounterA2      \d+                   あ号カウンターのボス到達回数(非負)
 CounterA3      \d+                   あ号カウンターのボス勝利回数(非負)
