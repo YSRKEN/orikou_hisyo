@@ -27,6 +27,7 @@ SaveFolderPath .+                    スクリーンショットの保存パス(自分で指定する
 SupplyLogging  (0|1)                 資源ログを残すか否か
 LoggingTime    ([1-9]|10)            資源ログを残す間隔(分単位)
 ShowLastDate   (0|1)                 最終更新日時を表示するか否か
+Denoise        (0|1)                 サブ画面・スクショをデノイズするか否か
 CounterA1      \d+                   あ号カウンターの出撃回数(非負)
 CounterA2      \d+                   あ号カウンターのボス到達回数(非負)
 CounterA3      \d+                   あ号カウンターのボス勝利回数(非負)

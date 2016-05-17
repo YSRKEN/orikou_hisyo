@@ -135,6 +135,7 @@ return
 		//通常保存
 		gsel kPutTempWindowID
 	}
+	if(denoise_flg) :Denoise
 	cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
 	cvputimg kCaptureBufferID
 	if(mode_index == kTypeNow){
@@ -414,6 +415,118 @@ return
 		next
 	}
 return
+*get_dock_e2
+	//遠征時間の計測は地味に面倒臭い……
+	;まず遠征の画面かを判定
+	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44)){
+		;次に、時間が表示されているかを判定
+		if(NearColor(667,445,188,188,188) || NearColor(667,445,255,241,231)){
+			;そして、第何艦隊が対象かを判定
+			;「旗左下から1つ上」基準で、上から
+			;x=517, y=180, 210, 240, ..., 390(約R76 G168 B168)
+			for k, 0, 8
+				if(NearColor(517,180 + k * 30,76,168,168)){
+					;(517,180+k*30)を基準とした場合、、
+					;(+8,0)が第2→R224 G230 B227、第3→R47  G164 B165、第4→R237 G229 B217
+					;(+6,0)が第2→R84  G176 B174、第3→R236 G228 B215、第4→R239 G231 B219
+					;として判別可能
+					if(NearColor(525,180 + k * 30,224,230,227) && NearColor(523,180 + k * 30, 84,176,174)){
+						buffer kTempBufferID, 9, 13
+						dim number, 6
+						gsel kFlashBufferID
+						i = 0
+						edock_hour(i) = 0
+						edock_minute(i) = 0
+						edock_second(i) = 0
+						for j, 0, 6
+							gsel kTempBufferID
+							gcopy kFlashBufferID, expos(j), 387, 9, 13
+							number(j) = limit(MatchNumber(190, FALSE), 0, 9)
+							if(j == 0) :number(j) = limit(number(j), 0, 5)
+							if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
+						next
+						edock_hour(i)   = number(0) * 10 + number(1)
+						edock_minute(i) = number(2) * 10 + number(3)
+						edock_second(i) = number(4) * 10 + number(5)
+						gsel kDockWindowID
+						gosub *redraw_dock
+						_break
+					}
+				}
+			next
+		}
+	}
+return
+*get_dock_e3
+	;まず遠征の画面かを判定
+	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44)){
+		;次に、時間が表示されているかを判定
+		if(NearColor(667,445,188,188,188) || NearColor(667,445,255,241,231)){
+			;そして、第何艦隊が対象かを判定
+			;「旗左下から1つ上」基準で、上から
+			;x=517, y=180, 210, 240, ..., 390(約R76 G168 B168)
+			for k, 0, 8
+				if(NearColor(517,180 + k * 30,76,168,168)){
+					if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,236,228,215)){
+						buffer kTempBufferID, 9, 13
+						dim number, 6
+						gsel kFlashBufferID
+						i = 1
+						edock_hour(i) = 0
+						edock_minute(i) = 0
+						edock_second(i) = 0
+						for j, 0, 6
+							gsel kTempBufferID
+							gcopy kFlashBufferID, expos(j), 387, 9, 13
+							number(j) = limit(MatchNumber(190, FALSE), 0, 9)
+							if(j == 0) :number(j) = limit(number(j), 0, 5)
+							if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
+						next
+						edock_hour(i)   = number(0) * 10 + number(1)
+						edock_minute(i) = number(2) * 10 + number(3)
+						edock_second(i) = number(4) * 10 + number(5)
+						gsel kDockWindowID
+						gosub *redraw_dock
+					}
+				}
+			next
+		}
+	}
+return
+*get_dock_e4
+	;まず遠征の画面かを判定
+	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44)){
+		;次に、時間が表示されているかを判定
+		if(NearColor(667,445,188,188,188) || NearColor(667,445,255,241,231)){
+			;そして、第何艦隊が対象かを判定
+			for k, 0, 8
+				if(NearColor(517,180 + k * 30,76,168,168)){
+					if(NearColor(525,180 + k * 30,237,229,217) && NearColor(523,180 + k * 30,239,231,219)){
+						buffer kTempBufferID, 9, 13
+						dim number, 6
+						gsel kFlashBufferID
+						i = 2
+						edock_hour(i) = 0
+						edock_minute(i) = 0
+						edock_second(i) = 0
+						for j, 0, 6
+							gsel kTempBufferID
+							gcopy kFlashBufferID, expos(j), 387, 9, 13
+							number(j) = limit(MatchNumber(190, FALSE), 0, 9)
+							if(j == 0) :number(j) = limit(number(j), 0, 5)
+							if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
+						next
+						edock_hour(i)   = number(0) * 10 + number(1)
+						edock_minute(i) = number(2) * 10 + number(3)
+						edock_second(i) = number(4) * 10 + number(5)
+						gsel kDockWindowID
+						gosub *redraw_dock
+					}
+				}
+			next
+		}
+	}
+return
 //インクリメント
 *increment_dock
 	for k, 0, kDocks
@@ -436,6 +549,19 @@ return
 				if(bdock_minute(k) < 0){
 					bdock_minute(k) += 60
 					bdock_hour(k) --
+				}
+			}
+		}
+	next
+	for k, 0, kDocks - 1
+		if((edock_hour(k) != 0) || (edock_minute(k) != 0) || (edock_second(k) != 0)){
+			edock_second(k)--
+			if(edock_second(k) < 0){
+				edock_second(k) += 60
+				edock_minute(k)--
+				if(edock_minute(k) < 0){
+					edock_minute(k) += 60
+					edock_hour(k) --
 				}
 			}
 		}
@@ -465,6 +591,19 @@ return
 			objprm k * 2 + 9, strf("%02d:%02d:%02d", now_hour, now_minute, now_second)
 		}else{
 			objprm k * 2 + 9, ""
+		}
+	next
+	for k, 0, kDocks - 1
+		objprm k * 2 + 16, strf("%02d:%02d:%02d", edock_hour(k), edock_minute(k), edock_second(k))
+		if((edock_hour(k) != 0) || (edock_minute(k) != 0) || (edock_second(k) != 0)){
+			now_hour   = gettime(4) + edock_hour(k)
+			now_minute = gettime(5) + edock_minute(k)
+			now_second = gettime(6) + edock_second(k)
+			if(now_second >= 60) :now_minute += now_second / 60 :now_second \= 60
+			if(now_minute >= 60) :now_hour += now_minute / 60 :now_minute \= 60
+			objprm k * 2 + 17, strf("%02d:%02d:%02d", now_hour, now_minute, now_second)
+		}else{
+			objprm k * 2 + 17, ""
 		}
 	next
 return
@@ -597,7 +736,7 @@ return
 	max_param = supply_log_int(0, 2)
 	min_param = supply_log_int(0, 2)
 	for n, 0, supply_log_size
-		for k, 2, 5
+		for k, 2, 6
 			if(max_param < supply_log_int(n, k)) :max_param = supply_log_int(n, k)
 			if(min_param > supply_log_int(n, k)) :min_param = supply_log_int(n, k)
 		next
@@ -606,8 +745,11 @@ return
 	min_param = ((min_param / 1000) - 1) * 1000 :if(min_param < 0) :min_param = 0
 	diff_param = max_param - min_param
 	// グラフを作成する
+	day_diff = day_last - day_first + 1
+	block_num = day_diff / scale_blocking(scale_mode)
+	if(day_diff \ scale_blocking(scale_mode) != 0) :block_num++
 	//グラフ線
-	buffer kGraphBufferID, (day_last - day_first + 1) * kGraphWX, kGraphWY
+	buffer kGraphBufferID, block_num * kGraphWX, kGraphWY
 	for n, 0, supply_log_size - 1
 		for k, 2, 6
 			switch k
@@ -624,30 +766,68 @@ return
 					color $CC,$33,$00
 					swbreak
 			swend
-			p1 = (ConvertDay(supply_log_int(n, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n, 1)) * kGraphWX
+			p1 = ((ConvertDay(supply_log_int(n, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n, 1)) * kGraphWX) / scale_blocking(scale_mode)
 			p2 = kGraphWY - 1.0 * (supply_log_int(n, k) - min_param) / diff_param * kGraphWY
-			p3 = (ConvertDay(supply_log_int(n + 1, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n + 1, 1)) * kGraphWX
+			p3 = ((ConvertDay(supply_log_int(n + 1, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n + 1, 1)) * kGraphWX) / scale_blocking(scale_mode)
 			p4 = kGraphWY - 1.0 * (supply_log_int(n + 1, k) - min_param) / diff_param * kGraphWY
 			line p1, p2, p3, p4
 		next
 	next
 	//縦線
 	font msgothic, kGraphFontSize
-	for k, 0, (day_last - day_first + 1) * 12
+	for k, 0, block_num * scale_zooming(scale_mode)
 		color $C0,$C0,$C0
 		line k * kGraphStepX, 0, k * kGraphStepX, kGraphWY
 		color 0, 0, 255
 		pos k * kGraphStepX, kGraphWY - kGraphFontSize * 2
-		mes strf("%02dh", (k \ 12) * 2)
+		switch scale_mode
+			case 0	;1日
+				mes strf("%02dh", (k \ 12) * 2)
+				swbreak
+			case 1	;1週間
+				mes strf("%01dd", k \ 7)
+				swbreak
+			case 2	;2週間
+				mes strf("%02dd", (k \ 7) * 2)
+				swbreak
+			case 3	;1ヶ月
+				mes strf("%02dd", (k \ 10) * 3)
+				swbreak
+			case 4	;2ヶ月
+				mes strf("%02dd", (k \ 10) * 6)
+				swbreak
+			case 5	;3ヶ月
+				mes strf("%02dd", (k \ 12) * 7)
+				swbreak
+			case 6	;半年
+				mes strf("%02dm", k \ 6)
+				swbreak
+			case 7	;1年
+				mes strf("%02dm", k \ 12)
+				swbreak
+		swend
+	next
+	//横線
+	interval_y = 1
+	if(diff_param > 10) :interval_y = 10
+	if(diff_param > 100) :interval_y = 100
+	if(diff_param > 1000) :interval_y = 1000
+	if(diff_param > 10000) :interval_y = 10000
+	if(diff_param > 100000) :interval_y = 100000
+	color $C0,$C0,$C0
+	for yy, 0, 500000, interval_y
+		if(limit(yy, min_param, max_param) != yy) :_continue
+		yy2 = kGraphWY - 1.0 * (yy - min_param) / diff_param * kGraphWY
+		line 0, yy2, block_num * kGraphWX, yy2
 	next
 	//日付
 	color 0, 0, 255
-	for k, 0, (day_last - day_first + 1)
-		pos k * kGraphWX, kGraphFontSize
-		mes ConvertDay2(day_first + k)
+	for k, 0, block_num
+		pos k * kGraphStepX * scale_zooming(scale_mode), kGraphFontSize
+		mes ConvertDay2(day_first + k * scale_blocking(scale_mode))
 	next
 	// 表示座標を初期化
-	plot_graph_px = (day_last - day_first + 1) * kGraphWX - kGraphWX
+	plot_graph_px = (block_num - 1) * scale_zooming(scale_mode) * kGraphStepX
 return
 //資材グラフを表示する
 *plot_graph

@@ -482,6 +482,7 @@
 			output += "SupplyLogging\t"  + auto_supply_flg@ + "\n"
 			output += "LoggingTime\t" + (logging_index@ + 1) + "\n"
 			output += "ShowLastDate\t"   + show_date_flg@ + "\n"
+			output += "Denoise\t"        + denoise_flg@ + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -505,7 +506,7 @@
 			// 資材量
 			if(CheckHomeFlg(kFlashBufferID@)){
 				GetSupply kFlashBufferID@, supply_list@
-				supply_log@ += NowTime() + "," + supply_list@(0) + "," + supply_list@(1) + "," + supply_list@(2) + "," + supply_list@(3) + "\n"
+				supply_log@ += NowTime() + "," + supply_list@(0) + "," + supply_list@(1) + "," + supply_list@(2) + "," + supply_list@(3) + "," + supply_list@(4) + "\n"
 				notesel supply_log@ :notesave "supply.csv"
 			}
 			// 画像
@@ -615,6 +616,9 @@
 				if(read_ver >= 204){
 					if(temp(0) == "ShowLastDate") :show_date_flg@ = limit(int(temp(1)), 0, 1)
 				}
+				if(read_ver >= 206){
+					if(temp(0) == "Denoise") :denoise_flg@ += limit(int(temp(1)), 0, 1)
+				}
 			next
 			;微修正
 			for k, 0, 3
@@ -684,7 +688,6 @@
 				buffer kTempBufferID@, 7, 11
 				gcopy flash_id_, 683 + k * 7, 36, 7, 11
 				number = MatchNumber(150, TRUE)
-				;assert
 				if(number < 10){
 					fuel *= 10
 					if(k == 0) :number = limit(number, 0, 3)
@@ -697,7 +700,6 @@
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 680 + k * 8, 55, 8, 11
 				number = MatchNumber(150, TRUE)
-				;assert
 				if(number < 10){
 					ammo *= 10
 					if(k == 0) :number = limit(number, 0, 3)
@@ -710,7 +712,6 @@
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 749 + k * 8, 36, 8, 11
 				number = MatchNumber(150, TRUE)
-				;assert
 				if(number < 10){
 					steel *= 10
 					if(k == 0) :number = limit(number, 0, 3)
@@ -723,11 +724,22 @@
 				buffer kTempBufferID@, 8, 11
 				gcopy flash_id_, 749 + k * 8, 55, 8, 11
 				number = MatchNumber(150, TRUE)
-				;assert
 				if(number < 10){
 					bauxite *= 10
 					if(k == 0) :number = limit(number, 0, 3)
 					bauxite += number
+				}
+			next
+			;バケツ
+			bucket = 0
+			for k, 0, 4
+				buffer kTempBufferID@, 9, 12
+				gcopy flash_id_, 695 + k * 9, 13, 9, 12
+				number = MatchNumber(150, TRUE)
+				if(number < 10){
+					bucket *= 10
+					if(k == 0) :number = limit(number, 0, 3)
+					bucket += number
 				}
 			next
 			;代入
@@ -735,16 +747,25 @@
 			supply_list_(1) = ammo
 			supply_list_(2) = steel
 			supply_list_(3) = bauxite
+			supply_list_(4) = bucket
 		return
 		// ログを読み込む
 		#defcfunc LoadLog var supply_log, array supply_log_int
 			notesel supply_log
-			dim supply_log_int, notemax, 2 + 4
+			dim supply_log_int, notemax, 2 + 5
 			supply_log_size = 0
+			gsel 0
+			old_log_flg = TRUE
 			for k, 1, notemax
+				if(time_ != gettime(6)){
+					title "" + strf("%2.1f％", 100.0 * k / notemax)
+					time_ = gettime(6)
+					await 5
+				}
 				noteget get, k
 				split get, ",", temp
 				if(stat < 5) :_continue
+				strrep temp(0), ":", ""	;互換性対策
 				strrep temp(0), "-", ""
 				strrep temp(0), " ", ""
 				strrep temp(0), ".", ""
@@ -754,8 +775,28 @@
 				supply_log_int(supply_log_size, 3) = int(temp(2))
 				supply_log_int(supply_log_size, 4) = int(temp(3))
 				supply_log_int(supply_log_size, 5) = int(temp(4))
+				if(length(temp) > 5){
+					supply_log_int(supply_log_size, 6) = int(temp(5))
+					old_log_flg = FALSE
+				}
 				supply_log_size++
 			next
+			;ログが古かった場合は新版に書き直しておく
+			if(old_log_flg){
+				supply_log = "時間,燃料,弾薬,鋼材,ボーキ,バケツ\n"
+				for k, 0, supply_log_size
+					temp = strf("%08d", supply_log_int(k, 0))
+					supply_log += strmid(temp, 0, 4) + "-" + strmid(temp, 4, 2) + "-" + strmid(temp, 6, 2) + " "
+					temp = strf("%09d", supply_log_int(k, 1))
+					supply_log += strmid(temp, 0, 2) + "-" + strmid(temp, 2, 2) + "-" + strmid(temp, 4, 2) + "." + strmid(temp, 6, 3) + ","
+					supply_log += str(supply_log_int(k, 2)) + ","
+					supply_log += str(supply_log_int(k, 3)) + ","
+					supply_log += str(supply_log_int(k, 4)) + ","
+					supply_log += str(supply_log_int(k, 5)) + ","
+					supply_log += str(supply_log_int(k, 6)) + "\n"
+				next
+			}
+			title "おりこうさんな秘書"
 		return supply_log_size
 		// 日付を統一日付にコンバートする
 		#defcfunc ConvertDay int day
@@ -780,16 +821,18 @@
 			day2__ = day2_
 			sdim day_, 1024
 			day3 = 0
+			dim day_temp, 3
+			;日付を特定する
 			for y, 1, 2100
 				leap_flg = (y \ 4 == 0) - (y \ 100 == 0) + (y \ 400 == 0)
 				if(day3 + 365 + leap_flg >= day2__){
-					day_ += strf("%04d", y) + "/"
+					day_temp(0) = y
 					day2__ -= day3
 					for m, 0, 12
 						if(yearplus@(m + 1, leap_flg) >= day2__){
-							day_ += strf("%02d", m + 1) + "/"
+							day_temp(1) = m + 1
 							day2__ -= yearplus@(m, leap_flg)
-							day_ += strf("%02d", day2__)
+							day_temp(2) = day2__
 							_break
 						}
 					next
@@ -798,7 +841,14 @@
 					day3 += 365 + leap_flg
 				}
 			next
+			;日付を出力する
+			day_ = strf("%04d/%02d/%02d", day_temp(0), day_temp(1), day_temp(2))
 		return day_
+		#deffunc Denoise
+			cvputimg kCVDenoiseBufferID
+			cvsmooth CV_BILATERAL, 30, 30, 0, kCVDenoiseBufferID
+			cvgetimg kCVDenoiseBufferID
+		return
 	#global
 	#module get_num
 		#deffunc DrawSquare int px_, int py_, int wx_, int wy_
@@ -877,8 +927,6 @@
 			gsel kNumGetBufferID
 			pos 0, 0
 			gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy
-			;bmpsave "hoge_" + strf("%05d", ttt@) + ".bmp"
-			;ttt@++
 			OtsuThreshold FALSE
 			DrawSquare 0, 0, kMatchSize, kMatchSize
 			cvbuffer kCVNumBufferID, kMatchSize, kMatchSize

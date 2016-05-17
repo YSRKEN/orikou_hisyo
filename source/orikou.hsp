@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.2.0.5 */
+/* おりこうさんな秘書 Ver.2.0.6 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.2.0.5"
-	#define kSoftVer2       "205"
-	#define kSoftLastUpdate "2015/07/20"
+	#define kSoftVer        "Ver.2.0.6"
+	#define kSoftVer2       "206"
+	#define kSoftLastUpdate "2015/07/21"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -39,6 +39,8 @@
 			chkbox "フォルダ指定", my_folder_flg
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 2
 			button gosub "参照...", *browse_folder
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 2
+			chkbox "デノイズ", denoise_flg
 		pos kObjSpace                 , kObjSpace + kObjSpaceY * 4
 			chkbox "資源ログ(分)",     auto_supply_flg
 		pos kObjSpace + kObjSpaceX    , kObjSpace + kObjSpaceY * 4
@@ -135,7 +137,7 @@
 	gosub *redraw_counter
 
 	//各種タイマー
-	screen kDockWindowID, kObjSpace + kObjSpaceX * 4, kObjSpace * 2 + kObjSpaceY * 5 + kSmallFontSize, 4
+	screen kDockWindowID, kObjSpace + kObjSpaceX * 6, kObjSpace * 2 + kObjSpaceY * 5 + kSmallFontSize, 4
 	gsel kDockWindowID, -1
 	title "各種時間"
 	font msgothic, kSmallFontSize
@@ -143,6 +145,8 @@
 			mes "【入渠時間】"
 		pos kObjSpace + kObjSpaceX * 2, kObjSpace
 			mes "【建造時間】"
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace
+			mes "【遠征時間】"
 	objsize kObjX, kObjY
 		;入渠時間
 		pos kObjSpace, kObjSpace + kSmallFontSize
@@ -178,12 +182,32 @@
 			input bdock4_time1
 		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 3 + kSmallFontSize
 			input bdock4_time2
+		;遠征時間
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY + kSmallFontSize
+			input edock2_time1
+		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY + kSmallFontSize
+			input edock2_time2
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY * 2+ kSmallFontSize
+			input edock3_time1
+		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY * 2 + kSmallFontSize
+			input edock3_time2
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY * 3 + kSmallFontSize
+			input edock4_time1
+		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY * 3 + kSmallFontSize
+			input edock4_time2
 		;
 		pos kObjSpace, kObjSpace + kObjSpaceY * 4 + kSmallFontSize
 			button gosub "更新", *get_dock
 		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 4 + kSmallFontSize
 			button gosub "閉じる", *close_dock
-	repeat 16
+	objsize kObjY, kObjY
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kSmallFontSize
+			button gosub "2", *get_dock_e2
+		pos kObjSpace + kObjSpaceX * 4 + kObjSpaceY, kObjSpace + kSmallFontSize
+			button gosub "3", *get_dock_e3
+		pos kObjSpace + kObjSpaceX * 4 + kObjSpaceY * 2, kObjSpace + kSmallFontSize
+			button gosub "4", *get_dock_e4
+	repeat 22
 		objenable cnt, 0
 	loop
 
@@ -224,7 +248,10 @@
 		button gosub "閉じる", *close_graph
 		pos kGraphWX - kObjSpaceX * 2, kGraphWY - kObjSpaceY - kGraphFontSize * 2
 		button gosub "画像保存", *save_graph
+		pos kGraphWX - kObjSpaceX * 3, kGraphWY - kObjSpaceY - kGraphFontSize * 2
+		combox scale_mode,,"1日\n1週間\n2週間\n1ヶ月\n2ヶ月\n3ヶ月\n半年\n1年"
 	if(supply_log_size != 0){
+		kGraphStepX = kGraphWX / scale_zooming(scale_mode)
 		gosub *make_graph
 		gosub *plot_graph
 	}
@@ -324,6 +351,7 @@
 	sort_index_ = sort_index
 	;資源グラフ
 	mouse_button_flg = FALSE
+	scale_mode_ = scale_mode
 	;最終更新日時
 	show_date_flg_ = show_date_flg
 	//ループしつつ監視
@@ -425,6 +453,8 @@
 				if(mode_list3(screen_shot_type2) == "演習個別") :color :boxf 130,  87, 425, 117
 			}
 		}
+		// デノイズを行う
+		if(denoise_flg) :Denoise
 		// サブ画面にサブ画面用バッファの画像を変倍して転送する
 		PutWindowSet kPutWindowID, kPutTempWindowID
 		//大破チェッカー機能
@@ -662,7 +692,7 @@
 				if((supply_last_time == -1) || (timeGetTime() - supply_last_time > 1000 * 60 * (logging_index + 1))){
 					supply_last_time = timeGetTime()
 					GetSupply kFlashBufferID, supply_list
-					supply_log += NowTime() + "," + supply_list(0) + "," + supply_list(1) + "," + supply_list(2) + "," + supply_list(3) + "\n"
+					supply_log += NowTime() + "," + supply_list(0) + "," + supply_list(1) + "," + supply_list(2) + "," + supply_list(3) + "," + supply_list(4) + "\n"
 					notesel supply_log :notesave "supply.csv"
 					supply_log_size = LoadLog(supply_log, supply_log_int)
 					gosub *make_graph
@@ -671,16 +701,31 @@
 				}
 			}
 		}
+		if(scale_mode_ != scale_mode){
+			if(supply_log_size != 0){
+				kGraphStepX = kGraphWX / scale_zooming(scale_mode)
+				gosub *make_graph
+				gosub *plot_graph
+			}
+			scale_mode_ = scale_mode
+		}
 		// 資源グラフをスクロールする
 		if(ginfo_act == kSupplyGraphID){
-			// キー操作を検知する
-			stick ky, 1 + 2 + 4 + 8, 1
+			/*// キー操作を検知する
+			stick ky, 1 + 2 + 4 + 8 + 64, 1
 			;左右キーで2時間毎のスクロール
 			if(ky & 1) :plot_graph_px -= kGraphStepX :gosub *plot_graph
 			if(ky & 4) :plot_graph_px += kGraphStepX :gosub *plot_graph
 			;上下キーで1日毎のスクロール
 			if(ky & 2) :plot_graph_px -= kGraphWX :gosub *plot_graph
-			if(ky & 8) :plot_graph_px += kGraphWX :gosub *plot_graph
+			if(ky & 8) :plot_graph_px += kGraphWX :gosub *plot_graph*/
+			// キー操作を検知する
+			;Ctrlキーが押されている場合は、ゆっくりスクロールするようにする
+			;A・Dキーで小スクロール、W・Sキーで大スクロール
+			getkey trigger_flg, 17 :if(trigger_flg) :wait 50
+			getkey key_flg_a, 'A' :getkey key_flg_d, 'D' :getkey key_flg_w, 'W' :getkey key_flg_s, 'S'
+			plot_graph_px += kGraphStepX * (key_flg_d - key_flg_a) + kGraphWX * (key_flg_s - key_flg_w)
+			gosub *plot_graph
 		}
 		// ウェイト
 		await 1000 / fps_num(fps_index)

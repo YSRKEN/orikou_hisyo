@@ -21,7 +21,7 @@
 	;ツール用
 	#enum kOptionWindowID	;オプション画面
 	#enum kExpCalcWindowID	;経験値計算機
-	#enum kDockWindowID		;入渠タイマー
+	#enum kDockWindowID		;各種タイマー
 	#enum kCountWindowID	;○号カウンター
 	#enum kSortListWindowID	;ソート一覧
 	#enum kSupplyGraphID	;資源グラフ
@@ -38,6 +38,7 @@
 	#enum global kCVTempBufferID = 0
 	#enum global kCVNumBufferID
 	#enum global kCVMatchBufferID
+	#enum global kCVDenoiseBufferID
 	// パラメータ
 	#const global kFleetNum    4	;艦隊数
 	#const global kUnitNum     6	;艦隊毎の艦娘数
@@ -101,7 +102,6 @@
 	;資源グラフのサイズ
 	#const kGraphWX 600
 	#const kGraphWY 300
-	#const kGraphStepX kGraphWX / 12
 	// キーボード・マウス操作
 	#const kStickEscKey 128
 	#const kStickMouse  256
@@ -208,6 +208,14 @@
 	dim bdock_second, kDocks
 	bxpos.0 = 402, 414, 433, 445, 464, 476
 	bypos.0 = 185, 263, 341, 419
+	;遠征
+	edock2_time1 = "00:00:00" :edock2_time2 = ""
+	edock3_time1 = "00:00:00" :edock3_time2 = ""
+	edock4_time1 = "00:00:00" :edock4_time2 = ""
+	dim edock_hour,   kDocks - 1
+	dim edock_minute, kDocks - 1
+	dim edock_second, kDocks - 1
+	expos.0 = 722, 731, 745, 754, 768, 777
 	gosub *match_init
 	;ソート一覧
 	sdim sort_list, 1024
@@ -217,15 +225,19 @@
 	if(strsize != -1){
 		notesel supply_log
 		noteload "supply.csv"
-		dim supply_log_int, 100, 2 + 4	;2は日時の部分
+		dim supply_log_int, 100, 2 + 5	;2は日時の部分
 		supply_log_size = LoadLog(supply_log, supply_log_int)
 	}else{
 		sdim supply_log, 32000
-		supply_log = "時間,燃料,弾薬,鋼材,ボーキ\n"
+		supply_log = "時間,燃料,弾薬,鋼材,ボーキ,バケツ\n"
 		supply_log_size = 0
 	}
 	supply_last_time = -1
 	logging_index = 9
+	;資源グラフ
+	scale_mode = 0	;モード(1日・1週間・2週間・1ヶ月・2ヶ月・3ヶ月・半年・1年)
+	scale_zooming.0  = 12, 7,  7, 10, 10, 12,   6,  12	;縦線の数
+	scale_blocking.0 =  1, 7, 14, 30, 60, 90, 180, 365	;1画面毎の日数
 	;各種フラグ
 	name_disable_flg  = TRUE
 	cursor_flg        = TRUE
@@ -235,6 +247,7 @@
 	auto_save_flg     = TRUE
 	my_folder_flg     = FALSE
 	auto_supply_flg   = TRUE
+	denoise_flg       = FALSE
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
 	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
 	get_handle_flg    = TRUE	;ズレ補正時だけOFFになる
@@ -245,7 +258,7 @@
 	dim unit_count, kFleetNum
 	dim unit_count_, kFleetNum
 	dim last_up_date, kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 2, 7
-	dim supply_list, 4
+	dim supply_list, 5
 	GetMonitorParam kDispX ,kDispY ,kOffsetX, kOffsetY
 	kFleetIdOffset = kCaptureBufferID + kSceneListSize
 	kUnitIdOffset = kFleetIdOffset + kFleetNum
@@ -284,6 +297,8 @@
 	loop
 	;認識用
 	buffer kNumGetBufferID, kMatchSize, kMatchSize
+	;デノイズ用
+	cvbuffer kCVDenoiseBufferID, kFlashWX, kFlashWY
 
 	ReadSaveData
 	gosub *init_bgm_list
