@@ -80,10 +80,11 @@ cursor.png……カーソルアイコン画像
 　　kNumGetBufferID1     数字認識用           16
 　　kCursorBufferID      カーソル用           17
 　　kBattleBufferID      戦闘画面(特殊)       18
-　　kCaptureBufferID以降 シーン保存用         19～19 + 保存シーン数 - 1
-　　kFleetIdOffset以降   編成画面用           19 + 保存シーン数～17 + 保存シーン数 + (4 - 1)
-　　kUnitIdOffset以降    改装画面用           19 + 保存シーン数 + 4～19 + 保存シーン数 + 4 + (4 * 6 - 1)
-　　kSortIdOffset以降    ソート画面用         19 + 保存シーン数 + 4 + 4 * 6～
+　　kDropBufferID        ドロップ画面         19
+　　kCaptureBufferID以降 シーン保存用         20～20 + 保存シーン数 - 1
+　　kFleetIdOffset以降   編成画面用           20 + 保存シーン数～17 + 保存シーン数 + (4 - 1)
+　　kUnitIdOffset以降    改装画面用           20 + 保存シーン数 + 4～19 + 保存シーン数 + 4 + (4 * 6 - 1)
+　　kSortIdOffset以降    ソート画面用         20 + 保存シーン数 + 4 + 4 * 6～
 ・const.hsp
 　#enumで定義された定数群……
 　　画面IDを決定するためのもの。具体的には、IDがkCaptureBufferID

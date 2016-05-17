@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.2.0.4 */
+/* おりこうさんな秘書 Ver.2.0.5 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.2.0.4"
-	#define kSoftVer2       "204"
-	#define kSoftLastUpdate "2015/07/18"
+	#define kSoftVer        "Ver.2.0.5"
+	#define kSoftVer2       "205"
+	#define kSoftLastUpdate "2015/07/20"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -339,16 +339,21 @@
 			GetFlashWindow2 handle, kFlashBufferID, flash_px, flash_py
 		}
 		// 結果を判定し、自動で格納する
-		screen_shot_type = JudgeSituation(kFlashBufferID)
+		screen_shot_type = JudgeSituation(kFlashBufferID, 1)
 		if(screen_shot_type != kTypeUnknown){
-			gsel kCaptureBufferID + screen_shot_type - 1
-			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
-			if(screen_shot_type <= kSceneListSize){
-				;戦闘画面(昼戦画面と夜戦画面と夜戦マス)ならば再度コピーする
-				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面") || (mode_list3(screen_shot_type) == "夜戦マス")){
-					gsel kBattleBufferID
-					gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+			if(screen_shot_type != kTypeDrop){
+				gsel kCaptureBufferID + screen_shot_type - 1
+				gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+				if(screen_shot_type <= kSceneListSize){
+					;戦闘画面(昼戦画面と夜戦画面と夜戦マス)ならば再度コピーする
+					if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面") || (mode_list3(screen_shot_type) == "夜戦マス")){
+						gsel kBattleBufferID
+						gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+					}
 				}
+			}else{
+				gsel kDropBufferID
+				gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
 			}
 		}
 		//艦隊における艦娘数を認識し、減少した場合はバッファを初期化する
@@ -390,17 +395,20 @@
 			}else{if(mode_index == kSceneListSize + 3){
 				;戦闘画面(特殊)
 				gcopy kBattleBufferID, 0, 0, kFlashWX, kFlashWY
+			}else{if(mode_index == kSceneListSize + 4){
+				;ドロップ画面
+				gcopy kDropBufferID, 0, 0, kFlashWX, kFlashWY
 			}else{
 				;その他
 				gcopy kCaptureBufferID + mode_index - 1, 0, 0, kFlashWX, kFlashWY
-			}}}
+			}}}}
 		}
 		//サブ画面のバッファに名前隠し処理を行う
 		if(name_disable_flg){
 			if(CheckHomeFlg(kPutTempWindowID)){	;要するに左上の歯車のすぐ右
 				color :boxf 111, 0, 273, 25
 			}
-			screen_shot_type2 = JudgeSituation(kPutTempWindowID)
+			screen_shot_type2 = JudgeSituation(kPutTempWindowID, 0)
 			if(screen_shot_type2 < kSceneListSize){
 				if(mode_list3(screen_shot_type2) == "戦績表示")   :color :boxf 201, 123, 496, 153
 				if(mode_list3(screen_shot_type2) == "ランキング") :color :boxf 225, 153, 375, 451
@@ -594,14 +602,20 @@
 		if(sort_index_ != sort_index) :gosub *redraw_sort_preview :sort_index_ = sort_index
 		//ステータスバーに最終更新日時を表示する
 		;記録処理
-		if(screen_shot_type == kTypeUnknown){
-		}else{
-			SetLastUpdate screen_shot_type - 1
-			if(screen_shot_type <= kSceneListSize){
-				if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面") || (mode_list3(screen_shot_type) == "夜戦マス")){
-					for k, 0, 7
-						last_up_date(kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum, k) = last_up_date(screen_shot_type - 1, k)
-					next
+		if(screen_shot_type != kTypeUnknown){
+			if(kTypeDropFlg){
+				SetLastUpdate kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 1
+			}else{
+				if((screen_shot_type == kTypeDrop) && (kTypeDropFlg == FALSE)){
+				}else{
+					SetLastUpdate screen_shot_type - 1
+					if(screen_shot_type <= kSceneListSize){
+						if((mode_list3(screen_shot_type) == "昼戦画面") || (mode_list3(screen_shot_type) == "夜戦画面") || (mode_list3(screen_shot_type) == "夜戦マス")){
+							for k, 0, 7
+								last_up_date(kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum, k) = last_up_date(screen_shot_type - 1, k)
+							next
+						}
+					}
 				}
 			}
 		}
@@ -624,10 +638,12 @@
 			}else{if(mode_index == kSceneListSize + 3){
 				;戦闘画面
 				mes GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum)
-			}else{
+			}else{if(mode_index == kSceneListSize + 4){
+				mes GetLastUpdate(kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 1)
+			else{
 				;その他
 				mes GetLastUpdate(mode_index - 1)
-			}}}}
+			}}}}}
 			;大破チェック機能でのチェック結果も表示
 			if(dead_zone_flg_){
 				pos kStatusBarOffset + kStatusBarFontSize * 12, zooming_num(zooming_index) * kFlashWY / 100 + kStatusBarOffset

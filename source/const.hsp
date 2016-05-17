@@ -32,6 +32,7 @@
 	#enum global kNumGetBufferID	;数字認識用
 	#enum kCursorBufferID	;カーソル用
 	#enum kBattleBufferID	;戦闘画面(特殊)
+	#enum kDropBufferID		;ドロップ画面
 	#enum kCaptureBufferID	;各保存画面
 	// OpenCV用ID
 	#enum global kCVTempBufferID = 0
@@ -243,7 +244,7 @@
 	;その他
 	dim unit_count, kFleetNum
 	dim unit_count_, kFleetNum
-	dim last_up_date, kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 1, 7
+	dim last_up_date, kSceneListSize + kFleetNum + kFleetNum * kUnitNum + 2, 7
 	dim supply_list, 4
 	GetMonitorParam kDispX ,kDispY ,kOffsetX, kOffsetY
 	kFleetIdOffset = kCaptureBufferID + kSceneListSize
@@ -269,6 +270,7 @@
 	buffer kPutTempWindowID, kFlashWX, kFlashWY
 	;各保存画面
 	buffer kBattleBufferID, kFlashWX, kFlashWY
+	buffer kDropBufferID, kFlashWX, kFlashWY
 	repeat kSceneListSize
 		buffer kCaptureBufferID + cnt, kFlashWX, kFlashWY
 	loop
@@ -311,7 +313,7 @@ return
 	noteload "scene_list.txt"
 	kSceneListSize = notemax - 1
 	dim mode_filter, kSceneListSize, kPoints, kParams	;判定用パラメータ
-	sdim mode_list2, 64, kSceneListSize + 4	;実行モード一覧
+	sdim mode_list2, 64, kSceneListSize + 5	;実行モード一覧
 		mode_list += "現在画面\n"
 		mode_list2(0) = "現在画面"
 	//1行づつ読み込む
@@ -326,16 +328,20 @@ return
 			next
 		next
 	loop
-	mode_list += "編成画面\n改装画面\n戦闘画面"
+	mode_list += "編成画面\n改装画面\n戦闘画面\nドロップ画面"
 	mode_list2(kSceneListSize + 1) = "編成画面"
 	mode_list2(kSceneListSize + 2) = "改装画面"
 	mode_list2(kSceneListSize + 3) = "戦闘画面"
+	mode_list2(kSceneListSize + 4) = "ドロップ画面"
 	;判定結果用配列
-	sdim mode_list3, 64, kSceneListSize + 3
+	sdim mode_list3, 64, kSceneListSize + 5
 	mode_list3(0) = "不明"
-	repeat kSceneListSize + 2, 1
+	repeat kSceneListSize + 4, 1
 		mode_list3(cnt) = mode_list2(cnt)
 	loop
+	;
+	kTypeDrop = kSceneListSize + 4
+	kTypeDropFlg = FALSE
 return
 
 //経験値処理の初期化

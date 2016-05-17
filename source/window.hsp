@@ -119,7 +119,7 @@ return
 //画像保存
 *save_picture
 	//画面クロップにチェックが入っているかで対応が変わる
-	screen_shot_type2 = JudgeSituation(kPutTempWindowID)
+	screen_shot_type2 = JudgeSituation(kPutTempWindowID, 0)
 	if((cap_crop_flg) && (screen_shot_type2 >= kSceneListSize)){
 		//クロップして保存
 		if(screen_shot_type2 >= kSceneListSize + kFleetNum){
@@ -479,7 +479,7 @@ return
 return
 //追加
 *add_sort_list
-	if(mode_list3(JudgeSituation(kPutTempWindowID)) == "ソート画面"){
+	if(mode_list3(JudgeSituation(kPutTempWindowID, 0)) == "ソート画面"){
 		;バッファの追加
 		buffer kSortIdOffset + sort_list_size, kSortWX, kSortWY
 		gcopy kPutTempWindowID, kSortPX, kSortPY, kSortWX, kSortWY

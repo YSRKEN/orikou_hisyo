@@ -158,15 +158,15 @@
 			//実行モード
 			title_str += mode_list2@(mode_index@) + " - "
 			//判定結果
-			if(screen_shot_type@ >= kSceneListSize@ + kFleetNum + 1){
+			if(kTypeDropFlg@ == TRUE){
+				title_str += "ドロップ画面 - "
+			}else{if(screen_shot_type@ >= kSceneListSize@ + kFleetNum + 1){
 				title_str += "改装画面 - "
+			}else{if(screen_shot_type@ >= kSceneListSize@ + 1){
+				title_str += "編成画面 - "
 			}else{
-				if(screen_shot_type@ >= kSceneListSize@ + 1){
-					title_str += "編成画面 - "
-				}else{
-					title_str += mode_list3@(screen_shot_type@) + " - "
-				}
-			}
+				title_str += mode_list3@(screen_shot_type@) + " - "
+			}}}
 			//艦これ画面の座標
 			title_str += "(" + flash_px@ + ","  +flash_py@ + ")"
 			//反映
@@ -192,7 +192,8 @@
 			if(diff < 500) :return FALSE
 		return TRUE
 		//状況を判別する
-		#defcfunc JudgeSituation int flash_id_
+		#defcfunc JudgeSituation int flash_id_, int change_flg_
+			if(change_flg_) :kTypeDropFlg@ = FALSE
 			gsel flash_id_
 			//通常の画面
 			judge_type = -1
@@ -233,6 +234,79 @@
 				for k, 0, kUnitNum
 					if(NearColor(294, 145 + 54 * k, 255, 102, 29)) :return kSceneListSize@ + kFleetNum + offset + k + 1
 				next
+			}
+			//ドロップ画面
+			;コモン
+			if(NearColor(745,437,32,162,165)){
+				if(NearColor(3,360,195,212,243)){
+					if(NearColor(11,471,68,104,105)){
+						if(change_flg_) :kTypeDropFlg@ = TRUE
+						return kTypeDrop@
+					}
+				}
+			}
+			;アンコモン
+			if(NearColor(745,437,32,162,165)){
+				if(NearColor(2,359,189,218,234)){
+					if(NearColor(15,467,68,105,106)){
+						if(change_flg_) :kTypeDropFlg@ = TRUE
+						return kTypeDrop@
+					}
+				}
+			}
+			;スーパーコモン
+			if(NearColor(745,437,32,162,165)){
+				if(NearColor(5,358,193,231,237)){
+					if(NearColor(11,471,68,104,105)){
+						if(change_flg_) :kTypeDropFlg@ = TRUE
+						return kTypeDrop@
+					}
+				}
+			}
+			;レア
+			if(NearColor(745,437,32,162,165)){
+				if(NearColor(8,358,205,210,211)){
+					if(NearColor(17,451,30,66,70)){
+						if(change_flg_) :kTypeDropFlg@ = TRUE
+						return kTypeDrop@
+					}
+				}
+			}
+			;スーパーレア
+			if(NearColor(745,437,32,162,165)){
+				if(NearColor(9,359,190,178,73)){
+					if(NearColor(18,457,39,71,58)){
+						if(change_flg_) :kTypeDropFlg@ = TRUE
+						return kTypeDrop@
+					}
+				}
+			}
+			;ホロ
+			if(NearColor(745,437,32,162,165)){
+				if(NearColor(3,349,238,199,195)){
+					if(NearColor(10,465,62,77,80)){
+						if(change_flg_) :kTypeDropFlg@ = TRUE
+						return kTypeDrop@
+					}
+				}
+			}
+			;スーパーホロ
+			if(NearColor(745,437,32,162,165)){
+				if(NearColor(9,360,255,243,226)){
+					if(NearColor(12,451,68,97,97)){
+						if(change_flg_) :kTypeDropFlg@ = TRUE
+						return kTypeDrop@
+					}
+				}
+			}
+			;SSホロ
+			if(NearColor(745,437,32,162,165)){
+				if(NearColor(4,343,254,228,196)){
+					if(NearColor(8,437,65,90,86)){
+						if(change_flg_) :kTypeDropFlg@ = TRUE
+						return kTypeDrop@
+					}
+				}
 			}
 		return kTypeUnknown
 		//サブ画面にコピー
@@ -423,7 +497,7 @@
 				output += "UnitCount" + (k + 1) + "\t" + unit_count@(k) + "\n"
 			next
 			;最終更新日時
-			for k, 0, kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum + 1
+			for k, 0, kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum + 2
 				output += "LastUpdate" + (k + 1) + "\t" + strf("%04d%02d%02d%02d%02d%02d%03d", last_up_date@(k, 0), last_up_date@(k, 1), last_up_date@(k, 2), last_up_date@(k, 3), last_up_date@(k, 4), last_up_date@(k, 5), last_up_date@(k, 6)) + "\n"
 			next
 			notesel output
@@ -435,13 +509,15 @@
 				notesel supply_log@ :notesave "supply.csv"
 			}
 			// 画像
-			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 1)
+			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 2)
 			for k, 0, kSceneListSize@
 				pos 0, k * kFlashWY
 				gcopy kCaptureBufferID@ + k, 0, 0, kFlashWX, kFlashWY
 			next
 			pos 0, kSceneListSize@ * kFlashWY
 			gcopy kBattleBufferID@, 0, 0, kFlashWX, kFlashWY
+			pos 0, (kSceneListSize@ + 1) * kFlashWY
+			gcopy kDropBufferID@, 0, 0, kFlashWX, kFlashWY
 			for k, 0, kFleetNum
 				pos kFlashWX, k * kFlashWY
 				gcopy kFleetIdOffset@ + k, 0, 0, kFlashWX, kFlashWY
@@ -512,7 +588,7 @@
 						unit_count@(k) = f
 					}
 					if(strmid(temp(0), 0, 10) == "LastUpdate"){
-						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum)
+						t = limit(int(strmid(temp(0), 10, strlen(temp(0)) - 10)) - 1, 0, kSceneListSize@ + kFleetNum + kFleetNum * kUnitNum + 1)
 						;バージョンによってtにオフセットを掛ける(間違えて上書きされる対策)
 						if((read_ver <= 19) && (t >= 16)) :t += 2
 						if((read_ver == 20) && (t >= 17)) :t += 1
@@ -551,7 +627,7 @@
 			// 画像
 			exist pic_save_path@(0) + "\\save.png"
 			if(strsize == -1) :return
-			buffer kTempBufferID@
+			buffer kTempBufferID@, kFlashWX * 6, kFlashWY * (kSceneListSize@ + 2)
 			picload pic_save_path@(0) + "\\save.png"
 			for k, 0, kSceneListSize@
 				gsel kCaptureBufferID@ + k
@@ -561,6 +637,9 @@
 			gsel kBattleBufferID@
 			pos 0, 0
 			gcopy kTempBufferID@, 0, kSceneListSize@ * kFlashWY, kFlashWX, kFlashWY
+			gsel kDropBufferID@
+			pos 0, 0
+			gcopy kTempBufferID@, 0, (kSceneListSize@ + 1) * kFlashWY, kFlashWX, kFlashWY
 			for k, 0, kFleetNum
 				gsel kFleetIdOffset@ + k
 				pos 0, 0
