@@ -1,8 +1,9 @@
-/* おりこうさんな秘書
+/* おりこうさんな秘書改
+ * 参考：sakura氏のhttp://hspnext.com/hspkura/hspkura02.htm
  */
 
 	#packopt name "おりこうさんな秘書"
-	#include "hspcv.as"
+	#include "hspcv.as"		;画像処理でOpenCVを使うためのライブラリ
 
 // 通常の定数
 	// 真偽
@@ -38,24 +39,89 @@
 	#const global kTypeResult  1
 	#const global kTypeHome    2
 	#const global kTypeInfo    3
+	#const global kTypeTeam1   4
+	#const global kTypeTeam2   5
+	#const global kTypeTeam3   6
+	#const global kTypeTeam4   7
 	// アプリ機能(mode_strと対応)
 	#const kModeNow    0
 	#const kModeReslut 1
 	#const kModeHome   2
 	#const kModeInfo   3
+	#const kModeTeam1  4
+	#const kModeTeam2  5
+	#const kModeTeam3  6
+	#const kModeTeam4  7
+	// タスクトレイ機能
+	#define WM_LBUTTONDOWN  $00000201
+	#define NOTIFY_TRAYICON $00001400
 	// その他フラグなど
 	#define kSoftName "おりこうさんな秘書(仮)"
 	#const kOffsetY kMainWY - kFlashWY
-	type_str.0 = "不明",     "戦果報告", "母港画面", "戦績表示"
-	mode_str.0 = "現在状況", "戦果報告", "母港画面", "戦績表示"
+	type_str.0 = "不明",     "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)"
+	mode_str.0 = "現在状況", "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)"
 	auto_getpos_flg  = TRUE
 	auto_capture_flg = FALSE
 	name_disable_flg = FALSE
+	tasktray_flg = FALSE
 	screen_shot_type = kTypeUnknown
 	application_mode = kModeNow
 
+	#uselib "user32.dll"
+		#func IsIconic "IsIconic" sptr
+
 // モジュール
-	#module
+	#module tasktray
+		// API呼び出し
+		#uselib "kernel32.dll"
+			#func GetModuleFileName "GetModuleFileNameA" int,var,int
+		#uselib "shell32.DLL"
+			#func ExtractIconEx "ExtractIconExA" var,int,var,var,int
+			#func Shell_NotifyIcon "Shell_NotifyIcon" int,var
+		// API用の定数
+		#const NIM_ADD     $00000000
+		#const NIM_DELETE  $00000002
+		#const NIM_MODIFY  $00000001
+		#const NIF_ICON    $00000002
+		#const NIF_MESSAGE $00000001
+		#const NIF_TIP     $00000004
+		// タスクトレイにアイコン格納
+		#defcfunc taskicoput str tooltip_text_
+			// ツールチップに表示するテキストを取得
+			tooltip_text = tooltip_text_
+			if(strlen(tooltip_text) == 0) :tooltip_text = ""
+			// 自分自身のファイル名を取得
+			sdim lpFileName, 260
+			GetModuleFileName hModule, lpFileName, 260
+			SelfName = lpFileName
+			icobig = 0
+			ExtractIconEx SelfName, 0, icobig, icosmall, 1
+			hIcon = icosmall
+			// NOTIFYICONDATA 構造体
+			dim IcoData, 22
+			IcoData(0) = 88
+			IcoData(1) = hwnd
+			IcoData(2) = 1
+			IcoData(3) = NIF_MESSAGE | NIF_ICON | NIF_TIP
+			IcoData(4) = $00001400	//なんでglobalな#constじゃダメなんだよクソが！
+			IcoData(5) = hIcon
+			poke IcoData, 24, tooltip_text
+			// タスクトレイにアイコンを追加
+			Shell_NotifyIcon NIM_ADD, IcoData
+		return hIcon
+		// タスクトレイアイコンを削除
+		#deffunc taskicoclr
+			// NOTIFYICONDATA 構造体
+			dim IcoData, 22
+			IcoData(0) = 88
+			IcoData(1) = hwnd
+			IcoData(2) = 1
+			IcoData(3) = NIF_ICON
+			// タスクトレイのアイコンを削除
+			Shell_NotifyIcon NIM_DELETE, IcoData
+		return 0
+	#global
+	#module misc
 		// API呼び出し
 		#uselib "gdi32.dll"
 		#cfunc CreateDC "CreateDCA" sptr,sptr,sptr,int
@@ -159,9 +225,11 @@
 			//戦果報告
 			;提督・艦隊名の左に出ている白縦棒
 			if(NearColor(51, 77, 255, 246, 242)){
-				;中央の白縦棒
+				;中央の白縦棒(上下)
 				if(NearColor(395, 77, 255, 246, 242)){
-					return kTypeResult
+					if(NearColor(37, 461, 33, 36, 38)){
+						return kTypeResult
+					}
 				}
 			}
 			//母港画面
@@ -170,7 +238,19 @@
 			if(NearColor(379, 464, 66, 182, 184)) :return kTypeHome	;帰投時
 			//戦績表示
 			;勝率表示部分の真ん中の縦棒
-			if(NearColor(306, 276, 84, 84, 84)) :return kTypeInfo
+			if(NearColor(306, 276, 84, 84, 84)){
+				if(NearColor(251, 203, 35, 158, 159)){
+					return kTypeInfo
+				}
+			}
+			//編成画面
+			;随伴艦一括解除ボタン
+			if(NearColor(420, 118, 195, 180, 169)){
+				if(NearColor(123, 126, 33, 150, 151)) :return kTypeTeam1
+				if(NearColor(153, 126, 33, 150, 151)) :return kTypeTeam2
+				if(NearColor(183, 126, 33, 150, 151)) :return kTypeTeam3
+				if(NearColor(213, 126, 33, 150, 151)) :return kTypeTeam4
+			}
 		return kTypeUnknown
 	#global
 
@@ -180,8 +260,13 @@
 	buffer 5 + kTypeResult, kFlashWX, kFlashWY
 	buffer 5 + kTypeHome,   kFlashWX, kFlashWY
 	buffer 5 + kTypeInfo,   kFlashWX, kFlashWY
+	buffer 5 + kTypeTeam1,  kFlashWX, kFlashWY
+	buffer 5 + kTypeTeam2,  kFlashWX, kFlashWY
+	buffer 5 + kTypeTeam3,  kFlashWX, kFlashWY
+	buffer 5 + kTypeTeam4,  kFlashWX, kFlashWY
 	//メインウィンドウ
 	screen kMainWindowID, kMainWX, kMainWY
+	oncmd gosub *OnMotificmd, NOTIFY_TRAYICON
 	objsize kObjX, kObjY
 		pos kObjSpace, kObjSpace
 			combox auto_getpos_flg,,"手動設定\n自動設定"
@@ -193,6 +278,8 @@
 			chkbox "自動更新", auto_capture_flg
 		pos kObjSpace + kObjSpaceX * 4, kObjSpace
 			chkbox "名前隠し", name_disable_flg
+		pos kObjSpace + kObjSpaceX * 5, kObjSpace
+			chkbox "タスクトレイ", tasktray_flg
 		pos kObjSpace, kObjSpace + kObjSpaceY
 			button gosub "現在状況", *mode_now
 		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY
@@ -201,6 +288,14 @@
 			button gosub "母港画面", *mode_home
 		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY
 			button gosub "戦績表示", *mode_info
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY
+			button gosub "編成画面1", *mode_team1
+		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY
+			button gosub "編成画面2", *mode_team2
+		pos kObjSpace + kObjSpaceX * 6, kObjSpace + kObjSpaceY
+			button gosub "編成画面3", *mode_team3
+		pos kObjSpace + kObjSpaceX * 7, kObjSpace + kObjSpaceY
+			button gosub "編成画面4", *mode_team4
 	SetTitle
 
 // 自動更新を行う
@@ -254,8 +349,51 @@
 						color :boxf 201, 123 + kOffsetY, 496, 153 + kOffsetY
 					}
 				swbreak
+				case kModeTeam1
+					pos 0, kOffsetY
+					gcopy 5 + kTypeTeam1, 0, 0, kFlashWX, kFlashWY
+					if(name_disable_flg){
+						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
+					}
+				swbreak
+				case kModeTeam2
+					pos 0, kOffsetY
+					gcopy 5 + kTypeTeam2, 0, 0, kFlashWX, kFlashWY
+					if(name_disable_flg){
+						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
+					}
+				swbreak
+				case kModeTeam3
+					pos 0, kOffsetY
+					gcopy 5 + kTypeTeam3, 0, 0, kFlashWX, kFlashWY
+					if(name_disable_flg){
+						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
+					}
+				swbreak
+				case kModeTeam4
+					pos 0, kOffsetY
+					gcopy 5 + kTypeTeam4, 0, 0, kFlashWX, kFlashWY
+					if(name_disable_flg){
+						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
+					}
+				swbreak
 			swend
 		redraw 1
+		// 最小化を検知して、タスクトレイに格納するかを決める
+		IsIconic hwnd
+		if(stat == 1){
+			// 最小化しているのでタスクトレイに格納可能
+			if(tasktray_flg){
+				gsel kMainWindowID, -1
+				tooltext = kSoftName
+				hIcon = taskicoput(tooltext)
+				repeat
+					IsIconic hwnd
+					if(stat == 0) :break
+					wait 10
+				loop
+			}
+		}
 		wait 10
 	loop
 
@@ -271,6 +409,18 @@ return
 return
 *mode_info
 	application_mode = kModeInfo
+return
+*mode_team1
+	application_mode = kModeTeam1
+return
+*mode_team2
+	application_mode = kModeTeam2
+return
+*mode_team3
+	application_mode = kModeTeam3
+return
+*mode_team4
+	application_mode = kModeTeam4
 return
 
 //座標取得
@@ -366,4 +516,16 @@ return
 	cvputimg kCVFlashBufferID
 	cvsave AutoFileName(), kCVFlashBufferID
 	gsel kMainWindowID
+return
+
+// NOTIFY_TRAYICONを処理する
+*OnMotificmd
+	itemID = lparam
+	switch itemID
+		case WM_LBUTTONDOWN
+			gsel kMainWindowID, 2
+			gsel kMainWindowID, 1
+			taskicoclr
+			swbreak
+	swend
 return
