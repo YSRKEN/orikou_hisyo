@@ -1,15 +1,15 @@
-/* おりこうさんな秘書 Ver.3.0.4 */
+/* おりこうさんな秘書 Ver.3.0.5 */
 
 /* TODO:
- * 起動し直して編成画面を観た際に保存していた明石タイマーがリセットされる不具合を修正
+ * 小破艦が編成画面に居る際に明石タイマーがリセットされる不具合を修正
  */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.0.4"
-	#define kVerString  "304"
-	#define kLastUpdate "2015/10/17"
+	#define kVersion    "Ver.3.0.5"
+	#define kVerString  "305"
+	#define kLastUpdate "2015/10/28"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"

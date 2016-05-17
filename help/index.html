@@ -14,7 +14,7 @@
 	</head>
 	<body>
 <!-- タイトル -->
-		<h1>おりこうさんな秘書 Ver.3.0.4</h1>
+		<h1>おりこうさんな秘書 Ver.3.0.5</h1>
 		Twitterアカウント：<a href="https://twitter.com/orikou_hisyo/">@orikou_hisyo</a><br>
 		公開ページ：<a href="http://www.vector.co.jp/soft/win95/game/se509326.html">http://www.vector.co.jp/soft/win95/game/se509326.html</a><br>
 		紹介動画：<a href="http://www.nicovideo.jp/watch/sm26755860">【艦これ】便利なスクショツール＋αを作ってみた</a><br>
@@ -101,6 +101,10 @@
 			<tr>
 				<td>☆hspext.dll</td>
 				<td>動作に必要なライブラリ。主にファイル処理を担当します</td>
+			</tr>
+			<tr>
+				<td>alert.wav</td>
+				<td><a href="#option">音声通知</a>を有効にした際に使用されるファイル。消しても構いません</td>
 			</tr>
 			<tr>
 				<td>sourceフォルダ</td>
@@ -368,7 +372,7 @@
 			<h3>各種タイマー</h3>
 			<p>　入渠・建造・遠征について、残り時間を自動でカウントします。また、明石タイマー機能もあります。<br>
 			　時間の他に、入渠・建造が<strong>空なドックは「空」と表示</strong>されます。また遠征の場合、その<strong>遠征名が表示</strong>されます。<br>
-			　また、残り<strong>1分を切ったらバルーン通知</strong>で知らせてくれます。<br>
+			　また、残り<strong>1分を切ったらバルーン通知</strong>で知らせてくれます(alert.wavを設定していると<a href="#option">音声通知</a>されます)。<br>
 			　なお、<strong>ゲームの画像素材は認識に一切使用していません</strong>。全て自前です。</p>
 			<img src="./images/dock.png" alt="各種タイマー" width="252" height="277">
 			<h3>ソート一覧作成機能</h3>
@@ -418,12 +422,20 @@
 			　セーブデータを違うVerのおり秘書に移した場合、ある程度は修正できますが<strong>完全な互換性は保証されない</strong>のでご容赦ください。<br>
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="option">オプション</a></h2>
-			<img src="./images/option.png" alt="オプション画面" width="274" height="203">
+			<img src="./images/option.png" alt="オプション画面" width="362" height="203">
 			<p>　各項目について解説します。</p>
 			<table border="1" summary="オプションの各項目についての説明">
 				<tr>
 					<th abbr="項目名">項目名</th>
 					<th abbr="説明">説明</th>
+				</tr>
+				<tr>
+					<td>マスコット化</td>
+					<td>メイン画面の表示を、<strong>右のコンボボックスで選択したマスコット</strong>に変更します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
+				</tr>
+				<tr>
+					<td>範囲表示</td>
+					<td>マスコットにおける選択範囲を明示します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
 				</tr>
 				<tr>
 					<td>倍率</td>
@@ -434,9 +446,8 @@
 					<td>画面を記録するfpsを設定します。30・20・15・10・5・3・2・1fpsを指定出来ます。</td>
 				</tr>
 				<tr>
-					<td>ズレ補正</td>
-					<td>ブラウザの位置を動かしたりして、艦これの画面がズレた際、それを自動で検知して修正します。<strong>チェック推奨</strong>ですが、<br>
-					<strong>環境によっては検知がしょっちゅう発動してしまうことがありますので、煩わしい人は切ってください</storng>。</td>
+					<td>時刻等表示</td>
+					<td>サブ画面にステータスバーを表示するかを決定します・</td>
 				</tr>
 				<tr>
 					<td>フォルダ指定</td>
@@ -448,10 +459,6 @@
 					<td>サブ画面から提督名を目立たない色で隠します。<strong>目立たない色で隠しているので注意。</strong>。</td>
 				</tr>
 				<tr>
-					<td>時刻等表示</td>
-					<td>サブ画面にステータスバーを表示するかを決定します・</td>
-				</tr>
-				<tr>
 					<td>大破チェック</td>
 					<td>出撃画面or戦果報告の際に<strong>大破艦が存在していた場合、出撃ボタンおよび進撃ボタンを白い枠で押せなくします</strong>。<br>
 					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
@@ -459,11 +466,6 @@
 				<tr>
 					<td>消耗チェック</td>
 					<td>出撃画面(演習含む)or遠征画面の際に<strong>未補給艦が存在していた場合、出撃ボタンを白い枠で押せなくします</strong>。<br>
-					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
-				</tr>
-				<tr>
-					<td>艦娘ロック<br>装備ロック</td>
-					<td>編成のソート画面での艦娘ロック、および改装の装備選択画面での装備<strong>ロックの操作を赤枠付きウィンドウで妨害します</strong>。<br>
 					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
 				</tr>
 				<tr>
@@ -482,12 +484,19 @@
 					なお、日付は「yyyy-mm-dd hh:MM:ss」という書式が標準ですが、"-"や":"や"/"や" "は読み込み時に同じものだと判断されます。</td>
 				</tr>
 				<tr>
-					<td>マスコット化</td>
-					<td>メイン画面の表示を、<strong>右のコンボボックスで選択したマスコット</strong>に変更します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
+					<td>ズレ補正</td>
+					<td>ブラウザの位置を動かしたりして、艦これの画面がズレた際、それを自動で検知して修正します。<strong>チェック推奨</strong>ですが、<br>
+					<strong>環境によっては検知がしょっちゅう発動してしまうことがありますので、煩わしい人は切ってください</storng>。</td>
 				</tr>
 				<tr>
-					<td>範囲表示</td>
-					<td>マスコットにおける選択範囲を明示します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
+					<td>艦娘ロック<br>装備ロック</td>
+					<td>編成のソート画面での艦娘ロック、および改装の装備選択画面での装備<strong>ロックの操作を赤枠付きウィンドウで妨害します</strong>。<br>
+					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
+				</tr>
+				<tr>
+					<td>音声通知</td>
+					<td><a href="#tools">各種タイマー</a>を使用している際に、入渠・建造・遠征の時間が1分を切ると音声で通知してくれます。<br>
+					音声ファイルはalert.wavとして、<strong>orikou.exeと同じフォルダに置いて下さい</strong>。</td>
 				</tr>
 			</table>
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
@@ -652,6 +661,11 @@
 				<td>Ixy</td>
 				<td><a href="http://pronama.azurewebsites.net/pronama/">http://pronama.azurewebsites.net/pronama/</a></td>
 			</tr>
+			<tr>
+				<td>On-Jin ～音人～</td>
+				<td>笠畑 栄樹</td>
+				<td><a href="http://on-jin.com/">http://on-jin.com/</a></td>
+			</tr>
 		</table>
 		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
@@ -663,6 +677,13 @@
 				<th abbr="バージョン">バージョン</th>
 				<th abbr="公開日">公開日</th>
 				<th abbr="変更箇所">変更箇所</th>
+			</tr>
+			<tr>
+				<td>Ver.3.0.5</td>
+				<td>2015/10/28</td>
+				<td>・入渠、建造、遠征終了時にアラーム音を鳴らせるようにした。<br>
+				・オプション画面をより見やすく改良した。<br>
+				・明石タイマーがリセットされやすい不具合を修正した。</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.4</td>
@@ -923,7 +944,7 @@
 <!-- 著作権について -->
 		<h1><a name="copyright">著作権について</a></h1>
 		<div><dl>
-			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.0.4</dd>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.0.5</dd>
 			<dt>種別</dt><dd>フリーウェア</dd>
 			<dt>種類</dt><dd>攻略・プレイ支援</dd>
 			<dt>開発者</dt><dd>YSR</dd>
@@ -940,7 +961,7 @@
 
 <!-- コメント -->
 		<h1><a name="comment">コメント</a></h1>
-		<p>明石タイマーがアッサリ実装できるとは思わなかった……</p>
+		<p>艦隊編成記録機能とかマジで！？</p>
 		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 

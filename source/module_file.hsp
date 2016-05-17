@@ -18,6 +18,7 @@
 			check_exhausted_flg@   = TRUE
 			kammusu_lock_flg@      = TRUE
 			weapon_lock_flg@       = TRUE
+			sound_alert_flg@       = FALSE
 			sub_window_size_index@ = 3
 			for k, 0, kCounterType
 				auto_count_flg@(k) = TRUE
@@ -126,6 +127,7 @@
 					if(param_name == "sub_window_size_index") :sub_window_size_index@ = limit(int(param_value), 0, length(sub_window_size_x@) - 1) :_continue
 					if(param_name == "kammusu_lock") :kammusu_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "weapon_lock") :weapon_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "sound_alert") :sound_alert_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -256,6 +258,7 @@
 			text_buffer += "sub_window_size_index=" + sub_window_size_index@ + "\n"
 			text_buffer += "kammusu_lock=" + kammusu_lock_flg@ + "\n"
 			text_buffer += "weapon_lock=" + weapon_lock_flg@ + "\n"
+			text_buffer += "sound_alert=" + sound_alert_flg@ + "\n"
 			notesel text_buffer
 			notesave exe_path@ + "\\save\\setting.ini"
 			// pngƒtƒ@ƒCƒ‹‚ð•Û‘¶

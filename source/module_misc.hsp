@@ -25,6 +25,7 @@
 			objprm check_exhausted_id@, check_exhausted_flg@
 			objprm kammusu_lock_id@, kammusu_lock_flg@
 			objprm weapon_lock_id@, weapon_lock_flg@
+			objprm sound_alert_id@, sound_alert_flg@
 		return
 		// ログに追記
 		#deffunc PutLog str message
@@ -45,6 +46,14 @@
 		// 改装画面のバッファIDを算出
 		#defcfunc GetUnitID int fleet_num, int unit_num
 		return kSceneBufferID + scene_fleet_offset@ + fleet_num * kUnitNum + unit_num
+		// アラートを鳴らす
+		#deffunc PlayAlert
+			assert
+			exist exe_path@ + "\\alert.wav"
+			if(strsize == -1) :return
+			mmload exe_path@ + "\\alert.wav", 1, 0
+			mmplay 1
+		return
 	#global
 
 	#module dtm

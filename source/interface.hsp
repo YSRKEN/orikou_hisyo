@@ -17,54 +17,66 @@
 	screen kLockerWindowID, 10, 10 :gsel kLockerWindowID, -1
 
 /* オプション画面 */
-	screen kOptionWindowID, POS_X(3), POS_Y(6), 4 :title "オプション画面"
+	screen kOptionWindowID, POS_X(4), POS_Y(6), 4 :title "オプション画面"
 	gsel kOptionWindowID, -1
+	font msgothic, kSmallFontSize
+		pos POS_X(0), POS_Y(0) + kObjOffset
+			mes "メイン画面"
+		pos POS_X(0), POS_Y(1) + kObjOffset
+			mes "サブ画面"
+		pos POS_X(0), POS_Y(2) + kObjOffset
+			mes "保存設定"
+		pos POS_X(0), POS_Y(4) + kObjOffset
+			mes "その他"
 	objsize SIZE_X(1), SIZE_Y(1)
-		POS_XY 0, 0
-			combox sub_window_size_index,,sub_window_size_list
-				sub_window_size_id = stat
 		POS_XY 1, 0
-			combox capture_fps_index,,capture_fps_list
-				capture_fps_id = stat
-		POS_XY 2, 0
-			chkbox "ズレ補正", check_move_flash_flg
-				check_move_flash_id = stat
-		POS_XY 0, 1
-			combox pic_save_path_flg,,"デフォルト\n指定フォルダ"
-		POS_XY 1, 1
-			button gosub "参照...", *browse_pic
-		POS_XY 2, 1
-			chkbox "名前隠し", name_disable_flg
-				name_disable_id = stat
-		POS_XY 0, 3
-			chkbox "大破チェック", check_deadzone_flg
-				check_deadzone_id = stat
-		POS_XY 1, 3
-			chkbox "消耗チェック", check_exhausted_flg
-				check_exhausted_id = stat
-		POS_XY 2, 3
-			chkbox "時刻等表示", show_status_flg
-				show_status_id = stat
-		POS_XY 0, 4
-			chkbox "艦娘ロック", kammusu_lock_flg
-				kammusu_lock_id = stat
-		POS_XY 1, 4
-			chkbox "装備ロック", weapon_lock_flg
-				weapon_lock_id = stat
-		POS_XY 2, 4
-			button gosub "資材管理", *show_supply_file_window
-		POS_XY 0, 5
 			chkbox "マスコット化", desktop_mascot_flg
 				desktop_mascot_id = stat
-		POS_XY 1, 5
+		POS_XY 2, 0
 			mascot_list = ""
 			combox mascot_index,,mascot_list
 				mascot_index_id = stat
-		POS_XY 2, 5
+		POS_XY 3, 0
 			chkbox "範囲表示", show_mascot_area_flg
 				show_mascot_area_id = stat
+		POS_XY 1, 1
+			combox sub_window_size_index,,sub_window_size_list
+				sub_window_size_id = stat
+		POS_XY 2, 1
+			combox capture_fps_index,,capture_fps_list
+				capture_fps_id = stat
+		POS_XY 3, 1
+			chkbox "時刻等表示", show_status_flg
+				show_status_id = stat
+		POS_XY 1, 2
+			combox pic_save_path_flg,,"デフォルト\n指定フォルダ"
+		POS_XY 2, 2
+			button gosub "参照...", *browse_pic
+		POS_XY 3, 2
+			chkbox "名前隠し", name_disable_flg
+				name_disable_id = stat
+		POS_XY 1, 4
+			chkbox "大破チェック", check_deadzone_flg
+				check_deadzone_id = stat
+		POS_XY 2, 4
+			chkbox "消耗チェック", check_exhausted_flg
+				check_exhausted_id = stat
+		POS_XY 3, 4
+			button gosub "資材管理", *show_supply_file_window
+		POS_XY 0, 5
+			chkbox "ズレ補正", check_move_flash_flg
+				check_move_flash_id = stat
+		POS_XY 1, 5
+			chkbox "艦娘ロック", kammusu_lock_flg
+				kammusu_lock_id = stat
+		POS_XY 2, 5
+			chkbox "装備ロック", weapon_lock_flg
+				weapon_lock_id = stat
+		POS_XY 3, 5
+			chkbox "音声通知", sound_alert_flg
+				sound_alert_id = stat
 	objsize SIZE_X(3), SIZE_Y(1)
-		POS_XY 0, 2
+		POS_XY 1, 3
 			input pic_save_path(1)
 				pic_save_path_id = stat
 	objenable pic_save_path_id, 0
