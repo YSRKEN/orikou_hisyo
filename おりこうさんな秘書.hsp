@@ -1,0 +1,369 @@
+/* おりこうさんな秘書
+ */
+
+	#packopt name "おりこうさんな秘書"
+	#include "hspcv.as"
+
+// 通常の定数
+	// 真偽
+	#const global TRUE  1
+	#const global FALSE 0
+	// 画面ID
+	#const kMainWindowID  0	;操作画面
+	#const kSubWindowID   1	;手動指定用画面
+	#const kDeskBufferID  2	;スクショ用
+	#const kFlashBufferID 3	;検索用
+	#const kTempBufferID  4	;テンポラリ用
+	// OpenCV用ID
+	#const kCVDeskBufferID  0
+	#const kCVFlashBufferID 1
+	// サイズ定義
+	#define global kDispX   ginfo_dispx
+	#define global kDispY   ginfo_dispy
+	#const  global kFlashWX 800
+	#const  global kFlashWY 480
+	#const kMainWX 800
+	#const kMainWY 600
+	#const kFontSize 30
+	#const kObjX 80
+	#const kObjY 20
+	#const kObjSpace 10
+	#const kObjSpaceX kObjSpace + kObjX
+	#const kObjSpaceY kObjSpace + kObjY
+	// キーボード・マウス操作
+	#const kStickEscKey 128
+	#const kStickMouse  256
+	// 画面状態(tye_strと対応)
+	#const global kTypeUnknown 0
+	#const global kTypeResult  1
+	#const global kTypeHome    2
+	#const global kTypeInfo    3
+	// アプリ機能(mode_strと対応)
+	#const kModeNow    0
+	#const kModeReslut 1
+	#const kModeHome   2
+	#const kModeInfo   3
+	// その他フラグなど
+	#define kSoftName "おりこうさんな秘書(仮)"
+	#const kOffsetY kMainWY - kFlashWY
+	type_str.0 = "不明",     "戦果報告", "母港画面", "戦績表示"
+	mode_str.0 = "現在状況", "戦果報告", "母港画面", "戦績表示"
+	auto_getpos_flg  = TRUE
+	auto_capture_flg = FALSE
+	name_disable_flg = FALSE
+	screen_shot_type = kTypeUnknown
+	application_mode = kModeNow
+
+// モジュール
+	#module
+		// API呼び出し
+		#uselib "gdi32.dll"
+		#cfunc CreateDC "CreateDCA" sptr,sptr,sptr,int
+		#func DeleteDC  "DeleteDC"  int
+		#func BitBlt    "BitBlt"    int,int,int,int,int,int,int,int,int
+		// API用の定数
+		#const NULL       0
+		#const SRCCOPY    0x00CC0020
+		#const CAPTUREBLT 0x40000000
+		// 各種関数定義
+		//デスクトップキャプチャ
+		#deffunc GetDesktopWindow int window_id_
+			now_id = ginfo_sel
+			gsel now_id, -1	//メイン画面を非表示にする
+			buffer window_id_, kDispX, kDispY
+			//デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			//デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kDispX, kDispY, hdc_screen, 0, 0, SRCCOPY | CAPTUREBLT
+			//デバイスコンテキストを削除する
+			DeleteDC hdc_screen
+			redraw 1
+			gsel now_id, 1	//画面を再表示する
+		return
+		//デスクトップの一部をキャプチャ
+		#deffunc GetFlashWindow int buffer_id_, int flash_px_, int flash_py_
+			buffer buffer_id_, kFlashWX, kFlashWY
+			//デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			//デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, flash_px_, flash_py_, SRCCOPY | CAPTUREBLT
+			//デバイスコンテキストを削除する
+			DeleteDC hdc_screen
+			redraw 1
+		return
+		//艦これ画面の自動認識
+		#deffunc GetPosFlashSquare int window_id_, int output_buffer_id_, var px_, var py_
+			;バッファ1：検索先画像
+			gsel window_id_
+			cvbuffer window_id_, ginfo_sx, ginfo_sy
+			cvputimg window_id_
+			//バッファ2:黒塗りの800x480の画像
+			buffer output_buffer_id_, kFlashWX, kFlashWY
+			boxf
+			cvbuffer output_buffer_id_, kFlashWX, kFlashWY
+			cvputimg output_buffer_id_
+			//マッチング処理を行う
+			cvmatch px_, py_, CV_TM_SQDIFF, output_buffer_id_, window_id_
+		return
+		//長方形枠を描画
+		#deffunc DrawMouseSquare int mouse_x1_, int mouse_y1_, int mouse_x2_, int mouse_y2_
+			if(mouse_x1_ < mouse_x2_){
+				square_x1 = mouse_x1_
+				square_x2 = mouse_x2_
+			}else{
+				square_x1 = mouse_x2_
+				square_x2 = mouse_x1_
+			}
+			if(mouse_y1_ < mouse_y2_){
+				square_y1 = mouse_y1_
+				square_y2 = mouse_y2_
+			}else{
+				square_y1 = mouse_y2_
+				square_y2 = mouse_y1_
+			}
+			color 0, 255, 255
+			line square_x1, square_y1, square_x2, square_y1
+			line square_x2, square_y1, square_x2, square_y2
+			line square_x2, square_y2, square_x1, square_y2
+			line square_x1, square_y2, square_x1, square_y1
+		return
+		//ファイル名を自動設定
+		#defcfunc AutoFileName
+			file_name = strf("%04d_%02d_%02d %02d_%02d_%02d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6))
+			number = 0
+			repeat
+				exist file_name + "_" + (cnt + 1) + ".png"
+				if(strsize == -1){
+					number = cnt + 1
+					break
+				}
+				wait 5
+			loop
+		return file_name + "_" + number + ".png"
+		//タイトルバーの文字列を設定
+		#deffunc SetTitle
+			title kSoftName@ + " - " + mode_str@(application_mode@) + " - (" + flash_px@ + ","  +flash_py@ + ") - " + type_str@(screen_shot_type@)
+		return
+		//色判定
+		#defcfunc NearColor int px_, int py_, int clr_r_, int clr_g_, int clr_b_
+			pget px_, py_
+			diff_r = ginfo_r - clr_r_
+			diff_g = ginfo_g - clr_g_
+			diff_b = ginfo_b - clr_b_
+			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
+			if(diff < 500) :return TRUE
+		return FALSE
+		//状況を判別する
+		#defcfunc JudgeSituation int flash_id_
+			gsel flash_id_
+			//戦果報告
+			;提督・艦隊名の左に出ている白縦棒
+			if(NearColor(51, 77, 255, 246, 242)){
+				;中央の白縦棒
+				if(NearColor(395, 77, 255, 246, 242)){
+					return kTypeResult
+				}
+			}
+			//母港画面
+			;中央下の履歴ボタン
+			if(NearColor(379, 464, 74, 202, 205)) :return kTypeHome	;通常
+			if(NearColor(379, 464, 66, 182, 184)) :return kTypeHome	;帰投時
+			//戦績表示
+			;勝率表示部分の真ん中の縦棒
+			if(NearColor(306, 276, 84, 84, 84)) :return kTypeInfo
+		return kTypeUnknown
+	#global
+
+// ウィンドウ周りを初期設定
+	//保存用バッファ
+	buffer kFlashBufferID,  kFlashWX, kFlashWY
+	buffer 5 + kTypeResult, kFlashWX, kFlashWY
+	buffer 5 + kTypeHome,   kFlashWX, kFlashWY
+	buffer 5 + kTypeInfo,   kFlashWX, kFlashWY
+	//メインウィンドウ
+	screen kMainWindowID, kMainWX, kMainWY
+	objsize kObjX, kObjY
+		pos kObjSpace, kObjSpace
+			combox auto_getpos_flg,,"手動設定\n自動設定"
+		pos kObjSpace + kObjSpaceX, kObjSpace
+			button gosub "座標取得", *get_pos
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace
+			button gosub "画像保存", *save_picture
+		pos kObjSpace + kObjSpaceX * 3, kObjSpace
+			chkbox "自動更新", auto_capture_flg
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace
+			chkbox "名前隠し", name_disable_flg
+		pos kObjSpace, kObjSpace + kObjSpaceY
+			button gosub "現在状況", *mode_now
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY
+			button gosub "戦果報告", *mode_result
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY
+			button gosub "母港画面", *mode_home
+		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY
+			button gosub "戦績表示", *mode_info
+	SetTitle
+
+// 自動更新を行う
+	repeat
+		// 自動更新を行う
+		if(auto_capture_flg){
+			redraw 0
+				SetTitle
+				GetFlashWindow kFlashBufferID, flash_px, flash_py
+				gsel kMainWindowID
+			redraw 1
+		}else{
+			SetTitle
+		}
+		// 現在の状況を自動判定する
+		screen_shot_type = JudgeSituation(kFlashBufferID)
+		if(screen_shot_type != kTypeUnknown){
+			gsel 5 + screen_shot_type
+			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+		}
+		gsel kMainWindowID
+		// アプリの状態に合わせ表示を変更する
+		redraw 0
+			switch application_mode
+				case kModeNow
+					if(auto_capture_flg){
+						pos 0, kOffsetY
+						gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+					}
+				swbreak
+				case kModeReslut
+					pos 0, kOffsetY
+					gcopy 5 + kTypeResult, 0, 0, kFlashWX, kFlashWY
+					if(name_disable_flg){
+						color :boxf 56, 82 + kOffsetY, 228, 106 + kOffsetY
+					}
+				swbreak
+				case kModeHome
+					pos 0, kOffsetY
+					gcopy 5 + kTypeHome, 0, 0, kFlashWX, kFlashWY
+					if(name_disable_flg){
+						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
+					}
+				swbreak
+				case kModeInfo
+					pos 0, kOffsetY
+					gcopy 5 + kTypeInfo, 0, 0, kFlashWX, kFlashWY
+					if(name_disable_flg){
+						;二箇所消す必要が有ることに注意
+						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
+						color :boxf 201, 123 + kOffsetY, 496, 153 + kOffsetY
+					}
+				swbreak
+			swend
+		redraw 1
+		wait 10
+	loop
+
+//各状況のボタンを押した際の処理
+*mode_now
+	application_mode = kModeNow
+return
+*mode_result
+	application_mode = kModeReslut
+return
+*mode_home
+	application_mode = kModeHome
+return
+*mode_info
+	application_mode = kModeInfo
+return
+
+//座標取得
+*get_pos
+	if(auto_getpos_flg){
+		// 座標を自動で取得する
+		//デスクトップを撮影する
+		GetDesktopWindow kDeskBufferID
+		//撮影した画像から座標を検索する
+		GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+		gsel kMainWindowID
+		SetTitle
+	}else{
+		// 座標を手動で取得する
+		//デスクトップを撮影する
+		GetDesktopWindow kDeskBufferID
+		//手動で枠を選択させる
+		;初期設定
+		bgscr kSubWindowID, kDispX, kDispY, , 0, 0
+		gsel kSubWindowID, 2
+		font msgothic, kFontSize
+		;画面表示
+		gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+		color :mes "枠を選択して下さい。(Escで終了)"
+		;選択操作
+		is_mouse_button = FALSE
+		mouse_pos_x1 = 0 :mouse_pos_y1 = 0
+		repeat
+			stick key, kStickMouse
+			if(key & kStickEscKey) :end
+			if(key & kStickMouse){
+				if(is_mouse_button){
+					// 選択中
+					redraw 0
+						pos 0, 0
+						gcopy kBufferID1, 0, 0, kDispX, kDispY
+						color :mes "枠を選択して下さい。(Escで終了)"
+						DrawMouseSquare mousex, mousey, mouse_pos_x1, mouse_pos_y1
+					redraw 1
+				}else{
+					// 選択開始
+					mouse_pos_x1 = mousex
+					mouse_pos_y1 = mousey
+					is_mouse_button = TRUE
+				}
+			}else{
+				if(is_mouse_button){
+					// 選択終了
+					mouse_pos_x2 = mousex
+					mouse_pos_y2 = mousey
+					if(mouse_pos_x1 < mouse_pos_x2){
+						square_x = mouse_pos_x1
+						square_xsize = mouse_pos_x2 - mouse_pos_x1 + 1
+					}else{
+						square_x = mouse_pos_x2
+						square_xsize = mouse_pos_x1 - mouse_pos_x2 + 1
+					}
+					if(mouse_pos_y1 < mouse_pos_y2){
+						square_y = mouse_pos_y1
+						square_ysize = mouse_pos_y2 - mouse_pos_y1 + 1
+					}else{
+						square_y = mouse_pos_y2
+						square_ysize = mouse_pos_y1 - mouse_pos_y2 + 1
+					}
+					is_mouse_button = FALSE
+					break
+				}else{
+					// 何もしていない
+				}
+			}
+			wait 5
+		loop
+		;選択結果から検索を行う
+		gsel kSubWindowID, -1
+		buffer kTempBufferID, square_xsize, square_ysize
+		gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
+		if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
+			gsel kMainWindowID
+		}else{
+			GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
+			flash_px += square_x :flash_py += square_y
+			gsel kMainWindowID
+			SetTitle
+		}
+	}
+return
+
+//画像保存
+*save_picture
+	buffer kFlashBufferID, kFlashWX, kFlashWY
+	gcopy kMainWindowID, 0, kMainWY - kFlashWY, kFlashWX, kFlashWY
+	cvbuffer kCVFlashBufferID, kFlashWX, kFlashWY
+	cvputimg kCVFlashBufferID
+	cvsave AutoFileName(), kCVFlashBufferID
+	gsel kMainWindowID
+return
