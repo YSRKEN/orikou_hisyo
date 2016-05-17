@@ -1,0 +1,256 @@
+/* 定数宣言 */
+
+	#pack "scene_list.txt"
+	#pack "area_exp.txt"
+	#pack "exp_table.txt"
+
+// 通常の定数
+	// 真偽
+	#const global TRUE  1
+	#const global FALSE 0
+	#const global NULL  0
+	// 画面ID
+	#enum kMainWindowID = 0	;メイン画面
+	#enum kPutWindowID		;サブ画面
+	#enum kPutTempWindowID	;サブ画面用バッファ
+	#enum kTempBufferID		;テンポラリ画面
+	;座標取得用
+	#enum kSelectWindowID	;手動指定用画面
+	#enum kDeskBufferID		;スクショ用
+	#enum kFlashBufferID	;検索用
+	;ツール用
+	#enum kExpCalcWindowID	;経験値計算機
+	#enum kDockWindowID		;入渠タイマー
+	#enum kCountWindowID	;○号カウンター
+	#enum kMatchBufferID	;マッチング用の捨てID
+	;バッファ用
+	#enum global kNumGetBufferID1	;数字認識用(64x64)
+	#enum global kNumGetBufferID2	;数字認識用(32x32)
+	#enum kCursorBufferID	;カーソル用
+	#enum kCaptureBufferID	;各保存画面
+	// OpenCV用ID
+	#enum global kCVTempBufferID = 0
+	#enum global kCVNumBufferID
+	#enum global kCVMatchBufferID
+	// パラメータ
+	#const global kFleetNum    4	;艦隊数
+	#const global kUnitNum     6	;艦隊毎の艦娘数
+	#const global kDocks       4	;ドック数
+	#const global kBgmListSize 3	;BGMの種類数
+	#const global kTypeUnknown 0	;デフォルトの判定結果
+	#const global kTypeNow     0	;現在画面
+	// オブジェクトのサイズ
+	;デスクトップ全体のサイズ
+	#define global kDispX ginfo_dispx
+	#define global kDispY ginfo_dispy
+	;Flash画面のサイズ
+	#const  global kFlashWX 800
+	#const  global kFlashWY 480
+	;オブジェクト関係
+	#const kObjX 80
+	#const kObjY 20
+	#const kObjSpace 8
+	#const kObjSpaceX kObjSpace + kObjX
+	#const kObjSpaceY kObjSpace + kObjY
+	;編成画面のサイズ
+	#const kFleetWX 684
+	#const kFleetWY 368
+	;編成画面のオフセット座標
+	#const kFleetPX 110
+	#const kFleetPY 96
+	;改装画面のサイズ
+	#const kUnitWX 455
+	#const kUnitWY 365
+	;改装画面のオフセット座標
+	#const kUnitPX 330
+	#const kUnitPY 100
+	;フォントサイズ
+	#const kSmallFontSize 12
+	#const kLargeFontSize 30
+	;メイン画面のサイズ
+	#const kMainWX kObjSpace + kObjSpaceX * 2
+	#const kMainWY kObjSpace * 4 + kObjSpaceY * 12
+	;カウンター画面
+	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
+	#const kCounterY 60
+	// キーボード・マウス操作
+	#const kStickEscKey 128
+	#const kStickMouse  256
+	// 認識用
+	#const global kPoints 3	;3点に対して、
+	#const global kParams 5	;xy座標+RGBの5つの数字でチェックする
+
+// 変数初期化
+	// コンボボックスの内容
+	sdim mode_list, 1024	//実行モード
+		gosub *init_mode_list
+	sdim fleets_list, 1024	//第○艦隊
+		for k, 1, kFleetNum + 1
+			fleets_list += "第" + k + "艦隊\n"
+		next
+	sdim units_list, 10240	//第○艦隊○番艦
+		for i, 1, kFleetNum + 1
+			for j, 1, kUnitNum + 1
+				units_list += "第" + i + "-" + j + "番艦\n"
+			next
+		next
+	sdim commands_list, 1024	//艦隊保存用コマンド
+		for k, 1, kFleetNum + 1
+			commands_list += "第" + k + "艦隊\n"
+		next
+		commands_list += "連合艦隊\n"
+		commands_list += "支援艦隊\n"
+	sdim bgm_list, 1024	//BGM一覧
+		bgm_list_name.0 = "母港", "マップ", "戦闘"
+		bgm_list_flg.0 = FALSE, FALSE, FALSE
+		sdim bgm_list_filename, 260, kBgmListSize
+		gosub *init_bgm_list
+	sdim fps_list, 1024	//fps一覧
+		fps_num.0 = 30, 20, 10, 5, 3, 2, 1
+		for k, 0, length(fps_num)
+			fps_list += "" + fps_num(k) + "fps\n"
+		next
+	sdim zooming_list, 1024	//倍率一覧
+		zooming_num.0 = 50, 75, 100, 150, 200
+		for k, 0, length(zooming_num)
+			zooming_list += "倍率" + zooming_num(k) + "％\n"
+		next
+	sdim level_list, 1024
+		for k, 1, 150 + 1
+			level_list += "" + k + "\n"
+		next
+	sdim area_list, 1024
+		gosub *area_init
+	// その他設定
+	;カレントディレクトリを記憶
+	sdim current_dir, 260		;カレントディレクトリ
+		current_dir = dir_cur
+	;経験値計算機
+	now_level = 0
+	goal_level = 24
+	area_index = 11
+	reader_ship_flg = TRUE
+	mvp_flg = TRUE
+	result_index = 1
+	;○号カウンター
+	sdim count_result, 1024		;○号カウンター
+	a_sortie_count = 0			;あ号出撃
+	a_to_boss_count = 0			;あ号ボス到達
+	a_win_boss_count = 0		;あ号ボス勝利
+	a_s_win_count = 0			;あ号S勝利
+	r_count = 0					;ろ号
+	i_count = 0					;い号
+	;入渠タイマー
+	dock1_time1 = "00:00:00" :dock1_time2 = ""
+	dock2_time1 = "00:00:00" :dock2_time2 = ""
+	dock3_time1 = "00:00:00" :dock3_time2 = ""
+	dock4_time1 = "00:00:00" :dock4_time2 = ""
+	dim dock_hour,   kDocks
+	dim dock_minute, kDocks
+	dim dock_second, kDocks
+	xpos.0 = 623, 634, 652, 663, 680, 691
+	ypos.0 = 136, 216, 298, 380
+	gosub *match_init
+	;各種フラグ
+	name_disable_flg = TRUE
+	cursor_flg = TRUE
+	;その他
+	kFleetIdOffset = kCaptureBufferID + kSceneListSize
+	kUnitIdOffset = kFleetIdOffset + kFleetNum
+	flash_px = -1
+	flash_py = -1
+	zooming_index_ = -1
+	dead_zone_flg_ = FALSE
+	goto *main1
+
+*init_bgm_list
+	bgm_list = ""
+	for k, 0, kBgmListSize
+		bgm_list += bgm_list_name(k)
+		if(bgm_list_flg(k)){
+			bgm_list += "(ON ,"
+		}else{
+			bgm_list += "(OFF,"
+		}
+		exist bgm_list_filename(k)
+		if(strsize != -1){
+			bgm_list += getpath(bgm_list_filename(k), 1 + 8) + ")\n"
+		}else{
+			bgm_list += "<NONE>)\n"
+		}
+	next
+return
+
+*init_mode_list
+	notesel text_buffer
+	noteload "scene_list.txt"
+	kSceneListSize = notemax - 1
+	dim mode_filter, kSceneListSize, kPoints, kParams	;判定用パラメータ
+	sdim mode_list2, 64, kSceneListSize + 3	;実行モード一覧
+		mode_list += "現在画面\n"
+		mode_list2(0) = "現在画面"
+	//1行づつ読み込む
+	repeat kSceneListSize
+		noteget get, cnt + 1
+		split get, "\t", temp
+		mode_list += temp(0) + "\n"
+		mode_list2(cnt + 1) = temp(0)
+		for i, 0, kPoints
+			for j, 0, kParams
+				mode_filter(cnt, i, j) = int(temp(i * kParams + j + 1))
+			next
+		next
+	loop
+	mode_list += "編成画面\n改装画面"
+	mode_list2(kSceneListSize + 1) = "編成画面"
+	mode_list2(kSceneListSize + 2) = "改装画面"
+	;判定結果用配列
+	sdim mode_list3, 64, kSceneListSize + 3
+	mode_list3(0) = "不明"
+	repeat kSceneListSize + 2, 1
+		mode_list3(cnt) = mode_list2(cnt)
+	loop
+return
+
+//経験値処理の初期化
+*area_init
+	notesel text_buffer
+	noteload "area_exp.txt"
+	dim exp_data, notemax
+	repeat notemax
+		noteget get, cnt
+		split get, " ", temp
+		area_list += temp(0) + "\n"
+		exp_data(cnt) = int(temp(1)) 
+	loop
+	noteload "exp_table.txt"
+	dim need_exp_table, notemax
+	repeat notemax
+		noteget get ,cnt
+		need_exp_table(cnt) = int(get)
+	loop
+return
+
+//マッチング処理の初期化
+*match_init
+	buffer kMatchBufferID, 32 * 19, 32
+	for k, 0, 10
+		buffer kNumGetBufferID1, 64, 64
+		color 255, 255, 255 :boxf :color
+		font msgothic, 64
+		mes k
+		OtsuThreshold
+		GetSquare px, py, wx, wy
+		gsel kMatchBufferID
+		pos k * 64, 0
+		gzoom 32, 32, kNumGetBufferID1, px, py, wx, wy, 1
+	next
+	OtsuThreshold
+	for k, 0, 10
+		DrawSquare k * 64, 0, 32, 32
+	next
+	cvbuffer kCVMatchBufferID, 32 * 19, 32
+	cvputimg kCVMatchBufferID
+return
+
+*main1

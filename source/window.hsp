@@ -1,0 +1,386 @@
+/* サブルーチン(画面周り) */
+goto *main2
+
+// 座標取得
+*get_pos
+	if(manual_getpos_flg){
+		// 座標を手動で取得する
+		//デスクトップを撮影する
+		GetDesktopWindow kDeskBufferID
+		//手動で枠を選択させる
+		;初期設定
+		bgscr kSelectWindowID, kDispX, kDispY, , 0, 0
+		gsel kSelectWindowID, 2
+		font msgothic, kLargeFontSize
+		;画面表示
+		gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+		color :mes "枠を選択して下さい。(Escで終了)"
+		;選択操作
+		is_mouse_button = FALSE
+		is_mouse_select = FALSE
+		mouse_pos_x1 = 0 :mouse_pos_y1 = 0
+		repeat
+			stick key, kStickMouse
+			if(key & kStickEscKey) :break
+			if(key & kStickMouse){
+				if(is_mouse_button){
+					// 選択中
+					redraw 0
+						pos 0, 0
+						gcopy kDeskBufferID, 0, 0, kDispX, kDispY
+						color :mes "枠を選択して下さい。(Escで終了)"
+						DrawMouseSquare mousex, mousey, mouse_pos_x1, mouse_pos_y1
+					redraw 1
+				}else{
+					// 選択開始
+					mouse_pos_x1 = mousex
+					mouse_pos_y1 = mousey
+					is_mouse_button = TRUE
+				}
+			}else{
+				if(is_mouse_button){
+					// 選択終了
+					mouse_pos_x2 = mousex
+					mouse_pos_y2 = mousey
+					if(mouse_pos_x1 < mouse_pos_x2){
+						square_x = mouse_pos_x1
+						square_xsize = mouse_pos_x2 - mouse_pos_x1 + 1
+					}else{
+						square_x = mouse_pos_x2
+						square_xsize = mouse_pos_x1 - mouse_pos_x2 + 1
+					}
+					if(mouse_pos_y1 < mouse_pos_y2){
+						square_y = mouse_pos_y1
+						square_ysize = mouse_pos_y2 - mouse_pos_y1 + 1
+					}else{
+						square_y = mouse_pos_y2
+						square_ysize = mouse_pos_y1 - mouse_pos_y2 + 1
+					}
+					is_mouse_button = FALSE
+					is_mouse_select = TRUE
+					break
+				}else{
+					// 何もしていない
+				}
+			}
+			wait 5
+		loop
+		;選択結果から検索を行う
+		gsel kSelectWindowID, -1
+		if(is_mouse_select){
+			buffer kTempBufferID, square_xsize, square_ysize
+			gcopy kDeskBufferID, square_x, square_y, square_xsize, square_ysize
+			if((square_xsize < kFlashWX) || (square_ysize < kFlashWY)){
+			}else{
+				GetPosFlashSquare kTempBufferID, kFlashBufferID, flash_px, flash_py
+				flash_px += square_x :flash_py += square_y
+				SetTitle
+			}
+		}
+	}else{
+		// 座標を自動で取得する
+		//デスクトップを撮影する
+		GetDesktopWindow kDeskBufferID
+		//撮影した画像から座標を検索する
+		GetPosFlashSquare kDeskBufferID, kFlashBufferID, flash_px, flash_py
+		SetTitle
+	}
+return
+
+//画像保存
+*save_picture
+	//画面クロップにチェックが入っているかで対応が変わる
+	screen_shot_type2 = JudgeSituation(kPutTempWindowID)
+	if((cap_crop_flg) && (screen_shot_type2 >= kSceneListSize)){
+		//クロップして保存
+		if(screen_shot_type2 >= kSceneListSize + kFleetNum){
+			//改装画面
+			buffer kTempBufferID, kUnitWX, kUnitWY
+			gcopy kPutTempWindowID, kUnitPX, kUnitPY, kUnitWX, kUnitWY
+		}else{
+			//編成画面
+			buffer kTempBufferID, kFleetWX, kFleetWY
+			gcopy kPutTempWindowID, kFleetPX, kFleetPY, kFleetWX, kFleetWY
+		}
+	}else{
+		//通常保存
+		gsel kPutTempWindowID
+	}
+	cvbuffer kCaptureBufferID, ginfo_sx, ginfo_sy
+	cvputimg kCaptureBufferID
+	cvsave current_dir + "\\" + AutoFileName(), kCaptureBufferID
+	gsel kMainWindowID
+return
+
+//艦隊画像保存
+*save_fleets
+	if(commands_index < kFleetNum){
+		// 第1～第4艦隊
+		buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
+		for y, 0, 2
+			for x, 0, 3
+				pos x * kUnitWX, y * kUnitWY
+				gcopy kUnitIdOffset + commands_index * kUnitNum + (y * 3 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+			next
+		next
+		cvbuffer kCaptureBufferID, kUnitWX * 3, kUnitWY * 2
+		cvputimg kCaptureBufferID
+		cvsave current_dir + "\\" + AutoFileName(), kCaptureBufferID
+	}else{
+		// 連合・支援艦隊
+		buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3
+		for z, 0, 2
+			for y, 0, 3
+				for x, 0, 2
+					pos (z * 2 + x) * kUnitWX, y * kUnitWY
+					gcopy kUnitIdOffset + (commands_index - kFleetNum) * (kUnitNum * 2) + (z * 6 + y * 2 + x), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+				next
+			next
+		next
+		cvbuffer kCVTempBufferID, kUnitWX * 4, kUnitWY * 3
+		cvputimg kCVTempBufferID
+		cvsave current_dir + "\\" + AutoFileName(), kCVTempBufferID
+		gsel kMainWindowID
+	}
+	gsel kMainWindowID
+return
+
+//BGM参照
+*browse_bgm
+	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
+	if(stat){
+		bgm_list_filename(bgm_index) = refstr
+		mmload refstr, bgm_index, 1
+		bgm_list_flg(bgm_index) = TRUE
+		if(bgm_index == bgm_type) :mmplay bgm_index :now_bgm = bgm_index
+		gosub *init_bgm_list
+		gsel kMainWindowID
+		objprm 22, bgm_list
+		objprm 22, bgm_index
+	}
+return
+//BGM切り替え
+*switch_bgm
+	if(bgm_list_flg(bgm_index)){
+		bgm_list_flg(bgm_index) = FALSE
+		if(bgm_index == bgm_type) :mmstop
+	}else{
+		exist bgm_list_filename(bgm_index)
+		if(strsize != -1){
+			bgm_list_flg(bgm_index) = TRUE
+			if(bgm_index == bgm_type) :mmplay bgm_index :now_bgm = bgm_index
+		}
+	}
+	gosub *init_bgm_list
+	gsel kMainWindowID
+	objprm 22, bgm_list
+	objprm 22, bgm_index
+return
+//BGM再生
+*start_bgm
+	if((bgm_type >= 0) && (bgm_type < kBgmListSize)){
+		if(bgm_list_flg(bgm_type)){
+			mmplay bgm_type
+			now_bgm = bgm_type
+			bgm_type_ = bgm_type
+		}
+	}
+return
+//BGM停止
+*stop_bgm
+	mmstop
+return
+
+//経験値計算機を閉じる
+*close_exp
+	gsel kExpCalcWindowID, -1
+return
+//経験値の計算
+*exp_calc
+	now_id = ginfo_sel
+	gsel kExpCalcWindowID
+	;レベルの矛盾を修正
+	if(now_level > goal_level){
+		if(now_level != now_level_){
+			goal_level = now_level
+			objprm 1, goal_level
+		}
+		if(goal_level != goal_level_){
+			now_level = goal_level
+			objprm 0, now_level
+		}
+	}
+	;必要経験値を計算
+	now_exp = need_exp_table(now_level)
+	goal_exp = need_exp_table(goal_level)
+	diff_exp = goal_exp - now_exp
+	objprm 6, diff_exp
+	;戦闘経験値を計算
+	battle_exp = 1.0 * exp_data(area_index)
+	if(reader_ship_flg) :battle_exp *= 1.5
+	if(mvp_flg) :battle_exp *= 2.0
+	switch result_index
+		case 0	;完全勝利S
+			battle_exp *= 1.2
+			swbreak
+		case 1	;勝利S
+			battle_exp *= 1.2
+			swbreak
+		case 2	;勝利A
+			battle_exp *= 1.0
+			swbreak
+		case 3	;戦術的勝利B
+			battle_exp *= 1.0
+			swbreak
+		case 4	;戦術的敗北C
+			battle_exp *= 0.8
+			swbreak
+		case 5	;敗北D
+			battle_exp *= 0.7
+			swbreak
+		case 6	;敗北E
+			battle_exp *= 0.5
+			if(mvp_flg) :battle_exp *= 0.5	;MVP無効
+	swend
+	battle_exp = int(battle_exp)
+	objprm 7, battle_exp
+	;必要周回数を計算
+	if(need_exp \ battle_exp == 0){
+		need_battles = need_exp / battle_exp
+	}else{
+		need_battles = need_exp / battle_exp + 1
+	}
+	objprm 8, need_battles
+	gsel now_id
+return
+//経験値計算機を出す
+*calc_exp
+	gsel kExpCalcWindowID, 2
+return
+
+//カウンターリセット
+*reset_counter_a
+	a_sortie_count = 0			;あ号出撃
+	a_to_boss_count = 0			;あ号ボス到達
+	a_win_boss_count = 0		;あ号ボス勝利
+	a_s_win_count = 0			;あ号S勝利
+	gosub *redraw_counter
+return
+*reset_counter_r
+	r_count = 0					;ろ号
+	gosub *redraw_counter
+return
+*reset_counter_i
+	i_count = 0					;い号
+	gosub *redraw_counter
+return
+//カウンターを閉じる
+*close_counter
+	gsel kCountWindowID, -1
+return
+//カウンターを出す
+*count_task
+	gsel kCountWindowID, 2
+return
+//カウントする
+*count_a_sortie :a_sortie_count++ :gosub *redraw_counter :return
+*count_a_to_boss :a_to_boss_count++ :gosub *redraw_counter :return
+*count_a_win_boss :a_win_boss_count++ :gosub *redraw_counter :return
+*count_a_s_win :a_s_win_count++ :gosub *redraw_counter :return
+*count_r :r_count++ :gosub *redraw_counter :return
+*count_i :i_count++ :gosub *redraw_counter :return
+//カウンター再描画
+*redraw_counter
+	count_result = ""
+	;あ号
+	count_result += "あ号：" + a_sortie_count + "回/" + a_to_boss_count + "回/" + a_win_boss_count + "回/" + a_s_win_count + "回("
+	if((a_sortie_count >= 36) && (a_to_boss_count >= 24) && (a_win_boss_count >= 12) && (a_s_win_count >= 6)){
+		count_result += "達成)\n"
+	}else{
+		count_result += "未達成)\n"
+	}
+	;ろ号
+	count_result += "ろ号：" + r_count + "回("
+	if(r_count >= 50) :count_result += "達成)\n" :else :count_result += "未達成)\n"
+	;い号
+	count_result += "い号：" + i_count + "回("
+	if(i_count >= 20) :count_result += "達成)\n" :else :count_result += "未達成)\n"
+	id = ginfo_sel
+	gsel kCountWindowID
+	objprm 0, count_result
+	gsel id
+return
+
+//タイマーを出す
+*dock_timer
+	gsel kDockWindowID, 2
+return
+//タイマーを閉じる
+*close_dock
+	gsel kDockWindowID, -1
+return
+//時間を取得
+*get_dock
+	if(mode_list3(screen_shot_type) == "入渠画面"){
+		buffer kTempBufferID, 11, 16
+		dim number, 6
+		for i, 0, kDocks
+			gsel kFlashBufferID
+			dock_hour(i) = 0
+			dock_minute(i) = 0
+			dock_second(i) = 0
+			if(NearColor(480, ypos(i), 33, 174, 178)){	//ドックに艦娘がいるかを判定
+				for j, 0, 6
+					gsel kTempBufferID
+					gcopy kFlashBufferID, xpos(j), ypos(i) + 25, 11, 16
+					number(j) = MatchNumber(i, j)
+					if(j == 0) :number(j) = limit(number(j), 0, 5)
+					if((j == 2) || (j == 4)) :number(j) = limit(number(j), 0, 5)
+				next
+				dock_hour(i)   = number(0) * 10 + number(1)
+				dock_minute(i) = number(2) * 10 + number(3)
+				dock_second(i) = number(4) * 10 + number(5)
+			}
+			gsel kDockWindowID
+			gosub *redraw_dock
+		next
+	}
+return
+//インクリメント
+*increment_dock
+	for k, 0, kDocks
+		if((dock_hour(k) != 0) || (dock_minute(k) != 0) || (dock_second(k) != 0)){
+			dock_second(k)--
+			if(dock_second(k) < 0){
+				dock_second(k) += 60
+				dock_minute(k)--
+				if(dock_minute(k) < 0){
+					dock_minute(k) += 60
+					dock_hour(k) --
+				}
+			}
+		}
+	next
+return
+//再描画
+*redraw_dock
+	for k, 0, kDocks
+		objprm k * 2, strf("%02d:%02d:%02d", dock_hour(k), dock_minute(k), dock_second(k))
+		if((dock_hour(k) != 0) || (dock_minute(k) != 0) || (dock_second(k) != 0)){
+			now_hour   = gettime(4) + dock_hour(k)
+			now_minute = gettime(5) + dock_minute(k)
+			now_second = gettime(6) + dock_second(k)
+			if(now_second >= 60) :now_minute += now_second / 60 :now_second \= 60
+			if(now_minute >= 60) :now_hour += now_minute / 60 :now_minute \= 60
+			objprm k * 2 + 1, strf("%02d:%02d:%02d", now_hour, now_minute, now_second)
+		}else{
+			objprm k * 2 + 1, ""
+		}
+	next
+return
+
+*about
+	dialog "ソフト名：" + kSoftName + " " + kSoftVer + "\n作成者：YSR\n最終更新日：2015/04/19",,kSoftName
+return
+
+*main2

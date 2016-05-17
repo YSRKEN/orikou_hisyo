@@ -1,0 +1,283 @@
+/* モジュール */
+
+	// API用
+	#module api
+		// API呼び出し
+		#uselib "gdi32.dll"
+		#cfunc CreateDC "CreateDCA" sptr,sptr,sptr,int
+		#func DeleteDC  "DeleteDC"  int
+		#func BitBlt    "BitBlt"    int,int,int,int,int,int,int,int,int
+		// API用の定数
+		#const SRCCOPY    0x00CC0020
+		#const CAPTUREBLT 0x40000000
+		// 各種関数定義
+		//デスクトップキャプチャ
+		#deffunc GetDesktopWindow int window_id_
+			buffer window_id_, kDispX, kDispY
+			//デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			//デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kDispX, kDispY, hdc_screen, 0, 0, SRCCOPY | CAPTUREBLT
+			//デバイスコンテキストを削除する
+			DeleteDC hdc_screen
+			redraw 1
+		return
+		//デスクトップの一部をキャプチャ
+		#deffunc GetFlashWindow int buffer_id_, int flash_px_, int flash_py_
+			buffer buffer_id_, kFlashWX, kFlashWY
+			//デスクトップのデバイスコンテキストを作成する
+			hdc_screen = CreateDC ("DISPLAY", NULL, NULL, NULL)
+			//デスクトップの画像をコピーする
+			BitBlt hdc, 0, 0, kFlashWX, kFlashWY, hdc_screen, flash_px_, flash_py_, SRCCOPY | CAPTUREBLT
+			//デバイスコンテキストを削除する
+			DeleteDC hdc_screen
+			redraw 1
+		return
+		//艦これ画面の自動認識
+		#deffunc GetPosFlashSquare int window_id_, int output_buffer_id_, var px_, var py_
+			;バッファ1：検索先画像
+			gsel window_id_
+			cvbuffer window_id_, ginfo_sx, ginfo_sy
+			cvputimg window_id_
+			//バッファ2:黒塗りの800x480の画像
+			buffer output_buffer_id_, kFlashWX, kFlashWY
+			boxf
+			cvbuffer output_buffer_id_, kFlashWX, kFlashWY
+			cvputimg output_buffer_id_
+			//マッチング処理を行う
+			cvmatch px_, py_, CV_TM_SQDIFF, output_buffer_id_, window_id_
+		return
+	#global
+
+	// 汎用
+	#module misc
+		//長方形枠を描画
+		#deffunc DrawMouseSquare int mouse_x1_, int mouse_y1_, int mouse_x2_, int mouse_y2_
+			if(mouse_x1_ < mouse_x2_){
+				square_x1 = mouse_x1_
+				square_x2 = mouse_x2_
+			}else{
+				square_x1 = mouse_x2_
+				square_x2 = mouse_x1_
+			}
+			if(mouse_y1_ < mouse_y2_){
+				square_y1 = mouse_y1_
+				square_y2 = mouse_y2_
+			}else{
+				square_y1 = mouse_y2_
+				square_y2 = mouse_y1_
+			}
+			color 0, 255, 255
+			line square_x1, square_y1, square_x2, square_y1
+			line square_x2, square_y1, square_x2, square_y2
+			line square_x2, square_y2, square_x1, square_y2
+			line square_x1, square_y2, square_x1, square_y1
+		return
+		//タイトルバーの文字列を設定
+		#deffunc SetTitle
+			sdim title_str, 1024
+			title_str = kSoftName@ + " - "
+			//実行モード
+			title_str += mode_list2@(mode_index@) + " - "
+			//判定結果
+			if(screen_shot_type@ >= kSceneListSize@ + kFleetNum + 1){
+				title_str += "改装画面 - "
+			}else{
+				if(screen_shot_type@ >= kSceneListSize@ + 1){
+					title_str += "編成画面 - "
+				}else{
+					title_str += mode_list3@(screen_shot_type@) + " - "
+				}
+			}
+			//艦これ画面の座標
+			title_str += "(" + flash_px@ + ","  +flash_py@ + ")"
+			//反映
+			gsel kPutWindowID@
+			title title_str
+			gsel kMainWindowID@
+		return
+		//色判定
+		#defcfunc NearColor int px_, int py_, int clr_r_, int clr_g_, int clr_b_
+			pget px_, py_
+			diff_r = ginfo_r - clr_r_
+			diff_g = ginfo_g - clr_g_
+			diff_b = ginfo_b - clr_b_
+			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
+			if(diff < 500) :return TRUE
+		return FALSE
+		#defcfunc FarColor int scene_type_, int point_index_
+			pget mode_filter@(scene_type_, point_index_, 0), mode_filter@(scene_type_, point_index_, 1)
+			diff_r = ginfo_r - mode_filter@(scene_type_, point_index_, 2)
+			diff_g = ginfo_g - mode_filter@(scene_type_, point_index_, 3)
+			diff_b = ginfo_b - mode_filter@(scene_type_, point_index_, 4)
+			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
+			if(diff < 500) :return FALSE
+		return TRUE
+		//状況を判別する
+		#defcfunc JudgeSituation int flash_id_
+			gsel flash_id_
+			//通常の画面
+			judge_type = -1
+			for i, 0, kSceneListSize@
+				type_flg = TRUE
+				for j, 0, kPoints
+					if(FarColor(i, j)){
+						type_flg = FALSE
+						_break
+					}
+				next
+				if(type_flg){
+					judge_type = i + 1
+					_break
+				}
+			next
+			if(judge_type != -1) :return judge_type
+			//編成画面
+			if(NearColor(420, 118, 195, 180, 169)){
+				;左上の旗
+				for k, 0, kFleetNum
+					if(NearColor(123 + 30 * k, 126, 33, 150, 151)) :return kSceneListSize@ + k + 1
+				next
+			}
+			//改装画面
+			;枠の柱
+			if(NearColor(300, 172, 241, 191, 119)){
+				;左上の旗
+				offset = -1
+				for k, 0, kFleetNum
+					if(NearColor(136 + 30 * k, 122, 33, 150, 151)){
+						offset = k * kUnitNum
+						_break
+					}
+				next
+				if(offset < 0) :return kTypeUnknown
+				;枠
+				for k, 0, kUnitNum
+					if(NearColor(294, 145 + 54 * k, 255, 102, 29)) :return kSceneListSize@ + kFleetNum + offset + k + 1
+				next
+			}
+		return kTypeUnknown
+		//サブ画面にコピー
+		#deffunc PutWindowSet int window_id_, int buffer_id_
+			//カーソルを擬似的に表示させる(オプション)
+			if((cursor_flg@) && ((mode_index@ == kTypeNow))){
+				gsel buffer_id_
+				mx = ginfo_mx - flash_px@ :my = ginfo_my - flash_py@
+				;カーソルを描画する
+				color 255, 0, 0
+				gmode 4,0,0,256
+				pos mx, my
+				gcopy kCursorBufferID@, 0, 0, cursor_x@, cursor_y@
+				gmode 0
+				pos 0, 0
+			}
+			//サブ画面に画像を転送する
+			gsel window_id_
+			pos 0, 0
+			redraw 0
+				gzoom zooming_num@(zooming_index@) * kFlashWX / 100, zooming_num@(zooming_index@) * kFlashWY / 100, buffer_id_, 0, 0, kFlashWX, kFlashWY, 1
+			redraw 1
+		return
+		//ファイル名を自動設定
+		#defcfunc AutoFileName
+			file_name = strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
+			exist file_name + ".png"
+			if(strsize == -1) :return file_name + ".png"
+			number = 1
+			while
+				exist file_name + "_" + number + ".png"
+				if(strsize != -1){
+					number++
+				}else{
+					_break
+				}
+				wait 5
+			wend
+		return file_name + "_" + number + ".png"
+		//「母港画面」かどうかを判定する(BGM・名前隠し用)
+		#defcfunc CheckHomeFlg int flash_id_
+			gsel flash_id_
+			if(NearColor(665, 42, 83, 159, 73)){		;バケツアイコン
+				if(NearColor(736, 61, 172, 128, 95)){	;ボーキアイコン
+					return TRUE
+				}
+			}
+		return FALSE
+		//「大破した艦娘」がいるかどうかを判定する
+		#defcfunc CheckDeadZone int flash_id_
+			gsel flash_id_
+			flg = FALSE
+			for k, 0, kUnitNum
+				if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
+					flg = TRUE
+					_break
+				}
+			next
+		return flg
+	#global
+	#module get_num
+		#deffunc DrawSquare int px_, int py_, int wx_, int wy_
+			color 255, 0, 0
+			line px_ + wx_, py_, px_, py_
+			line px_ + wx_ - 1, py_ + wy_, px_ + wx_ - 1, py_
+			line px_ + wx_ - 1, py_ + wy_ - 1, px_ , py_ + wy_ - 1
+			line px_      , py_ + wy_, px_      , py_
+		return
+		#deffunc OtsuThreshold
+			cvbuffer kCVTempBufferID, ginfo_sx, ginfo_sy
+			cvputimg kCVTempBufferID
+			cvconvert 0, kCVTempBufferID
+			cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
+			cvgetimg kCVTempBufferID, 1
+		return
+		#deffunc GetSquare var px__, var py__, var wx__, var wy__
+			for x, 0, ginfo_sx
+				flg = FALSE
+				for y, 0, ginfo_sy
+					pget x, y
+					if(ginfo_r == 0) :flg = TRUE :_break
+				next
+				if(flg) :px__ = x :_break
+			next
+			for y, 0, ginfo_sy
+				flg = FALSE
+				for x, 0, ginfo_sx
+					pget x, y
+					if(ginfo_r == 0) :flg = TRUE :_break
+				next
+				if(flg) :py__ = y :_break
+			next
+			for x, ginfo_sx - 1, -1, -1
+				flg = FALSE
+				for y, 0, ginfo_sy
+					pget x, y
+					if(ginfo_r == 0) :flg = TRUE :_break
+				next
+				if(flg) :wx__ = x - px__ + 1 :_break
+			next
+			for y, ginfo_sy - 1, -1, -1
+				flg = FALSE
+				for x, 0, ginfo_sx
+					pget x, y
+					if(ginfo_r == 0) :flg = TRUE :_break
+				next
+				if(flg) :wy__ = y - py__ + 1 :_break
+			next
+		return
+		#defcfunc MatchNumber int ii, int jj
+			id = ginfo_sel :sx = ginfo_sx :sy = ginfo_sy
+			gsel kNumGetBufferID1 :color 255, 255, 255 :boxf
+			pos 0, 0
+			gzoom 64, 64, id, 0, 0, sx, sy, 1
+			OtsuThreshold
+			GetSquare px, py, wx, wy
+			gsel kNumGetBufferID2 :color 255, 255, 255 :boxf
+			pos 0, 0
+			gzoom 32, 32, kNumGetBufferID1, px, py, wx, wy
+			OtsuThreshold
+			DrawSquare 0, 0, 32, 32
+			cvbuffer kCVNumBufferID, 32, 32
+			cvputimg kCVNumBufferID
+			cvmatch px, py, CV_TM_SQDIFF, kCVNumBufferID, kCVMatchBufferID
+		return limit(int(1.0 * px / 64 + 0.5), 0, 9)
+	#global
