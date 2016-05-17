@@ -483,6 +483,8 @@
 			output += "LoggingTime\t" + (logging_index@ + 1) + "\n"
 			output += "ShowLastDate\t"   + show_date_flg@ + "\n"
 			output += "Denoise\t"        + denoise_flg@ + "\n"
+			output += "AutoCountSet\t"   + auto_count_flg@ + "\n"
+			output += "AutoTimeSet\t"    + auto_time_set_flg@ + "\n"
 			output += "CounterA1\t"      + a_sortie_count@ + "\n"
 			output += "CounterA2\t"      + a_to_boss_count@ + "\n"
 			output += "CounterA3\t"      + a_win_boss_count@ + "\n"
@@ -619,6 +621,10 @@
 				if(read_ver >= 206){
 					if(temp(0) == "Denoise") :denoise_flg@ += limit(int(temp(1)), 0, 1)
 				}
+				if(read_ver >= 207){
+					if(temp(0) == "AutoCountSet") :auto_count_flg@ += limit(int(temp(1)), 0, 1)
+					if(temp(0) == "AutoTimeSet") :auto_time_set_flg@ += limit(int(temp(1)), 0, 1)
+				}
 			next
 			;î˜èCê≥
 			for k, 0, 3
@@ -754,7 +760,7 @@
 			notesel supply_log
 			dim supply_log_int, notemax, 2 + 5
 			supply_log_size = 0
-			gsel 0
+			gsel kMainWindowID
 			old_log_flg = TRUE
 			for k, 1, notemax
 				if(time_ != gettime(6)){

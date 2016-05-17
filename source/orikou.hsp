@@ -1,10 +1,10 @@
-/* おりこうさんな秘書 Ver.2.0.6 */
+/* おりこうさんな秘書 Ver.2.0.7 */
 
 	#packopt name "orikou"
 	#define kSoftName       "おりこうさんな秘書"
-	#define kSoftVer        "Ver.2.0.6"
-	#define kSoftVer2       "206"
-	#define kSoftLastUpdate "2015/07/21"
+	#define kSoftVer        "Ver.2.0.7"
+	#define kSoftVer2       "207"
+	#define kSoftLastUpdate "2015/07/23"
 
 /* プリプロセッサ */
 	#include "hspcv.as"
@@ -114,13 +114,13 @@
 			mes "い号"
 	objsize 0.8 * kObjX, kObjY
 		pos kObjSpace * 2 + kSmallFontSize * 2, kObjSpace
-			button gosub "出撃",       *count_a_sortie
+			button gosub "*出撃",       *count_a_sortie
 		pos kObjSpace * 3 + kSmallFontSize * 2 + 0.8 * kObjX,     kObjSpace
 			button gosub "ボス到達",   *count_a_to_boss
 		pos kObjSpace * 4 + kSmallFontSize * 2 + 0.8 * kObjX * 2, kObjSpace
 			button gosub "ボス勝利",   *count_a_win_boss
 		pos kObjSpace * 5 + kSmallFontSize * 2 + 0.8 * kObjX * 3, kObjSpace
-			button gosub "S勝利",      *count_a_s_win
+			button gosub "*S勝利",      *count_a_s_win
 		pos kObjSpace                      , ginfo_sy - kObjSpaceY
 			button gosub "リセット(あ)", *reset_counter_a
 		pos kObjSpace * 2 + 0.8 * kObjX    , ginfo_sy - kObjSpaceY
@@ -129,9 +129,11 @@
 			button gosub "リセット(い)", *reset_counter_i
 	objsize kObjX, kObjY
 		pos kObjSpace * 2 + kSmallFontSize * 2, kObjSpace + kObjSpaceY
-			button gosub "補給艦撃沈", *count_r
+			button gosub "*補給艦撃沈", *count_r
 		pos kObjSpace * 2 + kSmallFontSize * 2, kObjSpace + kObjSpaceY * 2
-			button gosub "空母系撃沈", *count_i
+			button gosub "*空母系撃沈", *count_i
+		pos kObjSpace * 2 + kSmallFontSize * 2, kObjSpace + kObjSpaceY * 3
+			chkbox "自動カウント", auto_count_flg
 		pos ginfo_sx - kObjSpaceX, ginfo_sy - kObjSpaceY
 			button gosub "閉じる", *close_counter
 	gosub *redraw_counter
@@ -200,6 +202,8 @@
 			button gosub "更新", *get_dock
 		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 4 + kSmallFontSize
 			button gosub "閉じる", *close_dock
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 4 + kSmallFontSize
+			chkbox "自動更新", auto_time_set_flg
 	objsize kObjY, kObjY
 		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kSmallFontSize
 			button gosub "2", *get_dock_e2
@@ -337,6 +341,7 @@
 
 // メインループ
 	//変化監視用変数初期化
+	screen_shot_type_ = screen_shot_type
 	;経験値計算機
 	now_level_       = now_level
 	goal_level_      = goal_level
@@ -354,6 +359,11 @@
 	scale_mode_ = scale_mode
 	;最終更新日時
 	show_date_flg_ = show_date_flg
+	;○号カウンター支援
+	ac_sortie   = FALSE :ac_sortie_   = ac_sortie
+	ac_win_s    = FALSE :ac_win_s_    = ac_win_s
+	ac_kill_sup = FALSE :ac_kill_sup_ = ac_kill_sup
+	ac_kill_air = FALSE :ac_kill_air_ = ac_kill_air
 	//ループしつつ監視
 	repeat
 		if(exit_flg) :end
@@ -711,14 +721,6 @@
 		}
 		// 資源グラフをスクロールする
 		if(ginfo_act == kSupplyGraphID){
-			/*// キー操作を検知する
-			stick ky, 1 + 2 + 4 + 8 + 64, 1
-			;左右キーで2時間毎のスクロール
-			if(ky & 1) :plot_graph_px -= kGraphStepX :gosub *plot_graph
-			if(ky & 4) :plot_graph_px += kGraphStepX :gosub *plot_graph
-			;上下キーで1日毎のスクロール
-			if(ky & 2) :plot_graph_px -= kGraphWX :gosub *plot_graph
-			if(ky & 8) :plot_graph_px += kGraphWX :gosub *plot_graph*/
 			// キー操作を検知する
 			;Ctrlキーが押されている場合は、ゆっくりスクロールするようにする
 			;A・Dキーで小スクロール、W・Sキーで大スクロール
@@ -727,8 +729,196 @@
 			plot_graph_px += kGraphStepX * (key_flg_d - key_flg_a) + kGraphWX * (key_flg_s - key_flg_w)
 			gosub *plot_graph
 		}
+		// ○号カウンターの自動化
+		if(auto_count_flg){
+			// 各フラグを判定
+			//出撃判定
+			gsel kFlashBufferID
+			ac_sortie   = FALSE
+			if(NearColor(183,239,255,210,78)){
+				if(NearColor(286,174,255,227,135)){
+					if(NearColor(504,297,154,134,14)){
+						ac_sortie   = TRUE
+					}
+				}
+			}
+			//S勝利判定
+			//(何故か普通のスクショと色合いが異なる？らしいのでコメントアウトで表現)
+			;勝利S
+			ac_win_s = FALSE
+			if(NearColor(/*23,43,53,188,190*/23,43,29,189,192)){
+				if(NearColor(/*604,240,248,230,91*/604,240,251,228,83)){
+					if(NearColor(/*258,196,135,163,162*/258,196,135,164,164)){
+						ac_win_s = TRUE
+					}
+				}
+			}
+			;完全勝利S
+			gsel kFlashBufferID
+			if(NearColor(/*23,43,51,180,182*/23,43,28,181,184)){
+				if(NearColor(/*628,218,179,144, 29*/628,218,183,144, 2)){
+					if(NearColor(/*30,243,169,141,29*/ 30,243,173,141,  2)){
+						ac_win_s = TRUE
+					}
+				}
+			}
+			if(screen_shot_type < kSceneListSize + 1){
+				if(mode_list3(screen_shot_type) == "交戦結果"){
+					gsel kBattleBufferID
+					//補給艦撃沈
+					ac_kill_sup_count = 0
+					ac_kill_sup = FALSE
+					for k, 0, kUnitNum
+						/*if(NearColor(536,215 + 45 * k,77,166,223)){
+							if(NearColor(583,192 + 45 * k,255,255,255)){
+								if(NearColor(600,196 + 45 * k,255,255,255)){
+									if(NearColor(603,202 + 45 * k,255,255,255)){
+										ac_kill_sup_count++
+										ac_kill_sup = TRUE
+									}
+								}
+							}
+						}*/
+						;669,403<-438,445　+231,-42
+						if(NearColor(767,173 + 45 * k,77,166,223)){
+							if(NearColor(669,178 + 45 * k,254,254,254)){
+								if(NearColor(649,157 + 45 * k,133,133,133)){
+									ac_kill_sup_count++
+									ac_kill_sup = TRUE
+								}
+							}
+						}
+					next
+					//空母系撃沈
+					ac_kill_air_count = 0
+					ac_kill_air = FALSE
+					for k, 0, kUnitNum
+						/*if(NearColor(536,215 + 45 * k,77,166,223)){
+							;正規空母
+							if(NearColor(586,193 + 45 * k,255,255,255)){
+								if(NearColor(602,192 + 45 * k,255,255,255)){
+									if(NearColor(582,202 + 45 * k,255,255,255)){
+										ac_kill_air_count++
+										ac_kill_air = TRUE
+									}
+								}
+							}
+							;軽空母
+							if(NearColor(584,192 + 45 * k,255,255,255)){
+								if(NearColor(602,192 + 45 * k,255,255,255)){
+									if(NearColor(598,194 + 45 * k,235,238,240)){
+										ac_kill_air_count++
+										ac_kill_air = TRUE
+									}
+								}
+							}
+						}*/
+						if(NearColor(767,173 + 45 * k,77,166,223)){
+							;正規空母
+							if(NearColor(670,176 + 45 * k,167,167,167)){
+								if(NearColor(671,157 + 45 * k,215,215,215)){
+									ac_kill_air_count++
+									ac_kill_air = TRUE
+								}
+							}
+							;軽空母
+							if(NearColor(667,177 + 45 * k,183,183,183)){
+								if(NearColor(664,170 + 45 * k,252,252,252)){
+									ac_kill_air_count++
+									ac_kill_air = TRUE
+								}
+							}
+						}
+					next
+				}else{
+					ac_kill_sup = FALSE
+					ac_kill_air = FALSE
+				}
+			}else{
+				ac_kill_sup = FALSE
+				ac_kill_air = FALSE
+			}
+			//変化時を検出してカウント
+			;出撃
+			if(ac_sortie){
+				if(ac_sortie_ == FALSE){
+					ac_sortie_ = ac_sortie
+					a_sortie_count++
+					gosub *redraw_counter
+					wait 50
+				}
+			}else{
+				if(ac_sortie_ == TRUE){
+					/*if(mode_list3(screen_shot_type) == "マップ画面"){
+						a_sortie_count++
+						gosub *redraw_counter
+					}*/
+					ac_sortie_ = ac_sortie
+				}
+			}
+			;S勝利
+			if(ac_win_s){
+				if(ac_win_s_ == FALSE){
+					ac_win_s_ = ac_win_s
+					a_s_win_count++
+					gosub *redraw_counter
+				}
+			}else{
+				if(ac_win_s_ == TRUE){
+					if(screen_shot_type != kTypeUnknown){
+						ac_win_s_ = ac_win_s
+					}
+				}
+			}
+			;補給艦
+			if(ac_kill_sup){
+				if(ac_kill_sup_ == FALSE){
+					ac_kill_sup_ = ac_kill_sup
+					r_count += ac_kill_sup_count
+					gosub *redraw_counter
+				}
+			}else{
+				if(ac_kill_sup_ == TRUE){
+					ac_kill_sup_ = ac_kill_sup
+				}
+			}
+			;空母系
+			if(ac_kill_air){
+				if(ac_kill_air_ == FALSE){
+					ac_kill_air_ = ac_kill_air
+					i_count += ac_kill_air_count
+					gosub *redraw_counter
+				}
+			}else{
+				if(ac_kill_air_ == TRUE){
+					ac_kill_air_ = ac_kill_air
+				}
+			}
+		}
+		// 各種タイマーの自動更新
+		if(auto_time_set_flg){
+			if(screen_shot_type <= kSceneListSize){
+				if(screen_shot_type_ != screen_shot_type){
+					if(mode_list3(screen_shot_type) == "入渠画面") :gosub *get_dock
+					if(mode_list3(screen_shot_type) == "工廠画面") :gosub *get_dock
+				}
+			}
+			if(NearColor(509,113,252,180,88)){
+				if(NearColor(286,139,54,70,44)){
+					if(NearColor(585,393,35,158,159)){
+						if(NearColor(598,451,118,113,114)){
+							gosub *get_dock_e2
+							gosub *get_dock_e3
+							gosub *get_dock_e4
+							wait 20
+						}
+					}
+				}
+			}
+		}
 		// ウェイト
 		await 1000 / fps_num(fps_index)
+		screen_shot_type_ = screen_shot_type
 	loop
 
 //終了確認

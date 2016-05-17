@@ -366,6 +366,7 @@ return
 return
 //時間を取得
 *get_dock
+	if(screen_shot_type >= kSceneListSize + 1) :return
 	if(mode_list3(screen_shot_type) == "入渠画面"){
 		buffer kTempBufferID, 11, 16
 		dim number, 6
@@ -418,9 +419,9 @@ return
 *get_dock_e2
 	//遠征時間の計測は地味に面倒臭い……
 	;まず遠征の画面かを判定
-	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44)){
+	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44) && NearColor(585,393,35,158,159)){
 		;次に、時間が表示されているかを判定
-		if(NearColor(667,445,188,188,188) || NearColor(667,445,255,241,231)){
+		if(NearColor(598,451,118,113,114)){
 			;そして、第何艦隊が対象かを判定
 			;「旗左下から1つ上」基準で、上から
 			;x=517, y=180, 210, 240, ..., 390(約R76 G168 B168)
@@ -459,9 +460,9 @@ return
 return
 *get_dock_e3
 	;まず遠征の画面かを判定
-	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44)){
+	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44) && NearColor(585,393,35,158,159)){
 		;次に、時間が表示されているかを判定
-		if(NearColor(667,445,188,188,188) || NearColor(667,445,255,241,231)){
+		if(NearColor(598,451,118,113,114)){
 			;そして、第何艦隊が対象かを判定
 			;「旗左下から1つ上」基準で、上から
 			;x=517, y=180, 210, 240, ..., 390(約R76 G168 B168)
@@ -495,9 +496,9 @@ return
 return
 *get_dock_e4
 	;まず遠征の画面かを判定
-	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44)){
+	if(NearColor(509,113,252,180,88) && NearColor(286,139,54,70,44) && NearColor(585,393,35,158,159)){
 		;次に、時間が表示されているかを判定
-		if(NearColor(667,445,188,188,188) || NearColor(667,445,255,241,231)){
+		if(NearColor(598,451,118,113,114)){
 			;そして、第何艦隊が対象かを判定
 			for k, 0, 8
 				if(NearColor(517,180 + k * 30,76,168,168)){
@@ -748,31 +749,7 @@ return
 	day_diff = day_last - day_first + 1
 	block_num = day_diff / scale_blocking(scale_mode)
 	if(day_diff \ scale_blocking(scale_mode) != 0) :block_num++
-	//グラフ線
 	buffer kGraphBufferID, block_num * kGraphWX, kGraphWY
-	for n, 0, supply_log_size - 1
-		for k, 2, 6
-			switch k
-				case 2	;燃料
-					color $00,$80,$00
-					swbreak
-				case 3	;弾薬
-					color $66,$33,$00
-					swbreak
-				case 4	;鋼材
-					color $A0,$A0,$A0
-					swbreak
-				case 5	;ボーキ
-					color $CC,$33,$00
-					swbreak
-			swend
-			p1 = ((ConvertDay(supply_log_int(n, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n, 1)) * kGraphWX) / scale_blocking(scale_mode)
-			p2 = kGraphWY - 1.0 * (supply_log_int(n, k) - min_param) / diff_param * kGraphWY
-			p3 = ((ConvertDay(supply_log_int(n + 1, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n + 1, 1)) * kGraphWX) / scale_blocking(scale_mode)
-			p4 = kGraphWY - 1.0 * (supply_log_int(n + 1, k) - min_param) / diff_param * kGraphWY
-			line p1, p2, p3, p4
-		next
-	next
 	//縦線
 	font msgothic, kGraphFontSize
 	for k, 0, block_num * scale_zooming(scale_mode)
@@ -819,6 +796,30 @@ return
 		if(limit(yy, min_param, max_param) != yy) :_continue
 		yy2 = kGraphWY - 1.0 * (yy - min_param) / diff_param * kGraphWY
 		line 0, yy2, block_num * kGraphWX, yy2
+	next
+	//グラフ線
+	for n, 0, supply_log_size - 1
+		for k, 2, 6
+			switch k
+				case 2	;燃料
+					color $00,$80,$00
+					swbreak
+				case 3	;弾薬
+					color $66,$33,$00
+					swbreak
+				case 4	;鋼材
+					color $A0,$A0,$A0
+					swbreak
+				case 5	;ボーキ
+					color $CC,$33,$00
+					swbreak
+			swend
+			p1 = ((ConvertDay(supply_log_int(n, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n, 1)) * kGraphWX) / scale_blocking(scale_mode)
+			p2 = kGraphWY - 1.0 * (supply_log_int(n, k) - min_param) / diff_param * kGraphWY
+			p3 = ((ConvertDay(supply_log_int(n + 1, 0)) - day_first) * kGraphWX + ConvertTime(supply_log_int(n + 1, 1)) * kGraphWX) / scale_blocking(scale_mode)
+			p4 = kGraphWY - 1.0 * (supply_log_int(n + 1, k) - min_param) / diff_param * kGraphWY
+			line p1, p2, p3, p4
+		next
 	next
 	//日付
 	color 0, 0, 255

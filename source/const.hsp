@@ -98,7 +98,7 @@
 ;	#const kMainWY kObjSpace * 4 + kObjSpaceY * 11
 	;カウンター画面
 	#const kObjOffset kObjY / 2 - kSmallFontSize / 2
-	#const kCounterY 60
+	#const kCounterY kObjSpaceY * 3 - kObjSpace
 	;資源グラフのサイズ
 	#const kGraphWX 600
 	#const kGraphWY 300
@@ -248,6 +248,8 @@
 	my_folder_flg     = FALSE
 	auto_supply_flg   = TRUE
 	denoise_flg       = FALSE
+	auto_count_flg    = FALSE
+	auto_time_set_flg = FALSE
 	get_pos_flg       = FALSE	;座標取得するとTRUEになる
 	other_get_pos_flg = FALSE	;自動設定IIを利用するとTRUEになる
 	get_handle_flg    = TRUE	;ズレ補正時だけOFFになる

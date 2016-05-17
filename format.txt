@@ -28,6 +28,8 @@ SupplyLogging  (0|1)                 資源ログを残すか否か
 LoggingTime    ([1-9]|10)            資源ログを残す間隔(分単位)
 ShowLastDate   (0|1)                 最終更新日時を表示するか否か
 Denoise        (0|1)                 サブ画面・スクショをデノイズするか否か
+AutoCountSet   (0|1)                 ○号カウンターを自動化するか否か
+AutoTimeSet    (0|1)                 各種タイマーの取得を自動化するか否か
 CounterA1      \d+                   あ号カウンターの出撃回数(非負)
 CounterA2      \d+                   あ号カウンターのボス到達回数(非負)
 CounterA3      \d+                   あ号カウンターのボス勝利回数(非負)
