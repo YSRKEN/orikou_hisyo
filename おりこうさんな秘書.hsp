@@ -1,5 +1,8 @@
-/* おりこうさんな秘書改
+/* おりこうさんな秘書改三
  * 参考：sakura氏のhttp://hspnext.com/hspkura/hspkura02.htm
+ * 備考：ぶっちゃけBGMの仕様決めるのがややこしかった。
+ * 　　　道中は「最初に道中と判定される～戦闘開始」まで、
+ * 　　　戦闘は「最初に戦闘と判定される～戦果報告画面」まで流すから……
  */
 
 	#packopt name "おりこうさんな秘書"
@@ -67,39 +70,50 @@
 	#const global kTypeUnit24  17
 	#const global kTypeUnit25  18
 	#const global kTypeUnit26  19
+	#const global kTypeFactory 20
+	#const global kTypeRoot    21
+	#const global kTypeBattle  22
+	#const global kTypeResult_ 23
 	// アプリ機能(mode_strと対応)
-	#const kModeNow    0
-	#const kModeReslut kTypeResult
-	#const kModeHome   kTypeHome  
-	#const kModeInfo   kTypeInfo  
-	#const kModeTeam1  kTypeTeam1 
-	#const kModeTeam2  kTypeTeam2 
-	#const kModeTeam3  kTypeTeam3 
-	#const kModeTeam4  kTypeTeam4 
-	#const kModeUnit11 kTypeUnit11
-	#const kModeUnit12 kTypeUnit12
-	#const kModeUnit13 kTypeUnit13
-	#const kModeUnit14 kTypeUnit14
-	#const kModeUnit15 kTypeUnit15
-	#const kModeUnit16 kTypeUnit16
-	#const kModeUnit21 kTypeUnit21
-	#const kModeUnit22 kTypeUnit22
-	#const kModeUnit23 kTypeUnit23
-	#const kModeUnit24 kTypeUnit24
-	#const kModeUnit25 kTypeUnit25
-	#const kModeUnit26 kTypeUnit26
+	#const kModeNow     0
+	#const kModeReslut  kTypeResult
+	#const kModeHome    kTypeHome  
+	#const kModeInfo    kTypeInfo  
+	#const kModeTeam1   kTypeTeam1 
+	#const kModeTeam2   kTypeTeam2 
+	#const kModeTeam3   kTypeTeam3 
+	#const kModeTeam4   kTypeTeam4 
+	#const kModeUnit11  kTypeUnit11
+	#const kModeUnit12  kTypeUnit12
+	#const kModeUnit13  kTypeUnit13
+	#const kModeUnit14  kTypeUnit14
+	#const kModeUnit15  kTypeUnit15
+	#const kModeUnit16  kTypeUnit16
+	#const kModeUnit21  kTypeUnit21
+	#const kModeUnit22  kTypeUnit22
+	#const kModeUnit23  kTypeUnit23
+	#const kModeUnit24  kTypeUnit24
+	#const kModeUnit25  kTypeUnit25
+	#const kModeUnit26  kTypeUnit26
+	#const kModeFactory kTypeFactory
 	// タスクトレイ機能
 	#define WM_LBUTTONDOWN  $00000201
 	#define NOTIFY_TRAYICON $00001400
 	// その他フラグなど
 	#define kSoftName "おりこうさんな秘書(仮)"
 	#const kOffsetY kMainWY - kFlashWY
-	type_str.0 = "不明",     "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)", "改装画面(1-1)", "改装画面(1-2)", "改装画面(1-3)", "改装画面(1-4)", "改装画面(1-5)", "改装画面(1-6)", "改装画面(2-1)", "改装画面(2-2)", "改装画面(2-3)", "改装画面(2-4)", "改装画面(2-5)", "改装画面(2-6)"
-	mode_str.0 = "現在状況", "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)", "改装画面(1-1)", "改装画面(1-2)", "改装画面(1-3)", "改装画面(1-4)", "改装画面(1-5)", "改装画面(1-6)", "改装画面(2-1)", "改装画面(2-2)", "改装画面(2-3)", "改装画面(2-4)", "改装画面(2-5)", "改装画面(2-6)"
+	type_str.0 = "不明",     "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)", "改装画面(1-1)", "改装画面(1-2)", "改装画面(1-3)", "改装画面(1-4)", "改装画面(1-5)", "改装画面(1-6)", "改装画面(2-1)", "改装画面(2-2)", "改装画面(2-3)", "改装画面(2-4)", "改装画面(2-5)", "改装画面(2-6)", "工廠画面", "道中画面", "戦闘画面", "戦果報告_"
+	mode_str.0 = "現在状況", "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)", "改装画面(1-1)", "改装画面(1-2)", "改装画面(1-3)", "改装画面(1-4)", "改装画面(1-5)", "改装画面(1-6)", "改装画面(2-1)", "改装画面(2-2)", "改装画面(2-3)", "改装画面(2-4)", "改装画面(2-5)", "改装画面(2-6)", "工廠画面", "道中画面", "戦闘画面", "戦果報告_"
+	sdim root_bgm_path, 260
+	sdim battle_bgm_path, 260
 	auto_getpos_flg  = TRUE
 	auto_capture_flg = FALSE
 	name_disable_flg = FALSE
-	tasktray_flg = FALSE
+	tasktray_flg     = FALSE
+	root_bgm_flg     = FALSE
+	battle_bgm_flg   = FALSE
+	root_bgm_flg2    = FALSE
+	battle_bgm_flg2  = FALSE
 	screen_shot_type = kTypeUnknown
 	application_mode = kModeNow
 
@@ -255,7 +269,7 @@
 			diff_g = ginfo_g - clr_g_
 			diff_b = ginfo_b - clr_b_
 			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
-			if(diff < 500) :return TRUE
+			if(diff < 100) :return TRUE
 		return FALSE
 		//状況を判別する
 		#defcfunc JudgeSituation int flash_id_
@@ -311,13 +325,38 @@
 				if(NearColor(294, 361, 255, 102, 29)) :return kTypeunit15 + offset
 				if(NearColor(294, 415, 255, 102, 29)) :return kTypeunit16 + offset
 			}
+			//工廠画面
+			;建造ボタンと開発ボタン(通常時と数値設定時とで二種類存在することに注意)
+			if(NearColor(150, 175, 254, 203, 93)){
+				if(NearColor(150, 350, 70, 128, 75)){
+					return kTypeFactory
+				}
+			}
+			if(NearColor(150, 175, 203, 162, 74)){
+				if(NearColor(150, 350, 56, 102, 60)){
+					return kTypeFactory
+				}
+			}
+			//道中画面
+			if(NearColor(221, 448, 21, 69, 93)) :return kTypeRoot
+			//戦闘画面(夜戦込み)
+			if(NearColor(388, 4, 89, 201, 212)) :return kTypeBattle	;昼戦
+			if(NearColor(388, 4, 89, 177, 220)) :return kTypeBattle	;夜戦
+			//戦果報告(直後)
+			;提督・艦隊名の左に出ている白縦棒
+			if(NearColor(87, 77, 255, 246, 242)){
+				;中央の白縦棒(上下)
+				if(NearColor(409, 77, 255, 246, 242)){
+					return kTypeResult_
+				}
+			}
 		return kTypeUnknown
 	#global
 
 // ウィンドウ周りを初期設定
 	//保存用バッファ
 	buffer kFlashBufferID,  kFlashWX, kFlashWY
-	for k, kTypeResult, kTypeUnit26 + 1
+	for k, kTypeResult, kTypeFactory + 1
 		buffer 5 + k, kFlashWX, kFlashWY
 	next
 	//メインウィンドウ
@@ -336,7 +375,7 @@
 			chkbox "名前隠し", name_disable_flg
 		pos kObjSpace + kObjSpaceX * 5, kObjSpace
 			chkbox "タスクトレイ", tasktray_flg
-			
+
 		pos kObjSpace, kObjSpace + kObjSpaceY
 			button gosub "現在状況", *mode_now
 		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY
@@ -345,7 +384,9 @@
 			button gosub "母港画面", *mode_home
 		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY
 			button gosub "戦績表示", *mode_info
-			
+		pos kObjSpace + kObjSpaceX * 8, kObjSpace + kObjSpaceY
+			button gosub "工廠画面", *mode_factory
+
 		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY
 			button gosub "編成画面1", *mode_team1
 		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY
@@ -386,9 +427,33 @@
 			button gosub "第2艦隊",  *save_team2
 		pos kObjSpace + kObjSpaceX * 8, kObjSpace
 			button gosub "連合艦隊", *save_team12
+
+		pos kObjSpace + kObjSpaceX * 6, kObjSpace + kObjSpaceY * 2
+			chkbox "道中BGM", root_bgm_flg
+		pos kObjSpace + kObjSpaceX * 6, kObjSpace + kObjSpaceY * 3
+			chkbox "戦闘BGM", battle_bgm_flg
+
+	objsize kObjX / 2, kObjY
+		pos kObjSpace + kObjSpaceX * 7, kObjSpace + kObjSpaceY * 2
+			button gosub "参照...",  *browse_root_bgm
+		pos kObjSpace + kObjSpaceX * 7, kObjSpace + kObjSpaceY * 3
+			button gosub "参照...", *browse_battle_bgm
+
+	objsize kObjX, kObjY
+		pos kObjSpace * 2 + kObjSpaceX * 7 + kObjX / 2, kObjSpace + kObjSpaceY * 2
+			input root_bgm_path,,,260
+		pos kObjSpace * 2 + kObjSpaceX * 7 + kObjX / 2, kObjSpace + kObjSpaceY * 3
+			input battle_bgm_path,,,260
+
+	objsize kObjX / 2, kObjY + kObjSpaceY
+		pos kObjSpace + kObjSpaceX * 8 + kObjX / 2, kObjSpace + kObjSpaceY * 2
+			button gosub "停止", *bgm_stop
+
 	SetTitle
 
 // 自動更新を行う
+	root_bgm_flg_ = FALSE
+	battle_bgm_flg_ = FALSE
 	repeat
 		// 自動更新を行う
 		if(auto_capture_flg){
@@ -403,8 +468,10 @@
 		// 現在の状況を自動判定する
 		screen_shot_type = JudgeSituation(kFlashBufferID)
 		if(screen_shot_type != kTypeUnknown){
-			gsel 5 + screen_shot_type
-			gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+			if(screen_shot_type <= kTypeFactory){
+				gsel 5 + screen_shot_type
+				gcopy kFlashBufferID, 0, 0, kFlashWX, kFlashWY
+			}
 		}
 		gsel kMainWindowID
 		// アプリの状態に合わせ表示を変更する
@@ -439,6 +506,13 @@
 						color :boxf 201, 123 + kOffsetY, 496, 153 + kOffsetY
 					}
 				swbreak
+				case kModeFactory
+					pos 0, kOffsetY
+					gcopy 5 + kTypeFactory, 0, 0, kFlashWX, kFlashWY
+					if(name_disable_flg){
+						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
+					}
+				swbreak
 			swend
 			if(limit(application_mode, kModeTeam1, kTypeUnit26) == application_mode){
 				pos 0, kOffsetY
@@ -463,30 +537,77 @@
 				loop
 			}
 		}
+		//BGMフラグに合わせ演奏する
+		if(screen_shot_type == kTypeRoot){
+			if(root_bgm_flg){
+				if(root_bgm_flg_ == FALSE){
+					mmplay 0
+					root_bgm_flg_ = TRUE
+				}
+			}
+		}else{
+			if(screen_shot_type != kTypeUnknown){
+				root_bgm_flg_ = FALSE
+				if(screen_shot_type == kTypeBattle){
+					root_bgm_flg_ = FALSE
+					if(battle_bgm_flg){
+						if(battle_bgm_flg_ == FALSE){
+							mmplay 1
+							battle_bgm_flg_ = TRUE
+						}
+					}
+				}else{
+					battle_bgm_flg_ = FALSE
+					mmstop
+				}
+			}
+		}
 		await 1000 / 30
 	loop
 
 //各状況のボタンを押した際の処理
-*mode_now    :application_mode = kModeNow    :return
-*mode_result :application_mode = kModeReslut :return
-*mode_home   :application_mode = kModeHome   :return
-*mode_info   :application_mode = kModeInfo   :return
-*mode_team1  :application_mode = kModeTeam1  :return
-*mode_team2  :application_mode = kModeTeam2  :return
-*mode_team3  :application_mode = kModeTeam3  :return
-*mode_team4  :application_mode = kModeTeam4  :return
-*mode_unit11 :application_mode = kModeUnit11 :return
-*mode_unit12 :application_mode = kModeUnit12 :return
-*mode_unit13 :application_mode = kModeUnit13 :return
-*mode_unit14 :application_mode = kModeUnit14 :return
-*mode_unit15 :application_mode = kModeUnit15 :return
-*mode_unit16 :application_mode = kModeUnit16 :return
-*mode_unit21 :application_mode = kModeUnit21 :return
-*mode_unit22 :application_mode = kModeUnit22 :return
-*mode_unit23 :application_mode = kModeUnit23 :return
-*mode_unit24 :application_mode = kModeUnit24 :return
-*mode_unit25 :application_mode = kModeUnit25 :return
-*mode_unit26 :application_mode = kModeUnit26 :return
+*mode_now     :application_mode = kModeNow     :return
+*mode_result  :application_mode = kModeReslut  :return
+*mode_home    :application_mode = kModeHome    :return
+*mode_info    :application_mode = kModeInfo    :return
+*mode_factory :application_mode = kModeFactory :return
+*mode_team1   :application_mode = kModeTeam1   :return
+*mode_team2   :application_mode = kModeTeam2   :return
+*mode_team3   :application_mode = kModeTeam3   :return
+*mode_team4   :application_mode = kModeTeam4   :return
+*mode_unit11  :application_mode = kModeUnit11  :return
+*mode_unit12  :application_mode = kModeUnit12  :return
+*mode_unit13  :application_mode = kModeUnit13  :return
+*mode_unit14  :application_mode = kModeUnit14  :return
+*mode_unit15  :application_mode = kModeUnit15  :return
+*mode_unit16  :application_mode = kModeUnit16  :return
+*mode_unit21  :application_mode = kModeUnit21  :return
+*mode_unit22  :application_mode = kModeUnit22  :return
+*mode_unit23  :application_mode = kModeUnit23  :return
+*mode_unit24  :application_mode = kModeUnit24  :return
+*mode_unit25  :application_mode = kModeUnit25  :return
+*mode_unit26  :application_mode = kModeUnit26  :return
+*browse_root_bgm
+	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
+	if(stat){
+		root_bgm_path = refstr
+		objprm 34, root_bgm_path
+		mmload root_bgm_path, 0, 1
+	}
+return
+*browse_battle_bgm
+	dialog "wav;*.mp3;*.wma", 16, "音楽ファイル"
+	if(stat){
+		battle_bgm_path = refstr
+		objprm 35, battle_bgm_path
+		mmload battle_bgm_path, 1, 1
+	}
+return
+*bgm_stop
+	root_bgm_flg_ = FALSE
+	battle_bgm_flg_ = FALSE
+	mmstop
+return
 
 //座標取得
 *get_pos
