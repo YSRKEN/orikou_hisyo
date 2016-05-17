@@ -18,23 +18,35 @@
 	// OpenCV用ID
 	#const kCVDeskBufferID  0
 	#const kCVFlashBufferID 1
+	#const kCVTempBufferID  2
 	// サイズ定義
+	;デスクトップ全体のサイズ
 	#define global kDispX   ginfo_dispx
 	#define global kDispY   ginfo_dispy
+	;Flash画面のサイズ
 	#const  global kFlashWX 800
 	#const  global kFlashWY 480
+	;ソフト画面のサイズ
 	#const kMainWX 800
 	#const kMainWY 600
+	;編成画面のサイズ
+	#const kUnitWX 455
+	#const kUnitWY 365
+	;編成画面のオフセット座標
+	#const kUnitPX 330
+	#const kUnitPY 100
+	;フォントサイズ
 	#const kFontSize 30
+	;オブジェクト関係
 	#const kObjX 80
 	#const kObjY 20
-	#const kObjSpace 10
+	#const kObjSpace 9
 	#const kObjSpaceX kObjSpace + kObjX
 	#const kObjSpaceY kObjSpace + kObjY
 	// キーボード・マウス操作
 	#const kStickEscKey 128
 	#const kStickMouse  256
-	// 画面状態(tye_strと対応)
+	// 画面状態(type_strと対応)
 	#const global kTypeUnknown 0
 	#const global kTypeResult  1
 	#const global kTypeHome    2
@@ -43,23 +55,47 @@
 	#const global kTypeTeam2   5
 	#const global kTypeTeam3   6
 	#const global kTypeTeam4   7
+	#const global kTypeUnit11  8
+	#const global kTypeUnit12  9
+	#const global kTypeUnit13  10
+	#const global kTypeUnit14  11
+	#const global kTypeUnit15  12
+	#const global kTypeUnit16  13
+	#const global kTypeUnit21  14
+	#const global kTypeUnit22  15
+	#const global kTypeUnit23  16
+	#const global kTypeUnit24  17
+	#const global kTypeUnit25  18
+	#const global kTypeUnit26  19
 	// アプリ機能(mode_strと対応)
 	#const kModeNow    0
-	#const kModeReslut 1
-	#const kModeHome   2
-	#const kModeInfo   3
-	#const kModeTeam1  4
-	#const kModeTeam2  5
-	#const kModeTeam3  6
-	#const kModeTeam4  7
+	#const kModeReslut kTypeResult
+	#const kModeHome   kTypeHome  
+	#const kModeInfo   kTypeInfo  
+	#const kModeTeam1  kTypeTeam1 
+	#const kModeTeam2  kTypeTeam2 
+	#const kModeTeam3  kTypeTeam3 
+	#const kModeTeam4  kTypeTeam4 
+	#const kModeUnit11 kTypeUnit11
+	#const kModeUnit12 kTypeUnit12
+	#const kModeUnit13 kTypeUnit13
+	#const kModeUnit14 kTypeUnit14
+	#const kModeUnit15 kTypeUnit15
+	#const kModeUnit16 kTypeUnit16
+	#const kModeUnit21 kTypeUnit21
+	#const kModeUnit22 kTypeUnit22
+	#const kModeUnit23 kTypeUnit23
+	#const kModeUnit24 kTypeUnit24
+	#const kModeUnit25 kTypeUnit25
+	#const kModeUnit26 kTypeUnit26
 	// タスクトレイ機能
 	#define WM_LBUTTONDOWN  $00000201
 	#define NOTIFY_TRAYICON $00001400
 	// その他フラグなど
 	#define kSoftName "おりこうさんな秘書(仮)"
 	#const kOffsetY kMainWY - kFlashWY
-	type_str.0 = "不明",     "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)"
-	mode_str.0 = "現在状況", "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)"
+	type_str.0 = "不明",     "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)", "改装画面(1-1)", "改装画面(1-2)", "改装画面(1-3)", "改装画面(1-4)", "改装画面(1-5)", "改装画面(1-6)", "改装画面(2-1)", "改装画面(2-2)", "改装画面(2-3)", "改装画面(2-4)", "改装画面(2-5)", "改装画面(2-6)"
+	mode_str.0 = "現在状況", "戦果報告", "母港画面", "戦績表示", "編成画面(第1)", "編成画面(第2)", "編成画面(第3)", "編成画面(第4)", "改装画面(1-1)", "改装画面(1-2)", "改装画面(1-3)", "改装画面(1-4)", "改装画面(1-5)", "改装画面(1-6)", "改装画面(2-1)", "改装画面(2-2)", "改装画面(2-3)", "改装画面(2-4)", "改装画面(2-5)", "改装画面(2-6)"
 	auto_getpos_flg  = TRUE
 	auto_capture_flg = FALSE
 	name_disable_flg = FALSE
@@ -195,12 +231,14 @@
 		return
 		//ファイル名を自動設定
 		#defcfunc AutoFileName
-			file_name = strf("%04d_%02d_%02d %02d_%02d_%02d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6))
+			file_name = strf("%04d-%02d-%02d %02d-%02d-%02d.%03d", gettime(0), gettime(1), gettime(3), gettime(4), gettime(5), gettime(6), gettime(7))
+			exist file_name + ".png"
+			if(strsize == -1) :return file_name + ".png"
 			number = 0
-			repeat
-				exist file_name + "_" + (cnt + 1) + ".png"
+			repeat, 1
+				exist file_name + "_" + cnt + ".png"
 				if(strsize == -1){
-					number = cnt + 1
+					number = cnt
 					break
 				}
 				wait 5
@@ -246,10 +284,32 @@
 			//編成画面
 			;随伴艦一括解除ボタン
 			if(NearColor(420, 118, 195, 180, 169)){
+				;左上の旗
 				if(NearColor(123, 126, 33, 150, 151)) :return kTypeTeam1
 				if(NearColor(153, 126, 33, 150, 151)) :return kTypeTeam2
 				if(NearColor(183, 126, 33, 150, 151)) :return kTypeTeam3
 				if(NearColor(213, 126, 33, 150, 151)) :return kTypeTeam4
+			}
+			//改装画面
+			;枠の柱
+			if(NearColor(300, 172, 241, 191, 119)){
+				;左上の旗
+				if(NearColor(136, 122, 33, 150, 151)){
+					offset = 0
+				}else{
+					if(NearColor(166, 122, 33, 150, 151)){
+						offset = 6
+					}else{
+						return kTypeUnknown
+					}
+				}
+				;枠
+				if(NearColor(294, 145, 255, 102, 29)) :return kTypeunit11 + offset
+				if(NearColor(294, 199, 255, 102, 29)) :return kTypeunit12 + offset
+				if(NearColor(294, 253, 255, 102, 29)) :return kTypeunit13 + offset
+				if(NearColor(294, 307, 255, 102, 29)) :return kTypeunit14 + offset
+				if(NearColor(294, 361, 255, 102, 29)) :return kTypeunit15 + offset
+				if(NearColor(294, 415, 255, 102, 29)) :return kTypeunit16 + offset
 			}
 		return kTypeUnknown
 	#global
@@ -257,13 +317,9 @@
 // ウィンドウ周りを初期設定
 	//保存用バッファ
 	buffer kFlashBufferID,  kFlashWX, kFlashWY
-	buffer 5 + kTypeResult, kFlashWX, kFlashWY
-	buffer 5 + kTypeHome,   kFlashWX, kFlashWY
-	buffer 5 + kTypeInfo,   kFlashWX, kFlashWY
-	buffer 5 + kTypeTeam1,  kFlashWX, kFlashWY
-	buffer 5 + kTypeTeam2,  kFlashWX, kFlashWY
-	buffer 5 + kTypeTeam3,  kFlashWX, kFlashWY
-	buffer 5 + kTypeTeam4,  kFlashWX, kFlashWY
+	for k, kTypeResult, kTypeUnit26 + 1
+		buffer 5 + k, kFlashWX, kFlashWY
+	next
 	//メインウィンドウ
 	screen kMainWindowID, kMainWX, kMainWY
 	oncmd gosub *OnMotificmd, NOTIFY_TRAYICON
@@ -280,6 +336,7 @@
 			chkbox "名前隠し", name_disable_flg
 		pos kObjSpace + kObjSpaceX * 5, kObjSpace
 			chkbox "タスクトレイ", tasktray_flg
+			
 		pos kObjSpace, kObjSpace + kObjSpaceY
 			button gosub "現在状況", *mode_now
 		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY
@@ -288,6 +345,7 @@
 			button gosub "母港画面", *mode_home
 		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY
 			button gosub "戦績表示", *mode_info
+			
 		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY
 			button gosub "編成画面1", *mode_team1
 		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY
@@ -296,6 +354,38 @@
 			button gosub "編成画面3", *mode_team3
 		pos kObjSpace + kObjSpaceX * 7, kObjSpace + kObjSpaceY
 			button gosub "編成画面4", *mode_team4
+			
+		pos kObjSpace, kObjSpace + kObjSpaceY * 2
+			button gosub "装備(1-1)", *mode_unit11
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 2
+			button gosub "装備(1-2)", *mode_unit12
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 2
+			button gosub "装備(1-3)", *mode_unit13
+		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 2
+			button gosub "装備(1-4)", *mode_unit14
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY * 2
+			button gosub "装備(1-5)", *mode_unit15
+		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY * 2
+			button gosub "装備(1-6)", *mode_unit16
+		pos kObjSpace, kObjSpace + kObjSpaceY * 3
+			button gosub "装備(2-1)", *mode_unit21
+		pos kObjSpace + kObjSpaceX, kObjSpace + kObjSpaceY * 3
+			button gosub "装備(2-2)", *mode_unit22
+		pos kObjSpace + kObjSpaceX * 2, kObjSpace + kObjSpaceY * 3
+			button gosub "装備(2-3)", *mode_unit23
+		pos kObjSpace + kObjSpaceX * 3, kObjSpace + kObjSpaceY * 3
+			button gosub "装備(2-4)", *mode_unit24
+		pos kObjSpace + kObjSpaceX * 4, kObjSpace + kObjSpaceY * 3
+			button gosub "装備(2-5)", *mode_unit25
+		pos kObjSpace + kObjSpaceX * 5, kObjSpace + kObjSpaceY * 3
+			button gosub "装備(2-6)", *mode_unit26
+
+		pos kObjSpace + kObjSpaceX * 6, kObjSpace
+			button gosub "第1艦隊",  *save_team1
+		pos kObjSpace + kObjSpaceX * 7, kObjSpace
+			button gosub "第2艦隊",  *save_team2
+		pos kObjSpace + kObjSpaceX * 8, kObjSpace
+			button gosub "連合艦隊", *save_team12
 	SetTitle
 
 // 自動更新を行う
@@ -349,35 +439,14 @@
 						color :boxf 201, 123 + kOffsetY, 496, 153 + kOffsetY
 					}
 				swbreak
-				case kModeTeam1
-					pos 0, kOffsetY
-					gcopy 5 + kTypeTeam1, 0, 0, kFlashWX, kFlashWY
-					if(name_disable_flg){
-						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
-					}
-				swbreak
-				case kModeTeam2
-					pos 0, kOffsetY
-					gcopy 5 + kTypeTeam2, 0, 0, kFlashWX, kFlashWY
-					if(name_disable_flg){
-						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
-					}
-				swbreak
-				case kModeTeam3
-					pos 0, kOffsetY
-					gcopy 5 + kTypeTeam3, 0, 0, kFlashWX, kFlashWY
-					if(name_disable_flg){
-						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
-					}
-				swbreak
-				case kModeTeam4
-					pos 0, kOffsetY
-					gcopy 5 + kTypeTeam4, 0, 0, kFlashWX, kFlashWY
-					if(name_disable_flg){
-						color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
-					}
-				swbreak
 			swend
+			if(limit(application_mode, kModeTeam1, kTypeUnit26) == application_mode){
+				pos 0, kOffsetY
+				gcopy 5 + application_mode, 0, 0, kFlashWX, kFlashWY
+				if(name_disable_flg){
+					color :boxf 111, 0 + kOffsetY, 273, 25 + kOffsetY
+				}
+			}
 		redraw 1
 		// 最小化を検知して、タスクトレイに格納するかを決める
 		IsIconic hwnd
@@ -394,34 +463,30 @@
 				loop
 			}
 		}
-		wait 10
+		await 1000 / 30
 	loop
 
 //各状況のボタンを押した際の処理
-*mode_now
-	application_mode = kModeNow
-return
-*mode_result
-	application_mode = kModeReslut
-return
-*mode_home
-	application_mode = kModeHome
-return
-*mode_info
-	application_mode = kModeInfo
-return
-*mode_team1
-	application_mode = kModeTeam1
-return
-*mode_team2
-	application_mode = kModeTeam2
-return
-*mode_team3
-	application_mode = kModeTeam3
-return
-*mode_team4
-	application_mode = kModeTeam4
-return
+*mode_now    :application_mode = kModeNow    :return
+*mode_result :application_mode = kModeReslut :return
+*mode_home   :application_mode = kModeHome   :return
+*mode_info   :application_mode = kModeInfo   :return
+*mode_team1  :application_mode = kModeTeam1  :return
+*mode_team2  :application_mode = kModeTeam2  :return
+*mode_team3  :application_mode = kModeTeam3  :return
+*mode_team4  :application_mode = kModeTeam4  :return
+*mode_unit11 :application_mode = kModeUnit11 :return
+*mode_unit12 :application_mode = kModeUnit12 :return
+*mode_unit13 :application_mode = kModeUnit13 :return
+*mode_unit14 :application_mode = kModeUnit14 :return
+*mode_unit15 :application_mode = kModeUnit15 :return
+*mode_unit16 :application_mode = kModeUnit16 :return
+*mode_unit21 :application_mode = kModeUnit21 :return
+*mode_unit22 :application_mode = kModeUnit22 :return
+*mode_unit23 :application_mode = kModeUnit23 :return
+*mode_unit24 :application_mode = kModeUnit24 :return
+*mode_unit25 :application_mode = kModeUnit25 :return
+*mode_unit26 :application_mode = kModeUnit26 :return
 
 //座標取得
 *get_pos
@@ -515,6 +580,53 @@ return
 	cvbuffer kCVFlashBufferID, kFlashWX, kFlashWY
 	cvputimg kCVFlashBufferID
 	cvsave AutoFileName(), kCVFlashBufferID
+	gsel kMainWindowID
+return
+
+//第1艦隊の編成を保存する
+*save_team1
+	buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
+	for y, 0, 2
+		for x, 0, 3
+			pos x * kUnitWX, y * kUnitWY
+			gcopy 5 + (kTypeUnit11 + (y * 3 + x)), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+		next
+	next
+	cvbuffer kCVTempBufferID, kUnitWX * 3, kUnitWY * 2
+	cvputimg kCVTempBufferID
+	cvsave AutoFileName(), kCVTempBufferID
+	gsel kMainWindowID
+return
+
+//第2艦隊の編成を保存する
+*save_team2
+	buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
+	for y, 0, 2
+		for x, 0, 3
+			pos x * kUnitWX, y * kUnitWY
+			gcopy 5 + (kTypeUnit21 + (y * 3 + x)), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+		next
+	next
+	cvbuffer kCVTempBufferID, kUnitWX * 3, kUnitWY * 2
+	cvputimg kCVTempBufferID
+	cvsave AutoFileName(), kCVTempBufferID
+	gsel kMainWindowID
+return
+
+//連合艦隊の編成を保存する
+*save_team12
+	buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3
+	for z, 0, 2
+		for y, 0, 3
+			for x, 0, 2
+				pos (z * 2 + x) * kUnitWX, y * kUnitWY
+				gcopy 5 + (kTypeUnit11 + (z * 6 + y * 2 + x)), kUnitPX, kUnitPY, kUnitWX, kUnitWY
+			next
+		next
+	next
+	cvbuffer kCVTempBufferID, kUnitWX * 4, kUnitWY * 3
+	cvputimg kCVTempBufferID
+	cvsave AutoFileName(), kCVTempBufferID
 	gsel kMainWindowID
 return
 
