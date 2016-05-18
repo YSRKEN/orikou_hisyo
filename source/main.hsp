@@ -1,23 +1,21 @@
-/* おりこうさんな秘書 Ver.3.0.9 */
+/* おりこうさんな秘書 Ver.3.1.0 */
 
 /* TODO:
  * ・夜戦確認音声タイミングの調整
+ * ・資材グラフ上にマウスを翳すと、その地点における資材値を表示するようにした
  */
 
 /* 実装済:
- * ・内蔵ブラウザの座標ズレを修正
- * ・6ページ目以降の任務一覧を取得できない問題の修正
- * ・Chromeでうまく読み取れない系バグの確認および修正
- * 　※flash_positionがFlashの左上座標
- * 　(単純スクショにディスプレイオフセットを考慮したものでmousex/mouseyと同じ)
+ * ・任務一覧を取得する際に1ページ目が頻繁に上書きされるバグを修正した
+ * ・
  */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.0.9"
+	#define kVersion    "Ver.3.1.0"
 	#define kVerString  "309"
-	#define kLastUpdate "2016/05/16"
+	#define kLastUpdate "2016/05/18"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"

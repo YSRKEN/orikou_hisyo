@@ -126,8 +126,10 @@
 					pget k, 458
 					//logmes "" + k + " " + (ginfo_g - ginfo_r) + " " + (ginfo_b - ginfo_r)
 					if((ginfo_g - ginfo_r) > 50 && (ginfo_b - ginfo_r) > 50){
-						position = (k - 349) / 52
-						_break
+						if(NearColor(102, 466, 205, 202, 168)){
+							position = (k - 349) / 52
+							_break
+						}
 					}
 				next
 				// 数字の点灯が判別できなかった場合は、判定不能とする
@@ -150,8 +152,6 @@
 				}
 				n += number - 1
 				scene_result(1) = scene_list_name@(n)
-				logmes scene_result(1)
-				await 200
 			}
 		return n
 		// サブ画面を生成する
