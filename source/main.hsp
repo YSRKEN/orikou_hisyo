@@ -88,7 +88,7 @@
 	cond_step_ = cond_step
 	auto_calc_flg_ = auto_calc_flg
 	bgm_type_now_ = bgm_type_now
-	graph_scale_index_ = graph_scale_index
+	graph_scale_index_ = graph_scale_index + 1	//最初に必ず画面を更新させる
 	redraw_counter_flg = FALSE
 	desktop_mascot_flg_ = desktop_mascot_flg
 	show_mascot_area_flg_ = show_mascot_area_flg
@@ -253,6 +253,7 @@
 			gosub *draw_supply_graph
 			graph_scale_index_ = graph_scale_index
 		}
+		gosub *draw_supply_num
 		//「戦闘画面」チェックに関する処理
 		if(show_battle_flg_ != show_battle_flg){
 			if(show_battle_flg == FALSE){
