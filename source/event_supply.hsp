@@ -421,8 +421,24 @@ return
 		point_time = per * last_time + (1.0 - per) * first_time
 		// 資材量計算
 		//近傍の資材量を引っ張ってくる
+		diff = 10000.0 :nearest_index = -1
+		for k, 0, supply_log_size
+			if(diff > absf(supply_time(k) - point_time)){
+				nearest_index = k
+				diff = absf(supply_time(k) - point_time)
+			}
+		next
+		point_time = supply_time(nearest_index)
 		// 結果を表示する
-		output = CnvStrDay(int(point_time)) + "\n" + CnvStrSec2(point_time - double(int(point_time)))
+		output = CnvStrDay(int(point_time)) + "\n"
+		output += CnvStrSec2(point_time - double(int(point_time))) + "\n"
+		output += "燃：" + supply_value(0, nearest_index) + "\n"
+		output += "弾：" + supply_value(1, nearest_index) + "\n"
+		output += "鋼：" + supply_value(2, nearest_index) + "\n"
+		output += "ボ：" + supply_value(3, nearest_index) + "\n"
+		output += "バ：" + supply_value(4, nearest_index) + "\n"
+		output += "開：" + supply_value(5, nearest_index) + "\n"
+		output += "Lv：" + supply_value(6, nearest_index) + "\n"
 		color 255, 255, 255
 		boxf POS_X(0), POS_Y(1), POS_X(0) + kObjX, kSpace + kGraphWY2 - kObjY
 		color :font msgothic, 14 :pos POS_X(0), POS_Y(1) :mes output
