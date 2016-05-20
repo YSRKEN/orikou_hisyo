@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html lang="ja">
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<meta http-equiv="Content-Style-Type" content="text/css">
 		<link rev="made" href="mailto:ysr.ken@gmail.com">
 		<link rel="index" href="./index.html">
-		<title>���肱������Ȕ鏑 �w���v</title>
+		<title>おりこうさんな秘書 ヘルプ</title>
 		<style type="text/css">
 			<!-- .underline{text-decoration: underline;}
 			img{border: none;}
@@ -13,700 +13,701 @@
 		</style>
 	</head>
 	<body>
-<!-- �^�C�g�� -->
-		<h1>���肱������Ȕ鏑 Ver.3.0.9</h1>
-		Twitter�A�J�E���g�F<a href="https://twitter.com/orikou_hisyo/">@orikou_hisyo</a>(�񍐗p), <a href="https://twitter.com/YSRKEN/">@YSRKEN</a>(���)<br>
-		���J�y�[�W�F<a href="http://www.vector.co.jp/soft/win95/game/se509326.html">http://www.vector.co.jp/soft/win95/game/se509326.html</a><br>
-		�Љ��F<a href="http://www.nicovideo.jp/watch/sm26755860">�y�͂���z�֗��ȃX�N�V���c�[���{��������Ă݂�</a><br>
-		�Љ�X���C�h�F<a href="http://www.slideshare.net/YSRKEN/ss-50964003">���肱������Ȕ鏑�@�\�摜�F���ɂ�鍂�@�\�Ȋ͂��ꃆ�[�e�B���e�B�ւ̒���\</a>
+<!-- タイトル -->
+		<h1>おりこうさんな秘書 Ver.3.1.0</h1>
+		Twitterアカウント：<a href="https://twitter.com/orikou_hisyo/">@orikou_hisyo</a>(報告用), <a href="https://twitter.com/YSRKEN/">@YSRKEN</a>(作者)<br>
+		公開ページ：<a href="http://www.vector.co.jp/soft/win95/game/se509326.html">http://www.vector.co.jp/soft/win95/game/se509326.html</a><br>
+		紹介動画：<a href="http://www.nicovideo.jp/watch/sm26755860">【艦これ】便利なスクショツール＋αを作ってみた</a><br>
+		紹介スライド：<a href="http://www.slideshare.net/YSRKEN/ss-50964003">おりこうさんな秘書　―画像認識による高機能な艦これユーティリティへの挑戦―</a>
 		<hr>
 
-<!-- �ڎ� -->
-		<h1><a name="index">�ڎ�</a></h1>
+<!-- 目次 -->
+		<h1><a name="index">目次</a></h1>
 		<ul>
-			<li><a href="#intro">�T�v</a></li>
-			<li><a href="#inst">�����E�폜</a></li>
-			<li><a href="#howto">������@</a><ul>
-				<li><a href="#window">��ʍ\��</a></li>
-				<li><a href="#getpos">���W�擾</a></li>
-				<li><a href="#showmode">�\�����[�h</a></li>
-				<li><a href="#save_cap">�摜�ۑ�</a></li>
-				<li><a href="#tools">�e��c�[��</a></li>
-				<li><a href="#save_data">�Z�[�u�ɂ���</a></li>
-				<li><a href="#option">�I�v�V����</a></li>
-				<li><a href="#mascot">�f�X�N�g�b�v�}�X�R�b�g�쐬�ɂ���</a></li>
-				<li><a href="#about">�e����</a></li>
+			<li><a href="#intro">概要</a></li>
+			<li><a href="#inst">導入・削除</a></li>
+			<li><a href="#howto">操作方法</a><ul>
+				<li><a href="#window">画面構成</a></li>
+				<li><a href="#getpos">座標取得</a></li>
+				<li><a href="#showmode">表示モード</a></li>
+				<li><a href="#save_cap">画像保存</a></li>
+				<li><a href="#tools">各種ツール</a></li>
+				<li><a href="#save_data">セーブについて</a></li>
+				<li><a href="#option">オプション</a></li>
+				<li><a href="#mascot">デスクトップマスコット作成について</a></li>
+				<li><a href="#about">各種情報</a></li>
 			</ul></li>
-			<li><a href="#faq">�悭���鎿��</a></li>
-			<li><a href="#caution">����</a></li>
-			<li><a href="#thanks">�ӎ�</a></li>
-			<li><a href="#history">�X�V����</a></li>
-			<li><a href="#copyright">���쌠�ɂ���</a></li>
-			<li><a href="#comment">�R�����g</a></li>
+			<li><a href="#faq">よくある質問</a></li>
+			<li><a href="#caution">注意</a></li>
+			<li><a href="#thanks">謝辞</a></li>
+			<li><a href="#history">更新履歴</a></li>
+			<li><a href="#copyright">著作権について</a></li>
+			<li><a href="#comment">コメント</a></li>
 		</ul>
 		<hr>
 
-<!-- �T�v -->
-		<h1><a name="intro">�T�v</a></h1>
-		<p>�@���̃\�t�g�E�F�A�́A�͂���̉�ʂ���ɊĎ����A�v���v���ŃX�N�V���������ŎB���Ă����\�t�g�ł��B<br>
-		�@����ɂ��A���ł���`��ʂ�Ґ���ʂ��ʕ񍐂Ȃǂ��m�F�ł���悤�ɂȂ�̂ŁA�Ⴆ�Ύ��̂悤�ȗp�r�ɖ𗧂��܂��B</p>
+<!-- 概要 -->
+		<h1><a name="intro">概要</a></h1>
+		<p>　このソフトウェアは、艦これの画面を常に監視しつつ、要所要所でスクショを自動で撮ってくれるソフトです。<br>
+		　これにより、いつでも母港画面や編成画面や戦果報告などを確認できるようになるので、例えば次のような用途に役立ちます。</p>
 		<ul>
-			<li>��ʕ񍐂�K���ɃN���b�N�Ŕ�΂��������j���ĂȂ�����������Ȃ��ꍇ�ɁA<strong>�k���Ċm�F���邱�Ƃ��o����</strong></li>
-			<li>�͑��̕Ґ��⑕�����m�F�ł���̂ŁA�i�R���ł������ɏo����<strong>�Ґ����T�b�ƌ�����</strong></li>
-			<li>���O�B���@�\������̂ŁA�X�N�V���ł�������<strong>������N���Ă��܂����Ƃ��Ȃ�</strong></li>
+			<li>戦果報告を適当にクリックで飛ばしたから大破してないかが分からない場合に、<strong>遡って確認することが出来る</strong></li>
+			<li>艦隊の編成や装備も確認できるので、進軍中でも遠征に出した<strong>編成をサッと見られる</strong></li>
+			<li>名前隠し機能もあるので、スクショでうっかり<strong>提督名を晒してしまうこともない</strong></li>
 		</ul>
-		<p>�@�܂�����ȋ@�\�Ƃ��āA���̂悤�ȋ@�\���������Ă��܂��B</p>
+		<p>　また特殊な機能として、次のような機能も実装しています。</p>
 		<ul>
-			<li>��j�o�����j�i������Տo���𖢑R�ɖh��<strong>�u��j�E���Ճ`�F�b�N�@�\�v</strong></li>
-			<li>������ʂł̃X�N�V����ҏW���Ă܂Ƃ߂���<strong>�u�����܂Ƃ߉摜�쐬�@�\�v</strong></li>
-			<li>�����E�����E������ʂ��摜�œǂݎ��A�����ŃJ�E���g����<strong>�u�e��^�C�}�[�v</strong></li>
-			<li>�Ґ���ʂł̃\�[�g�ꗗ�����₷���܂Ƃ߂�<strong>�u�\�[�g�܂Ƃ߉摜�쐬�@�\�v</strong></li>
-			<li>���ޏ󋵂����M���O���A�K�v�ɉ�����csv�ɏ����o����<strong>�u���ރ��O�@�\�v</strong></li>
-			<li>���x����ьo���l����K�v�o���l����񐔂��v�Z����<strong>�u�o���l�v�Z�@�v</strong></li>
-			<li>���E���E�덆���蓮�E�����ŃJ�E���g���ĕ\���ł���<strong>�u�����J�E���^�[�v</strong></li>
-			<li>�N���b�N���邾���Ŋ͖��̃R���f�B�V�������ȒP�Ɍv�Z�ł���<strong>�ucond�l���[�^�v</strong></li>
-			<li>��`�E�}�b�v�E�����퓬�E�{�X�퓬��ʂɂ�����<strong>�uBGM�������ŗ�����@�\�v</strong></li>
-			<li>���C����ʂ̕\����ύX����<strong>�u�D���ȃf�X�N�g�b�v�}�X�R�b�g���g����@�\�v</strong></li>
+			<li>大破出撃や大破進撃や消耗出撃を未然に防ぐ<strong>「大破・消耗チェック機能」</strong></li>
+			<li>改装画面でのスクショを編集してまとめられる<strong>「装備まとめ画像作成機能」</strong></li>
+			<li>入渠・建造・遠征画面を画像で読み取り、自動でカウントする<strong>「各種タイマー」</strong></li>
+			<li>編成画面でのソート一覧を見やすくまとめる<strong>「ソートまとめ画像作成機能」</strong></li>
+			<li>資材状況をロギングし、必要に応じてcsvに書き出せる<strong>「資材ログ機能」</strong></li>
+			<li>練度および経験値から必要経験値や周回数を計算する<strong>「経験値計算機」</strong></li>
+			<li>あ・い・ろ号を手動・自動でカウントして表示できる<strong>「○号カウンター」</strong></li>
+			<li>クリックするだけで艦娘のコンディションを簡単に計算できる<strong>「cond値メータ」</strong></li>
+			<li>母港・マップ・道中戦闘・ボス戦闘画面において<strong>「BGMを自動で流せる機能」</strong></li>
+			<li>メイン画面の表示を変更して<strong>「好きなデスクトップマスコットが使える機能」</strong></li>
 		</ul>
-		<p>�@�ŐV�̊J���󋵂�X�V���́A���̃X���ɂ܂Ƃ߂Ă���̂ň�x�`���Ă݂Ă��������B</p>
-		<div>�y�͂���z���肱������Ȕ鏑�y�X�N�V���z<br>
+		<p>　最新の開発状況や更新情報は、次のスレにまとめているので一度覗いてみてください。</p>
+		<div>【艦これ】おりこうさんな秘書【スクショ】<br>
 		<a href="http://anago.open2ch.net/test/read.cgi/software/1424098430/">http://anago.open2ch.net/test/read.cgi/software/1424098430/</a></div>
-		<p><a href="#index">���ڎ��֖߂�</a></p>
+		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
-<!-- �����E�폜 -->
-		<h1><a name="inst">�����E�폜</a></h1>
-		<h2>�C���X�g�[�����@</h2>
-		<p>�@zip�t�@�C�����𓀂��邾���ł��B�Z�[�u�f�[�^�͊�{�I�Ɏ����z���܂��B</p>
-		<h2>�A���C���X�g�[�����@</h2>
-		<p>�@�t�@�C�������̂܂܍폜���邾���ł��B���W�X�g���͎g�p���܂���B</p>
-		<h2>�t�@�C���\��</h2>
-		<p><strong>�@�擪�Ɂ����t�����t�@�C���́A����ɕK�{�ȃt�@�C���ł��B</strong><br>
-		�@�v���O���������߂Ď��s�����ۂ́Apic�t�H���_�Esave�t�H���_�Elog�t�H���_�Etheme�t�H���_��������������܂��B<br>
-		�@�܂��A�Z�[�u���ɂ�<a href="../save/save.ini">save.ini</a>�����<a href="../save/buffer.png">buffer.png</a>���A���ރ��O�ۑ�����supply.dat��orikou.exe��1����save�t�H���_�ɍ쐬����܂��B<br>
-		�@�Ȃ��A�Z�[�u�̍ۂɂ̓\�t�g�E�F�A�̃��O�Ƃ���log�t�H���_��soft(���t).log���ۑ�����܂��B</p>
-		<table border="1" summary="orikou.exe�Ehspcv.dll�Ehspext.dll���K�{�ŁA���͕K�{�ł͂���܂���">
+<!-- 導入・削除 -->
+		<h1><a name="inst">導入・削除</a></h1>
+		<h2>インストール方法</h2>
+		<p>　zipファイルを解凍するだけです。セーブデータは基本的に持ち越せます。</p>
+		<h2>アンインストール方法</h2>
+		<p>　ファイルをそのまま削除するだけです。レジストリは使用しません。</p>
+		<h2>ファイル構成</h2>
+		<p><strong>　先頭に☆が付いたファイルは、動作に必須なファイルです。</strong><br>
+		　プログラムを初めて実行した際は、picフォルダ・saveフォルダ・logフォルダ・themeフォルダが自動生成されます。<br>
+		　また、セーブ時には<a href="../save/save.ini">save.ini</a>および<a href="../save/buffer.png">buffer.png</a>が、資材ログ保存時はsupply.datがorikou.exeの1つ下のsaveフォルダに作成されます。<br>
+		　なお、セーブの際にはソフトウェアのログとしてlogフォルダにsoft(日付).logも保存されます。</p>
+		<table border="1" summary="orikou.exe・hspcv.dll・hspext.dllが必須で、他は必須ではありません">
 			<tr>
-				<th abbr="�t�@�C���E�t�H���_��">�t�@�C���E�t�H���_��</th>
-				<th abbr="����">����</th>
+				<th abbr="ファイル・フォルダ名">ファイル・フォルダ名</th>
+				<th abbr="説明">説明</th>
 			</tr>
 			<tr>
-				<td>��orikou.exe</td>
-				<td>���s�t�@�C���B������N���b�N���Ď��s���܂�</td>
+				<td>☆orikou.exe</td>
+				<td>実行ファイル。これをクリックして実行します</td>
 			</tr>
 			<tr>
-				<td>��hspcv.dll</td>
-				<td>����ɕK�v�ȃ��C�u�����B��ɉ摜������S�����܂�</td>
+				<td>☆hspcv.dll</td>
+				<td>動作に必要なライブラリ。主に画像処理を担当します</td>
 			</tr>
 			<tr>
-				<td>��hspext.dll</td>
-				<td>����ɕK�v�ȃ��C�u�����B��Ƀt�@�C��������S�����܂�</td>
+				<td>☆hspext.dll</td>
+				<td>動作に必要なライブラリ。主にファイル処理を担当します</td>
 			</tr>
 			<tr>
 				<td>alert_bld.wav</td>
-				<td><a href="#option">�����ʒm</a>��L���ɂ����ۂ�<strong>����</strong>�Ŏg�p�����t�@�C���B�����Ă��\���܂���</td>
+				<td><a href="#option">音声通知</a>を有効にした際に<strong>建造</strong>で使用されるファイル。消しても構いません</td>
 			</tr>
 			<tr>
 				<td>alert_dck.wav</td>
-				<td><a href="#option">�����ʒm</a>��L���ɂ����ۂ�<strong>����</strong>�Ŏg�p�����t�@�C���B�����Ă��\���܂���</td>
+				<td><a href="#option">音声通知</a>を有効にした際に<strong>入渠</strong>で使用されるファイル。消しても構いません</td>
 			</tr>
 			<tr>
 				<td>alert_exp.wav</td>
-				<td><a href="#option">�����ʒm</a>��L���ɂ����ۂ�<strong>����</strong>�Ŏg�p�����t�@�C���B�����Ă��\���܂���</td>
+				<td><a href="#option">音声通知</a>を有効にした際に<strong>遠征</strong>で使用されるファイル。消しても構いません</td>
 			</tr>
 			<tr>
-				<td>theme�t�H���_</td>
-				<td>�e�[�}�t�@�C���������ɒu���Ă����܂��B�ڂ�����<a href="#mascot">�f�X�N�g�b�v�}�X�R�b�g�̍���</a>��</td>
+				<td>themeフォルダ</td>
+				<td>テーマファイルをここに置いておきます。詳しくは<a href="#mascot">デスクトップマスコットの項目</a>で</td>
 			</tr>
 			<tr>
-				<td>source�t�H���_</td>
-				<td>�\�[�X�R�[�h�B<a href="http://hsp.tv/">HSP</a>�Ńv���O���~���O���܂���</td>
+				<td>sourceフォルダ</td>
+				<td>ソースコード。<a href="http://hsp.tv/">HSP</a>でプログラミングしました</td>
 			</tr>
 			<tr>
-				<td>help�t�H���_</td>
-				<td>�戵������(HTML��)�Bindex.html�����̕����ł�</td>
+				<td>helpフォルダ</td>
+				<td>取扱説明書(HTML版)。index.htmlがこの文書です</td>
 			</tr>
 		</table>
-		<p><a href="#index">���ڎ��֖߂�</a></p>
+		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
-<!-- ������@ -->
-		<h1><a name="howto">������@</a></h1>
-		<h2><a name="window">��ʍ\��</a></h2>
-		<p>�ǂ̉�ʂɂ����Ă��A<strong>�}�E�X�łǂ̈ʒu��͂�ł��h���b�O�ł���</strong>�悤�ɂ��Ă���܂��B</p>
-			<h3><a name="main_window">���C�����</a></h3>
-			<h4>�E�ʏ�</h4>
-			<img src="./images/main_window.png" alt="���C�����" width="603" height="455"><br>
-			<p>�e�{�^���̐����͈ȉ����Q�Ƃ��Ă��������B�񐔂�<a href="#option">�I�v�V����</a>����؂�ւ����܂��B�܂��A��ʂ̈�ԉ��ɕ\������Ă���̂̓\�t�g�E�F�A�̃��O�ł��B<br>
-			�@�Ȃ��A�u���������v����сu���������v�{�^����<a href="#tools">�e��c�[��</a>�̃{�^����\�����邩�؂�ւ����܂��B<br>
-			<strong>(�\�t�g�E�F�A�I�����A��������30KB�𒴂����ۂɁA������log�t�H���_�ȉ��ɕۑ������)</strong></p>
-			<h4>�E�}�X�R�b�g</h4>
-			<img src="./images/mascot_1.png" alt="�}�X�R�b�g" width="414" height="407"><br>
-			<p><a href="#option">�I�v�V����</a>�ŁA�}�X�R�b�g����ON�ɂ��Ă����<strong>���C����ʂ�������ɕς��܂�</strong>�B<br>
-			�Ƃ͌����Ă��A�ʏ�̃��C����ʂ����ł���̂ł͂Ȃ���\���ɂ��Ă��邾���Ȃ̂ŁA�ʏ�̃��C����ʂł̑I���͂��̂܂܂ł��B<br>
-			���̕\��(����png�Ή��Ȃ̂œ����Ă���)���ƁA<strong>���蕔�����N���b�N����ƁA���W�擾��摜�ۑ��Ȃǂ̎�v�@�\�����p�ł��܂�</strong>�B<br>
-			�����A����Ȃ̂͏������ᕪ��������Ȃ��̂ŁA���͈̔͂𖾎������̂����̐}�ł��B</p>
-			<h4>�E�}�X�R�b�g(�g�t��)</h4>
-			<img src="./images/mascot_2.png" alt="�}�X�R�b�g(�͈͕\��)" width="431" height="441"><br>
-			<p>�ڂ��������͕s�v�ł��傤�B<strong>�����`�̘g���N���b�N����΁A����ɍ��킹���@�\���������܂�</strong>�B<br>
-			(�ʏ�̃��C����ʂŃ{�^���������̂Ɠ���)<br>
-			������̉�ʂ̏ꍇ�A1��̏��(�g��\��)�ƈقȂ�A�w�i�����߂��Ă��܂���B<strong>�܂��͂���ňʒu���o���܂��傤</strong>�B<br>
-			�g�̈ʒu��ύX�E�ǉ��E�폜�������H�@�V�����f�X�N�g�b�v�}�X�R�b�g��ǉ��������H<br>
-			�������������́A<a href="#mascot">�f�X�N�g�b�v�}�X�R�b�g�쐬�ɂ���</a>���������������B</p>
-			<h3><a name="sub_window">�T�u���</a></h3>
-			<a href="#showmode"><img src="./images/sub_window.png" alt="�T�u���" width="416" height="302"></a>
-			<h3>�e��^�C�}�[�E�\�[�g�ꗗ�E���ރ��O�E�o���l�v�Z�@�E�����J�E���^�[�Econd�l���[�^�EBGM�@�\�E�����u���E�U�E�C���ꗗ</h3>
-			<p>�@<a href="#tools">�e��c�[��</a>�̍��Ɍf�ڂ��Ă��܂��B</p>
-			<h3>�퓬���</h3>
-			<p>�@<a href="#showmode">�\�����[�h</a>�̍��Ɍf�ڂ��Ă��܂��B</p>
-			<h3>�I�v�V�������</h3>
-			<p>�@<a href="#option">�I�v�V����</a>�̍��Ɍf�ڂ��Ă��܂��B</p>
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<h2><a name="getpos">���W�擾</a></h2>
-			<p>�@<a href="#main_window">���C�����</a>�ɂāu���W�擾�v�{�^���������ƁA�f�B�X�v���C�S�̂���͂���̉�ʂ���������A���̍���̍��W���T�u��ʂɂ��\������܂��B<br>
-			�@���̍ہA<strong>�͂���̉�ʂ̓u���E�U�ɂ�����100���\��(800x480)</strong>�ł��邱�ƂƁA���̎���1�s�N�Z���ȏオ���F�̔w�i�ł���K�v������܂��B<br>
-			�@�}���`�f�B�X�v���C���̏ꍇ�A<strong>�����͈͂͑S�Ẵf�B�X�v���C���܂ޒ����`�̈�</strong>�ł��邱�Ƃɒ��ӂ��Ă��������B<br>
-			�@�܂��A�u���W�擾�v�{�^���̍��ɂ���R���{�{�b�N�X����A�擾�A���S���Y����I���ł��܂��B
+<!-- 操作方法 -->
+		<h1><a name="howto">操作方法</a></h1>
+		<h2><a name="window">画面構成</a></h2>
+		<p>どの画面においても、<strong>マウスでどの位置を掴んでもドラッグできる</strong>ようにしてあります。</p>
+			<h3><a name="main_window">メイン画面</a></h3>
+			<h4>・通常</h4>
+			<img src="./images/main_window.png" alt="メイン画面" width="603" height="455"><br>
+			<p>各ボタンの説明は以下を参照してください。列数は<a href="#option">オプション</a>から切り替えられます。また、画面の一番下に表示されているのはソフトウェアのログです。<br>
+			　なお、「↑↑↑↑」および「↓↓↓↓」ボタンで<a href="#tools">各種ツール</a>のボタンを表示するか切り替えられます。<br>
+			<strong>(ソフトウェア終了時、もしくは30KBを超えた際に、自動でlogフォルダ以下に保存される)</strong></p>
+			<h4>・マスコット</h4>
+			<img src="./images/mascot_1.png" alt="マスコット" width="414" height="407"><br>
+			<p><a href="#option">オプション</a>で、マスコット化をONにしていると<strong>メイン画面がこちらに変わります</strong>。<br>
+			とは言っても、通常のメイン画面が消滅するのではなく非表示にしているだけなので、通常のメイン画面での選択はそのままです。<br>
+			この表示(透過png対応なので透けている)だと、<strong>特定部分をクリックすると、座標取得や画像保存などの主要機能が利用できます</strong>。<br>
+			ただ、そんなのは初見じゃ分かりっこないので、その範囲を明示したのが次の図です。</p>
+			<h4>・マスコット(枠付き)</h4>
+			<img src="./images/mascot_2.png" alt="マスコット(範囲表示)" width="431" height="441"><br>
+			<p>詳しい説明は不要でしょう。<strong>長方形の枠をクリックすれば、それに合わせた機能が発動します</strong>。<br>
+			(通常のメイン画面でボタンを押すのと同じ)<br>
+			こちらの画面の場合、1つ上の状態(枠非表示)と異なり、背景が透過していません。<strong>まずはこれで位置を覚えましょう</strong>。<br>
+			枠の位置を変更・追加・削除したい？　新しいデスクトップマスコットを追加したい？<br>
+			そういった方は、<a href="#mascot">デスクトップマスコット作成について</a>をご覧ください。</p>
+			<h3><a name="sub_window">サブ画面</a></h3>
+			<a href="#showmode"><img src="./images/sub_window.png" alt="サブ画面" width="416" height="302"></a>
+			<h3>各種タイマー・ソート一覧・資材ログ・経験値計算機・○号カウンター・cond値メータ・BGM機能・内蔵ブラウザ・任務一覧</h3>
+			<p>　<a href="#tools">各種ツール</a>の項に掲載しています。</p>
+			<h3>戦闘画面</h3>
+			<p>　<a href="#showmode">表示モード</a>の項に掲載しています。</p>
+			<h3>オプション画面</h3>
+			<p>　<a href="#option">オプション</a>の項に掲載しています。</p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="getpos">座標取得</a></h2>
+			<p>　<a href="#main_window">メイン画面</a>にて「座標取得」ボタンを押すと、ディスプレイ全体から艦これの画面が検索され、その左上の座標がサブ画面にも表示されます。<br>
+			　この際、<strong>艦これの画面はブラウザにおける100％表示(800x480)</strong>であることと、その周囲1ピクセル以上が同色の背景である必要があります。<br>
+			　マルチディスプレイ環境の場合、<strong>検索範囲は全てのディスプレイを含む長方形領域</strong>であることに注意してください。<br>
+			　また、「座標取得」ボタンの左にあるコンボボックスから、取得アルゴリズムを選択できます。
 			</p>
-			<table border="1" summary="�I�X�X���̓N���b�N�ł�">
+			<table border="1" summary="オススメはクリックです">
 				<tr>
-					<th abbr="�ݒ薼">�ݒ薼</th>
-					<th abbr="����">����</th>
+					<th abbr="設定名">設定名</th>
+					<th abbr="説明">説明</th>
 				</tr>
 				<tr>
-					<td>�I�[�g</td>
-					<td>�f�B�X�v���C�S�̂̃X�N�V�����玩���Ō������܂��B<strong>�܂��͂���������ĉ�����</strong>�B</td>
+					<td>オート</td>
+					<td>ディスプレイ全体のスクショから自動で検索します。<strong>まずはこれを試して下さい</strong>。</td>
 				</tr>
 				<tr>
-					<td>�N���b�v</td>
-					<td>���̏�ԂŁu���W�擾�v�{�^���������ƁA�}�E�X�Ŋ͂���̉�ʂ��܂ޗ̈���蓮�őI������悤���߂��܂��B<br>
-					Esc�L�[�ŃL�����Z���\�ł����A�I������Ƃ��͈̔͂���͂���̉�ʂ��������܂��B</td>
+					<td>クロップ</td>
+					<td>この状態で「座標取得」ボタンを押すと、マウスで艦これの画面を含む領域を手動で選択するよう求められます。<br>
+					Escキーでキャンセル可能ですが、選択するとその範囲から艦これの画面を検索します。</td>
 				</tr>
 				<tr>
-					<td>�N���b�N</td>
-					<td>���̏�ԂŁu���W�擾�v�{�^���������ƁA�}�E�X�Ŋ͂���̉�ʂ��N���b�N����悤���߂��܂��B<br>
-					Esc�L�[�ŃL�����Z���\�ł����A�N���b�N����Ƃ��̃E�B���h�E����͂���̉�ʂ��������܂��B</td>
+					<td>クリック</td>
+					<td>この状態で「座標取得」ボタンを押すと、マウスで艦これの画面をクリックするよう求められます。<br>
+					Escキーでキャンセル可能ですが、クリックするとそのウィンドウから艦これの画面を検索します。</td>
 				</tr>
 				<tr>
-					<td>�}�j���A��</td>
-					<td>���̃��[�h�̏ꍇ�A���Ƃ͊͂���̉�ʂ�T���A���S���Y���������Ⴂ�܂��B<br>
-					����Ƃ��Ă̓N���b�v�Ɠ��l�ł��B�Ō�̎�i�ɂǂ����B</td>
+					<td>マニュアル</td>
+					<td>このモードの場合、他とは艦これの画面を探すアルゴリズムが多少違います。<br>
+					操作としてはクロップと同様です。最後の手段にどうぞ。</td>
 				</tr>
 			</table>
-			<p>�@����ȍ~�́A�͂���̉�ʂ��펞�L�^���Ȃ���A�����ŃV�[�����ɃX�N�V���摜���U�蕪�����Ă����܂�(<a href="#showmode">�\�����[�h</a>�Ō�q)�B<br>
-			�@<a href="#option">�I�v�V����</a>�Łu�擾�΍�v�Ƀ`�F�b�N�����Ă��Ȃ��ꍇ�A<strong>�ǂ̃��[�h�ł��͂���̉�ʂ����̃E�B���h�E�ɉB����Ă��Ă����Ȃ��L�^�ł���</strong>���Ƃɒ��ӂ��Ă��������B<br>
-			(<strong>�}�E�X�|�C���^����������肷��</strong>�̂͂���ɂ����̂Ȃ̂�<strong>�d�l</strong>�ł�)<br>
-			�@�Ȃ̂ŁA�Ƃ肠�����u�I�[�g�v�Ŏ擾�ł��邩��������A��肭�����Ȃ��ۂ́u�N���b�N�v���u�N���b�v�v���u�}�j���A���v�̏��ɂ������������B<br>
-			�@�܂��A���̃\�t�g�̏ꍇ�A<strong>Aero��T�C�h�o�[��L���ɂ��Ă���Ɛ���ɓ��삵�Ȃ�</strong>���Ƃ�����܂��̂ŁA�ł���ΐ؂��Ďg�p���Ă��������B<br>
-			�@���Ȃ݂ɁA���X�N�V���c�[���ƈ���ĉB��Ă�OK�A�ȗ��R���m�肽�����́AWin32API�ɂ��Ē��ׂ��莟�̃y�[�W��ǂ񂾂肵�Ă��������B</p>
-			<div>Aero�L�����ɂ�����f�X�N�g�b�v�L���v�`���ɂ���<br>
+			<p>　これ以降は、艦これの画面を常時記録しながら、自動でシーン毎にスクショ画像が振り分けられていきます(<a href="#showmode">表示モード</a>で後述)。<br>
+			　<a href="#option">オプション</a>で「取得対策」にチェックを入れていない場合、<strong>どのモードでも艦これの画面が他のウィンドウに隠されていても問題なく記録できる</strong>ことに注意してください。<br>
+			(<strong>マウスポインタがちらついたりする</strong>のはこれによるものなので<strong>仕様</strong>です)<br>
+			　なので、とりあえず「オート」で取得できるか試した後、上手くいかない際は「クリック」→「クロップ」→「マニュアル」の順にお試し下さい。<br>
+			　また、このソフトの場合、<strong>Aeroやサイドバーを有効にしていると正常に動作しない</strong>ことがありますので、できれば切って使用してください。<br>
+			　ちなみに、他スクショツールと違って隠れてもOK、な理由が知りたい方は、Win32APIについて調べたり次のページを読んだりしてください。</p>
+			<div>Aero有効時におけるデスクトップキャプチャについて<br>
 			<a href="http://amalabo.blog35.fc2.com/blog-entry-242.html">http://amalabo.blog35.fc2.com/blog-entry-242.html</a></div><br>
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<h2><a name="showmode">�\�����[�h</a></h2>
-			<p>�@2�i�ڂ̃R���{�{�b�N�X����A<a href="#sub_window">�T�u���</a>�ɂǂ̃V�[����\�����邩��I���ł��܂��B�ȉ��Ɉꗗ�������܂��B</p>
-			<table border="1" summary="�\�����[�h�̐����B��Ɍ��݉�ʁE��`��ʁE��ʕ񍐁E�Ґ���ʁE������ʁE�퓬��ʂ��g����Ǝv���܂�">
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="showmode">表示モード</a></h2>
+			<p>　2段目のコンボボックスから、<a href="#sub_window">サブ画面</a>にどのシーンを表示するかを選択できます。以下に一覧を示します。</p>
+			<table border="1" summary="表示モードの説明。主に現在画面・母港画面・戦果報告・編成画面・改装画面・戦闘画面が使われると思われます">
 				<tr>
-					<th abbr="�\�����[�h">�\�����[�h</th>
-					<th abbr="����">����</th>
+					<th abbr="表示モード">表示モード</th>
+					<th abbr="説明">説明</th>
 				</tr>
 				<tr>
-					<td>���݉��</td>
-					<td>���̏u�ԂɁA�͂���̉�ʂɕ\������Ă�����</td>
+					<td>現在画面</td>
+					<td>その瞬間に、艦これの画面に表示されている場面</td>
 				</tr>
 				<tr>
-					<td>��`���</td>
-					<td>�鏑�͂�6�̑傫�Ȏ��Ԃ��������Ă�����</td>
+					<td>母港画面</td>
+					<td>秘書艦と6つの大きな歯車が鎮座している場面</td>
 				</tr>
 				<tr>
-					<td>�Ґ����</td>
-					<td>�Ґ��̏�ʁB��1�`��4�͑��܂őΉ�</td>
+					<td>編成画面</td>
+					<td>編成の場面。第1～第4艦隊まで対応</td>
 				</tr>
 				<tr>
-					<td>�������</td>
-					<td>�����̏�ʁB��1�͑�1�Ԋ́`��4�͑�6�Ԋ͂܂őΉ�</td>
+					<td>改装画面</td>
+					<td>改装の場面。第1艦隊1番艦～第4艦隊6番艦まで対応</td>
 				</tr>
 				<tr>
-					<td>�H�����</td>
-					<td>�H���h�b�N�̏��</td>
+					<td>工廠画面</td>
+					<td>工廠ドックの場面</td>
 				</tr>
 				<tr>
-					<td>�������</td>
-					<td>�����h�b�N�̏��</td>
+					<td>入渠画面</td>
+					<td>入渠ドックの場面</td>
 				</tr>
 				<tr>
-					<td>�⋋���</td>
-					<td>�⋋���̏��</td>
+					<td>補給画面</td>
+					<td>補給時の場面</td>
 				</tr>
 				<tr>
-					<td>�͑��i�ߕ����</td>
-					<td>��o���l�A�ő�ۗL�\�������\������Ă�����</td>
+					<td>艦隊司令部情報</td>
+					<td>提督経験値、最大保有可能数等が表示されている場面</td>
 				</tr>
 				<tr>
-					<td>�����L���O</td>
-					<td>��o���l�������L���O����Ă�����</td>
+					<td>ランキング</td>
+					<td>提督経験値がランキングされている場面</td>
 				</tr>
 				<tr>
-					<td>�A�C�e��</td>
-					<td>�A�C�e���ꗗ���\���������</td>
+					<td>アイテム</td>
+					<td>アイテム一覧が表示される画面</td>
 				</tr>
 				<tr>
-					<td>�C�����</td>
-					<td>�C���ꗗ���\��������ʁB4�y�[�W�ڂ܂őΉ�</td>
+					<td>任務画面</td>
+					<td>任務一覧が表示される画面。4ページ目まで対応</td>
 				</tr>
 				<tr>
-					<td>�C��}�b�v</td>
-					<td>�C��ɏo�����Ă���̓���(���j�Օ���)�̏��</td>
+					<td>海域マップ</td>
+					<td>海域に出撃してからの道中(羅針盤部分)の場面</td>
 				</tr>
 				<tr>
-					<td>�h���b�v</td>
-					<td>�S���(C�EUC�ESC�ER�ESR�E�z���ES�z���ESS�z��)�Ή�</td>
+					<td>ドロップ</td>
+					<td>全種類(C・UC・SC・R・SR・ホロ・Sホロ・SSホロ)対応</td>
 				</tr>
 				<tr>
-					<td>��q�ޔ�</td>
-					<td>�͑��i�ߕ��{�݂ɂ�����I�����</td>
+					<td>護衛退避</td>
+					<td>艦隊司令部施設における選択画面</td>
 				</tr>
 				<tr>
-					<td>���K�ꗗ</td>
-					<td>���K���ɕ\�������5�̊͑��̏��</td>
+					<td>演習一覧</td>
+					<td>演習時に表示される5つの艦隊の場面</td>
 				</tr>
 				<tr>
-					<td>�͑��Λ�</td>
-					<td>���K�ŁA�͑����m���Λ�������</td>
+					<td>艦隊対峙</td>
+					<td>演習で、艦隊同士が対峙する場面</td>
 				</tr>
 				<tr>
-					<td>�����ꗗ</td>
-					<td>������ʂɂ����鉓���ꗗ</td>
+					<td>遠征一覧</td>
+					<td>遠征画面における遠征一覧</td>
 				</tr>
 				<tr>
-					<td>��������</td>
-					<td>�����A�Ҏ��̐�������</td>
+					<td>遠征判定</td>
+					<td>遠征帰還時の成功判定</td>
 				</tr>
 				<tr>
-					<td>��ʕ�(����)</td>
-					<td>�����A�Ҏ��̕�</td>
+					<td>戦果報告(遠征)</td>
+					<td>遠征帰還時の報告</td>
 				</tr>
 				<tr>
-					<td>���`��</td>
-					<td>������E���q��E���q��̕\��</td>
+					<td>交戦形態</td>
+					<td>丁字戦・同航戦・反航戦の表示</td>
 				</tr>
 				<tr>
-					<td>������<br>�����</td>
-					<td>����E���̏��</td>
+					<td>昼戦画面<br>夜戦画面</td>
+					<td>昼戦・夜戦の場面</td>
 				</tr>
 				<tr>
-					<td>�C���E�A��</td>
-					<td>�C�����̕\��</td>
+					<td>砲撃・連撃</td>
+					<td>砲撃時の表示</td>
 				</tr>
 				<tr>
-					<td>�΋�J�b�g�C��<br>���J�b�g�C��<br>���J�b�g�C��<br>�����J�b�g�C��<br>��C�J�b�g�C��<br>�C���J�b�g�C��</td>
-					<td>���ꂼ��̃J�b�g�C���\��</td>
+					<td>対空カットイン<br>昼カットイン<br>昼カットイン<br>魚雷カットイン<br>主砲カットイン<br>砲雷カットイン</td>
+					<td>それぞれのカットイン表示</td>
 				</tr>
 				<tr>
-					<td>���j���<br>��j���</td>
-					<td>���j�E��j�����ۂ̏��</td>
+					<td>中破画面<br>大破画面</td>
+					<td>中破・大破した際の場面</td>
 				</tr>
 				<tr>
-					<td>��팋��</td>
-					<td>�퓬�I������́A�G�����̑��Q�󋵂��\�����ꂽ���</td>
+					<td>交戦結果</td>
+					<td>戦闘終了直後の、敵味方の損害状況が表示された場面</td>
 				</tr>
 				<tr>
-					<td>�퓬����</td>
-					<td>�퓬����(���S����S�`�s�kD)�ɑΉ�</td>
+					<td>戦闘判定</td>
+					<td>戦闘結果(完全勝利S～敗北D)に対応</td>
 				</tr>
 				<tr>
-					<td>��ʕ�(�퓬)</td>
-					<td>MVP���\������Ă�����</td>
+					<td>戦果報告(戦闘)</td>
+					<td>MVPが表示されている場面</td>
 				</tr>
 			</table>
 			<ul>
-				<li>�T�u��ʂ̃^�C�g���o�[�ɂ́A���ݔF��������ʂ̏ڍׂ��\������܂��B</li>
-				<li>���ꂼ��ɂ��āA<strong>�Ō�ɋL�^�����������T�u��ʉ��̃X�e�[�^�X�o�[�ɕ\������܂�</strong>�B</li>
-				<li>�܂��A�e�͑����͖̊������A�����̉��ɕ\������܂�(�F�����ĂȂ��ꍇ��0)�B</li>
-				<li>�u�퓬��ʁv�ւ̃`�F�b�N�̗L���ɂ�鋓���́A���̕\���Q�l�ɂ��Ă��������B</li>
+				<li>サブ画面のタイトルバーには、現在認識した場面の詳細が表示されます。</li>
+				<li>それぞれについて、<strong>最後に記録した日時がサブ画面下のステータスバーに表示されます</strong>。</li>
+				<li>また、各艦隊毎の艦娘数が、日時の横に表示されます(認識してない場合は0)。</li>
+				<li>「戦闘画面」へのチェックの有無による挙動は、次の表を参考にしてください。</li>
 			</ul>
-			<table border="1" summary="�u�퓬��ʁv�ւ̃`�F�b�N�̗L���ɂ�鋓��">
+			<table border="1" summary="「戦闘画面」へのチェックの有無による挙動">
 				<tr>
-					<th abbr="���">���</th>
-					<th abbr="����">����</th>
+					<th abbr="状態">状態</th>
+					<th abbr="挙動">挙動</th>
 				</tr>
 				<tr>
-					<td>�`�F�b�N����ꂽ����</td>
-					<td>�u<strong>������</strong>�v�Ɓu<strong>�����</strong>�v�̒��ōŏI�X�V�������V�������ɐ؂�ւ��</td>
+					<td>チェックを入れた直後</td>
+					<td>「<strong>昼戦画面</strong>」と「<strong>夜戦画面</strong>」の中で最終更新日時が新しい方に切り替わる</td>
 				</tr>
 				<tr>
-					<td>�`�F�b�N�������Ă����</td>
-					<td>�͂���̉�ʂ��u<strong>������</strong>�v���u<strong>�����</strong>�v�ɂȂ�Ƃ�����Ɍ����Đ؂�ւ��</td>
+					<td>チェックが入っている間</td>
+					<td>艦これの画面が「<strong>昼戦画面</strong>」か「<strong>夜戦画面</strong>」になるとそちらに向けて切り替わる</td>
 				</tr>
 				<tr>
-					<td>�`�F�b�N���O��������</td>
-					<td>�u<strong>���݉��</strong>�v�ɐ؂�ւ��</td>
+					<td>チェックを外した直後</td>
+					<td>「<strong>現在画面</strong>」に切り替わる</td>
 				</tr>
 				<tr>
-					<td>�`�F�b�N���O���Ă����</td>
-					<td>���ɉ������Ȃ�</td>
-				</tr>
-			</table>
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<h2><a name="save_cap">�摜�ۑ�</a></h2>
-			<p>�@�y�摜�ۑ��z�{�^���A�y�g���~���O�z�{�^���A�y�͑��摜�z�{�^���͑S�ĉ��炩�̉摜��ۑ�������̂ł��B<br>
-			�@�������A���̖����͑傫���قȂ��Ă��܂��B�ȉ��ɂ��̈Ⴂ�������܂��B</p>
-			<table border="1" summary="�摜��ۑ�����{�^���̈Ⴂ�ɂ��Ă̐���">
-				<tr>
-					<th abbr="����">����</th>
-					<th abbr="����">����</th>
-				</tr>
-				<tr>
-					<td>�y�摜�ۑ��z</td>
-					<td>���݃T�u��ʂɕ\������Ă�����e��<strong>���̂܂ܕۑ�</strong>���܂��B<br>
-					��ʓI�Ɂu�X�N�V���v�ƌĂ΂��̂͂���ŁA<strong>��ԃI�[�\�h�b�N�X</strong>���ƌ����܂��B<br>
-					<a href="#option">�I�v�V����</a>�Łu���O�B���v�Ƀ`�F�b�N�����Ă���ƁA���̃��[�h�ɔ��f����܂��B</td>
-				</tr>
-				<tr>
-					<td>�y�g���~���O�z</td>
-					<td>�Ґ���ʂ��\������Ă���ۂ�<strong>�Ґ����������g���~���O�����摜</strong>��ۑ����܂��B<br>
-					������ʂ��\������Ă���ۂ�<strong>�͖����������g���~���O�����摜</strong>��ۑ����܂��B<br>
-					����ȊO�ŁA��ʏ㕔�Ɏ����󋵂��\������Ă���ۂ�<strong>�����Ǝ��������Z�߂�ꂽ�摜</strong>��ۑ����܂��B</td>
-				</tr>
-				<tr>
-					<td>�y�͑��摜�z</td>
-					<td>���̃{�^���̍��ɂ���R���{�{�b�N�X�ɏ]���A<strong>�����܂Ƃ߉摜�������������ĕۑ�</strong>���܂��B<br>
-					��ނƂ��ẮA��1�`��4�͑��A�A���͑�(��1+2�͑�)�A�x���͑�(��3+4�͑�)�̌v6�p�^�[�����I�ׂ܂��B<br>
-					���R�ł����A<strong>������ʂł��͖̊�����x�͕\�����Ă��Ȃ��Ƃ��̉ӏ��͋L�^����܂���</strong>�B<br>
-					�܂��A5�ǈȉ��̕Ґ��̏ꍇ�A�󂫏ꏊ�͎����ŋ󔒂ɂȂ�܂��B</td>
+					<td>チェックを外している間</td>
+					<td>特に何もしない</td>
 				</tr>
 			</table>
-			<p>�@�摜�̕ۑ���́A�f�t�H���g�ł͂��̃\�t�g��exe�t�@�C������pic�t�H���_�ł����A<a href="#option">�I�v�V����</a>�ŕύX�\�ł��B<br>
-			�@�܂��t�@�C�����́A�y�摜�ۑ��z�ł��\�����[�h���u���݉�ʁv�ȊO�̏ꍇ�̂݁u�Ō�ɋL�^���������v�A����ȊO�ł̓{�^���������������ŕۑ�����܂��B<br>
-			�@���Ȃ݂ɁA�ۑ������̓~���b�P�ʂȂ̂ŁA����ď㏑������邱�Ƃ͂���܂���B<br>
-			�@�Ȃ��A�摜�̌`���́A�t���J���[��<a href="http://ja.wikipedia.org/wiki/Portable_Network_Graphics">png</a>�t�@�C���ł��B</p>
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<h2><a name="tools">�e��c�[��</a></h2>
-			<p>�@�������������܂�܂Ȃ̂ŁA���ꂼ��ł̓|�C���g�����������ɗ��߂܂��B</p>
-
-			<h3>�e��^�C�}�[</h3>
-			<p>�@�����E�����E�����ɂ��āA�c�莞�Ԃ������ŃJ�E���g���܂��B�܂��A���΃^�C�}�[�@�\������܂��B<br>
-			�@���Ԃ̑��ɁA�����E������<strong>��ȃh�b�N�́u��v�ƕ\��</strong>����܂�(�������͖͊��̃��x�����\�������)�B<br>
-			�@�����̏ꍇ�A����<strong>���������\��</strong>����܂��B<br>
-			�@�c��<strong>1����؂�����o���[���ʒm</strong>�Œm�点�Ă���܂�(alert_*.wav��ݒ肵�Ă����<a href="#option">�����ʒm</a>����܂�)�B<br>
-			�@�Ȃ��A<strong>�Q�[���̉摜�f�ނ͔F���Ɉ�؎g�p���Ă��܂���</strong>�B�S�Ď��O�ł��B</p>
-			<img src="./images/dock.png" alt="�e��^�C�}�[" width="252" height="277">
-
-			<h3>�\�[�g�ꗗ�쐬�@�\</h3>
-			<p>�@�͖��A�������͑����̈ꗗ�摜���쐬����@�\�ł��B<br>
-			�@�܂��A�쐬���������ɍ��킹�ăR���{�{�b�N�X����u�͖��v���u�����v����I�����Ă����܂��B<br>
-			�@���ɁA�O�҂̏ꍇ�͕Ґ�����u�ύX�v���������ۂɕ\�������<strong>�\�[�g���</strong>�A��҂̏ꍇ�͍H����<strong>�p�����</strong>���͂��ꑤ�ŊJ���Ă����܂��B<br>
-			�@���̏�ԂŁu�ǉ��v�{�^���������ƁA�͖��������͑����̈ꗗ�����X�g�ɒǉ�����܂�(���X�g�ɂ́u�L�^�������t�v�ŕ\��)�B<br>
-			�@���X�g���N���b�N����ƁA���̓��e����ʉE�ɕ\������܂��B�u���v�u���v�őI���������e���㉺�ɁA�u�����v�u�����v�ň�ԏ�E��ԉ��Ɉړ��ł��܂��B<br>
-			�@�������ď��Ԃ𒲐�������A�u�o�́FX��v�ŗ񐔂����߂Ă���u�ۑ��v�{�^����������pic�t�H���_�ɕۑ��ł��܂��B<br>
-			�@�Ȃ��A<strong>�u���͏��v���[�h�ł͂��̂܂܃R�s�y</strong>���Ă܂Ƃ߂��܂����A�u�\�[�g�v���[�h�ł́u�͖��v���u�����v����<strong>�������ς��܂�</strong>�B<br>
-			�E�u�͖��v���[�h�ł́A�܂�<strong>�͎했�ɂ܂Ƃ߂���A���x���~��</strong>�ŕ��ׂ��܂��B<br>
-			�E�u�����v���[�h�ł́A<strong>���C�́����t���Ă�����̂��A�͍ڋ@�̏n���x���ő�̏��(>>)�ł������</strong>���܂Ƃ߂ĕ��ׂ��܂��B</p>
-			<img src="./images/sort_list.png" alt="�\�[�g�ꗗ�쐬�@�\" width="362" height="343">
-
-			<h3>���ރ��O�E���ރO���t�@�\</h3>
-			<p>�@�R���E�e��E�|�ށE�{�[�L�E�����C���ށE�J�����ށE�i�ߕ����x���������Ń��M���O���܂��B<br>
-			�@Ver.2.1.0�܂łƈႢ�A���O�f�[�^�̓o�C�i���f�[�^�Ƃ��ĊǗ����邱�Ƃŏ��������������܂����B<br>
-			�@�܂��A�u���ރO���t�v�{�^���������ƁA���̂悤�ȃO���t��\�����܂��B<br>
-			�@����ƍ����E�E��ƉE���͂��ꂼ��A�R���`�{�[�L�̍ő�ʂƍŏ��ʁE�����C���ނƊJ�����ނ̍ő�ʂƍŏ��ʂ�\���Ă���A�܂���ԉ��̍s�ɂ̓X�P�[�����\������܂��B<br>
-			�@�Ȃ��A<strong>�R���{�{�b�N�X��؂�ւ���ƁA�O���t�̉����̒�������эő�ʁE�ŏ��l���ω����܂�</strong>�B</p>
-			<img src="./images/supply_graph.png" alt="���ރO���t" width="626" height="343">
-
-			<h3>�o���l�v�Z�@</h3>
-			<p>�@Lv.X����Lv.Y�܂ŏグ��ۂɂǂꂾ���̌o���l���K�v�����v�Z���܂��B<br>
-			�@���x�����O�ŉ҂��Ƃ����ꍇ�A�ǂꂾ�����񂷂�K�v�����邩���v�Z�ł��܂��B<br>
-			�@�Ȃ��A�u�o���l��ԁv�Ƀ`�F�b�N������ƁA<strong>�Ґ���ʂŕ\������Ă���͖��ɂ��āA���̗��x�ƌo���l��ǂݎ���āA��ʂɔ��f����</strong>���Ƃ��o���܂��I</p>
-			<img src="./images/exp_calc.png" alt="�o���l�v�Z�@" width="274" height="203">
-
-			<h3>�����J�E���^�[</h3>
-			<p>�@�e�{�^���ŃJ�E���g�A���Z�b�g�{�^����0��Ƀ��Z�b�g����܂��B�J�E���g�͂�����<a href="#save_data">�Z�[�u</a>�����̂ł��S�z�Ȃ��B<br>
-			�@�����J�E���g��ON�ɂ���ƁA<span class="underline">�摜��ǂݎ���Ď����ŃJ�E���g���Ă���܂�</span>�B</p>
-			<img src="./images/counter.png" alt="�����J�E���^�[" width="450" height="203">
-
-			<h3>cond�l���[�^</h3>
-			<p>�@cond�l�̌v�Z���x�����邽�߂̃c�[���ł��B���퓬������A���`�Ԃ̗�̃{�^�����퓬���ʂ̃{�^����MVP�̃{�^���������΁A�ω������f����܂��B<br>
-			�@cond�l�́u�O�d�L���v�{�^���ŃI�[��85�A�u���Z�b�g�v�{�^����49�A�u�S���Z�v�{�^���ŃI�[��49�A�u���R�񕜁v�{�^����48�ȉ���S��49�ɂł��܂��B<br>
-			�@�Ȃ��Acond�l����ł��������l�́A<strong>��������u�\���X�V�v�`�F�b�N�{�b�N�X��OFF�ɂ��Ă��珑�������āA�����ă`�F�b�N�����Ȃ����Ă�������</strong>�B</p>
-			<img src="./images/cond_meter.png" alt="cond�l���[�^" width="538" height="231">
-
-			<h3><a name="auto_bgm">BGM�@�\</a></h3>
-			<img src="./images/bgm_window.png" alt="BGM�@�\" width="522" height="259">
-			<p>�@��`��ʁE�}�b�v��ʁE�퓬��ʁE�{�X�퓬�̂��ꂼ��ōD����BGM�𗬂����Ƃ��ł��܂��B<br>
-			(�����ł̕�`��ʂƂ́A�\�����[�h�́u�}�b�v��ʁv�u�퓬��ʁv�u�{�X�퓬�v�ȊO�̑S�Ă��w���܂�)<br>
-			�@��ʂ͌����܂܂ł��BBGM�̌`����wav�Emp3�Ewma�ɑΉ����Ă��܂��B<br>
-			�@������BGM�́A���ꂼ��̃V�[���ɓ������ۂɖ肾���A�ʂ̃V�[���Ɉړ�����Ɩ�~�݂܂��B<br>
-			�@�����̋Ȃ����X�g�ɓo�^�����ꍇ�́A�Đ�����^�C�~���O�Ń����_���ɍĐ����s���܂��B<br>
-			�@�܂��AHSP�̎d�l��A<strong><span class="underline">�t�@�C���p�X�ɋ󔒂��܂�ł�����A64bitOS�Ńt�@�C���p�X�ɁuProgram Files�v�Ƃ����t�H���_���܂�ł����肷��Ɖ������Đ��ł��Ȃ�</span></strong>���Ƃ�����܂��B</p>
-
-			<h3><a name="inner_browser">�����u���E�U</a></h3>
-			<p>�@<a href="https://www.google.co.jp/search?q=IE%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6">IE�R���|�[�l���g�̃u���E�U</a>��\�����܂��B<br>
-			�@�u�ړ��v�{�^���œ��͂��ꂽURL�ֈړ����A�u�͂���v�{�^����URL��������͂���̂��̂ɕύX���܂��B<br>
-			�@�܂��A�u�����v�{�^���Ńy�[�W�̃X�N���[���ʒu���͂���\���ɓs���������悤�Ȉʒu�ɂ��違�X�N���[���o�[���B�����܂��B<br>
-			(�u���������v�{�^���ŃX�N���[���o�[�𕜊��ł��܂�)<br>
-			�@<strong>�u�őO�ʁv�Ƀ`�F�b�N������ƍőO�ʕ\��</strong>�ɂȂ�A�O���ƍőO�ʕ\���łȂ��Ȃ�܂��B<br>
-			�@���̃E�B���h�E�����W�L�������̂�<strong>����y�Ɋ͂���ł���</strong>�Ƃ��������b�g������܂����A���ʃ\�t�g����<strong>�d������</strong>(���ރ��O�ǋL�ACSV�ǂݍ��݂Ȃ�)���s�����ۂ�<strong>�������Ƀu���E�U�̕\�����ł܂�܂�</strong>�̂ł����Ӊ������B<br>
-			�@�Ȃ��A<strong>�������u���ƌĂ΂����̂Ƃ͈قȂ�A�ʐM�͈�ؓǂݎ���Ă��܂���</strong>�B</p>
-
-			<h3>�C���ꗗ</h3>
-			<p>�@���݁A�C����ʂőI������Ă���C����\�����܂��B��������ʁA�E�����C�����ł��B<br>
-			�@�Ȃ��A�o�b�t�@(���܂ŕ\�������f�[�^)���琶�����Ă��܂��̂ŁA�C���X�V�ɂ͑Ή����Ă��܂���̂ł����ӂ��������B<br>
-			<strong>(�f�C���[�Ȃǂ������ŏ������Ȃ��Ƃ�������)</strong></p>
-
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<h2><a name="save_data">�Z�[�u�ɂ���</a></h2>
-			<p>�@���̃\�t�g�E�F�A�̐ݒ肨��ѓ����ŋL�^���ꂽ�摜�́A�\�t�g�I��������ђ���I�ɃZ�[�u<strong>����܂�</strong>�B<br>
-			�@�Z�[�u�f�[�^(<a href="../save/save.ini">save.ini</a>�����<a href="../save/buffer.png">buffer.png</a>)�����supply.dat�́A�\�t�g�N�����Ɏ����œǂݍ��܂�܂��B<br>
-			�@�Z�[�u�f�[�^���ႤVer�̂���鏑�Ɉڂ����ꍇ�A������x�͏C���ł��܂���<strong>���S�Ȍ݊����͕ۏ؂���Ȃ�</strong>�̂ł��e�͂��������B<br>
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<h2><a name="option">�I�v�V����</a></h2>
-			<img src="./images/option.png" alt="�I�v�V�������" width="362" height="259">
-			<p>�@�e���ڂɂ��ĉ�����܂��B</p>
-			<table border="1" summary="�I�v�V�����̊e���ڂɂ��Ă̐���">
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="save_cap">画像保存</a></h2>
+			<p>　【画像保存】ボタン、【トリミング】ボタン、【艦隊画像】ボタンは全て何らかの画像を保存するものです。<br>
+			　しかし、その役割は大きく異なっています。以下にその違いを示します。</p>
+			<table border="1" summary="画像を保存するボタンの違いについての説明">
 				<tr>
-					<th abbr="���ږ�">���ږ�</th>
-					<th abbr="����">����</th>
+					<th abbr="名称">名称</th>
+					<th abbr="説明">説明</th>
 				</tr>
 				<tr>
-					<td>�}�X�R�b�g��</td>
-					<td>���C����ʂ̕\�����A<strong>�E�̃R���{�{�b�N�X�őI�������}�X�R�b�g</strong>�ɕύX���܂��B�ڂ�����<a href="#main_window">���C�����</a>�ŁB</td>
+					<td>【画像保存】</td>
+					<td>現在サブ画面に表示されている内容を<strong>そのまま保存</strong>します。<br>
+					一般的に「スクショ」と呼ばれるのはこれで、<strong>一番オーソドックス</strong>だと言えます。<br>
+					<a href="#option">オプション</a>で「名前隠し」にチェックを入れていると、このモードに反映されます。</td>
 				</tr>
 				<tr>
-					<td>�͈͕\��</td>
-					<td>�}�X�R�b�g�ɂ�����I��͈͂𖾎����܂��B�ڂ�����<a href="#main_window">���C�����</a>�ŁB</td>
+					<td>【トリミング】</td>
+					<td>編成画面が表示されている際は<strong>編成部分だけトリミングした画像</strong>を保存します。<br>
+					改装画面が表示されている際は<strong>艦娘部分だけトリミングした画像</strong>を保存します。<br>
+					それ以外で、画面上部に資源状況が表示されている際は<strong>時刻と資源だけ纏められた画像</strong>を保存します。</td>
 				</tr>
 				<tr>
-					<td>�擾�΍�</td>
-					<td><a href="#getpos">���W�擾</a>�̕������A�ʏ�g�p���Ă������(�u���E�U�̃E�B���h�E�n���h�����擾)����A�ʂ̕���(�f�X�N�g�b�v�S�̂̃E�B���h�E�n���h�����擾)�ɕύX���܂��B<br>
-					Chrome�ȂǂŁA�Ȃ����擾�ł��Ȃ��ۂɂ��g�����������B�������A<strong>�`�F�b�N����ꂽ��Ԃł͑��E�B���h�E�Ŋ͂���̉�ʂ��B��邱�Ƃ�����܂��B</strong></td>
+					<td>【艦隊画像】</td>
+					<td>このボタンの左にあるコンボボックスに従い、<strong>装備まとめ画像を自動生成して保存</strong>します。<br>
+					種類としては、第1～第4艦隊、連合艦隊(第1+2艦隊)、支援艦隊(第3+4艦隊)の計6パターンが選べます。<br>
+					当然ですが、<strong>改装画面でその艦娘を一度は表示していないとその箇所は記録されません</strong>。<br>
+					また、5隻以下の編成の場合、空き場所は自動で空白になります。</td>
+				</tr>
+			</table>
+			<p>　画像の保存先は、デフォルトではこのソフトのexeファイル下のpicフォルダですが、<a href="#option">オプション</a>で変更可能です。<br>
+			　またファイル名は、【画像保存】でかつ表示モードが「現在画面」以外の場合のみ「最後に記録した日時」、それ以外ではボタンを押した時刻で保存されます。<br>
+			　ちなみに、保存日時はミリ秒単位なので、誤って上書きされることはありません。<br>
+			　なお、画像の形式は、フルカラーな<a href="http://ja.wikipedia.org/wiki/Portable_Network_Graphics">png</a>ファイルです。</p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="tools">各種ツール</a></h2>
+			<p>　だいたい見たまんまなので、それぞれではポイントを書くだけに留めます。</p>
+
+			<h3>各種タイマー</h3>
+			<p>　入渠・建造・遠征について、残り時間を自動でカウントします。また、明石タイマー機能もあります。<br>
+			　時間の他に、入渠・建造が<strong>空なドックは「空」と表示</strong>されます(入渠時は艦娘のレベルも表示される)。<br>
+			　遠征の場合、その<strong>遠征名が表示</strong>されます。<br>
+			　残り<strong>1分を切ったらバルーン通知</strong>で知らせてくれます(alert_*.wavを設定していると<a href="#option">音声通知</a>されます)。<br>
+			　なお、<strong>ゲームの画像素材は認識に一切使用していません</strong>。全て自前です。</p>
+			<img src="./images/dock.png" alt="各種タイマー" width="252" height="277">
+
+			<h3>ソート一覧作成機能</h3>
+			<p>　艦娘、もしくは装備の一覧画像を作成する機能です。<br>
+			　まず、作成したい方に合わせてコンボボックスから「艦娘」か「装備」かを選択しておきます。<br>
+			　次に、前者の場合は編成から「変更」を押した際に表示される<strong>ソート画面</strong>、後者の場合は工廠の<strong>廃棄画面</strong>を艦これ側で開いておきます。<br>
+			　その状態で「追加」ボタンを押すと、艦娘もしくは装備の一覧がリストに追加されます(リストには「記録した日付」で表示)。<br>
+			　リストをクリックすると、その内容が画面右に表示されます。「↑」「↓」で選択した内容を上下に、「↑↑」「↓↓」で一番上・一番下に移動できます。<br>
+			　そうして順番を調整した後、「出力：X列」で列数を決めてから「保存」ボタンを押せばpicフォルダに保存できます。<br>
+			　なお、<strong>「入力順」モードではそのままコピペ</strong>してまとめられますが、「ソート」モードでは「艦娘」か「装備」かで<strong>挙動が変わります</strong>。<br>
+			・「艦娘」モードでは、まず<strong>艦種毎にまとめた後、レベル降順</strong>で並べられます。<br>
+			・「装備」モードでは、<strong>改修の☆が付いているものか、艦載機の熟練度が最大の状態(>>)であるもの</strong>をまとめて並べられます。</p>
+			<img src="./images/sort_list.png" alt="ソート一覧作成機能" width="362" height="343">
+
+			<h3>資材ログ・資材グラフ機能</h3>
+			<p>　燃料・弾薬・鋼材・ボーキ・高速修復材・開発資材・司令部レベルを自動でロギングします。<br>
+			　Ver.2.1.0までと違い、ログデータはバイナリデータとして管理することで処理を高速化しました。<br>
+			　また、「資材グラフ」ボタンを押すと、次のようなグラフを表示します。<br>
+			　左上と左下・右上と右下はそれぞれ、燃料～ボーキの最大量と最小量・高速修復材と開発資材の最大量と最小量を表しており、また一番下の行にはスケールが表示されます。<br>
+			　マウスをグラフ内にかざすと縦に線が表示され、それと最も近い位置における資材記録時刻・資材量を画面左に表示します。
+			　なお、<strong>コンボボックスを切り替えると、グラフの横軸の長さおよび最大量・最小値が変化します</strong>。</p>
+			<img src="./images/supply_graph.png" alt="資材グラフ" width="626" height="343">
+
+			<h3>経験値計算機</h3>
+			<p>　Lv.XからLv.Yまで上げる際にどれだけの経験値が必要かを計算します。<br>
+			　レベリングで稼ぐとした場合、どれだけ周回する必要があるかも計算できます。<br>
+			　なお、「経験値補間」にチェックを入れると、<strong>編成画面で表示されている艦娘について、その練度と経験値を読み取って、画面に反映する</strong>ことが出来ます！</p>
+			<img src="./images/exp_calc.png" alt="経験値計算機" width="274" height="203">
+
+			<h3>○号カウンター</h3>
+			<p>　各ボタンでカウント、リセットボタンで0回にリセットされます。カウントはちゃんと<a href="#save_data">セーブ</a>されるのでご心配なく。<br>
+			　自動カウントをONにすると、<span class="underline">画像を読み取って自動でカウントしてくれます</span>。</p>
+			<img src="./images/counter.png" alt="○号カウンター" width="450" height="203">
+
+			<h3>cond値メータ</h3>
+			<p>　cond値の計算を支援するためのツールです。一回戦闘したら、交戦形態の列のボタン→戦闘結果のボタン→MVPのボタンを押せば、変化が反映されます。<br>
+			　cond値は「三重キラ」ボタンでオール85、「リセット」ボタンで49、「全リセ」ボタンでオール49、「自然回復」ボタンで48以下を全て49にできます。<br>
+			　なお、cond値を手打ちしたい人は、<strong>いったん「表示更新」チェックボックスをOFFにしてから書き換えて、そしてチェックを入れなおしてください</strong>。</p>
+			<img src="./images/cond_meter.png" alt="cond値メータ" width="538" height="231">
+
+			<h3><a name="auto_bgm">BGM機能</a></h3>
+			<img src="./images/bgm_window.png" alt="BGM機能" width="522" height="259">
+			<p>　母港画面・マップ画面・戦闘画面・ボス戦闘のそれぞれで好きなBGMを流すことができます。<br>
+			(ここでの母港画面とは、表示モードの「マップ画面」「戦闘画面」「ボス戦闘」以外の全てを指します)<br>
+			　画面は見たままです。BGMの形式はwav・mp3・wmaに対応しています。<br>
+			　これらのBGMは、それぞれのシーンに入った際に鳴りだし、別のシーンに移動すると鳴り止みます。<br>
+			　複数の曲をリストに登録した場合は、再生するタイミングでランダムに再生を行います。<br>
+			　また、HSPの仕様上、<strong><span class="underline">ファイルパスに空白を含んでいたり、64bitOSでファイルパスに「Program Files」というフォルダを含んでいたりすると音声が再生できない</span></strong>ことがあります。</p>
+
+			<h3><a name="inner_browser">内蔵ブラウザ</a></h3>
+			<p>　<a href="https://www.google.co.jp/search?q=IE%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6">IEコンポーネントのブラウザ</a>を表示します。<br>
+			　「移動」ボタンで入力されたURLへ移動し、「艦これ」ボタンでURL文字列を艦これのものに変更します。<br>
+			　また、「中央」ボタンでページのスクロール位置を艦これ表示に都合がいいような位置にする＆スクロールバーを隠蔽します。<br>
+			(「中央解除」ボタンでスクロールバーを復活できます)<br>
+			　<strong>「最前面」にチェックを入れると最前面表示</strong>になり、外すと最前面表示でなくなります。<br>
+			　このウィンドウも座標記憶されるので<strong>お手軽に艦これできる</strong>というメリットがありますが、反面ソフト側で<strong>重い処理</strong>(資材ログ追記、CSV読み込みなど)を行った際は<strong>処理中にブラウザの表示も固まります</strong>のでご注意下さい。<br>
+			　なお、<strong>いわゆる専ブラと呼ばれるものとは異なり、通信は一切読み取っていません</strong>。</p>
+
+			<h3>任務一覧</h3>
+			<p>　現在、任務画面で選択されている任務を表示します。左欄が種別、右欄が任務名です。<br>
+			　なお、バッファ(今まで表示したデータ)から生成していますので、任務更新には対応していませんのでご注意ください。<br>
+			<strong>(デイリーなどが自動で消灯しないということ)</strong></p>
+
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="save_data">セーブについて</a></h2>
+			<p>　このソフトウェアの設定および内部で記録された画像は、ソフト終了時および定期的にセーブ<strong>されます</strong>。<br>
+			　セーブデータ(<a href="../save/save.ini">save.ini</a>および<a href="../save/buffer.png">buffer.png</a>)およびsupply.datは、ソフト起動時に自動で読み込まれます。<br>
+			　セーブデータを違うVerのおり秘書に移した場合、ある程度は修正できますが<strong>完全な互換性は保証されない</strong>のでご容赦ください。<br>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="option">オプション</a></h2>
+			<img src="./images/option.png" alt="オプション画面" width="362" height="259">
+			<p>　各項目について解説します。</p>
+			<table border="1" summary="オプションの各項目についての説明">
+				<tr>
+					<th abbr="項目名">項目名</th>
+					<th abbr="説明">説明</th>
 				</tr>
 				<tr>
-					<td>3��/2��\��</td>
-					<td>���C����ʂ̕\���񐔂�ύX���܂��B�ڂ�����<a href="#main_window">���C�����</a>�ŁB</td>
+					<td>マスコット化</td>
+					<td>メイン画面の表示を、<strong>右のコンボボックスで選択したマスコット</strong>に変更します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
 				</tr>
 				<tr>
-					<td>�V���[�g�J�b�g</td>
-					<td><strong>Alt+Z�L�[</strong>���������ƂŁA�y�摜�ۑ��z�Ɠ�����<strong>�X�N�V�����ۑ�</strong>�ł��܂��B</td>
+					<td>範囲表示</td>
+					<td>マスコットにおける選択範囲を明示します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
 				</tr>
 				<tr>
-					<td>�{��</td>
-					<td>�T�u��ʂ́A�͂���̉�ʂɑ΂���䗦��ݒ肵�܂��B25�E50�E75�E100�E150�E200�E300�����w��ł��܂��B</td>
+					<td>取得対策</td>
+					<td><a href="#getpos">座標取得</a>の方式を、通常使用しているもの(ブラウザのウィンドウハンドルを取得)から、別の方式(デスクトップ全体のウィンドウハンドルを取得)に変更します。<br>
+					Chromeなどで、なぜか取得できない際にお使いください。ただし、<strong>チェックを入れた状態では他ウィンドウで艦これの画面が隠れることがあります。</strong></td>
+				</tr>
+				<tr>
+					<td>3列/2列表示</td>
+					<td>メイン画面の表示列数を変更します。詳しくは<a href="#main_window">メイン画面</a>で。</td>
+				</tr>
+				<tr>
+					<td>ショートカット</td>
+					<td><strong>Alt+Zキー</strong>を押すことで、【画像保存】と同じく<strong>スクショが保存</strong>できます。</td>
+				</tr>
+				<tr>
+					<td>倍率</td>
+					<td>サブ画面の、艦これの画面に対する比率を設定します。25・50・75・100・150・200・300％を指定できます。</td>
 				</tr>
 				<tr>
 					<td>fps</td>
-					<td>��ʂ��L�^����fps��ݒ肵�܂��B30�E20�E15�E10�E5�E3�E2�E1fps���w��o���܂��B</td>
+					<td>画面を記録するfpsを設定します。30・20・15・10・5・3・2・1fpsを指定出来ます。</td>
 				</tr>
 				<tr>
-					<td>�������\��</td>
-					<td>�T�u��ʂɃX�e�[�^�X�o�[��\�����邩�����肵�܂��B</td>
+					<td>時刻等表示</td>
+					<td>サブ画面にステータスバーを表示するかを決定します。</td>
 				</tr>
 				<tr>
-					<td>�t�H���_�w��</td>
-					<td>�ʏ�A�X�N�V���͂��̃\�t�g��exe�t�@�C������pic�t�H���_�ł����A�ۑ��p�X���f�t�H���g�ȊO���ƁA<br>
-					�C���v�b�g�{�b�N�X�ɕ\������Ă���t�H���_�ɕۑ�����܂��B�������u�Q�Ɓv�{�^���Ńt�H���_��ύX�\�ł��B</td>
+					<td>フォルダ指定</td>
+					<td>通常、スクショはこのソフトのexeファイル下のpicフォルダですが、保存パスがデフォルト以外だと、<br>
+					インプットボックスに表示されているフォルダに保存されます。もちろん「参照」ボタンでフォルダを変更可能です。</td>
 				</tr>
 				<tr>
-					<td>�摜�t�H���_</td>
-					<td>�X�N�V����ۑ����Ă���t�H���_(�W����pic�t�H���_)���G�N�X�v���[�����ŊJ���܂��B</td>
+					<td>画像フォルダ</td>
+					<td>スクショを保存しているフォルダ(標準はpicフォルダ)をエクスプローラ等で開きます。</td>
 				</tr>
 				<tr>
-					<td>���O�B��</td>
-					<td>�T�u��ʂ�������ڗ����Ȃ��F�ŉB���܂��B<strong>�ڗ����Ȃ��F�ŉB���Ă���̂Œ��ӁB</strong>�B</td>
+					<td>名前隠し</td>
+					<td>サブ画面から提督名を目立たない色で隠します。<strong>目立たない色で隠しているので注意。</strong>。</td>
 				</tr>
 				<tr>
-					<td>�͖����b�N<br>�������b�N</td>
-					<td>�Ґ��̃\�[�g��ʂł͖̊����b�N�A����щ����̑����I����ʂł̑���<strong>���b�N�̑����Ԙg�t���E�B���h�E�ŖW�Q���܂�</strong>�B<br>
-					���̘g�͑��̃V�[���Ɉڂ�Ə����܂��B�܂��A�g���N���b�N����Ɩ������������\�ł��B<strong>�`�F�b�N����</strong>�B</td>
+					<td>艦娘ロック<br>装備ロック</td>
+					<td>編成のソート画面での艦娘ロック、および改装の装備選択画面での装備<strong>ロックの操作を赤枠付きウィンドウで妨害します</strong>。<br>
+					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
 				</tr>
 				<tr>
-					<td>���ފǗ�</td>
-					<td>�N���b�N����Ə������J���A�u�o�C�i���f�[�^�ł��鎑�ރf�[�^��CSV�`���ɏ����o���v�u��荞�ށv�u���̃o�C�i�����ރf�[�^�Ɠ�������v��3������s���܂��B<br>
-					�����o���͒�����������܂������A�ǂݍ��݂�<strong>�����������Ȃ�Əd�������ɂȂ�܂�</strong>�̂ł��������������B<br>
-					�܂��A�ǂݍ��݂̍ہA1�s�ڂ̍��ږ�����ǂꂪ�ǂ̗v�f�����������f���܂����A���̔��f��͎��̒ʂ�ł��B<br>
-					�@�u<strong>���t</strong>�v�Ɣ��f�������́c�c�u���t�v�u�����v�u�����v�u�^�C�~���O�v<br>
-					�@�u<strong>�R��</strong>�v�Ɣ��f�������́c�c�u�R���v�u�d���v�u�ΒY�v<br>
-					�@�u<strong>�e��</strong>�v�Ɣ��f�������́c�c�u�e��v�u�e�v�u��䰁v�u�e�e�v�u�C�e�v<br>
-					�@�u<strong>�|��</strong>�v�Ɣ��f�������́c�c�u�|�ށv�u�S�v�u�S�z�΁v<br>
-					�@�u<strong>�{�[�L</strong>�v�Ɣ��f�������́c�c�u�{�[�L�v�u�{�[�L�T�C�g�v�u�A���~�v�u�A���~�j�E���v�u�S�H�΁v<br>
-					�@�u<strong>�����C����</strong>�v�Ɣ��f�������́c�c�u�����C���ށv�u�o�P�c�v<br>
-					�@�u<strong>�J������</strong>�v�Ɣ��f�������́c�c�u�J�����ށv�u�c���n�V�v�u���ԁv<br>
-					�@�u<strong>�i�ߕ����x��</strong>�v�Ɣ��f�������́c�c�u�i�ߕ����x���v�u���ꂥ���x���v�u����x���v<br>
-					�Ȃ��A���t�́uyyyy-mm-dd hh:MM:ss�v�Ƃ����������W���ł����A"-"��":"��"/"��" "�͓ǂݍ��ݎ��ɓ������̂��Ɣ��f����܂��B<br>
-					���Ȃ݂ɓ�������̍ہA�f�[�^�̃\�[�g�Əd���b�f�[�^�̐������s���܂��̂ŁA�o�C�i���T�C�Y���������邱�Ƃ�����܂��B</td>
+					<td>資材管理</td>
+					<td>クリックすると小窓が開き、「バイナリデータである資材データをCSV形式に書き出す」「取り込む」「他のバイナリ資材データと統合する」の3操作を行えます。<br>
+					書き出しは超高速化されましたが、読み込みは<strong>件数が多くなると重い処理になります</strong>のでご了承ください。<br>
+					また、読み込みの際、1行目の項目名からどれがどの要素かを自動判断しますが、その判断基準は次の通りです。<br>
+					　「<strong>日付</strong>」と判断されるもの……「日付」「日時」「時刻」「タイミング」<br>
+					　「<strong>燃料</strong>」と判断されるもの……「燃料」「重油」「石炭」<br>
+					　「<strong>弾薬</strong>」と判断されるもの……「弾薬」「弾」「薬莢」「銃弾」「砲弾」<br>
+					　「<strong>鋼材</strong>」と判断されるもの……「鋼材」「鉄」「鉄鉱石」<br>
+					　「<strong>ボーキ</strong>」と判断されるもの……「ボーキ」「ボーキサイト」「アルミ」「アルミニウム」「鉄礬石」<br>
+					　「<strong>高速修復材</strong>」と判断されるもの……「高速修復材」「バケツ」<br>
+					　「<strong>開発資材</strong>」と判断されるもの……「開発資材」「ツルハシ」「歯車」<br>
+					　「<strong>司令部レベル</strong>」と判断されるもの……「司令部レベル」「しれぇレベル」「提督レベル」<br>
+					なお、日付は「yyyy-mm-dd hh:MM:ss」という書式が標準ですが、"-"や":"や"/"や" "は読み込み時に同じものだと判断されます。<br>
+					ちなみに統合操作の際、データのソートと重複秒データの整理を行いますので、バイナリサイズが減少することがあります。</td>
 				</tr>
 				<tr>
-					<td>��j�`�F�b�N</td>
-					<td>�o�����or��ʕ񍐂̍ۂ�<strong>��j�͂����݂��Ă����ꍇ�A�o���{�^������ѐi���{�^���𔒂��g�ŉ����Ȃ����܂�</strong>�B<br>
-					���̘g�͑��̃V�[���Ɉڂ�Ə����܂��B�܂��A�g���N���b�N����Ɩ������������\�ł��B<strong>�`�F�b�N����</strong>�B</td>
+					<td>大破チェック</td>
+					<td>出撃画面or戦果報告の際に<strong>大破艦が存在していた場合、出撃ボタンおよび進撃ボタンを白い枠で押せなくします</strong>。<br>
+					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
 				</tr>
 				<tr>
-					<td>���Ճ`�F�b�N</td>
-					<td>�o�����(���K�܂�)or������ʂ̍ۂ�<strong>���⋋�͂����݂��Ă����ꍇ�A�o���{�^���𔒂��g�ŉ����Ȃ����܂�</strong>�B<br>
-					���̘g�͑��̃V�[���Ɉڂ�Ə����܂��B�܂��A�g���N���b�N����Ɩ������������\�ł��B<strong>�`�F�b�N����</strong>�B</td>
+					<td>消耗チェック</td>
+					<td>出撃画面(演習含む)or遠征画面の際に<strong>未補給艦が存在していた場合、出撃ボタンを白い枠で押せなくします</strong>。<br>
+					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
 				</tr>
 				<tr>
-					<td>�Y���␳</td>
-					<td>�u���E�U�̈ʒu�𓮂������肵�āA�͂���̉�ʂ��Y�����ہA����������Ō��m���ďC�����܂��B<strong>�`�F�b�N����</strong>�ł����A<br>
-					<strong>���ɂ���Ă͌��m����������イ�������Ă��܂����Ƃ�����܂��̂ŁA�ς킵���l�͐؂��Ă�������</storng>�B</td>
+					<td>ズレ補正</td>
+					<td>ブラウザの位置を動かしたりして、艦これの画面がズレた際、それを自動で検知して修正します。<strong>チェック推奨</strong>ですが、<br>
+					<strong>環境によっては検知がしょっちゅう発動してしまうことがありますので、煩わしい人は切ってください</strong>。</td>
 				</tr>
 				<tr>
-					<td>�����ʒm</td>
-					<td>�l�X�ȏ󋵂ŁA�����Œʒm���Ă���܂��B<br>
-					�@alert_dck.wav�c�c�����̎��Ԃ��c��1���ɂȂ����ۂɒʒm<br>
-					�@alert_bld.wav�c�c�����̎��Ԃ��c��1���ɂȂ����ۂɒʒm<br>
-					�@alert_exp.wav�c�c�����̎��Ԃ��c��1���ɂȂ����ۂɒʒm<br>
-					�@alert_sel.wav�c�c���m�F��ʂɂȂ����ۂɒʒm<br>
-					�@alert_res.wav�c�c�퓬���ʂŕ]�������N���\�����ꂽ�ۂɒʒm<br>
-					�����t�@�C����alert_*.wav�Ƃ��āA<strong>orikou.exe�Ɠ����t�H���_�ɒu���ĉ�����</strong>�B<br>
-					�Ȃ��A�����I�ɉ������������ۂ́A���Y��alert_*.wav���폜���邩���O��ύX���ĉ������B</td>
+					<td>音声通知</td>
+					<td>様々な状況で、音声で通知してくれます。<br>
+					　alert_dck.wav……入渠の時間が残り1分になった際に通知<br>
+					　alert_bld.wav……建造の時間が残り1分になった際に通知<br>
+					　alert_exp.wav……遠征の時間が残り1分になった際に通知<br>
+					　alert_sel.wav……夜戦確認画面になった際に通知<br>
+					　alert_res.wav……戦闘結果で評価ランクが表示された際に通知<br>
+					音声ファイルはalert_*.wavとして、<strong>orikou.exeと同じフォルダに置いて下さい</strong>。<br>
+					なお、部分的に音を消したい際は、当該のalert_*.wavを削除するか名前を変更して下さい。</td>
 				</tr>
 				<tr>
-					<td>���W�L��</td>
-					<td>���C����ʂ�T�u��ʂ�e��c�[���̃E�B���h�E�̕\�����W����ѕ\���ۂ��L�����Ă����܂��B<br>
-					ON�ɂ��Ă����ƁA�N�����Ɏ����ŕ�������܂��B</td>
+					<td>座標記憶</td>
+					<td>メイン画面やサブ画面や各種ツールのウィンドウの表示座標および表示可否を記憶しておきます。<br>
+					ONにしておくと、起動時に自動で復元されます。</td>
 				</tr>
 				<tr>
-					<td>����`�F�b�N</td>
-					<td>�@�E�̃R���{�{�b�N�X�̏󋵂ɂȂ����ہA<strong>�o���{�^���𔒂��g�ŉ����Ȃ����܂�</strong><br>
-					�@A�F���΂����́c�c���΂����͂ɂ���͑����o�������悤�Ƃ����ۂɑj�~���܂��B<br>
-					�@B�F6�ǂ�1-1�c�c6�Ǌ͑���1-1�ɏo�������悤�Ƃ����ۂɑj�~���܂��B<br>
-					�@C�FA or B�c�cA��������B�̏󋵂ɂȂ����ۂɑj�~���܂��B<br>
-					<strong>�`�F�b�N����</strong>�B</td>
+					<td>特殊チェック</td>
+					<td>　右のコンボボックスの状況になった際、<strong>出撃ボタンを白い枠で押せなくします</strong><br>
+					　A：明石が旗艦……明石が旗艦にある艦隊を出撃させようとした際に阻止します。<br>
+					　B：6隻で1-1……6隻艦隊で1-1に出撃させようとした際に阻止します。<br>
+					　C：A or B……AもしくはBの状況になった際に阻止します。<br>
+					<strong>チェック推奨</strong>。</td>
 				</tr>
 			</table>
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<h2><a name="mascot">�f�X�N�g�b�v�}�X�R�b�g�쐬�ɂ���</a></h2>
-			�c�c�܂��T���v����<a href="http://pronama.azurewebsites.net/pronama/">�v���������</a>��<a href="http://zunko.jp/">���k����q</a>�̃t�@�C����K���ɘM��΍��܂����A�d�v�ȃ|�C���g��������܂��B
-			�����̍ہA�}�X�R�b�g���̂��s���O�t�ƋL�q���܂��B
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="mascot">デスクトップマスコット作成について</a></h2>
+			……まあサンプルの<a href="http://pronama.azurewebsites.net/pronama/">プロ生ちゃん</a>や<a href="http://zunko.jp/">東北ずん子</a>のファイルを適当に弄れば作れますが、重要なポイントを解説します。
+			説明の際、マスコット名称を《名前》と記述します。
 			<ul>
-				<li>orikou.exe�����ɐ��������theme�t�H���_�ɁA�܂��s���O�t�t�H���_���쐬���܂��B<br>
-				<strong>���̖��O���I�v�V������ʂ̃R���{�{�b�N�X�ɕ\�������e�[�}��</strong>�ƂȂ�܂��B</li>
-				<li>�s���O�t�t�H���_�̒����ɁApicture.png��config.csv��z�u���܂��B<br>
-				�O�҂͓��ߕt��png(���߂����ꏊ�������Č�����)�A��҂̓J���}��؂��CSV�ł��B</li>
-				<li>picture.png�ɂ��Ăׂ͍��������͂���܂��񂪁A���{�ŕ\�������̂ŕۑ��T�C�Y�ɂ͒��ӁB</li>
-				<li>config.csv�́A1�s�ڂɗ�^�C�g������͂��܂��B�T���v���́u����X,����Y,�E��X,�E��Y,���,���e�v�̂܂܂ł������ƁB<br>
-				������2�s�ڈȍ~�ɁA�f�X�N�g�b�v�}�X�R�b�g�ɂ�����I��͈͂�������W�E�E�����W�E��ށE���e����͂��܂��B</li>
-				<li>�u��ށv�ɂ́A�u�R�}���h�v���u��b�v����͂��܂��B�O�҂͌�q����e�푀��p�R�}���h�A��҂͒P�Ȃ��b�����Ӗ����܂��B</li>
-				<li>�u��ށv���u��b�v�������ꍇ�A<strong>�͈͂��N���b�N����Ɓu���e�v�̃Z���t���_�C�A���O�\��</strong>���܂��B</li>
-				<li>�u��ށv���u�R�}���h�v�������ꍇ�A<strong>�u���e�v���ȉ��̏ꍇ�ɂ����Ă��ꂼ��̃R�}���h�����s</strong>����܂��B</li>
+				<li>orikou.exe直下に生成されるthemeフォルダに、まず《名前》フォルダを作成します。<br>
+				<strong>この名前がオプション画面のコンボボックスに表示されるテーマ名</strong>となります。</li>
+				<li>《名前》フォルダの直下に、picture.pngとconfig.csvを配置します。<br>
+				前者は透過付きpng(透過した場所が透けて見える)、後者はカンマ区切りのCSVです。</li>
+				<li>picture.pngについては細かい制限はありませんが、等倍で表示されるので保存サイズには注意。</li>
+				<li>config.csvは、1行目に列タイトルを入力します。サンプルの「左上X,左上Y,右下X,右下Y,種類,内容」のままでいいかと。<br>
+				そして2行目以降に、デスクトップマスコットにおける選択範囲を左上座標・右下座標・種類・内容を入力します。</li>
+				<li>「種類」には、「コマンド」か「会話」を入力します。前者は後述する各種操作用コマンド、後者は単なる会話文を意味します。</li>
+				<li>「種類」が「会話」だった場合、<strong>範囲をクリックすると「内容」のセリフをダイアログ表示</strong>します。</li>
+				<li>「種類」が「コマンド」だった場合、<strong>「内容」が以下の場合においてそれぞれのコマンドが実行</strong>されます。</li>
 				<li><ul>
-					<li>�u���W�擾�v�c�c<a href="#getpos">���W���擾���܂�</a>�B�}�X�R�b�g�\���Ȃ̂Ŏ擾���@�͑I�ׂ܂���B</li>
-					<li>�u�摜�ۑ��v�c�c<a href="#save_cap">�摜��ۑ�</a>���܂��B</li>
-					<li>�u�I�v�V�����v�c�c<a href="#option">�I�v�V����</a>��ʂ�\�����܂��B</li>
-					<li>�u�g���~���O�v�c�c�摜��<a href="#save_cap">�g���~���O�ۑ�</a>���܂��B</li>
-					<li>�u�e��^�C�}�[�v�c�c<a href="#tools">�e��^�C�}�[</a>��\�����܂��B</li>
-					<li>�u�\�[�g�ꗗ�v�c�c<a href="#tools">�\�[�g�ꗗ</a>��\�����܂��B</li>
-					<li>�u���ރO���t�v�c�c<a href="#tools">���ރO���t</a>��\�����܂��B</li>
-					<li>�u�o���l�v�Z�@�v�c�c<a href="#tools">�o���l�v�Z�@</a>��\�����܂��B</li>
-					<li>�u�����J�E���^�v�c�c<a href="#tools">�����J�E���^</a>��\�����܂��B</li>
-					<li>�ucond�l���[�^�v�c�c<a href="#tools">cond�l���[�^</a>��\�����܂��B</li>
-					<li>�uBGM�@�\�v�c�c<a href="#tools">BGM�@�\</a>��\�����܂��B</li>
-					<li>�u�����u���E�U�v�c�c<a href="#tools">�����u���E�U</a>��\�����܂��B</li>
-					<li>�u�퓬��ʁv�c�c<a href="#showmode">�퓬���</a>�̃`�F�b�N��؂�ւ���̂Ɠ������ʂł��B</li>
-					<li>�u�e����v�c�c<a href="#about">�e����</a>��\�����܂��B</li>
+					<li>「座標取得」……<a href="#getpos">座標を取得します</a>。マスコット表示なので取得方法は選べません。</li>
+					<li>「画像保存」……<a href="#save_cap">画像を保存</a>します。</li>
+					<li>「オプション」……<a href="#option">オプション</a>画面を表示します。</li>
+					<li>「トリミング」……画像を<a href="#save_cap">トリミング保存</a>します。</li>
+					<li>「各種タイマー」……<a href="#tools">各種タイマー</a>を表示します。</li>
+					<li>「ソート一覧」……<a href="#tools">ソート一覧</a>を表示します。</li>
+					<li>「資材グラフ」……<a href="#tools">資材グラフ</a>を表示します。</li>
+					<li>「経験値計算機」……<a href="#tools">経験値計算機</a>を表示します。</li>
+					<li>「○号カウンタ」……<a href="#tools">○号カウンタ</a>を表示します。</li>
+					<li>「cond値メータ」……<a href="#tools">cond値メータ</a>を表示します。</li>
+					<li>「BGM機能」……<a href="#tools">BGM機能</a>を表示します。</li>
+					<li>「内蔵ブラウザ」……<a href="#tools">内蔵ブラウザ</a>を表示します。</li>
+					<li>「戦闘画面」……<a href="#showmode">戦闘画面</a>のチェックを切り替えるのと同じ効果です。</li>
+					<li>「各種情報」……<a href="#about">各種情報</a>を表示します。</li>
 				</ul></li>
 			</ul>
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<h2><a name="about">�e����</a></h2>
-			<p>�@�\�t�g���E����鏑�̍쐬�ҁE�ŏI�X�V�����\������܂��B<br>
-			�@�܂��A<strong>�Ґ���ʂł���������ƁA�͑��̊��͗��x����э��v���x���\������܂�</strong>�B</p>
-			<p><a href="#howto">��������@�֖߂�</a></p>
-		<p><a href="#index">���ڎ��֖߂�</a></p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<h2><a name="about">各種情報</a></h2>
+			<p>　ソフト名・おり秘書の作成者・最終更新日が表示されます。<br>
+			　また、<strong>編成画面でこれを押すと、艦隊の旗艦練度および合計練度が表示されます</strong>。</p>
+			<p><a href="#howto">↑操作方法へ戻る</a></p>
+		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
-<!-- �悭���鎿�� -->
-		<h1><a name="faq">�悭���鎿��</a></h1>
+<!-- よくある質問 -->
+		<h1><a name="faq">よくある質問</a></h1>
 		<table border="1" summary="FAQ">
 			<tr>
-				<th abbr="����">����</th>
-				<th abbr="��">��</th>
+				<th abbr="質問">質問</th>
+				<th abbr="回答">回答</th>
 			</tr>
 			<tr>
-				<td>�N������Windows SmartScreen��Z�L�����e�B�\�t�g�Ȃǂ�<br>
-				�x�����o���Ă��܂����B�܂����E�C���X�ł͂���܂����ˁH</td>
-				<td>�������Ⴂ�܂��BHSP���\�t�g�͉��̂��Z�L�����e�B�\�t�g���딽�����₷���̂ł�</td>
+				<td>起動時にWindows SmartScreenやセキュリティソフトなどが<br>
+				警告を出してきました。まさかウイルスではありませんよね？</td>
+				<td>もちろん違います。HSP製ソフトは何故かセキュリティソフトが誤反応しやすいのです</td>
 			</tr>
 			<tr>
-				<td>���W�擾�{�^���������Ă����܂��s���܂���I</td>
-				<td>�E�u���E�U�̕\����100���ȊO�ɂȂ��Ă��܂��񂩁H<br>
-				�@�͂���̉�ʂ�800x480�s�N�Z���Ȃ̂�����ł�<br>
-				�EAero��T�C�h�o�[��L���ɂ��Ă���ꍇ�͖����ɂ��Ă݂܂��傤<br>
-				�E���̃u���E�U���g���Ă݂܂��傤�B�I�X�X����<a href="https://www.google.co.jp/search?q=IE%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6">IE�R���|�[�l���g�̃u���E�U</a>�ł�<br>
-				(�����u���E�U�@�\���g���΁A<strong>����y��</strong>IE�R���|�[�l���g�u���E�U�𗘗p�ł��܂�)<br>
-				�E�͂���̉��(Flash�\���̓z)�̎���1�s�N�Z���ȏオ�����Ƌ󂢂Ă��܂����H<br>
-				�@�ꕔ��u�����ƁA���m��800x480�̕����������o���ĉ�ʕ\������̂ŏ�肭�s���Ȃ��悤�ł�<br>
-				�EChrome�ȂǂŃv���C����ۂɁA�Ȃ����摜������Ɏ擾�ł��Ȃ����Ƃ�����悤�ł��B<br>
-				���̍ۂ�<a href="#option">�I�v�V����</a>����u�擾�΍�v�Ƀ`�F�b�N�����Ă��������B</td>
+				<td>座標取得ボタンを押してもうまく行きません！</td>
+				<td>・ブラウザの表示が100％以外になっていませんか？<br>
+				　艦これの画面が800x480ピクセルなのが正常です<br>
+				・Aeroやサイドバーを有効にしている場合は無効にしてみましょう<br>
+				・他のブラウザも使ってみましょう。オススメは<a href="https://www.google.co.jp/search?q=IE%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6">IEコンポーネントのブラウザ</a>です<br>
+				(内蔵ブラウザ機能を使えば、<strong>お手軽に</strong>IEコンポーネントブラウザを利用できます)<br>
+				・艦これの画面(Flash表示の奴)の周囲1ピクセル以上がちゃんと空いていますか？<br>
+				　一部専ブラだと、正確に800x480の部分だけ抽出して画面表示するので上手く行かないようです<br>
+				・Chromeなどでプレイする際に、なぜか画像が正常に取得できないことがあるようです。<br>
+				その際は<a href="#option">オプション</a>から「取得対策」にチェックを入れてください。</td>
 			</tr>
 			<tr>
-				<td>���ރO���t���������A�Ȃɂ��˔�Ȓl��<br>���ޗʂƂ��ċL�^����Ă���̂ł����H</td>
-				<td>�F�����~�X�������̂��Ǝv���܂��B���萔�ł����A<br>
-				�I�v�V���������ފǗ���CSV�����o���ŏo�͂������CSV�t�@�C������ŏC�����A<br>
-				���x��CSV�ǂݍ��݂Ŕ��f���Ȃ����ĉ������B</td>
+				<td>資材グラフを見る限り、なにやら突飛な値が<br>資材量として記録されているのですが？</td>
+				<td>認識をミスったものだと思われます。お手数ですが、<br>
+				オプション→資材管理→CSV書き出しで出力した後にCSVファイルを手で修正し、<br>
+				今度はCSV読み込みで反映しなおして下さい。</td>
 			</tr>
 			<tr>
-				<td>���̃\�t�g�͗��p�K��ɐG��܂��񂩁H</td>
-				<td>���p�K����Ƃ炷����A�ʐM��ǂݎ�炸�摜�F���݂̂œ��삷�铖�c�[���͈ᔽ�ł͂Ȃ��ƔF�����Ă��܂��B<br>
-				Ver.3.0.7����IE�R���|�[�l���g�u���E�U���������悤�ɂȂ�܂������A�ʂɒʐM��ǂݎ���Ă��܂���B<br>
-				���������A�����̎���u���E�U�̓Z�[�t����<a href="https://twitter.com/KanColle_STAFF/status/373964944653312001">�͂���^�c���\�����Ă��܂��B</a><br>
-				���쌴���ɂ��āA�ڂ�����<a href="http://www.slideshare.net/YSRKEN/ss-50964003">������̃X���C�h</a>��������������</td>
+				<td>このソフトは利用規約に触れませんか？</td>
+				<td>利用規約を照らす限り、通信を読み取らず画像認識のみで動作する当ツールは違反ではないと認識しています。<br>
+				Ver.3.0.7からIEコンポーネントブラウザを内蔵するようになりましたが、別に通信を読み取っていません。<br>
+				そもそも、ただの自作ブラウザはセーフだと<a href="https://twitter.com/KanColle_STAFF/status/373964944653312001">艦これ運営も表明しています。</a><br>
+				動作原理について、詳しくは<a href="http://www.slideshare.net/YSRKEN/ss-50964003">こちらのスライド</a>をご覧ください</td>
 			</tr>
 		</table>
 		<hr>
 
-<!-- ���� -->
-		<h1><a name="caution">����</a></h1>
+<!-- 注意 -->
+		<h1><a name="caution">注意</a></h1>
 		<ul>
-			<li>���̃\�t�g�̌����Ƃ��ẮAWin32API�ŃX�N�V�������A������摜�F�����ċL�^����Ƃ��������̂ł��B<br>
-			�ł�����A<strong>�R�}���h�𑗂����BOT��}�E�X���������삷��}�N���A����уv���L�V�ŒʐM���E����u���Ƃ͕ʕ��ł�</strong>�B<br>
-			�ǂ��������c�[�����ʖڂȂ̂��́u<a href="http://blog.gamelogbook.com/2014/01/blog-post_1849.html">�}�N���`�[�g�c�[���ɑ΂���͂���������\</a>�v�ɏڂ����Z�߂��Ă��܂��B<br>
-			�c�c��{�c(�^�c)�̃c�C�[�g���炷��ɁA��������n��A�{�������Ȃ����(cond�l�Ȃ�)��\���ł���n�̃\�t�g�͑ʖڂȂ悤�ł��B<br>
-			�܂�A�͂���̉�ʂɏo�����̂������L�^���邾���̂���鏑�͑��v�A�Ȃ͂��B<br>
-			(Ver.3.0.7����IE�R���|�[�l���g�u���E�U��������܂������A<strong>�ʐM�͓ǂݎ���Ă��܂���</strong>)</li>
-			<li>�O�q�̂悤�ɁA�͂���̉�ʂ�<strong>100���\��(800x480)�̂��̈ȊO�ɂ͑Ή����Ă��܂���</strong>�B<br>
-			�ł���ΑΉ��������̂ł����A�A���S���Y���̓s����d���Ȃ��̂ł��c�c�B</li>
-			<li>�摜�ۑ��@�\����уZ�[�u�f�[�^�ۑ��Ńh���C�u�ɏ������ލہA�Z�L�����e�B�ɑj�܂�邱�Ƃ�����܂��B<br>
-			��̓I�ɂ�Windows SmartScreen��A�e��Z�L�����e�B�\�t�g�ȂǂŌx�����\������邱�Ƃ�����܂��B<br>
-			�������<strong>����鏑�̓E�C���X�ł͂���܂��񂵃E�C���X�`�F�b�N�����Ă��܂�</strong>���c�c�B</li>
-			<li>�O�q�̂悤�ɒʐM�͈�؏E�킸�摜�F���ŏ������Ă��܂��̂ŁA<strong>���ރ��O�����m�Ȓl�Ƃ͌���܂���</strong>�B</li>
-			<li>�����܂Ƃ߉摜�쐬���ɁA�͖��̏��Ԃ�ύX�y�ъO�����ꍇ�̑Ή���<strong>�G</strong>�ł��B<br>
-			�Ⴆ�΁u����v�u����v�u����v�Ƃ������͑��ɂ����āA�Ґ���ʂŐ���┒����O�����ꍇ�A<br>
-			�܂Ƃ߉摜��ۑ�����Ɛ���┒��ł͂Ȃ����Ⴊ�O���ꂽ�摜�ɂȂ��Ă��܂��܂��B<br>
-			����́A<strong>�Ґ���ʂւ̕ύX���������ہA�͑D���͌����ɂ����͑D���������ĂȂ�</strong>���ƂɗR�����܂��B<br>
-			�v����ɁA<strong>�u�����܂Ƃ߉摜���쐬����ۂ́A���������ʂł��̊͑��S�����̃y�[�W�ɐ؂�ւ��Ăˁv</strong>�Ƃ������Ƃł��B</li>
-			<li>�����J�E���^�[�̎����J�E���g�@�\�ŁA�����̍ۂ́u�y���v����сu���v�ɂ����������܂���B<br>
-			�����<strong>�Q�[���̎d�l��A�u�P�v��u�S�v�͂������ɃJ�E���g����Ȃ�</strong>����Ȃ̂Ŏd�l�ł��B</li>
-			<li>���̃\�t�g�́A<strong>Aero��T�C�h�o�[��L���ɂ��Ă���Ɛ���ɓ��삵�Ȃ�</strong>���Ƃ�����܂��B</li>
-			<li>�u���E�U�ɂ��Ăł����A<strong>IE�R���|�[�l���g�u���E�U</strong>���ł��������ǂ��悤�ł��B</li>
-			<li>�u���E�U���őO�ʕ\�����Ă���ۂȂǂɁA<strong>��j/���Վ��̐i��/�o����W�Q���锒���g�A<br>
-			����ъ͖�/�������b�N�̑����W�Q����Ԃ��g���ꎞ�I�ɕ\������Ȃ����Ƃ�����܂�</strong>�B<br>
-			�����u���E�U�Łu�őO�ʁv�Ƀ`�F�b�N�����Ă���ۂȂǂ͓��ɂ��C�����������B</li>
-			<li>�f�X�N�g�b�v�}�X�R�b�g�̃T���v���ɓ���Ă���摜��<a href="http://pronama.azurewebsites.net/pronama/">�v���������</a>��<a href="http://zunko.jp/">���k����q</a>�ł��B<br>
-			���p�K���Readme.txt������΂�������������܂����A�f����<strong>�����T�C�g�Ŋm�F���f�ނ��_�E�����[�h</strong>���邱�Ƃ𐄏����܂��B</li>
-			<li>�ʒm���̃T���v���ɓ���Ă��鉹����<a href="http://on-jin.com/">On-Jin �`���l�`</a>������܂����B
-			���̉����t�@�C����<strong>�񎟔z�z�֎~</strong>�ł��B</li>
-			<li>���̃\�t�g�́u<a href="http://hsp.tv/">Hot Soup Processor</a>�v�Ƃ����v���O���~���O����ŋL�q����Ă��܂��B<br>
-			<strong>���@���ȒP</strong>�����A<strong>�c�[����Q�[�������ۂɂ͒��֗�</strong>�Ȃ̂ł݂�Ȃ��g���Ă݂悤�I</li>
-			<li>�o�O�ɂ��L�^�摜�̏����ȂǁA�\�t�g�g�p�ɂ���Đ����������ɂ��Ă͐ӔC�����܂���̂ł������������B</li>
+			<li>このソフトの原理としては、Win32APIでスクショを取り、それを画像認識して記録するといったものです。<br>
+			ですから、<strong>コマンドを送りつけるBOTやマウスを自動操作するマクロ、およびプロキシで通信を拾う専ブラとは別物です</strong>。<br>
+			どういったツールが駄目なのかは「<a href="http://blog.gamelogbook.com/2014/01/blog-post_1849.html">マクロチートツールに対する艦これ公式発表</a>」に詳しく纏められています。<br>
+			……大本営(運営)のツイートからするに、自動操作系や、本来見えない情報(cond値など)を表示できる系のソフトは駄目なようです。<br>
+			つまり、艦これの画面に出たものをただ記録するだけのおり秘書は大丈夫、なはず。<br>
+			(Ver.3.0.7からIEコンポーネントブラウザを内蔵しましたが、<strong>通信は読み取っていません</strong>)</li>
+			<li>前述のように、艦これの画面は<strong>100％表示(800x480)のもの以外には対応していません</strong>。<br>
+			できれば対応したいのですが、アルゴリズムの都合上仕方ないのです……。</li>
+			<li>画像保存機能およびセーブデータ保存でドライブに書き込む際、セキュリティに阻まれることがあります。<br>
+			具体的にはWindows SmartScreenや、各種セキュリティソフトなどで警告が表示されることがあります。<br>
+			もちろん<strong>おり秘書はウイルスではありませんしウイルスチェックもしています</strong>が……。</li>
+			<li>前述のように通信は一切拾わず画像認識で処理していますので、<strong>資材ログも正確な値とは限りません</strong>。</li>
+			<li>装備まとめ画像作成時に、艦娘の順番を変更及び外した場合の対応が<strong>雑</strong>です。<br>
+			例えば「吹雪」「白雪」「初雪」といった艦隊において、編成画面で吹雪や白雪を外した場合、<br>
+			まとめ画像を保存すると吹雪や白雪ではなく初雪が外された画像になってしまいます。<br>
+			これは、<strong>編成画面への変更があった際、艦船名は見ずにただ艦船数しか見てない</strong>ことに由来します。<br>
+			要するに、<strong>「装備まとめ画像を作成する際は、毎回改装画面でその艦隊全員分のページに切り替えてね」</strong>ということです。</li>
+			<li>○号カウンターの自動カウント機能で、い号の際は「軽空母」および「空母」にしか反応しません。<br>
+			これは<strong>ゲームの仕様上、「姫」や「鬼」はい号作戦にカウントされない</strong>からなので仕様です。</li>
+			<li>このソフトは、<strong>Aeroやサイドバーを有効にしていると正常に動作しない</strong>ことがあります。</li>
+			<li>ブラウザについてですが、<strong>IEコンポーネントブラウザ</strong>が最も相性が良いようです。</li>
+			<li>ブラウザを最前面表示している際などに、<strong>大破/消耗時の進撃/出撃を妨害する白い枠、<br>
+			および艦娘/装備ロックの操作を妨害する赤い枠が一時的に表示されないことがあります</strong>。<br>
+			内蔵ブラウザで「最前面」にチェックを入れている際などは特にお気をつけ下さい。</li>
+			<li>デスクトップマスコットのサンプルに入れてある画像は<a href="http://pronama.azurewebsites.net/pronama/">プロ生ちゃん</a>と<a href="http://zunko.jp/">東北ずん子</a>です。<br>
+			利用規約はReadme.txtを見ればだいたい分かりますが、素直に<strong>公式サイトで確認＆素材をダウンロード</strong>することを推奨します。</li>
+			<li>通知音のサンプルに入れてある音声は<a href="http://on-jin.com/">On-Jin ～音人～</a>から取りました。
+			この音声ファイルは<strong>二次配布禁止</strong>です。</li>
+			<li>このソフトは「<a href="http://hsp.tv/">Hot Soup Processor</a>」というプログラミング言語で記述されています。<br>
+			<strong>文法も簡単</strong>だし、<strong>ツールやゲームを作る際には超便利</strong>なのでみんなも使ってみよう！</li>
+			<li>バグによる記録画像の消失など、ソフト使用によって生じた損失については責任を取れませんのでご了承下さい。</li>
 		</ul>
-		<p><a href="#index">���ڎ��֖߂�</a></p>
+		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
-<!-- �ӎ� -->
-		<h1><a name="thanks">�ӎ�</a></h1>
-		<p>�@���̕��X�����Ȃ���΂��̃\�t�g�E�F�A�͐��܂�܂���ł����B�[�����ӂ������܂��B<br>
-		(�Ȃ��A�Q�l�ɂ������܂������A<strong>���肱������Ȕ鏑�ɒʐM����у}�N���@�\�͈�؂Ȃ�</strong>���Ƃ��ēx�f�����Ă����܂�)</p>
-		<table border="1" summary="�ӎ�">
+<!-- 謝辞 -->
+		<h1><a name="thanks">謝辞</a></h1>
+		<p>　この方々がいなければこのソフトウェアは生まれませんでした。深く感謝いたします。<br>
+		(なお、参考にこそしましたが、<strong>おりこうさんな秘書に通信およびマクロ機能は一切ない</strong>ことを再度断言しておきます)</p>
+		<table border="1" summary="謝辞">
 			<tr>
-				<th abbr="�^�C�g��">�^�C�g��</th>
-				<th abbr="���">���(�h�̗�)</th>
+				<th abbr="タイトル">タイトル</th>
+				<th abbr="作者">作者(敬称略)</th>
 				<th abbr="URL">URL</th>
 			</tr>
 			<tr>
-				<td>�͂���ꗗ�߂����[</td>
+				<td>艦これ一覧めいかー</td>
 				<td>kanahiron</td>
 				<td><a href="http://www.vector.co.jp/soft/winnt/game/se508332.html">http://www.vector.co.jp/soft/winnt/game/se508332.html</a></td>
 			</tr>
 			<tr>
-				<td>�ԏ邳��̂����C�^�C�}�[</td>
+				<td>赤城さんのお風呂タイマー</td>
 				<td>Satofumi Kamimura</td>
 				<td><a href="https://sites.google.com/site/bathtimer/">https://sites.google.com/site/bathtimer/</a></td>
 			</tr>
@@ -717,7 +718,7 @@
 			</tr>
 			<tr>
 				<td>Advanced HSP</td>
-				<td>���傭��</td>
+				<td>ちょくと</td>
 				<td><a href="http://chokuto.ifdef.jp/advanced/index.html">http://chokuto.ifdef.jp/advanced/index.html</a></td>
 			</tr>
 			<tr>
@@ -726,38 +727,38 @@
 				<td><a href="http://lhsp.s206.xrea.com/">http://lhsp.s206.xrea.com/</a></td>
 			</tr>
 			<tr>
-				<td>�v���O���~���O�H�[</td>
+				<td>プログラミング工房</td>
 				<td>chrono</td>
 				<td><a href="http://lldev.jp/index.html">http://lldev.jp/index.html</a></td>
 			</tr>
 			<tr>
-				<td>����Z�p�H�[</td>
-				<td>����씎</td>
+				<td>中井技術工房</td>
+				<td>中井喜博</td>
 				<td><a href="http://nakai99.sakura.ne.jp/">http://nakai99.sakura.ne.jp/</a></td>
 			</tr>
 			<tr>
-				<td>���܃��{</td>
+				<td>あまラボ</td>
 				<td>amaman</td>
 				<td><a href="http://amalabo.blog35.fc2.com/">http://amalabo.blog35.fc2.com/</a></td>
 			</tr>
 			<tr>
-				<td>�͂���L�^�W</td>
+				<td>艦これ記録係</td>
 				<td>WGSY-UIRO</td>
 				<td><a href="http://ch.nicovideo.jp/numenume/blomaga/ar614197">http://ch.nicovideo.jp/numenume/blomaga/ar614197</a></td>
 			</tr>
 			<tr>
-				<td>HTML�N�C�b�N���t�@�����X</td>
-				<td>�����厁</td>
+				<td>HTMLクイックリファレンス</td>
+				<td>猿橋大氏</td>
 				<td><a href="http://www.htmq.com/">http://www.htmq.com/</a></td>
 			</tr>
 			<tr>
 				<td>Another HTML-lint</td>
-				<td>�Ζ�b��Y</td>
+				<td>石野恵一郎</td>
 				<td><a href="http://openlab.ring.gr.jp/k16/htmllint/index.html">http://openlab.ring.gr.jp/k16/htmllint/index.html</a></td>
 			</tr>
 			<tr>
-				<td>�����S�҂̂��߂̃z�[���y�[�W�쐬�u��</td>
-				<td>�H</td>
+				<td>超初心者のためのホームページ作成講座</td>
+				<td>？</td>
 				<td><a href="http://park16.wakwak.com/~html-css/index.html">http://park16.wakwak.com/~html-css/index.html</a></td>
 			</tr>
 			<tr>
@@ -766,379 +767,378 @@
 				<td><a href="http://kancolle.s601.xrea.com/kiat/">http://kancolle.s601.xrea.com/kiat/</a></td>
 			</tr>
 			<tr>
-				<td>�ʒm�̈摀�샂�W���[��</td>
+				<td>通知領域操作モジュール</td>
 				<td>naia</td>
 				<td><a href="http://www.geocities.jp/toshi0619/module/Tasktray.txt">http://www.geocities.jp/toshi0619/module/Tasktray.txt</a></td>
 			</tr>
 			<tr>
-				<td>���C���[�E�B���h�E���W���[��2</td>
-				<td>�Ȃ���</td>
+				<td>レイヤーウィンドウモジュール2</td>
+				<td>なたで</td>
 				<td><a href="http://www.placeark.com/program_hsp_module.html">http://www.placeark.com/program_hsp_module.html</a></td>
 			</tr>
 			<tr>
-				<td>�v���������</td>
+				<td>プロ生ちゃん</td>
 				<td>Ixy</td>
 				<td><a href="http://pronama.azurewebsites.net/pronama/">http://pronama.azurewebsites.net/pronama/</a></td>
 			</tr>
 			<tr>
-				<td>On-Jin �`���l�`</td>
-				<td>�}�� �h��</td>
+				<td>On-Jin ～音人～</td>
+				<td>笠畑 栄樹</td>
 				<td><a href="http://on-jin.com/">http://on-jin.com/</a></td>
 			</tr>
 			<tr>
-				<td>���k����q</td>
-				<td>�]�ˑ��ɂɂ�</td>
+				<td>東北ずん子</td>
+				<td>江戸村ににこ</td>
 				<td><a href="http://zunko.jp/">http://zunko.jp/</a></td>
 			</tr>
 		</table>
-		<p><a href="#index">���ڎ��֖߂�</a></p>
+		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
-<!-- �X�V���� -->
-		<h1><a name="history">�X�V����</a></h1>
-		<table border="1" summary="�X�V����">
+<!-- 更新履歴 -->
+		<h1><a name="history">更新履歴</a></h1>
+		<table border="1" summary="更新履歴">
 			<tr>
-				<th abbr="�o�[�W����">�o�[�W����</th>
-				<th abbr="���J��">���J��</th>
-				<th abbr="�ύX�ӏ�">�ύX�ӏ�</th>
+				<th abbr="バージョン">バージョン</th>
+				<th abbr="公開日">公開日</th>
+				<th abbr="変更箇所">変更箇所</th>
+			</tr>
+			<tr>
+				<td>Ver.3.0.0</td>
+				<td>2016/05/20</td>
+				<td>・任務一覧を取得する際に1ページ目が頻繁に上書きされるバグを修正した。<br>
+				・資材グラフ上にマウスを翳すと、その地点における資材値を表示するようにした</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.9</td>
 				<td>2016/05/16</td>
-				<td>�E�����u���E�U�ŁA�u�����v�{�^�����������ۂ̍��W�Y�����C�������B<br>
-				�E6�y�[�W�ڈȍ~�̔C���ꗗ���擾�ł��Ȃ������C�������B<br>
-				�EChrome�ł��܂��ǂݎ��Ȃ����Ƃ�����o�O�̊m�F����яC�����s�����B</td>
+				<td>・内蔵ブラウザで、「中央」ボタンを押した際の座標ズレを修正した。<br>
+				・6ページ目以降の任務一覧を取得できない問題を修正した。<br>
+				・Chromeでうまく読み取れないことがあるバグの確認および修正を行った。</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.8</td>
 				<td>2016/02/03</td>
-				<td>�E�����h�b�N�ŕ����F������ہA�N���[�����d�Ȃ����ۂɖ�������悤�ɂ����B<br>
-				�E�����u���E�U�̃T�C�Y��ύX�֎~�ɂ����B�܂��A<strong>�őO�ʕ\����؂�ւ�����悤�ɂ����B</strong><br>
-				�E�X�N�V�����V���[�g�J�b�g�L�[(Alt+Z�L�[)����s����悤�ɂ����B<br>
-				<strong>�E�I�������C���ꗗ���L������V���[�h�����������B</strong><br>
-				�E���̑��ׂ��ȕs����C�������B</td>
+				<td>・入渠ドックで文字認識する際、クレーンが重なった際に無視するようにした。<br>
+				・内蔵ブラウザのサイズを変更禁止にした。また、<strong>最前面表示を切り替えられるようにした。</strong><br>
+				・スクショをショートカットキー(Alt+Zキー)から行えるようにした。<br>
+				<strong>・選択した任務一覧を記憶する新モードを実装した。</strong><br>
+				・その他細かな不具合を修正した。</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.7</td>
 				<td>2015/11/24</td>
-				<td>�E���ރ��O��CSV����ǂݍ��񂾍ۂɁA�o�C�i���`���̎��ރ��O�Ɏ����ۑ�����悤�ɂ����B<br>
-				�Esupply.dat�̓ǂݍ��ݑϐ������������B<br>
-				�E�w���v�̃e�L�X�g���C�������B<br>
-				<strong>�E�ȒP��IE�R���|�[�l���g�u���E�U��\���ł���悤�ɂ����B</strong><br>
-				<strong>�E����Ґ��̏ꍇ�ɏo���x�����o����悤�ɂ����B</strong><br>
-				�E�퓬���A���m�F�Ɛ퓬����\�����ɉ���炷���ƂŒ��ӂ���������@�\��ǉ������B<br>
-				�E�����h�b�N�ɓ����Ă���͂������x���̊͂������Ă��邩��\������悤�ɂ����B<br>
-				<strong>�E�c���\��(���\��)�ɂ��ł���悤�ɂ����B</strong><br>
-				�E���ފǗ��R�}���h�̒��ŁA�����̎��ރ��O�𓝍�����u���ރ}�[�W�v�@�\��ǉ������B<br>
-				<strong>�E�e��c�[���̕\�����{�^����ŏ�߂�悤�ɂ����B</strong><br>
-				�E���̑��ׂ��ȕs����C�������B</td>
+				<td>・資材ログをCSVから読み込んだ際に、バイナリ形式の資材ログに自動保存するようにした。<br>
+				・supply.datの読み込み耐性を強化した。<br>
+				・ヘルプのテキストを修正した。<br>
+				<strong>・簡単なIEコンポーネントブラウザを表示できるようにした。</strong><br>
+				<strong>・特定編成の場合に出撃警告が出せるようにした。</strong><br>
+				・戦闘中、夜戦確認と戦闘判定表示時に音を鳴らすことで注意を向かせる機能を追加した。<br>
+				・入渠ドックに入っている艦が何レベルの艦が入っているかを表示するようにした。<br>
+				<strong>・縦長表示(二列表示)にもできるようにした。</strong><br>
+				・資材管理コマンドの中で、複数の資材ログを統合する「資材マージ」機能を追加した。<br>
+				<strong>・各種ツールの表示をボタン一つで畳めるようにした。</strong><br>
+				・その他細かな不具合を修正した。</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.6</td>
 				<td>2015/11/12</td>
-				<td>�E1�N���b�N�ŉ摜�ۑ��t�H���_���G�N�X�v���[���ŊJ����悤�ɂ����B<br>
-				<strong>�E�I�����̕\���ʒu��ۑ��ł���悤�ɂ����B</strong><br>
-				�E�X���̕񍐂���AIE�R���|�[�l���g�u���E�U�𐄏����Ă����悤�ɂ����B<br>
-				�E������ʂőI���������}�E�X�̈ʒu�̂����ŐF���ς���Ă����ꍇ�ɂ��Ή��ł���悤�ɂ����B<br>
-				�E�ʒm����������������ŕʁX�ɐݒ�ł���悤�ɂ����B<br>
-				<strong>�EFAQ��ǉ������B</strong><br>
-				�E�T���v���e�[�}��ǉ������B</td>
+				<td>・1クリックで画像保存フォルダをエクスプローラで開けるようにした。<br>
+				<strong>・終了時の表示位置を保存できるようにした。</strong><br>
+				・スレの報告から、IEコンポーネントブラウザを推奨しておくようにした。<br>
+				・遠征画面で選択遠征がマウスの位置のせいで色が変わっていた場合にも対応できるようにした。<br>
+				・通知音を入渠建造遠征で別々に設定できるようにした。<br>
+				<strong>・FAQを追加した。</strong><br>
+				・サンプルテーマを追加した。</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.5</td>
 				<td>2015/10/28</td>
-				<td>�E�����A�����A�����I�����ɃA���[������点��悤�ɂ����B<br>
-				�E�I�v�V������ʂ���茩�₷�����ǂ����B<br>
-				�E���΃^�C�}�[�����Z�b�g����₷���s����C�������B</td>
+				<td>・入渠、建造、遠征終了時にアラーム音を鳴らせるようにした。<br>
+				・オプション画面をより見やすく改良した。<br>
+				・明石タイマーがリセットされやすい不具合を修正した。</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.4</td>
 				<td>2015/10/16</td>
-				<td>�ECSV�̃C���|�[�g/�G�N�X�|�[�g�@�\�𓋍ځB����<strong>�G�N�X�|�[�g�͒�������</strong>�����B<br>
-				�E<strong>���΃^�C�}�[�@�\������</strong>�B���΂����͂ɂ��Ă���ǂ�قǌo��������\������悤�ɂ����B<br>
+				<td>・CSVのインポート/エクスポート機能を搭載。特に<strong>エクスポートは超高速化</strong>した。<br>
+				・<strong>明石タイマー機能を実装</strong>。明石を旗艦にしてからどれほど経ったかを表示するようにした。<br>
 				</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.3</td>
 				<td>2015/10/03</td>
-				<td>�E�\�����[�h���u���݉�ʁv�ȊO�ł���ہA�\�[�g�ꗗ�@�\�Łu�ǉ��v�ł��Ȃ������s����C�������B<br>
-				�E�R�[�h��K�X�������ĕ�����₷�������B<br>
-				�E<strong>�܂����̃f�X�N�g�b�v�}�X�R�b�g�@�\�𓋍ځI�@�D���ȉ摜������鏑�̃C���^�[�t�F�[�X�ɂł����I�I</strong><br>
+				<td>・表示モードが「現在画面」以外である際、ソート一覧機能で「追加」できなかった不具合を修正した。<br>
+				・コードを適宜分割して分かりやすくした。<br>
+				・<strong>まさかのデスクトップマスコット機能を搭載！　好きな画像をおり秘書のインターフェースにできるよ！！</strong><br>
 				</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.2</td>
 				<td>2015/09/27</td>
-				<td>�E���ރO���t�̉�������������(���Ԃł͂Ȃ������ɂȂ��Ă���)�s����C�������B<br>
-				�E�u�G��`��P���v�̂悤��60���Ԉȏ�̉������ƕ\�������������Ȃ�s����C�������B<br>
-				�E�u�퓬��ʁv�̎d�l��ύX�����B�����ƕ֗��ɂȂ��Ă���͂��B<br>
-				�E�������b�N�̉摜�����������Ȃ邱�Ƃ�����s����C�������B<!-- <br>
-				�E�T�u��ʂɑ��̃E�B���h�E���ʂ荞��ł��܂����Ƃ��������s����C�������B --><br>
+				<td>・資材グラフの横軸がおかしい(時間ではなく件数になっている)不具合を修正した。<br>
+				・「敵母港空襲作戦」のように60時間以上の遠征だと表示がおかしくなる不具合を修正した。<br>
+				・「戦闘画面」の仕様を変更した。もっと便利になっているはず。<br>
+				・装備ロックの画像がおかしくなることがある不具合を修正した。<!-- <br>
+				・サブ画面に他のウィンドウが写り込んでしまうことがあった不具合を修正した。 --><br>
 				</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.1</td>
 				<td>2015/09/26</td>
-				<td>�E�e��^�C�}�[�@�\�ŁA<strong>��ȃh�b�N�́u��v�ƕ\������</strong>�悤�ɏC�������B<br>
-				�E�V�[���ۑ����ɁA�ŏI�X�V�����ŕۑ������悤�ɏC������(<strong>�o�O�C��</strong>)�B<br>
-				�E�\�[�g�ꗗ�@�\�ŁA<strong>�����ꗗ���ۑ��ł���</strong>�悤�ɏC�������B<br>
-				�E�͖�/����<strong>���b�N������h�~</strong>����@�\��ǉ������B<br>
-				�E<strong>���ރO���t�@�\��{�i�I�Ɏ���</strong>�����B</td>
+				<td>・各種タイマー機能で、<strong>空なドックは「空」と表示する</strong>ように修正した。<br>
+				・シーン保存時に、最終更新日時で保存されるように修正した(<strong>バグ修正</strong>)。<br>
+				・ソート一覧機能で、<strong>装備一覧も保存できる</strong>ように修正した。<br>
+				・艦娘/装備<strong>ロック解除を防止</strong>する機能を追加した。<br>
+				・<strong>資材グラフ機能を本格的に実装</strong>した。</td>
 			</tr>
 			<tr>
 				<td>Ver.3.0.0</td>
 				<td>2015/09/24</td>
 				<td>
-				�E<strong>�R�[�h�𕪊����ĕ�����₷�������B�ƌ������S�ʓI�ɏ����������B</strong><br>
-				�E���W�擾���@�Ɂu�}�j���A���v��ǉ������B<br>
-				�E�u�F�������ʁv�Ɓu�ۑ������ʁv�𕪂��邱�Ƃɂ��A<strong>�F���E�ۑ��ł����ʐ����啝�ɑ���</strong>�B<br>
-				�E�y�g���~���O�z�{�^����V�݁B�኱�摜�ۑ���������₷���Ȃ����͂��B<br>
-				�E�e��^�C�}�[���������āA<strong>��������F��������c��ꕪ�ɂȂ�����ʒm������ł���悤�ɂ���</strong>�B<br>
-				�E�\�[�g�ꗗ���������āA<strong>�͎����x���ƂɃ\�[�g���ĕۑ��ł���悤�ɂ���</strong>�B<br>
-				�E���ރ��O�@�\���������āA<strong>�J�����ނȂǂ��L�^�ł���悤�ɂ���</strong>(�O���t�͂��������҂���)�B<br>
-				�E�o���l�v�Z�@���������āA<strong>�摜�F���ɂ��␳����x�E�o���l�o�[�ɕ����Ĕ��f�ł���悤�ɂ���</strong>�B<br>
-				�E�����J�E���^�����������B�܂��Acond�l���[�^��V�݂����B<br>
-				�EBGM�@�\���������āA<strong>�e�X�̏�ʂŊe�X�̃��X�g���烉���_���Đ��ł���悤�ɂ���</strong>�B<br>
-				�E�Ґ���ʕ\�����ɁA<strong>���͗��x����э��v���x��\���ł���悤�ɂ���</strong>�B</td>
+				・<strong>コードを分割して分かりやすくした。と言うか全面的に書き直した。</strong><br>
+				・座標取得方法に「マニュアル」を追加した。<br>
+				・「認識する場面」と「保存する場面」を分けることにより、<strong>認識・保存できる場面数が大幅に増加</strong>。<br>
+				・【トリミング】ボタンを新設。若干画像保存が分かりやすくなったはず。<br>
+				・各種タイマーを強化して、<strong>遠征名を認識したり残り一分になったら通知したりできるようにした</strong>。<br>
+				・ソート一覧を強化して、<strong>艦種や練度ごとにソートして保存できるようにした</strong>。<br>
+				・資材ログ機能を強化して、<strong>開発資材なども記録できるようにした</strong>(グラフはもう少し待って)。<br>
+				・経験値計算機を強化して、<strong>画像認識による補正を練度・経験値バーに分けて反映できるようにした</strong>。<br>
+				・○号カウンタを改装した。また、cond値メータを新設した。<br>
+				・BGM機能を強化して、<strong>各々の場面で各々のリストからランダム再生できるようにした</strong>。<br>
+				・編成画面表示時に、<strong>旗艦練度および合計練度を表示できるようにした</strong>。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.1.0</td>
 				<td>2015/08/04</td>
 				<td>
-				�E�Y���␳�@�\�ŁA�Y�����m���̕\�����@��ύX�����B�_�C�A���O���o��񐔂��������邩�ƁB<br>
-				�E<strong>�y�����͑��z����сy�����摜�z�@�\�𗘗p������Ɂy�摜�ۑ��z�𗘗p����ƁA<br>
-				�ۑ��T�C�Y�����������Ȃ�(�o�b�t�@�����Z�b�g����ĂȂ�)�o�O���C�������B</strong><br>
-				�EBGM�@�\�ŁA<strong>�{�X�킾���퓬BGM��ς�����</strong>�悤�ɂ����B<br>
-				�E�o���l�v�Z�@�ŁA<strong>�Ґ���ʂ���͖��̗��x����ьo���l�Q�[�W��F���ł���</strong>�悤�ɂ����B<br>
-				�E�e��^�C�}�[�̃E�B���h�E�^�C�g�����u�e�펞�ԁv�ɂȂ��Ă���̂��C�������B<br>
-				�E�e��^�C�}�[�ŁA<strong>����C���2�͑��ȏ�o���Ă���ۂɏ�肭���f�ł��Ȃ��s����C��</strong>�����B<br>
-				(<a href="https://sites.google.com/site/bathtimer/">�ԏ邳��̂����C�^�C�}�[</a>�Ɠ��l�̌����ŁA�������𔻕ʂ��Ă���)<br>
-				�E�����J�E���^�[�̎����J�E���g�ɂ����āA���K���̓J�E���g���Ȃ��悤�ɏC�������B<br>
-				�E�����O���t�ŁA�l��0�ł��镔�����Ԃ��ĕ\������I�v�V������t�����B<br>
-				�E���O�B���@�\�ŁA�������ʂł��B����悤�ɏC�������B<br>
-				�E���O�B���@�\�ŁA�B���F���ڗ����Ȃ��悤�ɐF�ύX���s�����B<br>
-				�E���Ճ`�F�b�N�@�\�ŁA���⋋�̉��K���F���ł���悤�ɏC�������B<br>
-				�E�������O�̔F�����x���グ���B<strong>1��0�ƌ�F�����邱�Ƃ������Ȃ�</strong>���ƁB</td>
+				・ズレ補正機能で、ズレ検知時の表示方法を変更した。ダイアログが出る回数が多少減るかと。<br>
+				・<strong>【○○艦隊】および【資源画像】機能を利用した後に【画像保存】を利用すると、<br>
+				保存サイズがおかしくなる(バッファがリセットされてない)バグを修正した。</strong><br>
+				・BGM機能で、<strong>ボス戦だけ戦闘BGMを変えられる</strong>ようにした。<br>
+				・経験値計算機で、<strong>編成画面から艦娘の練度および経験値ゲージを認識できる</strong>ようにした。<br>
+				・各種タイマーのウィンドウタイトルが「各種時間」になっているのを修正した。<br>
+				・各種タイマーで、<strong>同一海域で2艦隊以上出している際に上手く判断できない不具合を修正</strong>した。<br>
+				(<a href="https://sites.google.com/site/bathtimer/">赤城さんのお風呂タイマー</a>と同様の原理で、遠征名を判別している)<br>
+				・○号カウンターの自動カウントにおいて、演習時はカウントしないように修正した。<br>
+				・資源グラフで、値が0である部分を補間して表示するオプションを付けた。<br>
+				・名前隠し機能で、遠征結果でも隠せるように修正した。<br>
+				・名前隠し機能で、隠す色が目立たないように色変更を行った。<br>
+				・消耗チェック機能で、未補給の演習も認識できるように修正した。<br>
+				・資源ログの認識精度を上げた。<strong>1を0と誤認識することが無くなる</strong>かと。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.9</td>
 				<td>2015/07/30</td>
 				<td>
-				�E<strong>�摜�擾���@�̖��̂�ύX����</strong>�B��{�́u�I�[�g�v�ł������Ǝv���B<br>
-				�E�X�N�V���̃V���[�g�J�b�g�L�[��ǉ������B����Œ��邩���I<br>
-				�E�A�ʋ@�\���{�^���Ƃ��Ēǉ������B����Ŏ�蓦�����Ȃ������I<br>
-				�E�����J�E���^�͐��K���ƌy��ꂵ���ΏۂƂ��Ȃ����Ƃ𖾋L�����B<br>
-				�E�����J�E���^�[�̎������@�\�Ƀ{�X���B�E�{�X�����������������B<br>
-				�@����ɂ��A<strong>���������S�Ɏ����J�E���g���邱�Ƃ��\�ɂȂ���</strong>�I<br>
-				�E�����J�E���^�[��C�����Ɏ�����ON/OFF�ł���悤�ɏC�������B<br>
-				�E�O���t�ł̕\���Ƀo�P�c��ǉ������B<br>
-				�E���K�ł̑Λ���ʂ�F���V�[���Ƃ��Ēǉ������B<br>
-				�E�e��F�����x�����コ�����B<br>
-				�E���ރ��O��30��/3000�ȏ�̐l�ɂ��Ă͍l�����ĂȂ����Ƃ𖾋L�����B</td>
+				・<strong>画像取得方法の名称を変更した</strong>。基本は「オート」でいいかと思われ。<br>
+				・スクショのショートカットキーを追加した。これで捗るかも！<br>
+				・連写機能をボタンとして追加した。これで取り逃しもないかも！<br>
+				・い号カウンタは正規空母と軽空母しか対象としないことを明記した。<br>
+				・○号カウンターの自動化機能にボス到達・ボス勝利部分も加えた。<br>
+				　これにより、<strong>○号を完全に自動カウントすることが可能になった</strong>！<br>
+				・○号カウンターを任務毎に自動化ON/OFFできるように修正した。<br>
+				・グラフでの表示にバケツを追加した。<br>
+				・演習での対峙画面を認識シーンとして追加した。<br>
+				・各種認識精度を向上させた。<br>
+				・資材ログで30万/3000以上の人については考慮してないことを明記した。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.8</td>
 				<td>2015/07/24</td>
 				<td>
-				�E<strong>�G���[���O�@�\�����������B</strong><br>
-				�E��ʔ���ŁA�֐������b�v���邱�Ƃ�<strong>�Y���G���[������</strong>�����B<br>
-				�E�⋋���ĂȂ���Ԃŏo���������邱�Ƃ�j�~����@�\��ǉ������B<br>
-				�E<strong>�����ۑ��@�\�����������B</strong>�G���[�ŗ����Ă����S�B<br>
-				�Esupply.csv�̕ۑ��p�X���������������s����C�������B<br>
-				�E�t�@�C���p�X�ɋ󔒂������Ă���Ɠǂ߂Ȃ���Program Files�̐����𖾋L�����B<br>
-				�E�o�����̑�j����̐��x�����コ�����B<br>
-				�E<strong>��j�`�F�b�J�[�E���Ճ`�F�b�J�[�ł̃E�B���h�E�ʒu���A�����ݒ�II�ȊO�ł͂������������s����C�������B</strong></td>
+				・<strong>エラーログ機能を実装した。</strong><br>
+				・場面判定で、関数をラップすることで<strong>添字エラーを解消</strong>した。<br>
+				・補給してない状態で出撃遠征することを阻止する機能を追加した。<br>
+				・<strong>自動保存機能を実装した。</strong>エラーで落ちても安心。<br>
+				・supply.csvの保存パスがおかしかった不具合を修正した。<br>
+				・ファイルパスに空白が入っていると読めない＆Program Filesの制限を明記した。<br>
+				・出撃時の大破判定の精度を向上させた。<br>
+				・<strong>大破チェッカー・消耗チェッカーでのウィンドウ位置が、自動設定II以外ではおかしかった不具合を修正した。</strong></td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.7</td>
 				<td>2015/07/23</td>
-				<td>�E<strong>�e��^�C�}�[����с����J�E���^�[�������ŃJ�E���g</strong>�ł���悤�ɂ����B<br>
-				�E�ꕔ�̉�ʂŁA�e��^�C�}�[�̍X�V�{�^���������Ƌ����I�����Ă��܂��s����C�������B</td>
+				<td>・<strong>各種タイマーおよび○号カウンターを自動でカウント</strong>できるようにした。<br>
+				・一部の画面で、各種タイマーの更新ボタンを押すと強制終了してしまう不具合を修正した。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.6</td>
 				<td>2015/07/21</td>
-				<td><strong>�E�o�P�c�c�ʂ��������O�ɋL�^����悤�ɂ����B</strong>�Ȃ��o�P�c�͎��ރO���t�ɂ͏o�Ȃ��͗l�B<br>
-				<strong>�E�������Ԃ��e��^�C�}�[�ɋL�^�ł���悤�ɂ����B</strong>�n���ɖʓ|�������͔̂閧�B<br>
-				�E�\��/�X�N�V������ۂɃf�m�C�Y�ł���悤�ɂ����B�܂�OpenCV�ɕt���Ă��t�B���^�Ȃ�ł����ǂˁI<br>
-				<strong>�E�O���t�̃X�P�[����ύX�ł���悤�ɂ����B</strong>�����I�Ȑ��ڂ��m�F�ł��܂��B</td>
+				<td><strong>・バケツ残量も資源ログに記録するようにした。</strong>なおバケツは資材グラフには出ない模様。<br>
+				<strong>・遠征時間も各種タイマーに記録できるようにした。</strong>地味に面倒だったのは秘密。<br>
+				・表示/スクショする際にデノイズできるようにした。まあOpenCVに付いてたフィルタなんですけどね！<br>
+				<strong>・グラフのスケールを変更できるようにした。</strong>長期的な推移を確認できます。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.5</td>
 				<td>2015/07/19</td>
-				<td>�E�F���\�ȏ�ʂɃh���b�v��ʂ�ǉ������B</td>
+				<td>・認識可能な場面にドロップ画面を追加した。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.4</td>
 				<td>2015/07/18</td>
-				<td>�E���}�b�v�Ŗ��ƔF�����Ă���Ȃ��s����C���c�c�ƌ��������}�X�̍��ڂ�ǉ������B<br>
-				�E�Ԕ�J�܂�䒆�j���j�Ɗ��Ⴂ����s����C�������B<br>
-				�E������ʂł̔F���~�X���C�������B<br>
-				<strong>�E�����O���t�@�\��ǉ������B</strong><br>
-				�E�^�C�}�[�@�\�Ō������Ԃ��L�^����悤�ɂ����B</td>
+				<td>・夜戦マップで夜戦と認識してくれない不具合を修正……と言うか夜戦マスの項目を追加した。<br>
+				・赤疲労まるゆ中破を大破と勘違いする不具合を修正した。<br>
+				・改装画面での認識ミスを修正した。<br>
+				<strong>・資源グラフ機能を追加した。</strong><br>
+				・タイマー機能で建造時間も記録するようにした。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.3</td>
 				<td>2015/05/12</td>
-				<td>�E���ރ��O�@�\�ŁA�摜�F���̐��x���グ���B<br>
-				�EWin8�ɂ����āA�Ȃ񂩃����^�C���G���[���o�Ă��܂��o�O���C���B<br>
-				�Esource�t�H���_�ɂ�cursor.png��u�����B�łȂ��ƃf�o�b�O���Â炢�̂�ˁc�c�B</td>
+				<td>・資材ログ機能で、画像認識の精度を上げた。<br>
+				・Win8において、なんかランタイムエラーが出てしまうバグを修正。<br>
+				・sourceフォルダにもcursor.pngを置いた。でないとデバッグしづらいのよね……。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.2</td>
 				<td>2015/05/08</td>
-				<td>�E�퓬��ʂ̓��t���X�V����Ă��Ȃ��s����C�������B<br>
-				�E�Ԕ�J+��j�A�������͞��J+��j�̍ہA�o�����̑�j�`�F�b�N�������Ȃ��s����C�������B<br>
-				�E�����F���̐��x�����コ����(�������O����ѓ����^�C�}�[�@�\�ɂ�)�B<br>
-				<strong>�E���������M���O����@�\�����������B</strong><br>
-				�E(�w���v�ɂ�����)�͂��ꎩ�̂̒��쌠�\�L���C�������B</td>
+				<td>・戦闘画面の日付が更新されていない不具合を修正した。<br>
+				・赤疲労+大破、もしくは橙疲労+大破の際、出撃時の大破チェックが効かない不具合を修正した。<br>
+				・文字認識の精度を向上させた(資源ログおよび入渠タイマー機能にて)。<br>
+				<strong>・資源をロギングする機能を実装した。</strong><br>
+				・(ヘルプにおける)艦これ自体の著作権表記を修正した。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0.1</td>
 				<td>2015/05/04</td>
-				<td>�E�H�����1���H����ʂɁA�H�����2�𐔒l�ݒ�ɖ��O�ύX�����B<br>
-				�E�F���\�ȏ�ʂɕ⋋��ʂ�ǉ������B<br>
-				<strong>�EReadme��HTML�`���ɐ؂�ւ����B</strong><br>
-				�E�Z�[�u�f�[�^�ڍs�̍ہA�ߋ��̃Z�[�u�f�[�^�����̂܂܎����Ă��Ă��ŏI�X�V���������Ȃ��悤�ɂ����B</td>
+				<td>・工廠画面1を工廠画面に、工廠画面2を数値設定に名前変更した。<br>
+				・認識可能な場面に補給画面を追加した。<br>
+				<strong>・ReadmeをHTML形式に切り替えた。</strong><br>
+				・セーブデータ移行の際、過去のセーブデータをそのまま持ってきても最終更新日時が壊れないようにした。</td>
 			</tr>
 			<tr>
 				<td>Ver.2.0</td>
 				<td>2015/05/02</td>
-				<td>�E�I�v�V������ʂ�V�݁B����ɂ���ʃT�C�Y���R���p�N�g�ɂȂ����B<br>
-				�E��j�`�F�b�N���o�����ɂ��s���悤�ɂ����B<br>
-				�E�X�N���[���V���b�g�̕ۑ��t�H���_���w��ł���悤�ɂ����B<br>
-				<strong>�E�X�N���[���V���b�g�ۑ����A�B�e���Ԃ����̉摜�̍ŏI�X�V�����ɂ����B<br>
-				�܂�A�Ⴆ��5/3���ŏI�X�V�����ȉ摜��5/6�ɕۑ������ہA<br>
-				�]����5/6�̓��t�Ńt�@�C�����������̂����񂩂��5/3�̃t�@�C�����ɂȂ�B</strong><br>
-				�E���������݂̂̃X�N���[���V���b�g���B���悤�ɂ����B<br>
-				�E���W�擾�̐��x���グ���B<br>
-				�E�擾fps�Ɂu20fps�v��ǉ������B<br>
-				�E���̑��ׂ����o�O(������ʂɂ�����͖����F�������������Ȃ�)���C�������B</td>
+				<td>・オプション画面を新設。これにより画面サイズがコンパクトになった。<br>
+				・大破チェックを出撃時にも行うようにした。<br>
+				・スクリーンショットの保存フォルダを指定できるようにした。<br>
+				<strong>・スクリーンショット保存時、撮影時間をその画像の最終更新日時にした。<br>
+				つまり、例えば5/3が最終更新日時な画像を5/6に保存した際、<br>
+				従来は5/6の日付でファイル名だったのが今回からは5/3のファイル名になる。</strong><br>
+				・資源部分のみのスクリーンショットを撮れるようにした。<br>
+				・座標取得の精度を上げた。<br>
+				・取得fpsに「20fps」を追加した。<br>
+				・その他細かいバグ(改装画面における艦娘数認識がおかしいなど)を修正した。</td>
 			</tr>
 			<tr>
 				<td>Ver.1.9</td>
 				<td>2015/04/30</td>
-				<td>�E�Ґ��܂Ƃ߉摜�쐬���ɁA�͑����͖̊������딚����s����C���B<br>
-				�܂��A�e�͑��͖̊��������ł��m�F�ł���悤�ɂ����B</td>
+				<td>・編成まとめ画像作成時に、艦隊毎の艦娘数を誤爆する不具合を修正。<br>
+				また、各艦隊の艦娘数をいつでも確認できるようにした。</td>
 			</tr>
 			<tr>
 				<td>Ver.1.8</td>
 				<td>2015/04/28</td>
-				<td><strong>�E�T�u��ʂɁA�e��ʖ��̍ŏI�X�V������\������悤�ɂ���(�Z�[�u�������)�B</strong><br>
-				�E�V�[���Ɂu�퓬��ʁv��V�݁B�����ʂƖ���ʂōŌ�ɕ\���������̂��L�^����B<br>
-				�c�c�܂�����Ver.1.3�܂ŕt���Ă��u�퓬��ʁv���Č����������Ȃ�ł����ǂˁI<br>
-				<strong>�E��j�`�F�b�N�̎d�l��ύX���āA��j�������͐i���{�^�������肻���ȕ�����ʉ�ʂŉB���悤�ɂ����B<br>
-				�`�F�b�N���O�����ʂ̃V�[���Ɉڍs����Ώ����܂��B</strong><br>
-				�E�����Y���␳�@�\�̃o�O���C���B�^��(��)�ɓ����ꍇ�Ɍ��o���ĂȂ������c�c�B<br>
-				�E��j�`�F�b�N�̎d�l�ύX�ɉ����āA�����ݒ�II�ł̎擾���@������ɕύX�B<br>
-				��̓I�ɂ̓N���C�A���g�̈悾���ł͂Ȃ���N���C�A���g�̈���܂߂ăL���v�`������悤�ɂ����B<br>
-				<strong>���ꂾ����API���K�����ƕς��</strong>�̂�WinAPI�̋��낵����c�c�B<br>
-				�܂�����ɔ����A�����ݒ�II�ł��Z�[�u���ꂽ���W�������ƌ����悤�ɂȂ����B<br>
-				(���܂ł̓N���C�A���g�̈��̍��W�������̂Łu�����ݒ�v�u�蓮�ݒ�v�Ƃ��Ɏg���܂킹�Ȃ�����)</td>
+				<td><strong>・サブ画面に、各場面毎の最終更新日時を表示するようにした(セーブもされる)。</strong><br>
+				・シーンに「戦闘画面」を新設。昼戦画面と夜戦画面で最後に表示したものを記録する。<br>
+				……まあこれVer.1.3まで付いてた「戦闘画面」を再現しただけなんですけどね！<br>
+				<strong>・大破チェックの仕様を変更して、大破発生時は進撃ボタンがありそうな部分を別画面で隠すようにした。<br>
+				チェックを外すか別のシーンに移行すれば消えます。</strong><br>
+				・自動ズレ補正機能のバグを修正。真横(左)に動く場合に検出してなかった……。<br>
+				・大破チェックの仕様変更に応じて、自動設定IIでの取得方法を微妙に変更。<br>
+				具体的にはクライアント領域だけではなく非クライアント領域を含めてキャプチャするようにした。<br>
+				<strong>これだけでAPIがガラっと変わる</strong>のがWinAPIの恐ろしさよ……。<br>
+				またこれに伴い、自動設定IIでもセーブされた座標がちゃんと効くようになった。<br>
+				(今まではクライアント領域基準の座標だったので「自動設定」「手動設定」とかに使いまわせなかった)</td>
 			</tr>
 			<tr>
 				<td>Ver.1.7</td>
 				<td>2015/04/27</td>
-				<td><strong>�u�����ݒ�II�v��V�݁B�͂���̉�ʂ����̉�ʂɉB����Ă��Ă��擾�ł���悤�ɂȂ����B</strong></td>
+				<td><strong>「自動設定II」を新設。艦これの画面が他の画面に隠されていても取得できるようになった。</strong></td>
 			</tr>
 			<tr>
 				<td>Ver.1.6</td>
 				<td>2015/04/26</td>
-				<td>�E�����Y���␳�@�\�ɂāA���W�擾���蓮�ݒ�ɂ��Ă����ꍇ�͍Ď擾�̊Ԋu��1�b�ł͂Ȃ�5�b�ɂ����B<br>
-				�������Ȃ��ƁA�u�A���Ń}�E�X�I���𔗂��ă`�F�b�N�O���Ȃ��v�Ƃ��������̂��p������̂Łc�c�B<br>
-				�E�\�[�g�܂Ƃ߉摜�쐬�@�\��ǉ������B<br>
-				�E�I�����̃Z�[�u�̗L�����`�F�b�N�{�b�N�X�őI�ׂ�悤�ɂ����B</td>
+				<td>・自動ズレ補正機能にて、座標取得を手動設定にしていた場合は再取得の間隔を1秒ではなく5秒にした。<br>
+				そうしないと、「連続でマウス選択を迫られてチェック外せない」といった事故が頻発するので……。<br>
+				・ソートまとめ画像作成機能を追加した。<br>
+				・終了時のセーブの有無をチェックボックスで選べるようにした。</td>
 			</tr>
 			<tr>
 				<td>Ver.1.5</td>
 				<td>2015/04/21</td>
-				<td><strong>�E�蓮�Z�[�u�@�\���I�����Z�[�u�@�\�������B<br>
-				����ɂ��A�I�����ċN�����Ȃ����Ă��ݒ�ƃX�N�V�����c����悤�ɂȂ����B</strong><br>
-				�E�}���`���j�^�ɐ����Ή��B�ǂ̃f�B�X�v���C�ɂ����Ă��F���ł���悤�ɂȂ����B<br>
-				�E�Ґ��܂Ƃ߉摜�쐬���ɁA�ȑO�̕Ґ����͖̊��f�[�^���c���Ă��܂��s����C���B<br>
-				����ɂ��A5�ǈȉ��̕Ґ����L�^����ۂɂ��ł��������L�^�ł���悤�ɂȂ�B<br>
-				<strong>�E�����Y���␳�@�\�������B����ɂ��A��ʂ��Y���Ă������Ŗ߂���悤�ɂȂ����B</strong><br>
-				�E�\�[�X�R�[�h��ǂ݉������߂̃}�j���A����t���������B</td>
+				<td><strong>・手動セーブ機能＆終了時セーブ機能を実装。<br>
+				これにより、終了して起動しなおしても設定とスクショが残せるようになった。</strong><br>
+				・マルチモニタに正式対応。どのディスプレイにあっても認識できるようになった。<br>
+				・編成まとめ画像作成時に、以前の編成時の艦娘データが残ってしまう不具合を修正。<br>
+				これにより、5隻以下の編成を記録する際にいつでも正しく記録できるようになる。<br>
+				<strong>・自動ズレ補正機能を実装。これにより、画面がズレても自動で戻せるようになった。</strong><br>
+				・ソースコードを読み解くためのマニュアルを付属させた。</td>
 			</tr>
 			<tr>
 				<td>Ver.1.4</td>
 				<td>2015/04/19</td>
-				<td><strong>�E�R�[�h�𕪊����ĕ�����₷�������B�ƌ������S�ʓI�ɏ����������B</strong><br>
-				�E�T�u��ʂ��őO�ʕ\���ɂ����B�܂��A�f�t�H���g�ł�50���\���ɂ����B<br>
-				�E�ۑ��\�ȃV�[����啝�Ɋg�[�����B����ɔ����A���K�ʂŃ{�^����I�����Ă���ƔF������Ȃ��s����C�������B<br>
-				�E��ʃN���b�v�@�\�𓋍ځB����ɂ��A�Ґ���ʂŕҐ��̂݁A������ʂŊ͖��݂̂�ۑ��ł���悤�ɂ����B<br>
-				�E�����J�E���^�[���e�C�����Ƀ��Z�b�g�ł���悤�ɂ����B<br>
-				�E�����^�C�}�[���u���ݓ�����ʂ��\������Ă��鎞�v����Ȃ��ƍX�V�ł��Ȃ��悤�ɂ����B��쓮�h�~�̂��߂Ȃ̂ł��������������B<br>
-				�E<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>�̗��p�����߂��B�ƌ�����<strong>HSP�Ńp�C�v���s����ƈ��肵�Ȃ�������</strong>�񂾂�I<br>
-				�Ȃ�ł�������イ�t���[�Y���₪��̂��c�c�H<br>
-				(<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>�������Ƃ͌����ĂȂ��B�قڊԈႢ�Ȃ�HSP������������)</td>
+				<td><strong>・コードを分割して分かりやすくした。と言うか全面的に書き直した。</strong><br>
+				・サブ画面も最前面表示にした。また、デフォルトでは50％表示にした。<br>
+				・保存可能なシーンを大幅に拡充した。それに伴い、演習個別でボタンを選択していると認識されない不具合を修正した。<br>
+				・画面クロップ機能を搭載。これにより、編成画面で編成のみ、改装画面で艦娘のみを保存できるようにした。<br>
+				・○号カウンターを各任務毎にリセットできるようにした。<br>
+				・入渠タイマーが「現在入渠画面が表示されている時」じゃないと更新できないようにした。誤作動防止のためなのでご理解ください。<br>
+				・<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>の利用を辞めた。と言うか<strong>HSPでパイプ実行すると安定しなさすぎる</strong>んだよ！<br>
+				なんでしょっちゅうフリーズしやがるのか……？<br>
+				(<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>が悪いとは言ってない。ほぼ間違いなくHSP側が悪いかと)</td>
 			</tr>
 			<tr>
 				<td>Ver.1.3</td>
 				<td>2015/02/23</td>
-				<td>�E�T�u��ʂ̃}�E�X�J�[�\���\�����A���ݏ󋵃��[�h�݂̂Ɍ��肵���B<br>
-				�E�T�u��ʂɕ\������Ă�̂�������ʂłȂ����ɓ����^�C�}�[���g���Ȃ��̂��C�������B<br>
-				�E�����͑��ۑ��@�\�ł̃t�@�C���p�X���������������̂��C�������B<br>
-				�E���K�ꗗ�E���K�ʂ̋L�^�ɑΉ������B<br>
-				�E<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>�𗘗p���ĕ����F���̐��x���グ���B<br>
-				�E��L�̋@�\��ǉ����邽�߂ɁA�{�^�������������������������B</td>
+				<td>・サブ画面のマウスカーソル表示を、現在状況モードのみに限定した。<br>
+				・サブ画面に表示されてるのが入渠画面でない時に入渠タイマーが使えないのを修正した。<br>
+				・○○艦隊保存機能でのファイルパスがおかしかったのを修正した。<br>
+				・演習一覧・演習個別の記録に対応した。<br>
+				・<a href="https://code.google.com/p/tesseract-ocr/">Tesseract-OCR</a>を利用して文字認識の精度を上げた。<br>
+				・上記の機能を追加するために、ボタン等を少しだけ小さくした。</td>
 			</tr>
 			<tr>
 				<td>Ver.1.2</td>
 				<td>2015/02/19</td>
-				<td>�E�T�u��ʂ̍X�V�p�x��1�`30fps�܂Œ����ł���悤�ɂ����B<br>
-				�E�T�u��ʂɃ}�E�X�J�[�\����\����������悤�ɂ���I�v�V������t�����B</td>
+				<td>・サブ画面の更新頻度を1～30fpsまで調整できるようにした。<br>
+				・サブ画面にマウスカーソルを表示させられるようにするオプションを付けた。</td>
 			</tr>
 			<tr>
 				<td>Ver1.1</td>
 				<td>2015/02/18</td>
-				<td><strong>�E�y�摜�ۑ��z�{�^���ŁA�ۑ������摜�̃T�C�Y���u�{���`�`���v�ɉe������Ȃ��悤�ɂ����B<br>
-				����ɂ��A�������ׂꂸ�Ɉ��S���ĕۑ��ł���悤�ɂȂ����B</strong><br>
-				�E�u�{���`�`���v�Ɋg��̕������������B�傫�ȃf�B�X�v���C�ł�����ň��S�H<br>
-				�E���j�E��j�����ۂ̉摜�������L�^�ł���悤�ɂ����B<br>
-				�E�o���l�v�Z�@�Ɠ����^�C�}�[��ǉ����������B</td>
+				<td><strong>・【画像保存】ボタンで、保存される画像のサイズが「倍率～～％」に影響されないようにした。<br>
+				これにより、文字が潰れずに安心して保存できるようになった。</strong><br>
+				・「倍率～～％」に拡大の方も実装した。大きなディスプレイでもこれで安心？<br>
+				・中破・大破した際の画像も自動記録できるようにした。<br>
+				・経験値計算機と入渠タイマーを追加実装した。</td>
 			</tr>
 			<tr>
 				<td>Ver1.0</td>
 				<td>2015/02/15</td>
-				<td>���ŁB</td>
+				<td>初版。</td>
 			</tr>
 		</table>
-		<p><a href="#index">���ڎ��֖߂�</a></p>
+		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
-<!-- ���쌠�ɂ��� -->
-		<h1><a name="copyright">���쌠�ɂ���</a></h1>
+<!-- 著作権について -->
+		<h1><a name="copyright">著作権について</a></h1>
 		<div><dl>
-			<dt>�\�t�g��</dt><dd>���肱������Ȕ鏑 Ver.3.0.9</dd>
-			<dt>���</dt><dd>�t���[�E�F�A</dd>
-			<dt>���</dt><dd>�U���E�v���C�x��</dd>
-			<dt>�J����</dt><dd>YSR</dd>
-			<dt>�����</dt><dd>Microsoft Windows 98,Me,2000,XP(NT4.0�ȍ~���܂�),Vista,7,8,8.1,10</dd>
-			<dt>�J������</dt><dd>Hot Soup Processor ver.3.5 beta2</dd>
-			<dt>�A����</dt><dd><a href="mailto:ysr.ken@gmail.com">ysr.ken@gmail.com</a></dd>
-			<dt>Web�y�[�W</dt><dd><a href="http://www.vector.co.jp/vpack/browse/person/an050622.html">http://www.vector.co.jp/vpack/browse/person/an050622.html</a></dd>
-			<dt>�]��</dt><dd>���R�ł��B�������A���̖��O���ꏏ�ɏ悹�Ă��������B</dd>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.1.0</dd>
+			<dt>種別</dt><dd>フリーウェア</dd>
+			<dt>種類</dt><dd>攻略・プレイ支援</dd>
+			<dt>開発者</dt><dd>YSR</dd>
+			<dt>動作環境</dt><dd>Microsoft Windows 98,Me,2000,XP(NT4.0以降を含む),Vista,7,8,8.1,10</dd>
+			<dt>開発言語</dt><dd>Hot Soup Processor ver.3.5 beta2</dd>
+			<dt>連絡先</dt><dd><a href="mailto:ysr.ken@gmail.com">ysr.ken@gmail.com</a></dd>
+			<dt>Webページ</dt><dd><a href="http://www.vector.co.jp/vpack/browse/person/an050622.html">http://www.vector.co.jp/vpack/browse/person/an050622.html</a></dd>
+			<dt>転載</dt><dd>自由です。ただし、私の名前も一緒に乗せてください。</dd>
 		</dl></div>
-		<p>���͑����ꂭ�����͊p��Q�[���Y�^DMM.com������A�^�c���Ă���I�����C���Q�[���ł��B<br>
+		<p>※艦隊これくしょんは角川ゲームズ／DMM.comが製作、運営しているオンラインゲームです。<br>
 		(C) 2015 DMM.com POWERCHORD STUDIO / C2 / KADOKAWA All Rights Reserved.</p>
-		<p><a href="#index">���ڎ��֖߂�</a></p>
+		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
-<!-- �R�����g -->
-		<h1><a name="comment">�R�����g</a></h1>
-		<p><a href="https://codeiq.jp/magazine/2016/03/39291/">�u�͂���I�R�[�h�w���v��C#�����</a>��<strong>�����Ɍ�����</strong>�h��</p>
-		<p><a href="#index">���ڎ��֖߂�</a></p>
+<!-- コメント -->
+		<h1><a name="comment">コメント</a></h1>
+		<p><a href="https://codeiq.jp/magazine/2016/03/39291/">「はしれ！コード学園」のC#ちゃん</a>が<strong>鹿島に見えて</strong>辛い</p>
+		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 
-<!-- ���̃y�[�W�ɂ��� -->
-		<p>�����̃y�[�W��<a href="http://openlab.ring.gr.jp/k16/htmllint/index.html">Another HTML-lint</a>�ɂ���ă`�F�b�N����܂����B</p>
+<!-- このページについて -->
+		<p>※このページは<a href="http://validator.w3.org/">The W3C Markup Validation Servicet</a>によってチェックされました。</p>
 	</body>
 </html>
-
-<!--
-	����Ȃ�HTML�ҏW�ɋ�킵���A���̃w���v�����̂͊y���������ł��B
-	���@��Another HTML-lint�ł΂�����`�F�b�N����������͂Ȃ��͂��B
-	(���΂Ƀv���O���}�����@�~�X���Ă�����܂�Ȃ�����)
-	�����\�[�X�ł����A�Ō�܂Ō��ĉ����肠�肪�Ƃ��������܂��B
--->
