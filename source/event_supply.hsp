@@ -428,6 +428,10 @@ return
 				diff = absf(supply_time(k) - point_time)
 			}
 		next
+		if(nearest_index == -1){
+			redraw 1
+			return
+		}
 		point_time = supply_time(nearest_index)
 		// Œ‹‰Ê‚ð•\Ž¦‚·‚é
 		output = CnvStrDay(int(point_time)) + "\n"
