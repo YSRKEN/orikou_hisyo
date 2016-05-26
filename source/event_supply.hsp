@@ -434,6 +434,7 @@ return
 		}
 		point_time = supply_time(nearest_index)
 		// Œ‹‰Ê‚ð•\Ž¦‚·‚é
+		if(length2(supply_value) < nearest_index + 1) :return
 		output = CnvStrDay(int(point_time)) + "\n"
 		output += CnvStrSec2(point_time - double(int(point_time))) + "\n"
 		output += "”RF" + supply_value(0, nearest_index) + "\n"
