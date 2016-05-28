@@ -397,6 +397,7 @@ return
 	next
 	bsave exe_path + "\\save\\supply.dat", supply_log, supply_log_size * kSupplyLogBlockSize
 	PutLog "統合終了"
+	gosub *draw_supply_graph
 return
 
 //*マウスをかざした位置における資材数値を表示する
