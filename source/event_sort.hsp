@@ -8,6 +8,7 @@ return
 
 //*ソート一覧に追加する
 *add_sort_list
+	// 艦娘
 	if(sort_kind == 0){
 		if((scene_result(0) == "編成画面") && (scene_result(1) == "ソート画面") && (sort_list_size(0) < kMaxSortPages)){
 			sort_list(0) += NowTime() + "\n"
@@ -20,6 +21,7 @@ return
 			title "ソート一覧(艦娘," + sort_list_size(0) + "枚)"
 		}
 	}
+	// 装備
 	if(sort_kind == 1){
 		if((scene_result(1) == "廃棄画面") && (sort_list_size(1) < kMaxSort2Pages)){
 			sort_list(1) += NowTime() + "\n"
@@ -32,12 +34,38 @@ return
 			title "ソート一覧(装備," + sort_list_size(1) + "枚)"
 		}
 	}
+	// 基地
+	if(sort_kind == 2){
+		if((scene_result2(0) == "基地航空隊") && (instr(scene_result2(1),, "航空隊") != -1) && (sort_list_size(2) < kMaxSort3Pages)){
+			sort_list(2) += NowTime() + "\n"
+			gsel kSort3ListBufferID
+			pos sort_list_size(2) * kBaseAirWX, 0
+			gcopy kMainBufferID, kBaseAirPX, kBaseAirPY, kBaseAirWX, kBaseAirWY
+			gsel kSortListWindowID
+			objprm sort_index_id, sort_list(2)
+			sort_list_size(2)++
+			title "ソート一覧(基地," + sort_list_size(2) + "枚)"
+		}
+	}
 return
 
 //*ソート一覧からまとめ画像を生成する
 *make_sort_list
 	if(sort_list_size(sort_kind) <= 0) :return
 	PutLog "【ソート一覧画像】"
+	// 基地航空隊は特別扱い
+	if(sort_kind == 2){
+		buffer kTempBufferID, sort_list_size(sort_kind) * kBaseAirWX, kBaseAirWY
+		for k, 0, sort_list_size(sort_kind)
+			pos k * kBaseAirWX, 0
+			gcopy kSort3ListBufferID, k * kBaseAirWX, 0, kBaseAirWX, kBaseAirWY
+		next
+		file_name = NowTime() + ".png"
+		PicSave file_name
+		PutLog "ファイル名：" + file_name
+		return
+	}
+	// 艦娘・装備の場合
 	if(sort_type == 0){
 		// 普通のバージョン(練度をベタッと並べていく)
 		//出力用バッファを準備
@@ -213,6 +241,7 @@ return
 	if(sort_index == limit(sort_index, 1, sort_list_size(sort_kind) - 1)){
 		;バッファの入れ替え
 		if(sort_kind == 0){
+			// 艦娘一覧
 			buffer kTempBufferID, kSortWX, kSortWY
 				gcopy kSortListBufferID, sort_index * kSortWX, 0, kSortWX, kSortWY
 			gsel kSortListBufferID
@@ -221,13 +250,25 @@ return
 				pos (sort_index - 1) * kSortWX, 0
 					gcopy kTempBufferID, 0, 0, kSortWX, kSortWY
 		}else{
-			buffer kTempBufferID, kSort2WX, kSort2WY
-				gcopy kSort2ListBufferID, sort_index * kSort2WX, 0, kSort2WX, kSort2WY
-			gsel kSort2ListBufferID
-				pos sort_index * kSort2WX, 0
-					gcopy kSort2ListBufferID, (sort_index - 1) * kSort2WX, 0, kSort2WX, kSort2WY
-				pos (sort_index - 1) * kSort2WX, 0
-					gcopy kTempBufferID, 0, 0, kSort2WX, kSort2WY
+			if(sort_kind == 1){
+				// 装備一覧
+				buffer kTempBufferID, kSort2WX, kSort2WY
+					gcopy kSort2ListBufferID, sort_index * kSort2WX, 0, kSort2WX, kSort2WY
+				gsel kSort2ListBufferID
+					pos sort_index * kSort2WX, 0
+						gcopy kSort2ListBufferID, (sort_index - 1) * kSort2WX, 0, kSort2WX, kSort2WY
+					pos (sort_index - 1) * kSort2WX, 0
+						gcopy kTempBufferID, 0, 0, kSort2WX, kSort2WY
+			}else{
+				// 基地一覧
+				buffer kTempBufferID, kBaseAirWX, kBaseAirWY
+					gcopy kSort3ListBufferID, sort_index * kBaseAirWX, 0, kBaseAirWX, kBaseAirWY
+				gsel kSort3ListBufferID
+					pos sort_index * kBaseAirWX, 0
+						gcopy kSort3ListBufferID, (sort_index - 1) * kBaseAirWX, 0, kBaseAirWX, kBaseAirWY
+					pos (sort_index - 1) * kBaseAirWX, 0
+						gcopy kTempBufferID, 0, 0, kBaseAirWX, kBaseAirWY
+			}
 		}
 		;リストの入れ替え
 		notesel sort_list(sort_kind)
@@ -254,6 +295,7 @@ return
 	if(sort_index == limit(sort_index, 0, sort_list_size(sort_kind) - 2)){
 		;バッファの入れ替え
 		if(sort_kind == 0){
+			// 艦娘一覧
 			buffer kTempBufferID, kSortWX, kSortWY
 				gcopy kSortListBufferID, sort_index * kSortWX, 0, kSortWX, kSortWY
 			gsel kSortListBufferID
@@ -262,13 +304,25 @@ return
 				pos (sort_index + 1) * kSortWX, 0
 					gcopy kTempBufferID, 0, 0, kSortWX, kSortWY
 		}else{
-			buffer kTempBufferID, kSort2WX, kSort2WY
-				gcopy kSort2ListBufferID, sort_index * kSort2WX, 0, kSort2WX, kSort2WY
-			gsel kSort2ListBufferID
-				pos sort_index * kSort2WX, 0
-					gcopy kSort2ListBufferID, (sort_index + 1) * kSort2WX, 0, kSort2WX, kSort2WY
-				pos (sort_index + 1) * kSort2WX, 0
-					gcopy kTempBufferID, 0, 0, kSort2WX, kSort2WY
+			if(sort_kind == 1){
+				// 装備一覧
+				buffer kTempBufferID, kSort2WX, kSort2WY
+					gcopy kSort2ListBufferID, sort_index * kSort2WX, 0, kSort2WX, kSort2WY
+				gsel kSort2ListBufferID
+					pos sort_index * kSort2WX, 0
+						gcopy kSort2ListBufferID, (sort_index + 1) * kSort2WX, 0, kSort2WX, kSort2WY
+					pos (sort_index + 1) * kSort2WX, 0
+						gcopy kTempBufferID, 0, 0, kSort2WX, kSort2WY
+			}else{
+				// 基地一覧
+				buffer kTempBufferID, kBaseAirWX, kBaseAirWY
+					gcopy kSort3ListBufferID, sort_index * kBaseAirWX, 0, kBaseAirWX, kBaseAirWY
+				gsel kSort3ListBufferID
+					pos sort_index * kBaseAirWX, 0
+						gcopy kSort3ListBufferID, (sort_index + 1) * kBaseAirWX, 0, kBaseAirWX, kBaseAirWY
+					pos (sort_index + 1) * kBaseAirWX, 0
+						gcopy kTempBufferID, 0, 0, kBaseAirWX, kBaseAirWY
+			}
 		}
 		;リストの入れ替え
 		notesel sort_list(sort_kind)
@@ -295,17 +349,28 @@ return
 	if((sort_index >= 0) && (sort_index < sort_list_size(sort_kind))){
 		;バッファの削除
 		if(sort_kind == 0){
+			// 艦娘一覧
 			gsel kSortListBufferID
 			for k, sort_index, sort_list_size(sort_kind) - 1
 				pos k * kSortWX
 				gcopy kSortListBufferID, (k + 1) * kSortWX, 0, kSortWX, kSortWY
 			next
 		}else{
-			gsel kSort2ListBufferID
-			for k, sort_index, sort_list_size(sort_kind) - 1
-				pos k * kSort2WX
-				gcopy kSort2ListBufferID, (k + 1) * kSort2WX, 0, kSort2WX, kSort2WY
-			next
+			if(sort_kind == 0){
+				// 装備一覧
+				gsel kSort2ListBufferID
+				for k, sort_index, sort_list_size(sort_kind) - 1
+					pos k * kSort2WX
+					gcopy kSort2ListBufferID, (k + 1) * kSort2WX, 0, kSort2WX, kSort2WY
+				next
+			}else{
+				// 基地一覧
+				gsel kSort3ListBufferID
+				for k, sort_index, sort_list_size(sort_kind) - 1
+					pos k * kBaseAirWX
+					gcopy kSort3ListBufferID, (k + 1) * kBaseAirWX, 0, kBaseAirWX, kBaseAirWY
+				next
+			}
 		}
 		;リストの削除
 		notesel sort_list(sort_kind)
@@ -325,7 +390,15 @@ return
 *alldel_sort_list
 	dialog "項目を全削除しますか？", 2, kSoftName
 	if(stat == 6){
-		if(sort_kind == 0) :gsel kSortListBufferID :else :gsel kSort2ListBufferID
+		if(sort_kind == 0){
+			gsel kSortListBufferID
+		}else{
+			if(sort_kind == 1){
+				gsel kSort2ListBufferID
+			}else{
+				gsel kSort3ListBufferID
+			}
+		}
 		color 255, 255, 255 :boxf
 		gsel kSortListWindowID
 		sort_list(sort_kind) = ""
@@ -344,10 +417,17 @@ return
 			gzoom2 SIZE_X(2), SIZE_Y(8), kSortListBufferID, sort_index * kSortWX, 0, kSortWX, kSortWY
 			sort_index_ = sort_index
 		}else{
-			gsel kSortListWindowID
-			POS_XY 2, 0
-			gzoom2 SIZE_X(2), SIZE_Y(8), kSort2ListBufferID, sort_index * kSort2WX, 0, kSort2WX, kSort2WY
-			sort_index_ = sort_index
+			if(sort_kind == 1){
+				gsel kSortListWindowID
+				POS_XY 2, 0
+				gzoom2 SIZE_X(2), SIZE_Y(8), kSort2ListBufferID, sort_index * kSort2WX, 0, kSort2WX, kSort2WY
+				sort_index_ = sort_index
+			}else{
+				gsel kSortListWindowID
+				POS_XY 2, 0
+				gzoom2 SIZE_X(2), SIZE_Y(8), kSort3ListBufferID, sort_index * kBaseAirWX, 0, kBaseAirWX, kBaseAirWY
+				sort_index_ = sort_index
+			}
 		}
 	}
 return

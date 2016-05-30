@@ -7,6 +7,7 @@
 	buffer kSubBufferID, kFlashWX, kFlashWY
 	buffer kSortListBufferID,  kSortWX  * kMaxSortPages,  kSortWY
 	buffer kSort2ListBufferID, kSort2WX * kMaxSort2Pages, kSort2WY
+	buffer kSort3ListBufferID, kBaseAirWX * kMaxSort2Pages, kBaseAirWY
 	buffer kGraphBufferID, kGraphWX2, kGraphWY2
 	for k, 0, show_scene_list_size
 		buffer kSceneBufferID + k, kFlashWX, kFlashWY
@@ -140,7 +141,7 @@
 		POS_XY 1, 10
 			button gosub "↓↓", *lower_sort_list2
 		POS_XY 2, 8
-			combox sort_kind,,"艦娘\n装備"
+			combox sort_kind,,"艦娘\n装備\n基地"
 		POS_XY 2, 9
 			combox sort_width_index,,"出力：1列\n出力：2列\n出力：3列\n出力：4列\n出力：5列"
 		POS_XY 2, 10

@@ -29,6 +29,7 @@
 	#enum global kSubBufferID		;サブ画面に表示するためのID
 	#enum global kSortListBufferID	;ソート一覧を保存するためのID(艦娘)
 	#enum global kSort2ListBufferID	;ソート一覧を保存するためのID(装備)
+	#enum global kSort3ListBufferID	;ソート一覧を保存するためのID(基地)
 	#enum global kTempBufferID		;テンポラリ用バッファID
 	#enum global kGraphBufferID		;グラフ描画用バッファID
 	#enum global kSaveBufferID		;セーブ用バッファID
@@ -162,6 +163,7 @@
 	#const kSortStrLength 40	;艦種データの長さ
 	#const kUnitMarkLength1 8 * 5	;艦名データ(編成画面)の長さ 入力
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
+	#const kMaxSort3Pages 3	;ソート一覧(基地)の最大ページ数
 	// 内蔵ブラウザ
 	#define DIID_DWebBrowserEvents2  "{34A715A0-6587-11D0-924A-0020AFC7AC4D}"
 	#const DISPID_NAVIGATECOMPLETE2 252
@@ -347,11 +349,11 @@
 	sort_pos_x.0 = 163, 172
 	sort_pos_y.0 = 0, 28, 55, 83, 111, 139, 167, 195, 223, 251
 	// ソート一覧
-	sdim sort_list, 1024, 2
-	sort_list_size.0 = 0, 0
+	sdim sort_list, 1024, 3
+	sort_list_size.0 = 0, 0, 0
 	sort_key_flg = FALSE
 	sdim sort_kind_name, 64, 2
-	sort_kind_name.0 = "艦娘", "装備"
+	sort_kind_name.0 = "艦娘", "装備", "基地"
 	// 経験値計算機
 	sdim level_list, 1024
 		for k, 1, kMaxKammusuLevel + 1
