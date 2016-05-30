@@ -281,6 +281,7 @@
 	akashi_fleet_num  = 0	;明石が所属する艦隊
 	sdim akashi_fleet_name, kUnitMarkLength2, kUnitNum	;所属艦隊における艦娘名
 	fleet_2byte_num = "１,２,３,４"
+	last_preset_time = 0.0	;最後に編成展開 or 随伴一括解除を選択した時刻
 	//認識に使用する座標
 	dck_pos_x.0 = 623, 634, 652, 663, 680, 691
 	dck_level_pos_x.0 = 497, 507, 517

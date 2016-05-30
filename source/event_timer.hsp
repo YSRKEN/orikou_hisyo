@@ -148,13 +148,13 @@
 		// 現在開いている艦隊番号を取得する
 		fleet_num_ = instr(fleet_2byte_num,,strmid(scene_result(1), 2, 2)) / 3 + 1
 		// リセット処理
-		logmes "" + akashi_flg_ + " " + akashi_flg
 		if(akashi_flg_){
 			flg = FALSE
 			for n, 1, kUnitNum
 				if(akashi_fleet_name(n) != fleet_name(n)) :flg = TRUE :_break
 			next
-			if((flg) || (akashi_flg == FALSE)){
+			if(((flg) || (akashi_flg == FALSE)) && (flash_time - last_preset_time > 5.0 / 60 /60 / 24)){
+				logmes "" + CnvStrTime(last_preset_time) + "," + CnvStrTime(flash_time)
 				akashi_start_time = GetFloatTime()
 				akashi_fleet_num = fleet_num_
 				PutLog "【明石タイマー】"

@@ -6,7 +6,6 @@
  * 　デフォルトでは、PCのユーザー名などを目印として記憶し反映させる。
  * 　(USBメモリに入れて持ち歩くことを想定)
  * ・ボトルネックを解析し、負荷軽減のための策を考える
- * ・明石タイマーをより正確に行えるようにする
  */
 
 /* 実装済:
@@ -16,6 +15,7 @@
  * ・基地航空隊設定のシーン認識・【トリミング】機能の実装
  * ・編成プリセット画面もシーン認識(記録)対象に加える
  * ・基地航空隊設定のまとめ画像作成機能の実装
+ * ・明石タイマーをより正確に行えるようにする
  */
 
 /* ソフトウェア情報 */
@@ -194,12 +194,17 @@
 				gosub *check_scene_change
 				pre_scene_type = scene_result(0)
 				pre_scene_name = scene_result(1)
-				logmes pre_scene_type + " " + pre_scene_name
 			}
 			// 定期的に任務一覧を更新する
 			if(flash_time - task_start_time >= kTaskInterval){
 				task_start_time = flash_time
 				gosub *redraw_task_window
+			}
+			// 随伴艦一括解除ボタン用
+			gsel kMainBufferID
+			if(scene_result(1) == "随伴艦一括解除"){
+				last_preset_time = flash_time
+				logmes "" + CnvStrTime(last_preset_time)
 			}
 			// 各種タイマーを更新
 			if(time != gettime(6)){

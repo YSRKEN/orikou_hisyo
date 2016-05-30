@@ -212,6 +212,9 @@ return
 			}
 		}
 	}
+	if(pre_scene_name == "編成展開"){
+		last_preset_time = flash_time
+	}
 	// 音声通知
 	if((scene_result(0) == "出撃経過") && (scene_result(1) == "夜戦確認")){
 		if(sound_alert_flg) :PlayAlert kAlertSel
