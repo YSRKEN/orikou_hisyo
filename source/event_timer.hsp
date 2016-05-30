@@ -7,7 +7,11 @@
 		for k, 0, kDocks
 			// ドックに誰もいなければ無視する
 			gsel kMainBufferID
-			if(NearColor(480, dck_pos_y(k), 33, 174, 178) == FALSE) :_continue
+			if(NearColor(480, dck_pos_y(k), 33, 174, 178) == FALSE){
+				dock_finish_time(k) = 0.0
+				dock_finish_flg(k) = FALSE
+				_continue
+			}
 			// クレーンの位置を検出して、レベルや時間に掛かっていそうな場合に無視する
 			crane_pos = GetCranePos(k)
 			if(crane_pos != -1){
@@ -16,7 +20,7 @@
 			}
 			// 各桁の数字を読み取って、配列に代入する
 			dock_finish_time(k) = 0.0
-			dock_finish_flg(k) = 0
+			dock_finish_flg(k) = FALSE
 			dim number, 6
 			ReadNumber number, 6, dck_pos_x, dck_pos_y(k) + 25, 11, 16, 170, FALSE
 			// 正規化して、終了時刻を代入する
@@ -42,7 +46,7 @@
 	if((scene_result(0) == "工廠画面") && (scene_result(1) == "通常時")){
 		for k, 0, kDocks
 			dock_finish_time(k + kDocks) = 0.0
-			dock_finish_flg(k + Docks) = 0
+			dock_finish_flg(k + Docks) = FALSE
 			// ドックに誰もいなければ無視する
 			gsel kMainBufferID
 			if(NearColor(730, bld_pos_y(k), 204, 128, 73) == FALSE) :_continue
@@ -90,7 +94,7 @@
 			if(unit_number == 0) :_continue
 			// 各桁の数字を読み取って、配列に代入する
 			dock_finish_time(unit_number - 1 + kDocks * 2) = 0.0
-			dock_finish_flg(unit_number - 1 + kDocks * 2) = 0
+			dock_finish_flg(unit_number - 1 + kDocks * 2) = FALSE
 			expedition_kind(unit_number - 1) = -1
 			dim number, 6
 			ReadNumber number, 6, exp_pos_x, exp_pos_y, 9, 13, 190, FALSE
@@ -208,8 +212,8 @@ return
 		if((dock_finish_time(k) != 0.0) && (time_diff > 0.0)){
 			timer_output += "" + (k + 1) + "→" + CnvStrSec2(time_diff) + " Lv" + dock_level(k)
 			if(time_diff < 1.0 / 24 / 60){
-				if(dock_finish_flg(k) == 0){
-					dock_finish_flg(k) = 1
+				if(dock_finish_flg(k) == FALSE){
+					dock_finish_flg(k) = TRUE
 					PutLog "【終了通知】"
 					PutLog "入渠―第" + (k + 1) + "ドック"
 					gsel kMainWindowID
@@ -221,7 +225,7 @@ return
 			timer_output += "\n"
 		}else{
 			timer_output += "" + (k + 1) + "→00:00:00　空\n"
-			dock_finish_flg(k) = 0
+			dock_finish_flg(k) = FALSE
 		}
 	next
 	timer_output += "【建造ドック】\n"
@@ -230,8 +234,8 @@ return
 		if((dock_finish_time(k + kDocks) != 0.0) && (time_diff > 0.0)){
 			timer_output += "" + (k + 1) + "→" + CnvStrSec2(time_diff)
 			if(time_diff < 1.0 / 24 / 60){
-				if(dock_finish_flg(k + kDocks) == 0){
-					dock_finish_flg(k + kDocks) = 1
+				if(dock_finish_flg(k + kDocks) == FALSE){
+					dock_finish_flg(k + kDocks) = TRUE
 					PutLog "【終了通知】"
 					PutLog "建造―第" + (k + 1) + "ドック"
 					gsel kMainWindowID
@@ -243,7 +247,7 @@ return
 			timer_output += "\n"
 		}else{
 			timer_output += "" + (k + 1) + "→00:00:00　空\n"
-			dock_finish_flg(k + kDocks) = 0
+			dock_finish_flg(k + kDocks) = FALSE
 		}
 	next
 	timer_output += "【遠征艦隊】\n"
@@ -252,8 +256,8 @@ return
 		if((dock_finish_time(k + kDocks * 2) != 0.0) && (time_diff > 0.0)){
 			timer_output += "" + (k + 2) + "→" + CnvStrSec2(time_diff)
 			if(time_diff < 1.0 / 24 / 60){
-				if(dock_finish_flg(k + kDocks * 2) == 0){
-					dock_finish_flg(k + kDocks * 2) = 1
+				if(dock_finish_flg(k + kDocks * 2) == FALSE){
+					dock_finish_flg(k + kDocks * 2) = TRUE
 					PutLog "【終了通知】"
 					if(expedition_kind(k) != -1){
 						PutLog "遠征―第" + (k + 2) + "艦隊" + "(" + exped_name(expedition_kind(k)) + ")"
@@ -275,7 +279,7 @@ return
 			}
 		}else{
 			timer_output += "" + (k + 2) + "→00:00:00\n"
-			dock_finish_flg(k + kDocks * 2) = 0
+			dock_finish_flg(k + kDocks * 2) = FALSE
 		}
 	next
 	timer_output += "【明石タイマー】\n"
