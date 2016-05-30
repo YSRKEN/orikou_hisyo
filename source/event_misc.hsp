@@ -208,7 +208,7 @@ return
 			if(time_diff >= kAkashiInterval){
 				akashi_start_time = GetFloatTime()
 				PutLog "【明石タイマー】"
-				PutLog "カウントをリセットしました。"
+				PutLog "タイマーをセットしました。"
 			}
 		}
 	}
