@@ -96,6 +96,11 @@
 	#const kSort2WY 300
 	#const kSort2PX 200
 	#const kSort2PY 130
+	;基地航空隊(設定画面)のサイズ・オフセット座標
+	#const kBaseAirWX 225
+	#const kBaseAirWY 358
+	#const kBaseAirPX 575
+	#const kBaseAirPY 109
 	;資源画像用のパラメータ
 	#const kStockAllWX 229	;全体のサイズ
 	#const kStockAllWY 60

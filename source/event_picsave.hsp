@@ -50,6 +50,16 @@ return
 		PutLog "ファイル名：" + file_name
 		return
 	}
+	// 基地航空隊設定画面におけるトリミング(設定画像)
+	if((scene_result2(0) == "基地航空隊") && (instr(scene_result2(1),, "航空隊") != -1)){
+		PutLog "【トリミング】"
+		buffer kTempBufferID, kBaseAirWX, kBaseAirWY
+		gcopy kSubBufferID, kBaseAirPX, kBaseAirPY, kBaseAirWX, kBaseAirWY
+		file_name = NowTime() + ".png"
+		PicSave file_name
+		PutLog "ファイル名：" + file_name
+		return
+	}
 	// その他母港画面におけるトリミング(資材画像)
 	if(CheckHomeFlg(kSubBufferID)){
 		PutLog "【トリミング】"
