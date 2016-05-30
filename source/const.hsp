@@ -50,17 +50,19 @@
 /* インターフェース */
 	// マクロ
 	#define ctype POS_X(%1)  (%1) * kObjX + ((%1) + 1) * kSpace
-	#define ctype POS_XX(%1)  (%1) * kObjX2 + ((%1) + 1) * kSpace
+	#define ctype POS_BIGX(%1)  (%1) * kObjBigX + ((%1) + 1) * kSpace
 	#define ctype POS_Y(%1)  (%1) * kObjY + ((%1) + 1) * kSpace
 	#define ctype SIZE_X(%1) (%1) * kObjX + ((%1) - 1) * kSpace
-	#define ctype SIZE_X2(%1) (%1) * kObjX2 + ((%1) - 1) * kSpace
+	#define ctype SIZE_BIGX(%1) (%1) * kObjBigX + ((%1) - 1) * kSpace
+	#define ctype SIZE_SMALLX(%1) (%1) * kObjSmaillX + ((%1) - 1) * kSpace
 	#define ctype SIZE_Y(%1) (%1) * kObjY + ((%1) - 1) * kSpace
 	#define POS_XY(%1, %2) pos POS_X(%1), POS_Y(%2)
-	#define POS_X2Y(%1, %2) pos POS_XX(%1), POS_Y(%2)
+	#define POS_X2Y(%1, %2) pos POS_BIGX(%1), POS_Y(%2)
 	// 各種オブジェクトのサイズ
 	;ボタン等のオブジェクトのサイズ
 	#const kObjX  80
-	#const kObjX2 1.5 * kObjX
+	#const kObjSmaillX 0.6 * kObjX
+	#const kObjBigX 1.5 * kObjX
 	#const kObjY 20
 	#const kSpace 8
 	#const global kStatusBarY 48
@@ -202,6 +204,7 @@
 	#enum kMascotTypeCmd = 0	;マスコットにおけるコマンドの種類
 	#enum kMascotTypeTalk
 	#const kCheckPosInterval 1.0 / 24 / 60 / 60	;ズレチェックの更新時間「1秒」
+	#const kMaxKammusuLevel 155	;最大練度
 
 /* 初期設定 */
 	// 座標設定
@@ -346,7 +349,7 @@
 	sort_kind_name.0 = "艦娘", "装備"
 	// 経験値計算機
 	sdim level_list, 1024
-		for k, 1, 150 + 1
+		for k, 1, kMaxKammusuLevel + 1
 			level_list += "" + k + "\n"
 		next
 	sdim area_list, 1024

@@ -86,7 +86,7 @@
 						_continue
 					}
 					if(param_name_first == "dock_level"){
-						dock_level@(param_name_second) = limit(int(param_value), 1, 150)
+						dock_level@(param_name_second) = limit(int(param_value), 1, kMaxKammusuLevel)
 						_continue
 					}
 					if(param_name_first == "expedition_kind"){

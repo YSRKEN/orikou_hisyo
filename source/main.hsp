@@ -1,25 +1,35 @@
-/* おりこうさんな秘書 Ver.3.1.1 */
+/* おりこうさんな秘書 Ver.3.2.0 */
 
 /* TODO:
  * ・夜戦確認音声タイミングの調整
+ * ・ソフトの設定をプロファイルとして保持し、適宜選択して変更できるようにする。
+ * 　デフォルトでは、PCのユーザー名などを目印として記憶し反映させる。
+ * 　(USBメモリに入れて持ち歩くことを想定)
+ * ・ボトルネックを解析し、負荷軽減のための策を考える
+ * ・入渠ドックに艦娘が存在しなくとも、カウンターがリセットされないことがある不具合の修正
+ * ・基地航空隊設定のシーン認識・【トリミング】・まとめ画像作成機能の実装
+ * ・明石タイマーをより正確に行えるようにする
+ * ・編成プリセット画面もシーン認識(記録)対象に加える
  */
 
 /* 実装済:
- * ・資材データが存在しない場合に異常終了する不具合を修正した。
+ * ・経験値計算機にて、プリセットでは「次レベルまでの経験値計算」になるよう調節する。
+ * 　具体的には「次練度」のチェックをねじ込む
  */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.1.1"
-	#define kVerString  "311"
-	#define kLastUpdate "2016/05/26"
+	#define kVersion    "Ver.3.2.0"
+	#define kVerString  "320"
+	#define kLastUpdate "2016/05/30"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
 	#pack "expedition.csv"
 	#pack "exp_table.csv"
 	#pack "sort_type.csv"
+	#cmpopt ppout 1
 
 /* ライブラリ・サブルーチン */
 	// 他作

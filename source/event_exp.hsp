@@ -49,7 +49,7 @@ return
 				}
 			next
 			// 練度の値から、経験値補正がどれほどあるかを算出する
-			if(now_level + 1 != 150){
+			if(now_level + 1 != kMaxKammusuLevel){
 				now_exp_plus = int(unit_exp_double * (need_exp_table(now_level + 1) - need_exp_table(now_level)))
 			}else{
 				now_exp_plus = 0
@@ -118,8 +118,21 @@ return
 
 //*計算機の更新をチェックする
 *check_exp_calc
-	if(now_level_        != now_level)        :gosub *exp_calc :now_level_        = now_level
-	if(goal_level_       != goal_level)       :gosub *exp_calc :goal_level_       = goal_level
+	if(now_level_        != now_level){
+		// 次Lvのチェックが入った際の処理
+		if(next_level_flg){
+			goal_level = limit(now_level + 1, 0, kMaxKammusuLevel - 1)
+			gsel kExpCalcWindowID
+			objprm goal_level_id, goal_level
+			goal_level_= goal_level
+		}
+		gosub *exp_calc
+		now_level_ = now_level
+	}
+	if(goal_level_       != goal_level){
+		gosub *exp_calc
+		goal_level_= goal_level
+	}
 	if(area_index_       != area_index)       :gosub *exp_calc :area_index_       = area_index
 	if(result_index_     != result_index)     :gosub *exp_calc :result_index_     = result_index
 	if(reader_ship_flg_  != reader_ship_flg)  :gosub *exp_calc :reader_ship_flg_  = reader_ship_flg
