@@ -61,14 +61,14 @@ return
 		now_exp_plus = 0
 	}
 	// レベル補正についての処理
-	if(now_level > goal_level){
+	if(now_level >= goal_level){
 		if(now_level != now_level_){
-			goal_level = now_level
+			goal_level = limit(now_level + 1, 0, kMaxKammusuLevel - 1)
 			gsel kExpCalcWindowID
 			objprm goal_level_id, goal_level
 		}
 		if(goal_level != goal_level_){
-			now_level = goal_level
+			now_level = limit(goal_level - 1, 0, kMaxKammusuLevel - 1)
 			gsel kExpCalcWindowID
 			objprm now_level_id, now_level
 		}
@@ -133,7 +133,17 @@ return
 		gosub *exp_calc
 		goal_level_= goal_level
 	}
-	if(next_level_flg_   != next_level_flg)   :gosub *exp_calc :next_level_flg_   = next_level_flg
+	if(next_level_flg_   != next_level_flg){
+		// 次Lvのチェックが入った際の処理
+		if(next_level_flg){
+			goal_level = limit(now_level + 1, 0, kMaxKammusuLevel - 1)
+			gsel kExpCalcWindowID
+			objprm goal_level_id, goal_level
+			goal_level_= goal_level
+		}
+		gosub *exp_calc
+		next_level_flg_   = next_level_flg
+	}
 	if(area_index_       != area_index)       :gosub *exp_calc :area_index_       = area_index
 	if(result_index_     != result_index)     :gosub *exp_calc :result_index_     = result_index
 	if(reader_ship_flg_  != reader_ship_flg)  :gosub *exp_calc :reader_ship_flg_  = reader_ship_flg
