@@ -64,7 +64,7 @@
 					sdim param_value, 1024
 					param_value = strmid(getline, p + 1, strlen(getline) - p - 1)
 					//ƒpƒ‰ƒ[ƒ^‚Ìí—Ş‚É‚æ‚Á‚Äê‡•ª‚¯
-					if(param_name == "capture_fps_index") :capture_fps_index@    = limit(int(param_value), 0, length(capture_fps) - 1) :_continue
+					if(param_name == "capture_fps_index") :capture_fps_index@    = limit(int(param_value), 0, length(capture_fps@) - 1) :_continue
 					if(param_name == "check_move_flash")  :check_move_flash_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "get_pos_mode"){
 						if(param_value == "auto")   :get_pos_mode@ = kGetPosAuto

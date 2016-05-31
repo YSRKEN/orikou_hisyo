@@ -117,7 +117,6 @@
 					}
 				}
 			next
-			//logmes "" + exped_index + " " + temp_small_str
 			for k, 0, kExpAllPage
 				if(temp_small_str == exped_small_str@(k)){
 					exp_small_name = k

@@ -154,7 +154,6 @@
 				if(akashi_fleet_name(n) != fleet_name(n)) :flg = TRUE :_break
 			next
 			if(((flg) || (akashi_flg == FALSE)) && (flash_time - last_preset_time > 5.0 / 60 /60 / 24)){
-				logmes "" + CnvStrTime(last_preset_time) + "," + CnvStrTime(flash_time)
 				akashi_start_time = GetFloatTime()
 				akashi_fleet_num = fleet_num_
 				PutLog "【明石タイマー】"

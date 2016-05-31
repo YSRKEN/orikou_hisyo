@@ -124,7 +124,6 @@
 				position = -1
 				for k, 349, 349 + 52 * 4 + 12
 					pget k, 458
-					//logmes "" + k + " " + (ginfo_g - ginfo_r) + " " + (ginfo_b - ginfo_r)
 					if((ginfo_g - ginfo_r) > 50 && (ginfo_b - ginfo_r) > 50){
 						if(NearColor(102, 466, 205, 202, 168)){
 							position = (k - 349) / 52
