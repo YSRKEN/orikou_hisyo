@@ -23,7 +23,7 @@
 	#define global kSoftName   "おりこうさんな秘書"
 	#define kVersion    "Ver.3.2.0"
 	#define kVerString  "320"
-	#define kLastUpdate "2016/05/30"
+	#define kLastUpdate "2016/05/31"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -90,6 +90,7 @@
 	show_locker_flg2 = FALSE	//ロックストッパーの画面を出していたらTRUE
 	sort_index_ = sort_index
 	sort_kind_ = sort_kind
+	next_level_flg_ = next_level_flg
 	dim cond_, kUnitNum
 	for k, 0, kUnitNum
 		cond_(k) = cond(k)

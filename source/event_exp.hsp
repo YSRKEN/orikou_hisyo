@@ -133,6 +133,7 @@ return
 		gosub *exp_calc
 		goal_level_= goal_level
 	}
+	if(next_level_flg_   != next_level_flg)   :gosub *exp_calc :next_level_flg_   = next_level_flg
 	if(area_index_       != area_index)       :gosub *exp_calc :area_index_       = area_index
 	if(result_index_     != result_index)     :gosub *exp_calc :result_index_     = result_index
 	if(reader_ship_flg_  != reader_ship_flg)  :gosub *exp_calc :reader_ship_flg_  = reader_ship_flg

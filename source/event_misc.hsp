@@ -202,14 +202,12 @@ return
 	//現在の状況を更新する
 	gosub *check_bgm_type
 	// 各種タイマー
-	if(akashi_flg){
-		if((scene_result(0) == "母港画面") && (scene_result(1) == "通常画面")){
-			time_diff = flash_time - akashi_start_time
-			if(time_diff >= kAkashiInterval){
-				akashi_start_time = GetFloatTime()
-				PutLog "【明石タイマー】"
-				PutLog "タイマーをセットしました。"
-			}
+	if((scene_result(0) == "母港画面") && (scene_result(1) == "通常画面")){
+		time_diff = flash_time - akashi_start_time
+		if(time_diff >= kAkashiInterval){
+			akashi_start_time = GetFloatTime()
+			PutLog "【明石タイマー】"
+			PutLog "タイマーをセットしました。"
 		}
 	}
 	if(pre_scene_name == "編成展開"){
