@@ -4,6 +4,8 @@
 
 // 各種定数
 	#const kBrowserWindowID 0
+	#const TRUE 1
+	#const FALSE 0
 	// マクロ
 	#define ctype SIZE_X(%1) (%1) * kObjX + ((%1) - 1) * kSpace
 	#define ctype SIZE_Y(%1) (%1) * kObjY + ((%1) - 1) * kSpace
@@ -21,9 +23,10 @@
 	#const DISPID_NAVIGATECOMPLETE2 252
 	#define kKanColleURL "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/"
 
-
 // 変数初期化
 	sdim browser_url, 512 :browser_url = kKanColleURL
+	browser_offset_x = 105
+	browser_offset_y = 90
 
 // 本体の処理
 	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "外蔵ブラウザ"
@@ -46,6 +49,8 @@
 	pos 0, kObjY
 	axobj ie, "Shell.Explorer.2", kBrowserX, kBrowserY - kObjY
 	ie->"Navigate" browser_url
+
+	onexit goto *exit
 	stop
 
 //*艦これ
@@ -108,3 +113,9 @@ return
 	gsel kBrowserWindowID
 	ie->"Navigate" browser_url
 return
+
+//*終了確認
+*exit
+	dialog "終了しますか？", 2, kSoftName
+	if(stat == 6) :end
+	stop

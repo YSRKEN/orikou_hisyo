@@ -36,8 +36,6 @@
 				dock_level(k) = number2(0) * 100 + number2(1) * 10 + number2(2)
 			}else :if(number2(1) >= 0){
 				dock_level(k) = number2(0) * 10 + number2(1)
-			}else{
-				//dock_level(k) = number2(0)
 			}
 		next
 	}
