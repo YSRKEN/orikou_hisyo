@@ -13,7 +13,6 @@
 	#enum global kCounterWindowID	;○号カウンタのID
 	#enum global kCondMeterWindowID	;cond値メータのID
 	#enum global kBgmWindowID		;BGM機能のID
-	//#enum global kBrowserWindowID	;内蔵ブラウザ用のID
 	#enum global kTaskWindowID		;任務一覧用のID
 	#enum kMascotWindowID			;マスコット表示用ID
 	#enum kSupplyFileWindowID		;資材管理用のID
@@ -164,10 +163,6 @@
 	#const kUnitMarkLength1 8 * 5	;艦名データ(編成画面)の長さ 入力
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
 	#const kMaxSort3Pages 3	;ソート一覧(基地)の最大ページ数
-	// 内蔵ブラウザ
-	#define DIID_DWebBrowserEvents2  "{34A715A0-6587-11D0-924A-0020AFC7AC4D}"
-	#const DISPID_NAVIGATECOMPLETE2 252
-	#define kKanColleURL "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/"
 	// 任務一覧
 	#const kTaskColumnWX1 49
 	#const kTaskColumnWX2 251	;本来なら491だが、あえて短めにしている
@@ -456,8 +451,6 @@
 		mmload dir_cur + "\\" + alert_name(k), k + 1, 0
 		alert_flg(k) = TRUE
 	next
-	// 内蔵ブラウザ
-	sdim browser_url, 512 :browser_url = kKanColleURL
 	// 任務一覧
 	task_pos_x = 144
 	task_pos_y = 110, 178, 246, 314, 382

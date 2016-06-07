@@ -379,31 +379,6 @@
 			button gosub "データ統合", *merge_supply_data
 	hwnd_window(kSupplyFileWindowID) = hwnd
 
-/* 内蔵ブラウザ用画面 */
-/*	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "内蔵ブラウザ"
-	gsel kBrowserWindowID, -1
-	cls 1
-	objsize SIZE_X(4), SIZE_Y(1)
-		pos 0, 0
-			input browser_url
-	objsize kObjX, kObjY
-		pos kBrowserX - kObjX * 5, 0
-			chkbox "最前面", browser_front_flg
-				browser_front_id = stat
-		pos kBrowserX - kObjX * 4, 0
-			button gosub "艦これ", *reset_url
-		pos kBrowserX - kObjX * 3, 0
-			button gosub "中央", *scroll_browser
-		pos kBrowserX - kObjX * 2, 0
-			button gosub "中央解除", *unscroll_browser
-		pos kBrowserX - kObjX, 0
-			button gosub "移動", *move_browser
-	pos 0, kObjY
-	axobj ie, "Shell.Explorer.2", kBrowserX, kBrowserY - kObjY
-	ie->"Navigate" browser_url
-	hwnd_window(kBrowserWindowID) = hwnd
-	show_window(kBrowserWindowID) = FALSE*/
-
 /* 任務一覧用画面 */
 	screen kTaskWindowID, kTaskWindowX, kTaskWindowY, 4 :title "任務一覧"
 	gsel kTaskWindowID, -1
