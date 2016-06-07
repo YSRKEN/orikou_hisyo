@@ -114,12 +114,13 @@
 	if((scene_result(0) == "編成画面") && (instr(scene_result(1),,"艦隊") != -1)){
 		// ドラッグして交換しようとしていないかを調べる
 		gsel kMainBufferID
-		flg = FALSE
+		drag_flg = FALSE
 		for k, 0, kUnitNum
 			x = k \ 2 :y = k / 2
-			if(NearColor(342 * x + 142, 113 * y + 138, 180, 222, 219)) :flg = TRUE :_break
+			if(NearColor(342 * x + 142, 113 * y + 138, 180, 222, 219)) :drag_flg = TRUE :_break
+			if(NearColor(342 * x + 142, 113 * y + 138, 158, 158, 157)) :drag_flg = TRUE :_break
 		next
-		if(flg) :return
+		if(drag_flg) :return
 		// 各艦の「マーク」を読み取る
 		sdim fleet_name, kUnitMarkLength2, kUnitNum
 		for n, 0, kUnitNum
@@ -140,32 +141,26 @@
 		// 明石　：0x「7f7fff7ff8」
 		// 明石改：0x「7dffffffc8」
 		if((fleet_name(0) == "7f7fff7ff8") || (fleet_name(0) == "7dffffffc8")){
-			akashi_flg_ = TRUE
+			akashi_1st_flg = TRUE
 		}else{
-			akashi_flg_ = FALSE
+			akashi_1st_flg = FALSE
 		}
 		// 現在開いている艦隊番号を取得する
 		fleet_num_ = instr(fleet_2byte_num,,strmid(scene_result(1), 2, 2)) / 3 + 1
 		// リセット処理
-		if(akashi_flg_){
-			flg = FALSE
-			for n, 1, kUnitNum
-				if(akashi_fleet_name(n) != fleet_name(n)) :flg = TRUE :_break
+		if(akashi_1st_flg == FALSE) :return
+		change_mark_flg = FALSE
+		for n, 1, kUnitNum
+			if(akashi_fleet_name(n) != fleet_name(n)) :change_mark_flg = TRUE :_break
+		next
+		if((change_mark_flg) && (flash_time - last_preset_time > 5.0 / 60 /60 / 24)){
+			akashi_start_time = GetFloatTime()
+			akashi_fleet_num = fleet_num_
+			PutLog "【明石タイマー】"
+			PutLog "タイマーをセットしました。"
+			for n, 0, kUnitNum
+				akashi_fleet_name(n) = fleet_name(n)
 			next
-			if(((flg) || (akashi_flg == FALSE)) && (flash_time - last_preset_time > 5.0 / 60 /60 / 24)){
-				akashi_start_time = GetFloatTime()
-				akashi_fleet_num = fleet_num_
-				PutLog "【明石タイマー】"
-				PutLog "タイマーをセットしました。"
-				for n, 0, kUnitNum
-					akashi_fleet_name(n) = fleet_name(n)
-				next
-				akashi_flg = TRUE
-			}
-		}else{
-			if(akashi_flg){
-				akashi_flg = FALSE
-			}
 		}
 	}
 return
