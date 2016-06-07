@@ -438,7 +438,7 @@
 		// 入渠画面にて、クレーンの位置を検出する
 		#defcfunc GetCranePos int lane
 			for k, 336, kFlashWX
-				if(NearColor(k,dck_pos_y@(lane) + 58,88,111,145) != TRUE){
+				if(NearColor(k,dck_pos_y@(lane) + 58,43,43,43)){
 					return k
 				}
 			next

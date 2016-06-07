@@ -5,18 +5,17 @@
 	// 入渠画面
 	if((scene_result(0) == "入渠画面") && (scene_result(1) == "通常時")){
 		for k, 0, kDocks
-			// ドックに誰もいなければ無視する
 			gsel kMainBufferID
+			// クレーンの位置を検出して、レベルや時間に掛かっていそうな場合に無視する
+			crane_pos = GetCranePos(k)
+			if(crane_pos != -1){
+				if(crane_pos == limit(crane_pos, 450, 760)) :_continue
+			}
+			// ドックに誰もいなければ無視する
 			if(NearColor(480, dck_pos_y(k), 33, 174, 178) == FALSE){
 				dock_finish_time(k) = 0.0
 				dock_finish_flg(k) = FALSE
 				_continue
-			}
-			// クレーンの位置を検出して、レベルや時間に掛かっていそうな場合に無視する
-			crane_pos = GetCranePos(k)
-			if(crane_pos != -1){
-				if(crane_pos == limit(crane_pos, 490, 560)) :_continue
-				if(crane_pos == limit(crane_pos, 600, 760)) :_continue
 			}
 			// 各桁の数字を読み取って、配列に代入する
 			dock_finish_time(k) = 0.0
@@ -38,7 +37,7 @@
 			}else :if(number2(1) >= 0){
 				dock_level(k) = number2(0) * 10 + number2(1)
 			}else{
-				dock_level(k) = number2(0)
+				//dock_level(k) = number2(0)
 			}
 		next
 	}
