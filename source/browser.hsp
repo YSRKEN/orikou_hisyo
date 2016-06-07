@@ -27,6 +27,8 @@
 	sdim browser_url, 512 :browser_url = kKanColleURL
 	browser_offset_x = 105
 	browser_offset_y = 90
+	exit_flg = FALSE
+	browser_front_flg = FALSE
 
 // 本体の処理
 	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "外蔵ブラウザ"
@@ -50,8 +52,20 @@
 	axobj ie, "Shell.Explorer.2", kBrowserX, kBrowserY - kObjY
 	ie->"Navigate" browser_url
 
-	onexit goto *exit
-	stop
+	onexit gosub *exit
+	browser_front_flg_ = browser_front_flg
+	repeat
+		if(exit_flg) :end
+		if(browser_front_flg != browser_front_flg_){
+			if(browser_front_flg){
+				gsel kBrowserWindowID, 2
+			}else{
+				gsel kBrowserWindowID, 1
+			}
+			browser_front_flg_ = browser_front_flg
+		}
+		wait 5
+	loop
 
 //*艦これ
 *reset_url
@@ -117,5 +131,5 @@ return
 //*終了確認
 *exit
 	dialog "終了しますか？", 2, kSoftName
-	if(stat == 6) :end
-	stop
+	if(stat == 6) :exit_flg = TRUE
+return
