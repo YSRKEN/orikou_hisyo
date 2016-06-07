@@ -13,7 +13,7 @@
 	#enum global kCounterWindowID	;○号カウンタのID
 	#enum global kCondMeterWindowID	;cond値メータのID
 	#enum global kBgmWindowID		;BGM機能のID
-	#enum global kBrowserWindowID	;内蔵ブラウザ用のID
+	//#enum global kBrowserWindowID	;内蔵ブラウザ用のID
 	#enum global kTaskWindowID		;任務一覧用のID
 	#enum kMascotWindowID			;マスコット表示用ID
 	#enum kSupplyFileWindowID		;資材管理用のID
