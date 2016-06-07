@@ -14,8 +14,8 @@
 		#deffunc ResetObjParam
 			gsel kMainWindowID
 			objprm get_pos_mode_id@, get_pos_mode@
-			gsel kBrowserWindowID
-			objprm browser_front_id@, browser_front_flg@
+			/*gsel kBrowserWindowID
+			objprm browser_front_id@, browser_front_flg@*/
 			gsel kOptionWindowID
 			objprm sub_window_size_id@, sub_window_size_index@
 			objprm capture_fps_id@, capture_fps_index@

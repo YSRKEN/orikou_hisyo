@@ -380,7 +380,7 @@
 	hwnd_window(kSupplyFileWindowID) = hwnd
 
 /* 内蔵ブラウザ用画面 */
-	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "内蔵ブラウザ"
+/*	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "内蔵ブラウザ"
 	gsel kBrowserWindowID, -1
 	cls 1
 	objsize SIZE_X(4), SIZE_Y(1)
@@ -402,11 +402,11 @@
 	axobj ie, "Shell.Explorer.2", kBrowserX, kBrowserY - kObjY
 	ie->"Navigate" browser_url
 	hwnd_window(kBrowserWindowID) = hwnd
-	show_window(kBrowserWindowID) = FALSE
+	show_window(kBrowserWindowID) = FALSE*/
 
 /* 任務一覧用画面 */
 	screen kTaskWindowID, kTaskWindowX, kTaskWindowY, 4 :title "任務一覧"
-	//gsel kTaskWindowID, -1
+	gsel kTaskWindowID, -1
 	hwnd_window(kTaskWindowID) = hwnd
 	show_window(kTaskWindowID) = FALSE
 

@@ -1,0 +1,110 @@
+/* 外蔵ブラウザ */
+
+#packopt name "browser"
+
+// 各種定数
+	#const kBrowserWindowID 0
+	// マクロ
+	#define ctype SIZE_X(%1) (%1) * kObjX + ((%1) - 1) * kSpace
+	#define ctype SIZE_Y(%1) (%1) * kObjY + ((%1) - 1) * kSpace
+	;オブジェクトのサイズ
+	#const kObjX  80
+	#const kObjY 20
+	;艦これの画面のサイズ
+	#const global kFlashWX 800
+	#const global kFlashWY 480
+	;ブラウザのサイズ
+	#const kBrowserX kFlashWX + 30
+	#const kBrowserY kFlashWY + 30 + kObjY
+	;ブラウザ用定数
+	#define DIID_DWebBrowserEvents2  "{34A715A0-6587-11D0-924A-0020AFC7AC4D}"
+	#const DISPID_NAVIGATECOMPLETE2 252
+	#define kKanColleURL "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/"
+
+
+// 変数初期化
+	sdim browser_url, 512 :browser_url = kKanColleURL
+
+// 本体の処理
+	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "外蔵ブラウザ"
+	cls 1
+	objsize SIZE_X(4), SIZE_Y(1)
+		pos 0, 0
+			input browser_url
+	objsize kObjX, kObjY
+		pos kBrowserX - kObjX * 5, 0
+			chkbox "最前面", browser_front_flg
+				browser_front_id = stat
+		pos kBrowserX - kObjX * 4, 0
+			button gosub "艦これ", *reset_url
+		pos kBrowserX - kObjX * 3, 0
+			button gosub "中央", *scroll_browser
+		pos kBrowserX - kObjX * 2, 0
+			button gosub "中央解除", *unscroll_browser
+		pos kBrowserX - kObjX, 0
+			button gosub "移動", *move_browser
+	pos 0, kObjY
+	axobj ie, "Shell.Explorer.2", kBrowserX, kBrowserY - kObjY
+	ie->"Navigate" browser_url
+	stop
+
+//*艦これ
+*reset_url
+	browser_url = kKanColleURL
+	gsel kBrowserWindowID
+	objprm 0, browser_url
+return
+
+//*中央
+*scroll_browser
+	gsel kBrowserWindowID
+	repeat
+		wait 20
+		if(ie("busy") == 0) && (ie("ReadyState") == 4) :break
+	loop
+	pDoc = ie("Document")
+	;スクロール
+	pPW = pDoc("parentWindow")
+	pPW->"scrollBy" -2000, -2000
+	pPW->"scrollBy" browser_offset_x, browser_offset_y
+	;スクロールバーを隠す
+	comres pBody
+	pDoc->"getElementsByTagName" "body"
+	if(pBody("length")){
+		pBodyItem = pBody("item", 0)
+		pBodyItemStyle = pBodyItem("style")
+		pBodyItemStyle("overflow") = "hidden"
+		delcom pBodyItemStyle
+		delcom pBodyItem
+	}
+	delcom pBody
+	delcom pDoc
+return
+
+//*中央解除
+*unscroll_browser
+	gsel kBrowserWindowID
+	repeat
+		wait 20
+		if(ie("busy") == 0) && (ie("ReadyState") == 4) :break
+	loop
+	pDoc = ie("Document")
+	;スクロールバーを復活させる
+	comres pBody
+	pDoc->"getElementsByTagName" "body"
+	if(pBody("length")){
+		pBodyItem = pBody("item", 0)
+		pBodyItemStyle = pBodyItem("style")
+		pBodyItemStyle("overflow") = "scroll"
+		delcom pBodyItemStyle
+		delcom pBodyItem
+	}
+	delcom pBody
+	delcom pDoc
+return
+
+//*移動
+*move_browser
+	gsel kBrowserWindowID
+	ie->"Navigate" browser_url
+return

@@ -95,7 +95,7 @@ return
 				POS_XY 0, 6
 					button gosub "BGM機能", *show_bgm_window
 				POS_XY 1, 6
-					button gosub "内蔵ブラウザ", *show_browser
+					button gosub "外蔵ブラウザ", *show_browser
 				POS_XY 2, 6
 					button gosub "任務一覧", *show_task_window
 			}else{
@@ -163,7 +163,7 @@ return
 				POS_XY 0, 9
 					button gosub "BGM機能", *show_bgm_window
 				POS_XY 1, 9
-					button gosub "内蔵ブラウザ", *show_browser
+					button gosub "外蔵ブラウザ", *show_browser
 				POS_XY 0, 10
 					button gosub "任務一覧", *show_task_window
 			}else{
@@ -274,6 +274,11 @@ return
 *show_option
 	gsel kOptionWindowID, 2
 	show_window(kOptionWindowID) = TRUE
+return
+
+//*外蔵ブラウザを表示する
+*show_browser
+	exec exe_path + "\\browser.exe"
 return
 
 //*画像の保存パスを指定する
