@@ -184,37 +184,37 @@
 					notesel bgm_list@(i)
 					bgm_list_size@(i) = notemax
 				next
-				// pngファイルを読み込んでバッファを反映する
-				exist exe_path@ + "\\save\\buffer.png"
-				if(strsize != -1){
-					buffer kSaveBufferID
-					picload exe_path@ + "\\save\\buffer.png"
-					save_buffer_y = ginfo_sy / kFlashWY
-					for k, 0, show_scene_list_size@
-						scene_string = show_scene_list_category@(k) + "_" + show_scene_list_name@(k)
-						notesel text_buffer_scene
-						for n, 0, notemax
+			}
+			// pngファイルを読み込んでバッファを反映する
+			exist exe_path@ + "\\save\\buffer.png"
+			if(strsize != -1){
+				buffer kSaveBufferID
+				picload exe_path@ + "\\save\\buffer.png"
+				save_buffer_y = ginfo_sy / kFlashWY
+				for k, 0, show_scene_list_size@
+					scene_string = show_scene_list_category@(k) + "_" + show_scene_list_name@(k)
+					notesel text_buffer_scene
+					for n, 0, notemax
+						noteget get, n
+						split get, "\t", temp
+						if(temp(0) == scene_string){
+							gsel kSceneBufferID + k
+							pos 0, 0
+							gcopy kSaveBufferID, kFlashWX * (int(temp(1)) / save_buffer_y), kFlashWY * (int(temp(1)) \ save_buffer_y), kFlashWX, kFlashWY
+							notesel text_buffer_time
 							noteget get, n
-							split get, "\t", temp
-							if(temp(0) == scene_string){
-								gsel kSceneBufferID + k
-								pos 0, 0
-								gcopy kSaveBufferID, kFlashWX * (int(temp(1)) / save_buffer_y), kFlashWY * (int(temp(1)) \ save_buffer_y), kFlashWX, kFlashWY
-								notesel text_buffer_time
-								noteget get, n
-								show_scene_list_time@(k) = double(get)
-								_break
-							}
-						next
+							show_scene_list_time@(k) = double(get)
+							_break
+						}
 					next
-				}
-				// datファイルを読み込んで資材量を反映する
-				exist exe_path@ + "\\save\\supply.dat"
-				if(strsize != -1){
-					supply_log_size@ = strsize / kSupplyLogBlockSize
-					sdim supply_log@, supply_log_size@ * kSupplyLogBlockSize
-					bload exe_path@ + "\\save\\supply.dat", supply_log@
-				}
+				next
+			}
+			// datファイルを読み込んで資材量を反映する
+			exist exe_path@ + "\\save\\supply.dat"
+			if(strsize != -1){
+				supply_log_size@ = strsize / kSupplyLogBlockSize
+				sdim supply_log@, supply_log_size@ * kSupplyLogBlockSize
+				bload exe_path@ + "\\save\\supply.dat", supply_log@
 			}
 			// テーマ一覧を反映する
 			chdir exe_path@ + "\\theme"
