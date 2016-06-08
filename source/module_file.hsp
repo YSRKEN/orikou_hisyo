@@ -184,6 +184,15 @@
 					notesel bgm_list@(i)
 					bgm_list_size@(i) = notemax
 				next
+			}else{
+				sdim text_buffer_scene, 32000
+				notesel text_buffer
+				noteload "show_scene.csv"
+				for n, 0, notemax - 1
+					noteget get, n + 1
+					split get, ",", temp
+					text_buffer_scene += temp(0) + "_" + temp(1) + "\t" + n + "\n"
+				next
 			}
 			// pngファイルを読み込んでバッファを反映する
 			exist exe_path@ + "\\save\\buffer.png"
