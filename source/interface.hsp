@@ -385,5 +385,13 @@
 	hwnd_window(kTaskWindowID) = hwnd
 	show_window(kTaskWindowID) = FALSE
 
+/* ŠÍ‘àî•ñ‰æ–Ê */
+	screen kFleetInfoWindowID, kFleetInfoWX, kFleetInfoWY, 4 :title "ŠÍ‘àî•ñ"
+	gsel kFleetInfoWindowID, -1
+	pos kSpace, kSpace
+	mesbox fleetinfo_output, kFleetInfoWX - kSpace * 2, kFleetInfoWY - kSpace * 2, 4
+	hwnd_window(kFleetInfoWindowID) = hwnd
+	show_window(kFleetInfoWindowID) = FALSE
+
 /* ƒƒCƒ“‰æ–Ê */
 	gosub *make_main_window

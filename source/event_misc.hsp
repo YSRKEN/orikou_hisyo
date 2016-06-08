@@ -44,14 +44,14 @@ return
 	case 0
 		// 3列表示
 		if(main_pulldown_flg){
-			screen kMainWindowID, POS_X(3), POS_Y(12)
+			screen kMainWindowID, POS_X(3), POS_Y(13)
 		}else{
 			screen kMainWindowID, POS_X(3), POS_Y(9)
 		}
 		title kSoftName
 		gsel kMainWindowID, 2
 		if(main_pulldown_flg){
-			POS_XY 0, 7
+			POS_XY 0, 8
 		}else{
 			POS_XY 0, 4
 		}
@@ -98,6 +98,8 @@ return
 					button gosub "外蔵ブラウザ", *show_browser
 				POS_XY 2, 6
 					button gosub "任務一覧", *show_task_window
+				POS_XY 0, 7
+					button gosub "艦隊情報", *show_fleetinfo_window
 			}else{
 				POS_XY 0, 3
 					button gosub "↓↓↓↓", *change_pulldown
@@ -166,6 +168,8 @@ return
 					button gosub "外蔵ブラウザ", *show_browser
 				POS_XY 0, 10
 					button gosub "任務一覧", *show_task_window
+				POS_XY 1, 10
+					button gosub "艦隊情報", *show_fleetinfo_window
 			}else{
 				POS_XY 0, 5
 					button gosub "↓↓↓↓", *change_pulldown

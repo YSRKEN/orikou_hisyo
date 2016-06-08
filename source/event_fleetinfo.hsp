@@ -1,0 +1,6 @@
+/* ŠÍ‘àî•ñ‚ÉŠÖ‚·‚éƒCƒxƒ“ƒgˆ— */
+
+*show_fleetinfo_window
+	gsel kFleetInfoWindowID, 2
+	show_window(kFleetInfoWindowID) = TRUE
+return

@@ -1,4 +1,4 @@
-/* おりこうさんな秘書 Ver.3.2.1 */
+/* おりこうさんな秘書 Ver.3.3.0 */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
@@ -48,6 +48,7 @@
 	#include "event_bgm.hsp"
 	#include "event_mascot.hsp"
 	#include "event_task.hsp"
+	#include "event_fleetinfo.hsp"
 /* メインルーチン */
 *main
 	MakeSubWindow
