@@ -4,3 +4,56 @@
 	gsel kFleetInfoWindowID, 2
 	show_window(kFleetInfoWindowID) = TRUE
 return
+
+*get_fleetinfo
+	kKammusuMarkLen = 128
+	kWeapons = 4
+	kWeaponMarkLen = 108
+	;
+	notesel text_buffer
+	noteload exe_path + "\\kammusu_data.csv"
+	kammusu_data_size = notemax - 1
+	sdim kammusu_name, 64, kammusu_data_size
+	sdim kammusu_mark, kKammusuMarkLen, kammusu_data_size
+	for k, 0, kammusu_data_size
+		noteget get, k + 1
+		split get, ",", temp
+		kammusu_name(k) = temp(1)
+		kammusu_mark(k) = temp(2)
+	next
+	;
+	fleetinfo_output = ""
+	// ì«Ç›éÊÇË
+	fleetinfo_output += "äÕñ∫ÅEëïîıÅF\n"
+	for n, 0, unit_count(0)
+		gsel GetUnitID(0, n)
+		sdim kammusu_mark_temp, kKammusuMarkLen
+		for k, 0, kKammusuMarkLen
+			pget 339 + k, 117
+			if(ginfo_r < 200) :kammusu_mark_temp += "b" :else :kammusu_mark_temp += "w"
+		next
+		kammusu_index = -1
+		for k, 0, kammusu_data_size
+			if(kammusu_mark(k) == kammusu_mark_temp){
+				kammusu_index = k
+				_break
+			}
+		next
+		if(kammusu_index == -1){
+			fleetinfo_output += kammusu_mark_temp + "\n"
+		}else{
+			fleetinfo_output += kammusu_name(k) + "\n"
+		}
+		sdim weapon_mark_temp, kWeaponMarkLen, kWeapons
+		for w, 0, kWeapons
+			for k, 0, kWeaponMarkLen
+				pget 379 + k, 176 + w * 33
+				if(ginfo_r < 200) :weapon_mark_temp(w) += "b" :else :weapon_mark_temp(w) += "w"
+			next
+			fleetinfo_output += "Å@" + weapon_mark_temp(w) + "\n"
+		next
+	next
+	// îΩâf
+	gsel kFleetInfoWindowID
+	objprm 0, fleetinfo_output
+return

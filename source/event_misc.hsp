@@ -241,6 +241,10 @@ return
 			}
 		}
 	}
+	// 艦隊情報画面を更新する
+	if((scene_result(0) == "改装画面") && (instr(scene_result(1),,"第１艦隊") != -1)){
+		gosub *get_fleetinfo
+	}
 return
 
 //*サブ画面下の表示を更新する
