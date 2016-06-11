@@ -7,13 +7,17 @@ return
 
 *get_fleetinfo
 	// 情報読み取り
-	target_unit_count = unit_count(0)
-	dim target_unit_id, target_unit_count
-	dim target_weapon_id, target_unit_count, kWeapons
-	dim target_weapon_count, target_unit_count
+	master_level = GetMasterLevel()		;司令部レベル
+	target_unit_count = unit_count(0)	;艦隊の艦娘数
+	dim target_unit_id, target_unit_count	;艦娘のID
+	dim target_unit_search, target_unit_count	;艦娘の索敵値
+	dim target_weapon_id, target_unit_count, kWeapons	;装備のID
+	dim target_weapon_airs, target_unit_count, kWeapons	;装備の搭載数
+	dim target_weapon_count, target_unit_count	;所持装備数
 	for n, 0, target_unit_count
 		gsel GetUnitID(0, n)
 		// 艦娘情報
+		;艦娘のマークを読み取り、判定を行う
 		sdim kammusu_mark_temp, kKammusuMarkLen
 		for k, 0, kKammusuMarkLen
 			pget 339 + k, 122
@@ -26,15 +30,25 @@ return
 				_break
 			}
 		next
+		;索敵値を読み取る
+		dim search_num, 3
+		ReadNumber search_num, 3, search_pos_x, 423, 7, 12, 170, FALSE
+		target_unit_search(n) = limit(search_num(2), 0, 9)
+		if(search_num(1) != 10) :target_unit_search(n) += limit(search_num(1), 1, 9) * 10
+		if(search_num(0) != 10) :target_unit_search(n) += limit(search_num(0), 1, 9) * 100
+//		if(n == 4) :dialog "" + target_unit_search(n)
 		// 装備情報
 		for w, 0, kWeapons
 			target_weapon_id(n, w) = -1
+			gsel GetUnitID(0, n)
+			;装備欄なし、および未装備の場合はそれ以降読み込まない
 			if(NearColor(546, 174 + 33 * w, 27, 173, 176) == FALSE){
 				_break
 			}
 			if(NearColor(362, 175 + 33 * w, 39, 64, 46) && NearColor(361, 173 + 33 * w, 41, 63, 46)){
 				_break
 			}
+			;装備のマークを読み取り、判定を行う
 			sdim weapon_mark_temp, kWeaponMarkLen
 			for k, 0, kWeaponMarkLen
 				pget 379 + k, 176 + 33 * w
@@ -46,23 +60,61 @@ return
 					_break
 				}
 			next
+			;搭載数を読み取る
+			if(target_weapon_id(n, w) != -1){
+				switch(weapon_type(target_weapon_id(n, w)))
+					case "オートジャイロ"
+					case "艦上攻撃機"
+					case "艦上戦闘機"
+					case "艦上偵察機"
+					case "艦上爆撃機"
+					case "水上偵察機"
+					case "水上爆撃機"
+					case "多用途水上機/水上戦闘機"
+					case "対潜哨戒機"
+					case "大型飛行艇"
+						dim airs_num, 2
+						ReadNumber airs_num, 2, airs_pos_x, 169 + w * 33, 8, 12, 200, FALSE
+						if(airs_num(1) != 10){
+							target_weapon_airs(n, w) = limit(airs_num(1), 0, 9)
+							if(airs_num(0) != 10) :target_weapon_airs(n, w) += limit(airs_num(0), 1, 9) * 10
+						}
+					default
+				swend
+			}
+			;装備数を更新する
 			target_weapon_count(n)++
 		next
 	next
+	;装備から、索敵値に補正を入れる
+	for n, 0, target_unit_count
+		for w, 0, target_weapon_count(n)
+			if(target_weapon_id(n, w) == -1) :_continue
+			target_unit_search(n) -= weapon_search(target_weapon_id(n, w))
+		next
+	next
+	;制空値を計算する
+	all_anti_air = 0
+	
+	;索敵値を計算する
+	
 	// 結果書き出し
-	fleetinfo_output = "艦娘・装備：\n"
+	fleetinfo_output = ""
+	fleetinfo_output += "司令部レベル：" + master_level + "\n"
+	fleetinfo_output += "制空値：" + all_anti_air + "\n"
+	fleetinfo_output += "艦娘・装備：\n"
 	for n, 0, target_unit_count
 		if(target_unit_id(n) == -1){
 			fleetinfo_output += "不明"
 		}else{
 			fleetinfo_output += kammusu_name(target_unit_id(n))
 		}
-		fleetinfo_output += " (装備数：" + target_weapon_count(n) + ")\n"
+		fleetinfo_output += " [装備数：" + target_weapon_count(n) + "] [素索敵：" + target_unit_search(n) + "]\n"
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1){
 				fleetinfo_output += "　不明\n"
 			}else{
-				fleetinfo_output += "　" + weapon_name(target_weapon_id(n, w)) + "\n"
+				fleetinfo_output += "　[" + target_weapon_airs(n, w) + "]" + weapon_name(target_weapon_id(n, w)) + "\n"
 			}
 		next
 	next

@@ -463,6 +463,9 @@
 	task_pos_y = 110, 178, 246, 314, 382
 	// 艦隊情報
 	sdim fleetinfo_output, 4096	;各種タイマーを表示するためのバッファ
+	airs_pos_x.0 = 330, 338			;搭載数
+	search_pos_x.0 = 514, 522, 530	;索敵値
+	;
 	notesel text_buffer
 	noteload "kmms_data.csv"
 	kammusu_data_size = notemax - 1

@@ -389,7 +389,12 @@
 	screen kFleetInfoWindowID, kFleetInfoWX, kFleetInfoWY, 4 :title "艦隊情報"
 	gsel kFleetInfoWindowID, -1
 	pos kSpace, kSpace
-	mesbox fleetinfo_output, kFleetInfoWX - kSpace * 2, kFleetInfoWY - kSpace * 2, 4
+	mesbox fleetinfo_output, kFleetInfoWX - kSpace * 2, kFleetInfoWY - kSpace * 3 - kObjY, 4
+	objsize SIZE_X(1), SIZE_Y(1)
+		pos kSpace, kFleetInfoWY - kSpace - kObjY
+			chkbox "自動更新", auto_fleetinfo_flg
+		pos kSpace * 2 + kObjX, kFleetInfoWY - kSpace - kObjY
+			button gosub "手動更新", *get_fleetinfo
 	hwnd_window(kFleetInfoWindowID) = hwnd
 	show_window(kFleetInfoWindowID) = FALSE
 

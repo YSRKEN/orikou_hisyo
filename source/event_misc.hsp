@@ -241,10 +241,11 @@ return
 		}
 	}
 	// ŠÍ‘àî•ñ‰æ–Ê‚ğXV‚·‚é
-	if((scene_result(0) == "‰ü‘•‰æ–Ê") && (instr(scene_result(1),,"‘æ‚PŠÍ‘à") != -1)){
-		gsel kMainBufferID
-		PicSave CnvStrTime2(flash_time) + " test.png"
-		gosub *get_fleetinfo
+	if(auto_fleetinfo_flg){
+		if((scene_result(0) == "‰ü‘•‰æ–Ê") && (instr(scene_result(1),,"‘æ‚PŠÍ‘à") != -1)){
+			gsel kMainBufferID
+			gosub *get_fleetinfo
+		}
 	}
 return
 
