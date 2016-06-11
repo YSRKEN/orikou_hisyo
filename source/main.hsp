@@ -12,6 +12,8 @@
 	#pack "expedition.csv"
 	#pack "exp_table.csv"
 	#pack "sort_type.csv"
+	#pack "kmms_data.csv"
+	#pack "wpn_data.csv"
 	#cmpopt ppout 1
 
 /* ライブラリ・サブルーチン */
@@ -187,9 +189,9 @@
 			if(scene_result(1) == "随伴艦一括解除"){
 				last_preset_time = flash_time
 			}
-			// 各種タイマーを更新
 			if(time != gettime(6)){
 				time = gettime(6)
+				// 各種タイマーを更新
 				gosub *check_timer
 				gosub *redraw_timer
 			}

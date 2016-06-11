@@ -6,51 +6,60 @@
 return
 
 *get_fleetinfo
-	kKammusuMarkLen = 128
-	kWeapons = 4
-	kWeaponMarkLen = 108
-	;
-	notesel text_buffer
-	noteload exe_path + "\\kammusu_data.csv"
-	kammusu_data_size = notemax - 1
-	sdim kammusu_name, 64, kammusu_data_size
-	sdim kammusu_mark, kKammusuMarkLen, kammusu_data_size
-	for k, 0, kammusu_data_size
-		noteget get, k + 1
-		split get, ",", temp
-		kammusu_name(k) = temp(1)
-		kammusu_mark(k) = temp(2)
-	next
-	;
-	fleetinfo_output = ""
-	// 読み取り
-	fleetinfo_output += "艦娘・装備：\n"
-	for n, 0, unit_count(0)
+	// 情報読み取り
+	target_unit_count = unit_count(0)
+	dim target_unit_id, target_unit_count
+	dim target_weapon_id, target_unit_count, kWeapons
+	dim target_weapon_count, target_unit_count
+	for n, 0, target_unit_count
 		gsel GetUnitID(0, n)
+		// 艦娘情報
 		sdim kammusu_mark_temp, kKammusuMarkLen
 		for k, 0, kKammusuMarkLen
-			pget 339 + k, 117
-			if(ginfo_r < 200) :kammusu_mark_temp += "b" :else :kammusu_mark_temp += "w"
+			pget 339 + k, 122
+			if(ginfo_r < 210) :kammusu_mark_temp += "b" :else :kammusu_mark_temp += "w"
 		next
-		kammusu_index = -1
+		target_unit_id(n) = -1
 		for k, 0, kammusu_data_size
 			if(kammusu_mark(k) == kammusu_mark_temp){
-				kammusu_index = k
+				target_unit_id(n) = k
 				_break
 			}
 		next
-		if(kammusu_index == -1){
-			fleetinfo_output += kammusu_mark_temp + "\n"
-		}else{
-			fleetinfo_output += kammusu_name(k) + "\n"
-		}
-		sdim weapon_mark_temp, kWeaponMarkLen, kWeapons
+		// 装備情報
 		for w, 0, kWeapons
+			target_weapon_id(n, w) = -1
+			if(NearColor(546, 174 + 33 * w, 27, 173, 176) == FALSE){
+				_break
+			}
+			sdim weapon_mark_temp, kWeaponMarkLen
 			for k, 0, kWeaponMarkLen
-				pget 379 + k, 176 + w * 33
-				if(ginfo_r < 200) :weapon_mark_temp(w) += "b" :else :weapon_mark_temp(w) += "w"
+				pget 379 + k, 176 + 33 * w
+				if(ginfo_r < 210) :weapon_mark_temp += "b" :else :weapon_mark_temp += "w"
 			next
-			fleetinfo_output += "　" + weapon_mark_temp(w) + "\n"
+			for k, 0, weapon_data_size
+				if(weapon_mark(k) == weapon_mark_temp){
+					target_weapon_id(n, w) = k
+					_break
+				}
+			next
+			target_weapon_count(n)++
+		next
+	next
+	// 結果書き出し
+	fleetinfo_output = "艦娘・装備：\n"
+	for n, 0, target_unit_count
+		if(target_unit_id(n) == -1){
+			fleetinfo_output += "不明\n"
+		}else{
+			fleetinfo_output += kammusu_name(target_unit_id(n)) + "\n"
+		}
+		for w, 0, target_weapon_count(n)
+			if(target_weapon_id(n, w) == -1){
+				fleetinfo_output += "　不明\n"
+			}else{
+				fleetinfo_output += "　" + weapon_name(target_weapon_id(n, w)) + "\n"
+			}
 		next
 	next
 	// 反映

@@ -71,7 +71,7 @@
 	#const kTimerWX 250
 	#const kTimerWY 250
 	#const kFleetInfoWX 250
-	#const kFleetInfoWY 250
+	#const kFleetInfoWY 500
 	;艦これの画面のサイズ
 	#const global kFlashWX 800
 	#const global kFlashWY 480
@@ -178,6 +178,10 @@
 	#const kTaskWindowX kTaskColumnWX1 + kTaskColumnWX2
 	#const kTaskWindowY kTaskColumnWY * kMaxTasks
 	#const kTaskInterval 1.0 / 24 / 60 / 60	;任務一覧の更新時間「1秒」
+	// 艦隊情報
+	#const kKammusuMarkLen 128	;艦娘のマーク長
+	#const kWeapons 4			;最大装備可能数
+	#const kWeaponMarkLen 108	;装備のマーク長
 	// その他
 	#const global kSavePositions kMascotWindowID
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
@@ -459,6 +463,39 @@
 	task_pos_y = 110, 178, 246, 314, 382
 	// 艦隊情報
 	sdim fleetinfo_output, 4096	;各種タイマーを表示するためのバッファ
+	notesel text_buffer
+	noteload "kmms_data.csv"
+	kammusu_data_size = notemax - 1
+	dim kammusu_id, kammusu_data_size
+	sdim kammusu_name, 64, kammusu_data_size
+	sdim kammusu_mark, kKammusuMarkLen, kammusu_data_size
+	for k, 0, kammusu_data_size
+		noteget get, k + 1
+		split get, ",", temp
+		kammusu_id(k) = int(temp(0))
+		kammusu_name(k) = temp(1)
+		kammusu_mark(k) = temp(2)
+	next
+	;
+	notesel text_buffer
+	noteload "wpn_data.csv"
+	weapon_data_size = notemax - 1
+	dim weapon_id, weapon_data_size
+	sdim weapon_name, 64, weapon_data_size
+	sdim weapon_type, 64, weapon_data_size
+	dim weapon_antiair, weapon_data_size
+	dim weapon_search, weapon_data_size
+	sdim weapon_mark, kWeaponMarkLen, weapon_data_size
+	for k, 0, weapon_data_size
+		noteget get, k + 1
+		split get, ",", temp
+		weapon_id(k) = int(temp(0))
+		weapon_name(k) = temp(1)
+		weapon_type(k) = temp(2)
+		weapon_antiair(k) = int(temp(3))
+		weapon_search(k) = int(temp(4))
+		weapon_mark(k) = temp(5)
+	next
 	// その他の初期設定
 	sdim soft_log, 32000
 	exe_path = dir_cur

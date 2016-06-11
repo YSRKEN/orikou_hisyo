@@ -202,8 +202,7 @@ return
 	}
 	//自動カウント処理
 	gosub *counter_auto
-	// BGM機能
-	//現在の状況を更新する
+	// BGM機能(現在の状況を更新する)
 	gosub *check_bgm_type
 	// 各種タイマー
 	if((scene_result(0) == "母港画面") && (scene_result(1) == "通常画面")){
@@ -243,6 +242,8 @@ return
 	}
 	// 艦隊情報画面を更新する
 	if((scene_result(0) == "改装画面") && (instr(scene_result(1),,"第１艦隊") != -1)){
+		gsel kMainBufferID
+		PicSave CnvStrTime2(flash_time) + " test.png"
 		gosub *get_fleetinfo
 	}
 return
