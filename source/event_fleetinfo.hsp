@@ -32,6 +32,9 @@ return
 			if(NearColor(546, 174 + 33 * w, 27, 173, 176) == FALSE){
 				_break
 			}
+			if(NearColor(362, 175 + 33 * w, 39, 64, 46) && NearColor(361, 173 + 33 * w, 41, 63, 46)){
+				_break
+			}
 			sdim weapon_mark_temp, kWeaponMarkLen
 			for k, 0, kWeaponMarkLen
 				pget 379 + k, 176 + 33 * w
@@ -50,10 +53,11 @@ return
 	fleetinfo_output = "艦娘・装備：\n"
 	for n, 0, target_unit_count
 		if(target_unit_id(n) == -1){
-			fleetinfo_output += "不明\n"
+			fleetinfo_output += "不明"
 		}else{
-			fleetinfo_output += kammusu_name(target_unit_id(n)) + "\n"
+			fleetinfo_output += kammusu_name(target_unit_id(n))
 		}
+		fleetinfo_output += " (装備数：" + target_weapon_count(n) + ")\n"
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1){
 				fleetinfo_output += "　不明\n"
