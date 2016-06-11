@@ -1,17 +1,19 @@
-/* おりこうさんな秘書 Ver.3.2.1 */
+/* おりこうさんな秘書 Ver.3.3.0 */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.2.1"
-	#define kVerString  "321"
-	#define kLastUpdate "2016/06/07"
+	#define kVersion    "Ver.3.3.0"
+	#define kVerString  "330"
+	#define kLastUpdate "2016/06/"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
 	#pack "expedition.csv"
 	#pack "exp_table.csv"
 	#pack "sort_type.csv"
+	#pack "kmms_data.csv"
+	#pack "wpn_data.csv"
 	#cmpopt ppout 1
 
 /* ライブラリ・サブルーチン */
@@ -48,6 +50,7 @@
 	#include "event_bgm.hsp"
 	#include "event_mascot.hsp"
 	#include "event_task.hsp"
+	#include "event_fleetinfo.hsp"
 /* メインルーチン */
 *main
 	MakeSubWindow
@@ -186,9 +189,9 @@
 			if(scene_result(1) == "随伴艦一括解除"){
 				last_preset_time = flash_time
 			}
-			// 各種タイマーを更新
 			if(time != gettime(6)){
 				time = gettime(6)
+				// 各種タイマーを更新
 				gosub *check_timer
 				gosub *redraw_timer
 			}
