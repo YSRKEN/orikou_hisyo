@@ -43,12 +43,12 @@
 	if((scene_result(0) == "工廠画面") && (scene_result(1) == "通常時")){
 		for k, 0, kDocks
 			dock_finish_time(k + kDocks) = 0.0
-			dock_finish_flg(k + Docks) = FALSE
+			dock_finish_flg(k + kDocks) = FALSE
 			// ドックに誰もいなければ無視する
 			gsel kMainBufferID
 			if(NearColor(730, bld_pos_y(k), 204, 128, 73) == FALSE){
-				dock_finish_time(k + Docks) = 0.0
-				dock_finish_flg(k + Docks) = FALSE
+				dock_finish_time(k + kDocks) = 0.0
+				dock_finish_flg(k + kDocks) = FALSE
 				_continue
 			}
 			// 各桁の数字を読み取って、配列に代入する
