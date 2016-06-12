@@ -463,6 +463,7 @@
 	task_pos_y = 110, 178, 246, 314, 382
 	// 艦隊情報
 	sdim fleetinfo_output, 4096	;各種タイマーを表示するためのバッファ
+	unit_level_pos_x.0 = 492, 503, 514	;練度
 	airs_pos_x.0 = 330, 338			;搭載数
 	search_pos_x.0 = 514, 522, 530	;索敵値
 	fleet_2byte_arr = "１", "２", "３", "４"	;艦隊番号

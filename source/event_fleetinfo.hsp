@@ -34,7 +34,17 @@ return
 		next
 		;ŠÍ–º‚Ì—û“x‚ğæ“¾‚·‚é
 		target_unit_level(n) = 1
-		
+		dim level_num, 3
+		ReadNumber level_num, 3, unit_level_pos_x, 112, 10, 14, 170, FALSE
+		if(level_num(1) == 10){
+			target_unit_level(n) = limit(level_num(2), 1, 9)
+		}else{
+			if(level_num(0) == 10){
+				target_unit_level(n) = limit(level_num(1), 1, 9) * 10 + limit(level_num(2), 0, 9)
+			}else{
+				target_unit_level(n) = 100 + limit(level_num(1), 0, 5) * 10 + limit(level_num(2), 0, 9)
+			}
+		}
 		;õ“G’l‚ğ“Ç‚İæ‚é
 		dim search_num, 3
 		ReadNumber search_num, 3, search_pos_x, 423, 7, 12, 170, FALSE
@@ -254,7 +264,7 @@ return
 		if(target_unit_id(n) == -1){
 			fleetinfo_output += "•s–¾"
 		}else{
-			fleetinfo_output += kammusu_name(target_unit_id(n))
+			fleetinfo_output += kammusu_name(target_unit_id(n)) + " Lv." + target_unit_level(n)
 		}
 		fleetinfo_output += " [‘•”õ”F" + target_weapon_count(n) + "] [‘fõ“GF" + target_unit_search(n) + "]\n"
 		for w, 0, target_weapon_count(n)
