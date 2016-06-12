@@ -389,15 +389,18 @@
 	screen kFleetInfoWindowID, kFleetInfoWX, kFleetInfoWY, 4 :title "艦隊情報"
 	gsel kFleetInfoWindowID, -1
 	pos kSpace, kSpace
-	mesbox fleetinfo_output, kFleetInfoWX - kSpace * 2, kFleetInfoWY - kSpace * 3 - kObjY, 4
+	mesbox fleetinfo_output, kFleetInfoWX - kSpace * 2, kFleetInfoWY - kSpace * 3 - kObjY * 2, 4
 	objsize SIZE_X(1), SIZE_Y(1)
-		pos POS_X(0), kFleetInfoWY - kSpace - kObjY
+		pos POS_X(0), kFleetInfoWY - kSpace * 2 - kObjY * 2
 			chkbox "自動更新", auto_fleetinfo_flg
-		pos POS_X(1), kFleetInfoWY - kSpace - kObjY
+		pos POS_X(1), kFleetInfoWY - kSpace * 2 - kObjY * 2
 			button gosub "手動更新", *get_fleetinfo
 	objsize kObjSmaillX, SIZE_Y(1)
-		pos POS_X(2), kFleetInfoWY - kSpace - kObjY
+		pos POS_X(2), kFleetInfoWY - kSpace * 2 - kObjY * 2
 			combox fleetinfo_number_index, 0, "第1\n第2\n第3\n第4"
+	objsize kFleetInfoWX - kSpace * 2, SIZE_Y(1)
+		pos POS_X(0), kFleetInfoWY - kSpace - kObjY
+			button gosub "デッキビルダー形式でコピー", *copy_deck_format
 	hwnd_window(kFleetInfoWindowID) = hwnd
 	show_window(kFleetInfoWindowID) = FALSE
 

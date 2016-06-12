@@ -23,6 +23,7 @@
 	#include "hspext.as"
 	#include "module_lwm2.hsp"
 	#include "keyhook.hsp"
+	#include "clipboard.as"
 	// 自作
 	#include "const.hsp"
 	#include "module_api.hsp"
@@ -324,8 +325,8 @@
 	if((wparam == kMainWindowID) || (wparam == kSubWindowID)){
 		dialog "終了しますか？", 2, kSoftName
 		if(stat == 6){
-			exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
-			SaveSoftData TRUE
+			/*exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
+			SaveSoftData TRUE*/
 			gsel kMainWindowID
 			TasktrayDel
 			exit_flg = TRUE

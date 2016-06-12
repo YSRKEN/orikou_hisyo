@@ -1,10 +1,12 @@
 /* 艦隊情報に関するイベント処理 */
 
+//*艦隊情報画面を表示
 *show_fleetinfo_window
 	gsel kFleetInfoWindowID, 2
 	show_window(kFleetInfoWindowID) = TRUE
 return
 
+//*艦隊情報を計算して出力する
 *get_fleetinfo
 	// 情報読み取り
 	master_level = GetMasterLevel()		;司令部レベル
@@ -297,4 +299,46 @@ return
 	// 反映
 	gsel kFleetInfoWindowID
 	objprm 0, fleetinfo_output
+	fleetinfo_flg = TRUE
+return
+
+//*艦隊情報からデッキビルダー用の形式に変換する
+//*(ダミーデータ：吹雪、しばふ砲)
+*copy_deck_format
+	if(fleetinfo_flg != TRUE) :return
+	if(target_unit_count <= 0) :return
+	sdim deck_output, 32000
+	deck_output += "{\"version\":3,\"f1\":{"
+	for n, 0, target_unit_count
+		if(n != 0) :deck_output += ","
+		deck_output += "\"s" + (n + 1) + "\":{"
+		;艦娘IDが-1なら、とりあえずID=9(吹雪)にしておく
+		kid = target_unit_id(n)
+		if(kid < 0){
+			deck_output += "\"id\":\"9\","
+		}else{
+			deck_output += "\"id\":\"" + kammusu_id(kid) + "\","
+		}
+		;他の項目
+		deck_output += "\"lv\":" + limit(target_unit_level(n), 1, kMaxKammusuLevel) + ","
+		deck_output += "\"luck\":-1,"
+		deck_output += "\"items\":{"
+		for w, 0, target_weapon_count(n)
+			if(w != 0) :deck_output += ","
+			deck_output += "\"i" + (w + 1) + "\":{"
+			;装備IDが-1なら、とりあえずID=2(しばふ砲)にしておく
+			wid = target_weapon_id(n, w)
+			if(wid < 0){
+				deck_output += "\"id\":2,"
+			}else{
+				deck_output += "\"id\":" + weapon_id(wid) + ","
+			}
+			deck_output += "\"rf\":" + target_weapon_level(n, w)
+			deck_output += "}"
+		next
+		deck_output += "}}"
+	next
+	deck_output += "}}"
+	;クリップボードにコピー
+	ClipB_SetText deck_output
 return
