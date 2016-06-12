@@ -19,9 +19,9 @@ return
 	dim target_weapon_level, target_unit_count, kWeapons	;装備の改修度・熟練度
 	dim target_weapon_count, target_unit_count	;所持装備数
 	for n, 0, target_unit_count
-		gsel GetUnitID(fleetinfo_number_index, n)
 		// 艦娘情報
 		;艦娘のマークを読み取り、判定を行う
+		gsel GetUnitID(fleetinfo_number_index, n)
 		sdim kammusu_mark_temp, kKammusuMarkLen
 		for k, 0, kKammusuMarkLen
 			pget 339 + k, 122
@@ -35,6 +35,7 @@ return
 			}
 		next
 		;艦娘の練度を取得する
+		gsel GetUnitID(fleetinfo_number_index, n)
 		target_unit_level(n) = 1
 		dim level_num, 3
 		ReadNumber level_num, 3, unit_level_pos_x, 112, 10, 14, 170, FALSE
@@ -48,6 +49,7 @@ return
 			}
 		}
 		;索敵値を読み取る
+		gsel GetUnitID(fleetinfo_number_index, n)
 		dim search_num, 3
 		ReadNumber search_num, 3, search_pos_x, 423, 7, 12, 170, FALSE
 		target_unit_search(n) = limit(search_num(2), 0, 9)
