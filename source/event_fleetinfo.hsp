@@ -8,14 +8,14 @@ return
 *get_fleetinfo
 	// 情報読み取り
 	master_level = GetMasterLevel()		;司令部レベル
-	target_unit_count = unit_count(0)	;艦隊の艦娘数
+	target_unit_count = unit_count(fleetinfo_number_index)	;艦隊の艦娘数
 	dim target_unit_id, target_unit_count	;艦娘のID
 	dim target_unit_search, target_unit_count	;艦娘の索敵値
 	dim target_weapon_id, target_unit_count, kWeapons	;装備のID
 	dim target_weapon_airs, target_unit_count, kWeapons	;装備の搭載数
 	dim target_weapon_count, target_unit_count	;所持装備数
 	for n, 0, target_unit_count
-		gsel GetUnitID(0, n)
+		gsel GetUnitID(fleetinfo_number_index, n)
 		// 艦娘情報
 		;艦娘のマークを読み取り、判定を行う
 		sdim kammusu_mark_temp, kKammusuMarkLen
@@ -40,7 +40,7 @@ return
 		// 装備情報
 		for w, 0, kWeapons
 			target_weapon_id(n, w) = -1
-			gsel GetUnitID(0, n)
+			gsel GetUnitID(fleetinfo_number_index, n)
 			;装備欄なし、および未装備の場合はそれ以降読み込まない
 			if(NearColor(546, 174 + 33 * w, 27, 173, 176) == FALSE){
 				_break
@@ -195,7 +195,7 @@ return
 			if(target_weapon_id(n, w) == -1){
 				fleetinfo_output += "　不明\n"
 			}else{
-				fleetinfo_output += "　[" + target_weapon_airs(n, w) + "]" + weapon_name(target_weapon_id(n, w)) + "\n"
+				fleetinfo_output += "　[" + target_weapon_airs(n, w) + "] " + weapon_name(target_weapon_id(n, w)) + "\n"
 			}
 		next
 	next

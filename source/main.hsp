@@ -74,6 +74,7 @@
 	sort_index_ = sort_index
 	sort_kind_ = sort_kind
 	next_level_flg_ = next_level_flg
+	fleetinfo_number_index_ = fleetinfo_number_index
 	dim cond_, kUnitNum
 	for k, 0, kUnitNum
 		cond_(k) = cond(k)
@@ -308,6 +309,11 @@
 				}
 				browser_front_flg_ = browser_front_flg
 			}
+		}
+		// 艦隊情報画面
+		if(fleetinfo_number_index_ != fleetinfo_number_index){
+			gosub *get_fleetinfo
+			fleetinfo_number_index_ = fleetinfo_number_index
 		}
 		// ウェイト
 		await 1000 / capture_fps(capture_fps_index)

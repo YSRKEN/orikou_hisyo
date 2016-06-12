@@ -465,6 +465,7 @@
 	sdim fleetinfo_output, 4096	;各種タイマーを表示するためのバッファ
 	airs_pos_x.0 = 330, 338			;搭載数
 	search_pos_x.0 = 514, 522, 530	;索敵値
+	fleet_2byte_arr = "１", "２", "３", "４"
 	;
 	notesel text_buffer
 	noteload "kmms_data.csv"

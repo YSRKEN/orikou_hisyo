@@ -242,8 +242,7 @@ return
 	}
 	// ŠÍ‘àî•ñ‰æ–Ê‚ğXV‚·‚é
 	if(auto_fleetinfo_flg){
-		if((scene_result(0) == "‰ü‘•‰æ–Ê") && (instr(scene_result(1),,"‘æ‚PŠÍ‘à") != -1)){
-			gsel kMainBufferID
+		if((scene_result(0) == "‰ü‘•‰æ–Ê") && (instr(scene_result(1),,"‘æ" + fleet_2byte_arr(fleetinfo_number_index) + "ŠÍ‘à") != -1)){
 			gosub *get_fleetinfo
 		}
 	}
