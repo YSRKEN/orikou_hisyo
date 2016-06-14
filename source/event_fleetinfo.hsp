@@ -34,6 +34,19 @@ return
 				_break
 			}
 		next
+		;ŠÍ–º–¼‚É‚Â‚¢‚Ä‚Ì“Áê•â³(Graf Zeppelin)
+		if(target_unit_id(n) != -1){
+			if(instr(kammusu_name(target_unit_id(n)),,"Graf") != -1){
+				gsel GetUnitID(fleetinfo_number_index, n)
+				if(NearColor(546, 174 + 33 * 3, 27, 173, 176) == FALSE){
+					;Graf Zeppelin
+					target_unit_id(n) = 379
+				}else{
+					;Graf Zeppelin‰ü
+					target_unit_id(n) = 334
+				}
+			}
+		}
 		;ŠÍ–º‚Ì—û“x‚ğæ“¾‚·‚é
 		gsel GetUnitID(fleetinfo_number_index, n)
 		target_unit_level(n) = 1
