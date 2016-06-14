@@ -37,18 +37,27 @@ return
 		;艦娘の練度を取得する
 		gsel GetUnitID(fleetinfo_number_index, n)
 		target_unit_level(n) = 1
-		dim level_num, 3
-		ReadNumber level_num, 3, unit_level_pos_x, 112, 10, 14, 170, FALSE
-		if(level_num(1) == 10){
-			target_unit_level(n) = limit(level_num(2), 1, 9)
+		if(NearColor(472, 119, 29, 189, 192) == FALSE){
+			;そもそも練度が読み取れない状態＝光っている＝Lv99である
+			target_unit_level(n) = 99
 		}else{
-			if(level_num(0) == 10){
-				target_unit_level(n) = limit(level_num(1), 1, 9) * 10 + limit(level_num(2), 0, 9)
+			dim level_num, 3
+			ReadNumber level_num, 3, unit_level_pos_x, 112, 10, 14, 170, FALSE
+			if(level_num(0) == 9){
+				target_unit_level(n) = 99	;Lv99用の特別な処理なんだけど、f**kな仕様すぎる……
 			}else{
-				target_unit_level(n) = 100 + limit(level_num(1), 0, 5) * 10 + limit(level_num(2), 0, 9)
+				if(level_num(1) == 10){
+					target_unit_level(n) = limit(level_num(2), 1, 9)
+				}else{
+					if(level_num(0) == 10){
+						target_unit_level(n) = limit(level_num(1), 1, 9) * 10 + limit(level_num(2), 0, 9)
+					}else{
+						target_unit_level(n) = 100 + limit(level_num(1), 0, 5) * 10 + limit(level_num(2), 0, 9)
+					}
+				}
 			}
+			target_unit_level(n) = limit(target_unit_level(n), 1, kMaxKammusuLevel)
 		}
-		target_unit_level(n) = limit(target_unit_level(n), 1, kMaxKammusuLevel)
 		;索敵値を読み取る
 		gsel GetUnitID(fleetinfo_number_index, n)
 		dim search_num, 3
