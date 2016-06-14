@@ -48,6 +48,7 @@ return
 				target_unit_level(n) = 100 + limit(level_num(1), 0, 5) * 10 + limit(level_num(2), 0, 9)
 			}
 		}
+		target_unit_level(n) = limit(target_unit_level(n), 1, kMaxKammusuLevel)
 		;õ“G’l‚ğ“Ç‚İæ‚é
 		gsel GetUnitID(fleetinfo_number_index, n)
 		dim search_num, 3
