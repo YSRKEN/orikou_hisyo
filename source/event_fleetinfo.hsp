@@ -103,14 +103,14 @@ return
 			target_weapon_count(n)++
 		next
 	next
-	;‘•”õ‚©‚çAõ“G’l‚É•â³‚ğ“ü‚ê‚é
+	// ‘•”õ‚©‚çAõ“G’l‚É•â³‚ğ“ü‚ê‚é
 	for n, 0, target_unit_count
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
 			target_unit_search(n) -= weapon_search(target_weapon_id(n, w))
 		next
 	next
-	;ŠÍÚ‹@n—û“x‚ğ“Ç‚İæ‚é
+	// ŠÍÚ‹@n—û“x‚ğ“Ç‚İæ‚é
 	for n, 0, target_unit_count
 		gsel GetUnitID(fleetinfo_number_index, n)
 		for w, 0, target_weapon_count(n)
@@ -161,7 +161,7 @@ return
 			swend
 		next
 	next
-	;§‹ó’l‚ğŒvZ‚·‚é(ŠÍÚ‹@n—û“x‘Î‰)
+	// §‹ó’l‚ğŒvZ‚·‚é(ŠÍÚ‹@n—û“x‘Î‰)
 	all_anti_air = 0
 	for n, 0, target_unit_count
 		for w, 0, target_weapon_count(n)
@@ -189,7 +189,8 @@ return
 			swend
 		next
 	next
-	;õ“G’l‚ğŒvZ‚·‚é(2-5®HA33®)
+	// õ“G’l‚ğŒvZ‚·‚é(2-5®HA33®)
+	;2-5®H
 	all_search_power = -0.6142467 * ((master_level - 1) / 5 + 1) * 5
 	for n, 0, target_unit_count
 		all_search_power += 1.6841056 * sqrt(target_unit_search(n))
@@ -226,14 +227,21 @@ return
 			swend
 		next
 	next
-	all_search_power33 = -1.0 * int(0.4 * master_level)
+	;33®
+	if(4 * master_level \ 10 != 0){
+		;ceilŠÖ”‚ÌÀ‘•‚ª–Ê“|‚¾‚Á‚½‚Ì‚Åê‡•ª‚¯
+		all_search_power33 = -1.0 * (int(0.4 * master_level) + 1)
+	}else{
+		all_search_power33 = -1.0 * int(0.4 * master_level)
+	}
 	for n, 0, target_unit_count
 		all_search_power33 += sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
 			switch(weapon_type(target_weapon_id(n, w)))
-			case "…ã”šŒ‚‹@"
-				all_search_power33 += 1.1 * weapon_search(target_weapon_id(n, w))
+			case "ŠÍãí“¬‹@"
+			case "ŠÍã”šŒ‚‹@"
+				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
 				swbreak
 			case "ŠÍãUŒ‚‹@"
 				all_search_power33 += 0.8 * weapon_search(target_weapon_id(n, w))
@@ -244,18 +252,25 @@ return
 			case "…ã’ã@‹@"
 				all_search_power33 += 1.2 * weapon_search(target_weapon_id(n, w))
 				swbreak
-			case "¬Œ^“d’T"
-				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
+			case "…ã”šŒ‚‹@"
+				all_search_power33 += 1.1 * weapon_search(target_weapon_id(n, w))
 				swbreak
+			case "¬Œ^“d’T"
 			case "‘åŒ^“d’T"
+			case "‘Îö£‰ú‹@"
+			case "q‹ó—vˆõ"
+			case "…ãŠÍ—vˆõ"
+			case "‘åŒ^ƒ\ƒi["
+			case "‘åŒ^”òs’ø"
+			case "‘åŒ^’TÆ“”"
+			case "‘½—p“r…ã‹@/…ãí“¬‹@"
 				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
 				swbreak
 			default
-				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
-				swbreak
 			swend
 		next
 	next
+	all_search_power33 += 2.0 * (6 - target_unit_count)
 	// Œ‹‰Ê‘‚«o‚µ
 	fleetinfo_output = ""
 	fleetinfo_output += "i—ß•”ƒŒƒxƒ‹F" + master_level + "\n"
