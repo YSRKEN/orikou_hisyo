@@ -91,6 +91,22 @@ return
 					_break
 				}
 			next
+			;装備名についての特殊補正
+			if(target_weapon_id(n, w) != -1){
+				;(381mm/50 三連装砲)
+				if(instr(weapon_name(target_weapon_id(n, w)),,"381mm") != -1){
+					gsel GetUnitID(fleetinfo_number_index, n)
+					if(NearColor(515, 171 + 33 * w, 189, 177, 163)){
+						;381mm/50 三連装砲改
+						target_weapon_id(n, w) = 136
+					}else{
+						;381mm/50 三連装砲
+						target_weapon_id(n, w) = 132
+					}
+				}
+				;()
+				
+			}
 			;搭載数を読み取る
 			if(target_weapon_id(n, w) != -1){
 				switch(weapon_type(target_weapon_id(n, w)))
