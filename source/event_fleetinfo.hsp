@@ -191,7 +191,11 @@ return
 	next
 	// õ“G’l‚ğŒvZ‚·‚é(2-5®HA33®)
 	;2-5®H
-	all_search_power = -0.6142467 * ((master_level - 1) / 5 + 1) * 5
+	if(master_level \ 5 == 0){
+		all_search_power = -0.6142467 * master_level
+	}else{
+		all_search_power = -0.6142467 * ((master_level / 5) + 1) * 5
+	}
 	for n, 0, target_unit_count
 		all_search_power += 1.6841056 * sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
@@ -199,9 +203,6 @@ return
 			switch(weapon_type(target_weapon_id(n, w)))
 			case "ŠÍã”šŒ‚‹@"
 				all_search_power += 1.0376255 * weapon_search(target_weapon_id(n, w))
-				swbreak
-			case "…ã”šŒ‚‹@"
-				all_search_power += 1.7787282 * weapon_search(target_weapon_id(n, w))
 				swbreak
 			case "ŠÍãUŒ‚‹@"
 				all_search_power += 1.3677954 * weapon_search(target_weapon_id(n, w))
@@ -211,6 +212,9 @@ return
 				swbreak
 			case "…ã’ã@‹@"
 				all_search_power += 2.0000000 * weapon_search(target_weapon_id(n, w))
+				swbreak
+			case "…ã”šŒ‚‹@"
+				all_search_power += 1.7787282 * weapon_search(target_weapon_id(n, w))
 				swbreak
 			case "¬Œ^“d’T"
 				all_search_power += 1.0045358 * weapon_search(target_weapon_id(n, w))
