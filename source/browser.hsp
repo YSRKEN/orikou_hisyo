@@ -3,6 +3,7 @@
 #packopt name "browser"
 
 // 各種定数
+	#define kSoftName "外蔵ブラウザ"
 	#const kBrowserWindowID 0
 	#const TRUE 1
 	#const FALSE 0

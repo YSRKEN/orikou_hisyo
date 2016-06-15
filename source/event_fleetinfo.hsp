@@ -34,19 +34,42 @@ return
 				_break
 			}
 		next
+		;艦娘名についての特殊補正(Graf Zeppelin)
+		if(target_unit_id(n) != -1){
+			if(instr(kammusu_name(target_unit_id(n)),,"Graf") != -1){
+				gsel GetUnitID(fleetinfo_number_index, n)
+				if(NearColor(546, 174 + 33 * 3, 27, 173, 176)){
+					;Graf Zeppelin改
+					target_unit_id(n) = 334
+				}else{
+					;Graf Zeppelin
+					target_unit_id(n) = 379
+				}
+			}
+		}
 		;艦娘の練度を取得する
 		gsel GetUnitID(fleetinfo_number_index, n)
 		target_unit_level(n) = 1
-		dim level_num, 3
-		ReadNumber level_num, 3, unit_level_pos_x, 112, 10, 14, 170, FALSE
-		if(level_num(1) == 10){
-			target_unit_level(n) = limit(level_num(2), 1, 9)
+		if(NearColor(472, 119, 29, 189, 192) == FALSE){
+			;そもそも練度が読み取れない状態＝光っている＝Lv99である
+			target_unit_level(n) = 99
 		}else{
-			if(level_num(0) == 10){
-				target_unit_level(n) = limit(level_num(1), 1, 9) * 10 + limit(level_num(2), 0, 9)
+			dim level_num, 3
+			ReadNumber level_num, 3, unit_level_pos_x, 112, 10, 14, 170, FALSE
+			if(level_num(0) == 9){
+				target_unit_level(n) = 99	;Lv99用の特別な処理なんだけど、f**kな仕様すぎる……
 			}else{
-				target_unit_level(n) = 100 + limit(level_num(1), 0, 5) * 10 + limit(level_num(2), 0, 9)
+				if(level_num(1) == 10){
+					target_unit_level(n) = limit(level_num(2), 1, 9)
+				}else{
+					if(level_num(0) == 10){
+						target_unit_level(n) = limit(level_num(1), 1, 9) * 10 + limit(level_num(2), 0, 9)
+					}else{
+						target_unit_level(n) = 100 + limit(level_num(1), 0, 5) * 10 + limit(level_num(2), 0, 9)
+					}
+				}
 			}
+			target_unit_level(n) = limit(target_unit_level(n), 1, kMaxKammusuLevel)
 		}
 		;索敵値を読み取る
 		gsel GetUnitID(fleetinfo_number_index, n)
@@ -55,7 +78,6 @@ return
 		target_unit_search(n) = limit(search_num(2), 0, 9)
 		if(search_num(1) != 10) :target_unit_search(n) += limit(search_num(1), 1, 9) * 10
 		if(search_num(0) != 10) :target_unit_search(n) += limit(search_num(0), 1, 9) * 100
-//		if(n == 4) :dialog "" + target_unit_search(n)
 		// 装備情報
 		for w, 0, kWeapons
 			target_weapon_id(n, w) = -1
@@ -79,6 +101,42 @@ return
 					_break
 				}
 			next
+			;装備名についての特殊補正
+			if(target_weapon_id(n, w) != -1){
+				;(381mm/50 三連装砲)
+				if(instr(weapon_name(target_weapon_id(n, w)),,"381mm") != -1){
+					gsel GetUnitID(fleetinfo_number_index, n)
+					if(NearColor(515, 171 + 33 * w, 189, 177, 163)){
+						;381mm/50 三連装砲改
+						target_weapon_id(n, w) = 136
+					}else{
+						;381mm/50 三連装砲
+						target_weapon_id(n, w) = 132
+					}
+				}
+				;(25mm三連装機銃)
+				if(instr(weapon_name(target_weapon_id(n, w)),,"25mm三連装機銃") != -1){
+					gsel GetUnitID(fleetinfo_number_index, n)
+					if(NearColor(496, 176 + 33 * w, 92, 87, 80)){
+						;25mm三連装機銃 集中配備
+						target_weapon_id(n, w) = 130
+					}else{
+						;25mm三連装機銃
+						target_weapon_id(n, w) = 39
+					}
+				}
+				;(12.7cm連装高角砲)
+				if(instr(weapon_name(target_weapon_id(n, w)),,"12.7cm連装高角砲") != -1){
+					gsel GetUnitID(fleetinfo_number_index, n)
+					if(NearColor(497, 177 + 33 * w, 92, 86, 80)){
+						;12.7cm連装高角砲(後期型)
+						target_weapon_id(n, w) = 90
+					}else{
+						;12.7cm連装高角砲
+						target_weapon_id(n, w) = 9
+					}
+				}
+			}
 			;搭載数を読み取る
 			if(target_weapon_id(n, w) != -1){
 				switch(weapon_type(target_weapon_id(n, w)))
@@ -104,14 +162,14 @@ return
 			target_weapon_count(n)++
 		next
 	next
-	;装備から、索敵値に補正を入れる
+	// 装備から、索敵値に補正を入れる
 	for n, 0, target_unit_count
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
 			target_unit_search(n) -= weapon_search(target_weapon_id(n, w))
 		next
 	next
-	;艦載機熟練度を読み取る
+	// 艦載機熟練度を読み取る
 	for n, 0, target_unit_count
 		gsel GetUnitID(fleetinfo_number_index, n)
 		for w, 0, target_weapon_count(n)
@@ -162,7 +220,7 @@ return
 			swend
 		next
 	next
-	;制空値を計算する(艦載機熟練度対応)
+	// 制空値を計算する(艦載機熟練度対応)
 	all_anti_air = 0
 	for n, 0, target_unit_count
 		for w, 0, target_weapon_count(n)
@@ -190,8 +248,13 @@ return
 			swend
 		next
 	next
-	;索敵値を計算する(2-5式秋、33式)
-	all_search_power = -0.6142467 * ((master_level - 1) / 5 + 1) * 5
+	// 索敵値を計算する(2-5式秋、33式)
+	;2-5式秋
+	if(master_level \ 5 == 0){
+		all_search_power = -0.6142467 * master_level
+	}else{
+		all_search_power = -0.6142467 * ((master_level / 5) + 1) * 5
+	}
 	for n, 0, target_unit_count
 		all_search_power += 1.6841056 * sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
@@ -199,9 +262,6 @@ return
 			switch(weapon_type(target_weapon_id(n, w)))
 			case "艦上爆撃機"
 				all_search_power += 1.0376255 * weapon_search(target_weapon_id(n, w))
-				swbreak
-			case "水上爆撃機"
-				all_search_power += 1.7787282 * weapon_search(target_weapon_id(n, w))
 				swbreak
 			case "艦上攻撃機"
 				all_search_power += 1.3677954 * weapon_search(target_weapon_id(n, w))
@@ -211,6 +271,9 @@ return
 				swbreak
 			case "水上偵察機"
 				all_search_power += 2.0000000 * weapon_search(target_weapon_id(n, w))
+				swbreak
+			case "水上爆撃機"
+				all_search_power += 1.7787282 * weapon_search(target_weapon_id(n, w))
 				swbreak
 			case "小型電探"
 				all_search_power += 1.0045358 * weapon_search(target_weapon_id(n, w))
@@ -227,14 +290,21 @@ return
 			swend
 		next
 	next
-	all_search_power33 = -1.0 * int(0.4 * master_level)
+	;33式
+	if(4 * master_level \ 10 != 0){
+		;ceil関数の実装が面倒だったので場合分け
+		all_search_power33 = -1.0 * (int(0.4 * master_level) + 1)
+	}else{
+		all_search_power33 = -1.0 * int(0.4 * master_level)
+	}
 	for n, 0, target_unit_count
 		all_search_power33 += sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
 			switch(weapon_type(target_weapon_id(n, w)))
-			case "水上爆撃機"
-				all_search_power33 += 1.1 * weapon_search(target_weapon_id(n, w))
+			case "艦上戦闘機"
+			case "艦上爆撃機"
+				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
 				swbreak
 			case "艦上攻撃機"
 				all_search_power33 += 0.8 * weapon_search(target_weapon_id(n, w))
@@ -245,18 +315,25 @@ return
 			case "水上偵察機"
 				all_search_power33 += 1.2 * weapon_search(target_weapon_id(n, w))
 				swbreak
-			case "小型電探"
-				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
+			case "水上爆撃機"
+				all_search_power33 += 1.1 * weapon_search(target_weapon_id(n, w))
 				swbreak
+			case "小型電探"
 			case "大型電探"
+			case "対潜哨戒機"
+			case "航空要員"
+			case "水上艦要員"
+			case "大型ソナー"
+			case "大型飛行艇"
+			case "大型探照灯"
+			case "多用途水上機/水上戦闘機"
 				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
 				swbreak
 			default
-				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
-				swbreak
 			swend
 		next
 	next
+	all_search_power33 += 2.0 * (6 - target_unit_count)
 	// 結果書き出し
 	fleetinfo_output = ""
 	fleetinfo_output += "司令部レベル：" + master_level + "\n"
@@ -292,7 +369,7 @@ return
 					fleetinfo_output += "\n"
 					swbreak
 				default
-					fleetinfo_output += weapon_name(wid) + "\n"
+					fleetinfo_output += "　" + weapon_name(wid) + "\n"
 					swbreak
 				swend
 			}

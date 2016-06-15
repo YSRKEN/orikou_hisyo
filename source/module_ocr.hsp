@@ -207,7 +207,7 @@
 					master_level = 100 + limit(supnum(1), 0, 2) * 10 + limit(supnum(2), 0, 9)
 				}
 			}
-		return master_level
+		return limit(master_level, 1, 120)
 		// ‘Œ¹—p‚ÉA“Ç‚İæ‚Á‚½”š‚ğ³‹K‰»‚·‚é
 		#deffunc NormalizeSupply array number
 			for k, 0, length(number)
