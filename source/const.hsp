@@ -455,7 +455,11 @@
 		exist dir_cur + "\\" + alert_name(k)
 		alert_flg(k) = FALSE
 		if(strsize == -1) :_continue
-		mmload dir_cur + "\\" + alert_name(k), k + 1, 0
+		if(k == kAlertSel){
+			mmload dir_cur + "\\" + alert_name(k), k + 1, 2
+		}else{
+			mmload dir_cur + "\\" + alert_name(k), k + 1, 0
+		}
 		alert_flg(k) = TRUE
 	next
 	// ”C–±ˆê——
