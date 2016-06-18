@@ -113,7 +113,10 @@
 	screen kTimerWindowID, kTimerWX, kTimerWY, 4 :title "各種タイマー"
 	gsel kTimerWindowID, -1
 	pos kSpace, kSpace
-	mesbox timer_output, kTimerWX - kSpace * 2, kTimerWY - kSpace * 2, 4
+		mesbox timer_output, kTimerWX - kSpace * 2, kTimerWY - kSpace * 3 - kObjY, 4
+	objsize SIZE_X(1), SIZE_Y(1)
+		pos kTimerWX - kSpace - kObjX, kTimerWY - kSpace - kObjY
+			button gosub "疲労リセット", *reset_fatigue_timer
 	hwnd_window(kTimerWindowID) = hwnd
 	show_window(kTimerWindowID) = FALSE
 

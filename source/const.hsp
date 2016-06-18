@@ -69,7 +69,7 @@
 	#const global kStatusBarY 48
 	;各種画面のサイズ
 	#const kTimerWX 250
-	#const kTimerWY 250
+	#const kTimerWY 300
 	#const kFleetInfoWX 250
 	#const kFleetInfoWY 500
 	;艦これの画面のサイズ
@@ -200,11 +200,13 @@
 	#enum global kBattleRankS = 0	;戦闘結果におけるランク
 	#enum global kBattleRankA
 	#enum global kBattleRankB
-	#enum global kBattleRankLoss
+	#enum global kBattleRankC
+	#enum global kBattleRankD
 	#const global kSupplyLogBlockSize 28	;ログの1件あたりのブロックサイズ
 	#const kPutSupplyLogInterval 10.0 / 60 / 24	;資材ログの更新間隔
 	#const kAutoSaveInterval 10.0 / 60 / 24		;自動設定セーブの更新間隔
 	#const kAkashiInterval 20.0 / 24 / 60	;明石タイマーの修理時間「20分」
+	#const kFatigueInterval 15	;疲労回復タイマーの最大時間「15分」
 	#const global kBgmKinds 4
 	#enum kBgmTypeHome = 0	;BGMの種類
 	#enum kBgmTypeMap
@@ -284,6 +286,10 @@
 	sdim akashi_fleet_name, kUnitMarkLength2, kUnitNum	;所属艦隊における艦娘名
 	fleet_2byte_num = "１,２,３,４"
 	last_preset_time = 0.0	;最後に編成展開 or 随伴一括解除を選択した時刻
+	// 疲労回復タイマー
+	fatigue_timer_start_time = 0.0	;疲労回復タイマー作動時の時刻
+	fatigue_timer_flg = FALSE		;タイマーがカウントしているか
+	fatigue_timer_done_interval = 0	;疲労が抜けきる時間長(可変)
 	//認識に使用する座標
 	dck_pos_x.0 = 623, 634, 652, 663, 680, 691
 	dck_level_pos_x.0 = 497, 507, 517
