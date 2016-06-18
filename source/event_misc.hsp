@@ -208,13 +208,46 @@ return
 	if((scene_result(0) == "母港画面") && (scene_result(1) == "通常画面")){
 		time_diff = flash_time - akashi_start_time
 		if(time_diff >= kAkashiInterval){
+			// 明石タイマー作動
 			akashi_start_time = GetFloatTime()
 			PutLog "【明石タイマー】"
 			PutLog "タイマーをセットしました。"
 		}
 	}
 	if(pre_scene_name == "編成展開"){
+		// 編成展開による変化
 		last_preset_time = flash_time
+	}
+	// 疲労回復タイマー周りの処理
+	//帰投時にcond値-15(便宜上出撃時にタイマー開始)
+	if((pre_scene_type == "海域出撃") && (pre_scene_name == "艦隊選択") && (scene_result(1) == "出撃画面")){
+		if(exercises_flg == FALSE){
+			// 疲労回復タイマースタート
+			fatigue_timer_start_time = GetFloatTime()
+			fatigue_timer_flg = TRUE
+			fatigue_timer_done_interval = limit(fatigue_timer_done_interval + kFatigueInterval, 0, 49)	//Cond値0未満はありえないので
+		}
+	}
+	//昼戦突入時はcond値-3
+	if((pre_scene_name == "海域マップ") && (scene_result(1) == "昼戦画面")){
+		fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 3, 0, 49)
+	}
+	//夜戦突入時はcond値-2
+	if((pre_scene_name == "海域マップ") && (scene_result(1) == "夜戦画面")){
+		fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 2, 0, 49)
+	}
+	if((pre_scene_name == "夜戦確認") && (scene_result(1) == "夜戦画面")){
+		fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 2, 0, 49)
+	}
+	if((pre_scene_name == "戦果判定") && (scene_result(1) == "戦果報告")){
+		//S勝利時はcond値+4
+		
+		//A勝利時はcond値+3
+		
+		//B勝利時はcond値+2
+		
+		//C勝利時はcond値+1
+		
 	}
 	// 音声通知
 	if((scene_result(0) == "出撃経過") && (scene_result(1) == "戦闘判定")){

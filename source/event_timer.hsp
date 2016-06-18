@@ -247,6 +247,21 @@ return
 	if(time_diff > 0.0) :timer_output += CnvStrSec2(time_diff) :else :timer_output += "00:00:00"
 	if(time_diff >= kAkashiInterval) :timer_output += "™" :else :timer_output += "@"
 	timer_output += "‘æ" + strmid(fleet_2byte_num, (akashi_fleet_num - 1) * 3, 2) + "ŠÍ‘à\n"
+	timer_output += "y”æ˜J‰ñ•œƒ^ƒCƒ}[z\n"
+	if(fatigue_timer_flg){
+		time_diff = now_time - fatigue_timer_start_time
+		if((time_diff > 0.0) && (time_diff < 1.0 * fatigue_timer_done_interval / 24 / 60)){
+			timer_output += CnvStrSec2(time_diff) + " 00:" + strf("%02d", fatigue_timer_done_interval) + ":00\n"
+		}else{
+			PutLog "y‰ñ•œ’Ê’mz"
+			PutLog "ŠÍ‘à‚Ì”æ˜J‚ª‰ñ•œ‚µ‚Ü‚µ‚½B"
+			gsel kMainWindowID
+			TasktrayPopup2 "ŠÍ‘à‚Ì”æ˜J‚ª\n‰ñ•œ‚µ‚Ü‚µ‚½", kSoftName, 1, 1000
+			if(sound_alert_flg) :PlayAlert kAlertExp
+			fatigue_timer_flg = FALSE
+			fatigue_timer_done_interval = 0
+		}
+	}
 	gsel kTimerWindowID
 	objprm 0, timer_output
 return
