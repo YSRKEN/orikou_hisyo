@@ -239,15 +239,24 @@ return
 	if((pre_scene_name == "夜戦確認") && (scene_result(1) == "夜戦画面")){
 		fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 2, 0, 49)
 	}
-	if((pre_scene_name == "戦果判定") && (scene_result(1) == "戦果報告")){
+	logmes "" + pre_scene_name + "->" + scene_result(1)
+	if((pre_scene_name == "戦闘判定") && (scene_result(1) == "戦果報告")){
 		//S勝利時はcond値+4
-		
+		if(battle_rank == kBattleRankS){
+			fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 4, 0, 49)
+		}
 		//A勝利時はcond値+3
-		
+		if(battle_rank == kBattleRankA){
+			fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 3, 0, 49)
+		}
 		//B勝利時はcond値+2
-		
+		if(battle_rank == kBattleRankB){
+			fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 2, 0, 49)
+		}
 		//C勝利時はcond値+1
-		
+		if(battle_rank == kBattleRankC){
+			fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 1, 0, 49)
+		}
 	}
 	// 音声通知
 	if((scene_result(0) == "出撃経過") && (scene_result(1) == "戦闘判定")){

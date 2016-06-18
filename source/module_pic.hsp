@@ -434,7 +434,15 @@
 					}
 				}
 			}
-		return kBattleRankLoss
+			// 戦術的敗北C
+			if(NearColor(23,43,29,189,192)){
+				if(NearColor(238,229,181,38,24)){
+					if(NearColor(571,233, 253, 180, 0)){
+						return kBattleRankC
+					}
+				}
+			}
+		return kBattleRankD
 		// 入渠画面にて、クレーンの位置を検出する
 		#defcfunc GetCranePos int lane
 			for k, 336, kFlashWX

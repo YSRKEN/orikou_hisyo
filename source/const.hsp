@@ -200,7 +200,8 @@
 	#enum global kBattleRankS = 0	;戦闘結果におけるランク
 	#enum global kBattleRankA
 	#enum global kBattleRankB
-	#enum global kBattleRankLoss
+	#enum global kBattleRankC
+	#enum global kBattleRankD
 	#const global kSupplyLogBlockSize 28	;ログの1件あたりのブロックサイズ
 	#const kPutSupplyLogInterval 10.0 / 60 / 24	;資材ログの更新間隔
 	#const kAutoSaveInterval 10.0 / 60 / 24		;自動設定セーブの更新間隔

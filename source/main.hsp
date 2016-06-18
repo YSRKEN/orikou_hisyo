@@ -133,13 +133,13 @@
 			// ソート一覧で選択位置が変わった際に表示する画像を変更する
 			gosub *redraw_sort_preview
 			// 精度面の問題から、勝利判定は常時行うようにする
-			// (判定できない＝C以下と判定されるので、最大評価を取る)
+			// (判定できない＝D以下と判定されるので、最大評価を取る)
 			if(scene_result(1) == "戦闘判定"){
 				battle_rank_ = JudgeBattleRank()
 				if(battle_rank > battle_rank_) :battle_rank = battle_rank_
 			}else{
 				if((scene_result(1) != "戦果報告") && (scene_result(1) != "不明")){
-					battle_rank = kBattleRankLoss
+					battle_rank = kBattleRankD
 				}
 			}
 			// 資材ログ機能

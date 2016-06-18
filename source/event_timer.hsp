@@ -250,7 +250,7 @@ return
 	timer_output += "y”æ˜J‰ñ•œƒ^ƒCƒ}[z\n"
 	if(fatigue_timer_flg){
 		time_diff = now_time - fatigue_timer_start_time
-		if((time_diff > 0.0) && (time_diff < 1.0 * fatigue_timer_done_interval / 24 / 60)){
+		if((time_diff >= 0.0) && (time_diff < 1.0 * fatigue_timer_done_interval / 24 / 60)){
 			timer_output += CnvStrSec2(time_diff) + " 00:" + strf("%02d", fatigue_timer_done_interval) + ":00\n"
 		}else{
 			PutLog "y‰ñ•œ’Ê’mz"
@@ -270,4 +270,11 @@ return
 *show_timer
 	gsel kTimerWindowID, 2
 	show_window(kTimerWindowID) = TRUE
+return
+
+//*”æ˜Jƒ^ƒCƒ}[‚ðƒŠƒZƒbƒg‚·‚é
+*reset_fatigue_timer
+	fatigue_timer_start_time = 0.0
+	fatigue_timer_flg = FALSE
+	fatigue_timer_done_interval = 0
 return
