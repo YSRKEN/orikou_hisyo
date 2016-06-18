@@ -1,11 +1,18 @@
-/* おりこうさんな秘書 Ver.3.3.1 */
+/*
+* SoftWareName(Jp) : おりこうさんな秘書
+* SoftWareName(En) : orikou_hisyo
+* Version          : 3.3.2 dev
+* Author           : YSR
+* License          : MIT
+* Copyright(C) 2015 YSR
+*/
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.3.1"
-	#define kVerString  "331"
-	#define kLastUpdate "2016/06/15"
+	#define kVersion    "Ver.3.3.2 dev"
+	#define kVerString  "332"
+	#define kLastUpdate "2016/06/18"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
