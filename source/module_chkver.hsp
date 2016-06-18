@@ -1,0 +1,29 @@
+/* バージョンチェック用関数 */
+#module getver
+	#defcfunc GetLatestVer
+		// ネットに接続できるかを確認する
+		netninit
+		if(stat != 0){
+			dialog "ネットに接続できませんでした。", 1, kSoftName
+			return ""
+		}
+		neturl "http://ysrken.blog.fc2.com/"
+		netrequest_get "blog-entry-77.html"
+		error_flg = FALSE
+		while
+			netexec res
+			if(res > 0) :_break
+			if(res < 0) :error_flg = TRUE :_break
+			await 50
+		wend
+		if(error_flg){
+			dialog "更新情報を取得できませんでした。", 1, kSoftName
+			return ""
+		}else{
+			netgetv html_buffer
+			sdim html_buffer2, 32000
+			nkfcnv html_buffer2, html_buffer, "s", -1, 32000
+			pos 1 = instr(html_buffer2,,"最新バージョン")
+		}
+	return ""
+#global

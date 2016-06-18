@@ -28,12 +28,14 @@
 	#include "a2d.hsp"
 	#include "hspcv.as"
 	#include "hspext.as"
+	#include "hspinet.as"
 	#include "module_lwm2.hsp"
 	#include "keyhook.hsp"
 	#include "clipboard.as"
 	// 自作
 	#include "const.hsp"
 	#include "module_api.hsp"
+	#include "module_chkver.hsp"
 	#include "module_misc.hsp"
 	#include "module_file.hsp"
 	#include "module_ocr.hsp"
@@ -98,6 +100,9 @@
 	mascot_index_ = mascot_index
 	main_width_index_ = main_width_index
 	khHook *shortcut
+	// バージョンチェック
+	latest_ver = GetLatestVer()
+	assert
 	// メインループ
 	repeat
 		if(exit_flg) :end
