@@ -363,15 +363,11 @@
 				cvsave exe_path@ + "\\save\\buffer.png", kCVSaveBufferID
 			}
 			// ソフトのログを保存
-			//保存先フォルダが存在するかを判定
-			dirlist x, exe_path@ + "\\log", 5
-			if(stat == 0) :mkdir exe_path@ + "\\log"
-			//ログを保存する
-			notesel soft_log@
-			notesave exe_path@ + "\\log\\soft(" + NowTime() + ").log"
+			SaveLog
 
 			if(flg) :PutLog "保存完了"
 		return
+		// 
 		// データ読み込み
 		#deffunc LoadSystemData
 			// 記録するシーン一覧

@@ -517,6 +517,8 @@
 	next
 	// その他の初期設定
 	sdim soft_log, 32000
+	soft_log_year = ""
+	soft_log_month = ""
 	exe_path = dir_cur
 	sdim scene_result, 64, kPosDim
 	save_buffer_turn = 10	;セーブデータにおける縦の最大枚数
@@ -528,3 +530,6 @@
 	dim battle_index, kBattleType		;各画面のインデックス
 	show_mascot_area_flg = FALSE
 	shortcut_save_flg = FALSE
+	sdim soft_log_file_name, 256
+	soft_log_year = ""
+	soft_log_month = ""

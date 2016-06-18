@@ -34,8 +34,8 @@
 	// é©çÏ
 	#include "const.hsp"
 	#include "module_api.hsp"
-	#include "module_file.hsp"
 	#include "module_misc.hsp"
+	#include "module_file.hsp"
 	#include "module_ocr.hsp"
 	#include "module_pic.hsp"
 	#include "module_time.hsp"

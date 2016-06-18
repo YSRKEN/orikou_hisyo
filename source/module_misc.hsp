@@ -38,17 +38,34 @@
 			objprm pic_save_path_index_id@, pic_save_path_flg@
 
 		return
+		// ログを書き出す
+		#deffunc SaveLog
+			// 保存用のフォルダを作成する
+			dirlist x, exe_path@ + "\\log", 5
+			if(stat == 0) :mkdir exe_path@ + "\\log"
+			dirlist x, exe_path@ + "\\log\\" + soft_log_year@, 5
+			if(stat == 0) :mkdir exe_path@ + "\\log\\" + soft_log_year@
+			dirlist x, exe_path@ + "\\log\\" + soft_log_year@ + "\\" + soft_log_month@, 5
+			if(stat == 0) :mkdir exe_path@ + "\\log\\" + soft_log_year@ + "\\" + soft_log_month@
+			// 保存する
+			notesel soft_log@
+			notesave exe_path@ + "\\log\\" + soft_log_year@ + "\\" + soft_log_month@ + "\\" + soft_log_file_name@
+		return
 		// ログに追記
 		#deffunc PutLog str message
 			// ソフトのログが溢れそうになったら自動保存する
 			if(strlen(soft_log@) > 30 * 1000){
-				dirlist x, exe_path@ + "\\log", 5
-				if(stat == 0) :mkdir exe_path@ + "\\log"
-				notesel soft_log@
-				notesave exe_path@ + "\\log\\soft(" + NowTime() + ").log"
+				SaveLog
 				soft_log@ = ""
 			}
 			// 追記して反映する
+			if(soft_log@ == ""){
+				hoge = NowTime()
+				soft_log_file_name@ = "soft(" + hoge + ").log"
+				split hoge, "-", fuga
+				soft_log_year@ = fuga(0)
+				soft_log_month@ = fuga(1)
+			}
 			soft_log@ += NowTimeMini() + " " + message + "\n"
 			gsel kMainWindowID
 			objprm 0, soft_log@
