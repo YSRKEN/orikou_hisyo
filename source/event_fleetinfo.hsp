@@ -380,25 +380,28 @@ return
 		all_search_power33 += sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
+			search_value = weapon_search(target_weapon_id(n, w))
 			switch(weapon_type(target_weapon_id(n, w)))
 			case "ŠÍãí“¬‹@"
 			case "ŠÍã”šŒ‚‹@"
-				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 0.6 * search_value
 				swbreak
 			case "ŠÍãUŒ‚‹@"
-				all_search_power33 += 0.8 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 0.8 * search_value
 				swbreak
 			case "ŠÍã’ã@‹@"
-				all_search_power33 += 1.0 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 1.0 * search_value
 				swbreak
 			case "…ã’ã@‹@"
-				all_search_power33 += 1.2 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 1.2 * (1.0 * search_value + 1.2 * sqrt(target_weapon_level_g(n, w)))
 				swbreak
 			case "…ã”šŒ‚‹@"
-				all_search_power33 += 1.1 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 1.1 * search_value
 				swbreak
 			case "¬Œ^“d’T"
 			case "‘åŒ^“d’T"
+				all_search_power33 += 0.6 * (1.0 * search_value + 1.25 * sqrt(target_weapon_level_g(n, w)))
+				swbreak
 			case "‘Îö£‰ú‹@"
 			case "q‹ó—vˆõ"
 			case "…ãŠÍ—vˆõ"
@@ -406,7 +409,7 @@ return
 			case "‘åŒ^”òs’ø"
 			case "‘åŒ^’TÆ“”"
 			case "‘½—p“r…ã‹@/…ãí“¬‹@"
-				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 0.6 * search_value
 				swbreak
 			default
 			swend
