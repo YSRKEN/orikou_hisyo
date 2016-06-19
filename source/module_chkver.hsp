@@ -1,29 +1,35 @@
-/* ãƒãƒ¼ã‚¸ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯ç”¨é–¢æ•° */
+/* ƒo[ƒWƒ‡ƒ“ƒ`ƒFƒbƒN—pŠÖ” */
 #module getver
 	#defcfunc GetLatestVer
-		// ãƒãƒƒãƒˆã«æ¥ç¶šã§ãã‚‹ã‹ã‚’ç¢ºèªã™ã‚‹
-		netninit
+		// ƒlƒbƒg‚ÉÚ‘±‚Å‚«‚é‚©‚ğŠm”F‚·‚é
+		netinit@
 		if(stat != 0){
-			dialog "ãƒãƒƒãƒˆã«æ¥ç¶šã§ãã¾ã›ã‚“ã§ã—ãŸã€‚", 1, kSoftName
+			dialog "ƒlƒbƒg‚ÉÚ‘±‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B", 1, kSoftName
 			return ""
 		}
-		neturl "http://ysrken.blog.fc2.com/"
-		netrequest_get "blog-entry-77.html"
+		neturl@ "http://ysrken.blog.fc2.com/"
+		netrequest_get@ "blog-entry-77.html"
 		error_flg = FALSE
 		while
-			netexec res
+			netexec@ res
 			if(res > 0) :_break
 			if(res < 0) :error_flg = TRUE :_break
 			await 50
 		wend
 		if(error_flg){
-			dialog "æ›´æ–°æƒ…å ±ã‚’å–å¾—ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚", 1, kSoftName
+			dialog "XVî•ñ‚ğæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B", 1, kSoftName
 			return ""
 		}else{
-			netgetv html_buffer
+			netgetv@ html_buffer
 			sdim html_buffer2, 32000
-			nkfcnv html_buffer2, html_buffer, "s", -1, 32000
-			pos 1 = instr(html_buffer2,,"æœ€æ–°ãƒãƒ¼ã‚¸ãƒ§ãƒ³")
+			nkfcnv@ html_buffer2, html_buffer, "s", -1, 32000
+			begin_str = "ÅVƒo[ƒWƒ‡ƒ“</span><br />"
+			begin_str_len = strlen(begin_str)
+			end_str = "<br />"
+			pos1 = instr(html_buffer2,,begin_str)
+			pos2 = instr(html_buffer2, pos1 + begin_str_len, end_str)
+			ver = strmid(html_buffer2, pos1 + begin_str_len, pos2)
+			return ver
 		}
 	return ""
 #global
