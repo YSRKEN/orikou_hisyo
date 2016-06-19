@@ -12,9 +12,9 @@
 		return param_2
 		// オブジェクトの状態を読み込んだ状態に合わせて変更する
 		#deffunc ResetObjParam
-			gsel kMainWindowID
+			gsel kMainWindowID, 2
 			objprm get_pos_mode_id@, get_pos_mode@
-			gsel kOptionWindowID
+			gsel kOptionWindowID, 2
 			objprm sub_window_size_id@, sub_window_size_index@
 			objprm capture_fps_id@, capture_fps_index@
 			objprm check_move_flash_id@, check_move_flash_flg@
@@ -66,7 +66,7 @@
 				soft_log_month@ = fuga(1)
 			}
 			soft_log@ += NowTimeMini() + " " + message + "\n"
-			gsel kMainWindowID
+			gsel kMainWindowID, 2
 			objprm 0, soft_log@
 			sendmsg hMesBox@, EM_SCROLL, SB_BOTTOM, 0
 		return

@@ -15,7 +15,7 @@ return
 			gsel kSortListBufferID
 			pos sort_list_size(0) * kSortWX, 0
 			gcopy kMainBufferID, kSortPX, kSortPY, kSortWX, kSortWY
-			gsel kSortListWindowID
+			gsel kSortListWindowID, 2
 			objprm sort_index_id, sort_list(0)
 			sort_list_size(0)++
 			title "ソート一覧(艦娘," + sort_list_size(0) + "枚)"
@@ -28,7 +28,7 @@ return
 			gsel kSort2ListBufferID
 			pos sort_list_size(1) * kSort2WX, 0
 			gcopy kMainBufferID, kSort2PX, kSort2PY, kSort2WX, kSort2WY
-			gsel kSortListWindowID
+			gsel kSortListWindowID, 2
 			objprm sort_index_id, sort_list(1)
 			sort_list_size(1)++
 			title "ソート一覧(装備," + sort_list_size(1) + "枚)"
@@ -41,7 +41,7 @@ return
 			gsel kSort3ListBufferID
 			pos sort_list_size(2) * kBaseAirWX, 0
 			gcopy kMainBufferID, kBaseAirPX, kBaseAirPY, kBaseAirWX, kBaseAirWY
-			gsel kSortListWindowID
+			gsel kSortListWindowID, 2
 			objprm sort_index_id, sort_list(2)
 			sort_list_size(2)++
 			title "ソート一覧(基地," + sort_list_size(2) + "枚)"
@@ -276,7 +276,7 @@ return
 		noteget text_buffer2, sort_index
 		noteadd text_buffer2, sort_index - 1, 1
 		noteadd text_buffer,  sort_index,     1
-		gsel kSortListWindowID
+		gsel kSortListWindowID, 2
 		objprm sort_index_id, sort_list(sort_kind)
 		sort_index--
 		objprm sort_index_id, sort_index
@@ -330,7 +330,7 @@ return
 		noteget text_buffer2, sort_index
 		noteadd text_buffer2, sort_index + 1, 1
 		noteadd text_buffer,  sort_index,     1
-		gsel kSortListWindowID
+		gsel kSortListWindowID, 2
 		objprm sort_index_id, sort_list(sort_kind)
 		sort_index++
 		objprm sort_index_id, sort_index
@@ -375,7 +375,7 @@ return
 		;リストの削除
 		notesel sort_list(sort_kind)
 		notedel sort_index
-		gsel kSortListWindowID
+		gsel kSortListWindowID, 2
 		objprm sort_index_id, sort_list(sort_kind)
 		sort_list_size(sort_kind)--
 		if(sort_list_size(sort_kind) == 0){
@@ -400,7 +400,7 @@ return
 			}
 		}
 		color 255, 255, 255 :boxf
-		gsel kSortListWindowID
+		gsel kSortListWindowID, 2
 		sort_list(sort_kind) = ""
 		objprm sort_index_id, sort_list(sort_kind)
 		sort_list_size(sort_kind) = 0
@@ -412,18 +412,18 @@ return
 *redraw_sort_preview
 	if((sort_index_ != sort_index) && (sort_index >= 0)){
 		if(sort_kind == 0){
-			gsel kSortListWindowID
+			gsel kSortListWindowID, 2
 			POS_XY 2, 0
 			gzoom2 SIZE_X(2), SIZE_Y(8), kSortListBufferID, sort_index * kSortWX, 0, kSortWX, kSortWY
 			sort_index_ = sort_index
 		}else{
 			if(sort_kind == 1){
-				gsel kSortListWindowID
+				gsel kSortListWindowID, 2
 				POS_XY 2, 0
 				gzoom2 SIZE_X(2), SIZE_Y(8), kSort2ListBufferID, sort_index * kSort2WX, 0, kSort2WX, kSort2WY
 				sort_index_ = sort_index
 			}else{
-				gsel kSortListWindowID
+				gsel kSortListWindowID, 2
 				POS_XY 2, 0
 				gzoom2 SIZE_X(2), SIZE_Y(8), kSort3ListBufferID, sort_index * kBaseAirWX, 0, kBaseAirWX, kBaseAirWY
 				sort_index_ = sort_index

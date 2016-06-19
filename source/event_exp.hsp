@@ -31,7 +31,7 @@ return
 			if(now_level_ + now_level__ > 0){
 				now_level = now_level_ + now_level__ - 1	//-1するのはコンボボックスの都合
 				// 読み取った練度を画面に反映する
-				gsel kExpCalcWindowID
+				gsel kExpCalcWindowID, 2
 				objprm now_level_id, now_level
 			}
 		}
@@ -64,12 +64,12 @@ return
 	if(now_level >= goal_level){
 		if(now_level != now_level_){
 			goal_level = limit(now_level + 1, 0, kMaxKammusuLevel - 1)
-			gsel kExpCalcWindowID
+			gsel kExpCalcWindowID, 2
 			objprm goal_level_id, goal_level
 		}
 		if(goal_level != goal_level_){
 			now_level = limit(goal_level - 1, 0, kMaxKammusuLevel - 1)
-			gsel kExpCalcWindowID
+			gsel kExpCalcWindowID, 2
 			objprm now_level_id, now_level
 		}
 	}
@@ -110,7 +110,7 @@ return
 	need_battles = need_exp / battle_exp
 	if(need_exp \ battle_exp != 0) :need_battles++
 	// 出力処理
-	gsel kExpCalcWindowID
+	gsel kExpCalcWindowID, 2
 	objprm need_exp_id, need_exp
 	objprm battle_exp_id, battle_exp
 	objprm need_battles_id, need_battles
@@ -122,7 +122,7 @@ return
 		// 次Lvのチェックが入った際の処理
 		if(next_level_flg){
 			goal_level = limit(now_level + 1, 0, kMaxKammusuLevel - 1)
-			gsel kExpCalcWindowID
+			gsel kExpCalcWindowID, 2
 			objprm goal_level_id, goal_level
 			goal_level_= goal_level
 		}
@@ -137,7 +137,7 @@ return
 		// 次Lvのチェックが入った際の処理
 		if(next_level_flg){
 			goal_level = limit(now_level + 1, 0, kMaxKammusuLevel - 1)
-			gsel kExpCalcWindowID
+			gsel kExpCalcWindowID, 2
 			objprm goal_level_id, goal_level
 			goal_level_= goal_level
 		}

@@ -107,7 +107,7 @@
 					if(param_name_first == "auto_count_flg"){
 						p = param_name_second
 						auto_count_flg@(p) = limit(int(param_value), FALSE, TRUE)
-						gsel kCounterWindowID
+						gsel kCounterWindowID, 2
 						objprm auto_count_flg_id@ + p, auto_count_flg@(p)
 						_continue
 					}
@@ -132,7 +132,7 @@
 					if(param_name_first == "bgm_flg"){
 						p = limit(param_name_second, 0, kBgmKinds - 1)
 						bgm_flg@(p) = limit(int(param_value), FALSE, TRUE)
-						gsel kBgmWindowID
+						gsel kBgmWindowID, 2
 						objprm kBgmKinds + p, bgm_flg@(p)
 						_continue
 					}
@@ -251,11 +251,11 @@
 				mascot_list_size@++
 			next
 			if(mascot_list_size@ == 0){
-				gsel kOptionWindowID
+				gsel kOptionWindowID, 2
 				objenable desktop_mascot_id@, 0
 				objenable mascot_index_id@, 0
 			}else{
-				gsel kOptionWindowID
+				gsel kOptionWindowID, 2
 				objprm mascot_index_id@, mascot_list@
 			}
 			PutLog "ì«Ç›çûÇ›äÆóπ"
@@ -326,7 +326,7 @@
 			;
 			text_buffer += "position_save=" + position_save_flg@ + "\n"
 			for i, 0, kSavePositions
-				gsel i
+				gsel i, 2
 				text_buffer += "pos_winow_" + i + "=" + ginfo_wx1 + "," + ginfo_wy1 + ","  +show_window@(i) + "\n"
 			next
 			;

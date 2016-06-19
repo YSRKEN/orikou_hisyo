@@ -7,7 +7,7 @@
 return
 
 *redraw_bgm_window
-	gsel kBgmWindowID
+	gsel kBgmWindowID, 2
 	for k, 0, kBgmKinds
 		objprm k, bgm_name_list(k)
 	next
@@ -45,7 +45,7 @@ return
 //*BGMÇÃã≠êßäJén
 *start_bgm
 	bgm_flg(bgm_type_now) = 1
-	gsel kBgmWindowID
+	gsel kBgmWindowID, 2
 	objprm kBgmKinds + bgm_type_now, bgm_flg(bgm_type_now)
 	gosub *change_bgm
 return

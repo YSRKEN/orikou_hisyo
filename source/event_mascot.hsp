@@ -38,12 +38,12 @@ return
 //*マスコットを再描画する
 *redraw_mascot
 	if(show_mascot_area_flg == FALSE){
-		gsel kMascotWindowID
+		gsel kMascotWindowID, 2
 		pos 0, 0
 		gcopy kMascotBufferMainID, 0, 0, px, py
 		enableAlphaBlendWindowRGB kMascotBufferSubID
 	}else{
-		gsel kMascotWindowID
+		gsel kMascotWindowID, 2
 		pos 0, 0
 		gcopy kMascotBufferMainID, 0, 0, px, py
 		font msgothic, kSmallFontSize, 1
