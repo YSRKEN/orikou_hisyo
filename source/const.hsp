@@ -69,7 +69,7 @@
 	#const global kStatusBarY 48
 	;各種画面のサイズ
 	#const kTimerWX 250
-	#const kTimerWY 250
+	#const kTimerWY 300
 	#const kFleetInfoWX 250
 	#const kFleetInfoWY 500
 	;艦これの画面のサイズ
@@ -200,11 +200,13 @@
 	#enum global kBattleRankS = 0	;戦闘結果におけるランク
 	#enum global kBattleRankA
 	#enum global kBattleRankB
-	#enum global kBattleRankLoss
+	#enum global kBattleRankC
+	#enum global kBattleRankD
 	#const global kSupplyLogBlockSize 28	;ログの1件あたりのブロックサイズ
 	#const kPutSupplyLogInterval 10.0 / 60 / 24	;資材ログの更新間隔
 	#const kAutoSaveInterval 10.0 / 60 / 24		;自動設定セーブの更新間隔
 	#const kAkashiInterval 20.0 / 24 / 60	;明石タイマーの修理時間「20分」
+	#const kFatigueInterval 15	;疲労回復タイマーの最大時間「15分」
 	#const global kBgmKinds 4
 	#enum kBgmTypeHome = 0	;BGMの種類
 	#enum kBgmTypeMap
@@ -284,6 +286,10 @@
 	sdim akashi_fleet_name, kUnitMarkLength2, kUnitNum	;所属艦隊における艦娘名
 	fleet_2byte_num = "１,２,３,４"
 	last_preset_time = 0.0	;最後に編成展開 or 随伴一括解除を選択した時刻
+	// 疲労回復タイマー
+	fatigue_timer_start_time = 0.0	;疲労回復タイマー作動時の時刻
+	fatigue_timer_flg = FALSE		;タイマーがカウントしているか
+	fatigue_timer_done_interval = 0	;疲労が抜けきる時間長(可変)
 	//認識に使用する座標
 	dck_pos_x.0 = 623, 634, 652, 663, 680, 691
 	dck_level_pos_x.0 = 497, 507, 517
@@ -455,7 +461,11 @@
 		exist dir_cur + "\\" + alert_name(k)
 		alert_flg(k) = FALSE
 		if(strsize == -1) :_continue
-		mmload dir_cur + "\\" + alert_name(k), k + 1, 0
+		if(k == kAlertSel){
+			mmload dir_cur + "\\" + alert_name(k), k + 1, 2
+		}else{
+			mmload dir_cur + "\\" + alert_name(k), k + 1, 0
+		}
 		alert_flg(k) = TRUE
 	next
 	// 任務一覧
@@ -507,14 +517,18 @@
 	next
 	// その他の初期設定
 	sdim soft_log, 32000
+	soft_log_year = ""
+	soft_log_month = ""
 	exe_path = dir_cur
 	sdim scene_result, 64, kPosDim
 	save_buffer_turn = 10	;セーブデータにおける縦の最大枚数
 	dim hwnd_window, kSelectWindowID	;マウスで動かせるようにするウィンドウのハンドル
-	dim show_window, kSavePositions	;ウィンドウの表示可否
+	dim show_window, kSavePositions		;ウィンドウの表示可否
 	sub_window_posx = 0 :sub_window_posy = 0	;サブ画面だけ特別扱い
 	dim unit_count, kFleetNum			;各艦隊の艦娘数
 	sdim status_bar_str, 1024			;ステータスバーに表示する文字列
 	dim battle_index, kBattleType		;各画面のインデックス
-	show_mascot_area_flg = FALSE
-	shortcut_save_flg = FALSE
+	show_mascot_area_flg = FALSE		;マスコットのクリック範囲を表示するかどうか
+	shortcut_save_flg = FALSE			;ショートカットによる画像保存が機能するかどうか
+	sdim soft_log_file_name, 256		;ログのファイル名
+	check_ver_type = 0					;0→更新チェックの選択が不明、1→更新チェックする、2→更新チェックしない

@@ -50,6 +50,9 @@
 		POS_XY 2, 1
 			chkbox "ショートカット", shortcut_command_flg
 				shortcut_command_id = stat
+		POS_XY 3, 1
+			combox check_ver_type,,"未定\n確認する\n確認しない"
+				check_ver_index_id = stat
 		POS_XY 1, 2
 			combox sub_window_size_index,,sub_window_size_list
 				sub_window_size_id = stat
@@ -113,7 +116,10 @@
 	screen kTimerWindowID, kTimerWX, kTimerWY, 4 :title "各種タイマー"
 	gsel kTimerWindowID, -1
 	pos kSpace, kSpace
-	mesbox timer_output, kTimerWX - kSpace * 2, kTimerWY - kSpace * 2, 4
+		mesbox timer_output, kTimerWX - kSpace * 2, kTimerWY - kSpace * 3 - kObjY, 4
+	objsize SIZE_X(1), SIZE_Y(1)
+		pos kTimerWX - kSpace - kObjX, kTimerWY - kSpace - kObjY
+			button gosub "疲労リセット", *reset_fatigue_timer
 	hwnd_window(kTimerWindowID) = hwnd
 	show_window(kTimerWindowID) = FALSE
 

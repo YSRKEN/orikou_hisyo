@@ -14,8 +14,6 @@
 		#deffunc ResetObjParam
 			gsel kMainWindowID
 			objprm get_pos_mode_id@, get_pos_mode@
-			/*gsel kBrowserWindowID
-			objprm browser_front_id@, browser_front_flg@*/
 			gsel kOptionWindowID
 			objprm sub_window_size_id@, sub_window_size_index@
 			objprm capture_fps_id@, capture_fps_index@
@@ -23,6 +21,7 @@
 			objprm pic_save_path_id@, pic_save_path@(1)
 			objprm name_disable_id@, name_disable_flg@
 			objprm shortcut_command_id@, shortcut_command_flg@
+			objprm check_ver_index_id@, check_ver_type@
 			objprm show_status_id@, show_status_flg@
 			objprm check_deadzone_id@, check_deadzone_flg@
 			objprm check_exhausted_id@, check_exhausted_flg@
@@ -38,17 +37,34 @@
 			objprm pic_save_path_index_id@, pic_save_path_flg@
 
 		return
+		// ログを書き出す
+		#deffunc SaveLog
+			// 保存用のフォルダを作成する
+			dirlist x, exe_path@ + "\\log", 5
+			if(stat == 0) :mkdir exe_path@ + "\\log"
+			dirlist x, exe_path@ + "\\log\\" + soft_log_year@, 5
+			if(stat == 0) :mkdir exe_path@ + "\\log\\" + soft_log_year@
+			dirlist x, exe_path@ + "\\log\\" + soft_log_year@ + "\\" + soft_log_month@, 5
+			if(stat == 0) :mkdir exe_path@ + "\\log\\" + soft_log_year@ + "\\" + soft_log_month@
+			// 保存する
+			notesel soft_log@
+			notesave exe_path@ + "\\log\\" + soft_log_year@ + "\\" + soft_log_month@ + "\\" + soft_log_file_name@
+		return
 		// ログに追記
 		#deffunc PutLog str message
 			// ソフトのログが溢れそうになったら自動保存する
 			if(strlen(soft_log@) > 30 * 1000){
-				dirlist x, exe_path@ + "\\log", 5
-				if(stat == 0) :mkdir exe_path@ + "\\log"
-				notesel soft_log@
-				notesave exe_path@ + "\\log\\soft(" + NowTime() + ").log"
+				SaveLog
 				soft_log@ = ""
 			}
 			// 追記して反映する
+			if(soft_log@ == ""){
+				hoge = NowTime()
+				soft_log_file_name@ = "soft(" + hoge + ").log"
+				split hoge, "-", fuga
+				soft_log_year@ = fuga(0)
+				soft_log_month@ = fuga(1)
+			}
 			soft_log@ += NowTimeMini() + " " + message + "\n"
 			gsel kMainWindowID
 			objprm 0, soft_log@

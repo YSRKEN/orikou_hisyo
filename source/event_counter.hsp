@@ -81,7 +81,7 @@ return
 	}
 	if(scene_result(1) == "戦果報告"){
 		//ボス勝利カウント
-		if((boss_battle_flg) && (battle_rank < kBattleRankLoss)){
+		if((boss_battle_flg) && (battle_rank < kBattleRankC)){
 			if(auto_count_flg(2) && (exercises_flg == FALSE)){
 				count_num(2)++
 				redraw_counter_flg = TRUE

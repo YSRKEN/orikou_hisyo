@@ -1,11 +1,18 @@
-/* おりこうさんな秘書 Ver.3.3.1 */
+/*
+* SoftWareName(Jp) : おりこうさんな秘書
+* SoftWareName(En) : orikou_hisyo
+* Version          : 3.3.2
+* Author           : YSR
+* License          : MIT
+* Copyright(C) 2015 YSR
+*/
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.3.1"
-	#define kVerString  "331"
-	#define kLastUpdate "2016/06/15"
+	#define kVersion    "Ver.3.3.2"
+	#define kVerString  "332"
+	#define kLastUpdate "2016/06/19"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -21,14 +28,16 @@
 	#include "a2d.hsp"
 	#include "hspcv.as"
 	#include "hspext.as"
+	#include "hspinet.as"
 	#include "module_lwm2.hsp"
 	#include "keyhook.hsp"
 	#include "clipboard.as"
 	// 自作
 	#include "const.hsp"
 	#include "module_api.hsp"
-	#include "module_file.hsp"
+	#include "module_chkver.hsp"
 	#include "module_misc.hsp"
+	#include "module_file.hsp"
 	#include "module_ocr.hsp"
 	#include "module_pic.hsp"
 	#include "module_time.hsp"
@@ -91,6 +100,40 @@
 	mascot_index_ = mascot_index
 	main_width_index_ = main_width_index
 	khHook *shortcut
+	// バージョンチェック
+	latest_ver = ""
+	if(check_ver_type == 0){
+		// 初めてバージョンチェックするので確認を取る
+		dialog "今後起動時に更新チェックを行いますか？", 2, kSoftName
+		if(stat == 6){
+			check_ver_type = 1
+		}else{
+			check_ver_type = 2
+		}
+		gsel kOptionWindowID
+		objprm check_ver_index_id, check_ver_type
+		gsel kMainWindowID
+	}
+	if(check_ver_type == 1){
+		// 更新チェックを行う
+		PutLog "【更新チェック】"
+		latest_ver = GetLatestVer()
+		if(kVersion != latest_ver){
+			if(latest_ver != ""){
+				PutLog "更新が見つかりました。"
+				PutLog "現在版：" + kVersion
+				PutLog "最新版：" + latest_ver
+				dialog "現在版：" + kVersion + "\n最新版：" + latest_ver + "\n配布サイトを開きますか？", 2, kSoftName
+				if(stat == 6){
+					exec "https://github.com/YSRKEN/orikou_hisyo/releases/latest", , "open"
+				}
+			}else{
+				PutLog "チェックできませんでした。"
+			}
+		}else{
+			PutLog "現在版が最新です。"
+		}
+	}
 	// メインループ
 	repeat
 		if(exit_flg) :end
@@ -126,13 +169,13 @@
 			// ソート一覧で選択位置が変わった際に表示する画像を変更する
 			gosub *redraw_sort_preview
 			// 精度面の問題から、勝利判定は常時行うようにする
-			// (判定できない＝C以下と判定されるので、最大評価を取る)
+			// (判定できない＝D以下と判定されるので、最大評価を取る)
 			if(scene_result(1) == "戦闘判定"){
 				battle_rank_ = JudgeBattleRank()
 				if(battle_rank > battle_rank_) :battle_rank = battle_rank_
 			}else{
 				if((scene_result(1) != "戦果報告") && (scene_result(1) != "不明")){
-					battle_rank = kBattleRankLoss
+					battle_rank = kBattleRankD
 				}
 			}
 			// 資材ログ機能

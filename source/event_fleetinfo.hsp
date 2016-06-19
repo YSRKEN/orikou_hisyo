@@ -16,7 +16,8 @@ return
 	dim target_unit_search, target_unit_count	;艦娘の索敵値
 	dim target_weapon_id, target_unit_count, kWeapons	;装備のID
 	dim target_weapon_airs, target_unit_count, kWeapons	;装備の搭載数
-	dim target_weapon_level, target_unit_count, kWeapons	;装備の改修度・熟練度
+	dim target_weapon_level_v, target_unit_count, kWeapons	;装備の熟練度(Veteran)
+	dim target_weapon_level_g, target_unit_count, kWeapons	;装備の改修度(Grade)
 	dim target_weapon_count, target_unit_count	;所持装備数
 	for n, 0, target_unit_count
 		// 艦娘情報
@@ -181,12 +182,12 @@ return
 			case "艦上爆撃機"
 			case "艦上偵察機"
 			case "水上爆撃機"
-			case "水上偵察機"
+			//case "水上偵察機"	//デッキビルダーが現状無視しているため
 			case "多用途水上機/水上戦闘機"
 				// Max(>>)
 				if(NearColor(508, 176 + 33 * w, 214, 159, 21)){
 					if(NearColor(502, 176 + 33 * w, 214, 159, 20)){
-						target_weapon_level(n, w) = 7
+						target_weapon_level_v(n, w) = 7
 						swbreak
 					}
 				}
@@ -194,12 +195,12 @@ return
 				if(NearColor(507, 176 + 33 * w, 213, 156, 8)){
 					if(NearColor(503, 176 + 33 * w, 213, 156, 8)){
 						if(NearColor(499, 176 + 33 * w, 213, 156, 8)){
-							target_weapon_level(n, w) = 6
+							target_weapon_level_v(n, w) = 6
 						}else{
-							target_weapon_level(n, w) = 5
+							target_weapon_level_v(n, w) = 5
 						}
 					}else{
-						target_weapon_level(n, w) = 4
+						target_weapon_level_v(n, w) = 4
 					}
 					swbreak
 				}
@@ -207,17 +208,95 @@ return
 				if(NearColor(508, 176 + 33 * w, 154, 181, 208)){
 					if(NearColor(504, 176 + 33 * w, 154, 181, 208)){
 						if(NearColor(500, 176 + 33 * w, 154, 181, 208)){
-							target_weapon_level(n, w) = 3
+							target_weapon_level_v(n, w) = 3
 						}else{
-							target_weapon_level(n, w) = 2
+							target_weapon_level_v(n, w) = 2
 						}
 					}else{
-						target_weapon_level(n, w) = 1
+						target_weapon_level_v(n, w) = 1
 					}
 					swbreak
 				}
 				swbreak
 			swend
+		next
+	next
+	// 装備改修度を読み取る
+	for n, 0, target_unit_count
+		gsel GetUnitID(fleetinfo_number_index, n)
+		for w, 0, target_weapon_count(n)
+			id = target_weapon_id(n, w)
+			if(id == -1) :_continue
+			// ★MAX用
+			if(NearColor(525, 175 + 33 * w, 255, 255, 255)){
+				target_weapon_level_g(n, w) = 10
+			}
+			// ★1～9用
+			if(NearColor(517, 175 + 33 * w, 69, 169, 165)){
+				// ★9
+				if(NearColor(536, 170 + 33 * w, 124, 185, 177)){
+					if(NearColor(533, 180 + 33 * w, 159, 195, 185)){
+						target_weapon_level_g(n, w) = 9
+						_continue
+					}
+				}
+				// ★8
+				if(NearColor(538, 178 + 33 * w, 106, 179, 173)){
+					if(NearColor(538, 172 + 33 * w, 111, 181, 174)){
+						target_weapon_level_g(n, w) = 8
+						_continue
+					}
+				}
+				// ★7
+				if(NearColor(533, 171 + 33 * w, 114, 182, 175)){
+					if(NearColor(538, 170 + 33 * w, 131, 186, 178)){
+						target_weapon_level_g(n, w) = 7
+						_continue
+					}
+				}
+				// ★6
+				if(NearColor(534, 173 + 33 * w, 70, 170, 166)){
+					if(NearColor(537, 170 + 33 * w, 129, 186, 178)){
+						target_weapon_level_g(n, w) = 6
+						_continue
+					}
+				}
+				// ★5
+				if(NearColor(538, 170 + 33 * w, 137, 188, 179)){
+					if(NearColor(536, 180 + 33 * w, 156, 194, 184)){
+						target_weapon_level_g(n, w) = 5
+						_continue
+					}
+				}
+				// ★4
+				if(NearColor(536, 176 + 33 * w, 72, 170, 166)){
+					if(NearColor(533, 176 + 33 * w, 136, 188, 180)){
+						target_weapon_level_g(n, w) = 4
+						_continue
+					}
+				}
+				// ★3
+				if(NearColor(533, 179 + 33 * w, 120, 184, 176)){
+					if(NearColor(535, 175 + 33 * w, 135, 188, 180)){
+						target_weapon_level_g(n, w) = 3
+						_continue
+					}
+				}
+				// ★2
+				if(NearColor(534, 179 + 33 * w, 79, 172, 168)){
+					if(NearColor(539, 177 + 33 * w, 136, 188, 179)){
+						target_weapon_level_g(n, w) = 2
+						_continue
+					}
+				}
+				// ★1
+				if(NearColor(536, 179 + 33 * w, 94, 176, 171)){
+					if(NearColor(535, 171 + 33 * w, 70, 170, 166)){
+						target_weapon_level_g(n, w) = 1
+						_continue
+					}
+				}
+			}
 		next
 	next
 	// 制空値を計算する(艦載機熟練度対応)
@@ -236,7 +315,7 @@ return
 				;対空と搭載数に基づいた制空値
 				all_anti_air += int(sqrt(target_weapon_airs(n, w)) * weapon_antiair(wid))
 				;艦載機熟練度ボーナス
-				wlevel = target_weapon_level(n, w)
+				wlevel = target_weapon_level_v(n, w)
 				all_anti_air += all_bonus(wlevel)
 				if(wtype == "艦上戦闘機" | wtype == "多用途水上機/水上戦闘機"){
 					all_anti_air += afwf_bonus(wlevel)
@@ -301,25 +380,28 @@ return
 		all_search_power33 += sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
+			search_value = weapon_search(target_weapon_id(n, w))
 			switch(weapon_type(target_weapon_id(n, w)))
 			case "艦上戦闘機"
 			case "艦上爆撃機"
-				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 0.6 * search_value
 				swbreak
 			case "艦上攻撃機"
-				all_search_power33 += 0.8 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 0.8 * search_value
 				swbreak
 			case "艦上偵察機"
-				all_search_power33 += 1.0 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 1.0 * search_value
 				swbreak
 			case "水上偵察機"
-				all_search_power33 += 1.2 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 1.2 * (1.0 * search_value + 1.2 * sqrt(target_weapon_level_g(n, w)))
 				swbreak
 			case "水上爆撃機"
-				all_search_power33 += 1.1 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 1.1 * search_value
 				swbreak
 			case "小型電探"
 			case "大型電探"
+				all_search_power33 += 0.6 * (1.0 * search_value + 1.25 * sqrt(target_weapon_level_g(n, w)))
+				swbreak
 			case "対潜哨戒機"
 			case "航空要員"
 			case "水上艦要員"
@@ -327,7 +409,7 @@ return
 			case "大型飛行艇"
 			case "大型探照灯"
 			case "多用途水上機/水上戦闘機"
-				all_search_power33 += 0.6 * weapon_search(target_weapon_id(n, w))
+				all_search_power33 += 0.6 * search_value
 				swbreak
 			default
 			swend
@@ -365,13 +447,14 @@ return
 				case "対潜哨戒機"
 				case "大型飛行艇"
 					fleetinfo_output += "　[" + target_weapon_airs(n, w) + "] " + weapon_name(wid)
-					if(target_weapon_level(n, w) != 0) :fleetinfo_output += " ☆" + target_weapon_level(n, w)
-					fleetinfo_output += "\n"
 					swbreak
 				default
-					fleetinfo_output += "　" + weapon_name(wid) + "\n"
+					fleetinfo_output += "　" + weapon_name(wid)
 					swbreak
 				swend
+				if(target_weapon_level_v(n, w) != 0) :fleetinfo_output += " ☆" + target_weapon_level_v(n, w)
+				if(target_weapon_level_g(n, w) != 0) :fleetinfo_output += " ★" + target_weapon_level_g(n, w)
+				fleetinfo_output += "\n"
 			}
 		next
 	next
@@ -412,7 +495,22 @@ return
 			}else{
 				deck_output += "\"id\":" + weapon_id(wid) + ","
 			}
-			deck_output += "\"rf\":" + target_weapon_level(n, w)
+			deck_output += "\"rf\":"
+			switch(weapon_type(wid))
+			case "オートジャイロ"
+			case "艦上攻撃機"
+			case "艦上戦闘機"
+			case "艦上偵察機"
+			case "艦上爆撃機"
+			//case "水上偵察機"
+			case "水上爆撃機"
+			case "多用途水上機/水上戦闘機"
+			case "対潜哨戒機"
+			case "大型飛行艇"
+				deck_output += target_weapon_level_v(n, w)
+			default
+				deck_output += target_weapon_level_g(n, w)
+			swend
 			deck_output += "}"
 		next
 		deck_output += "}}"

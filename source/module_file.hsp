@@ -34,6 +34,7 @@
 				auto_count_flg@(k) = TRUE
 				count_num@(k) = 0
 			next
+			check_ver_type@ = 0
 			// iniファイルを読み込んで設定を反映する
 			exist exe_path@ + "\\save\\setting.ini"
 			if(strsize != -1){
@@ -164,6 +165,13 @@
 						browser_offset_x@ = int(temp(0))
 						browser_offset_y@ = int(temp(1))
 					}
+					if(param_name == "unit_count"){
+						split param_value, ",", temp
+						unit_count@(0) = int(temp(0))
+						unit_count@(1) = int(temp(1))
+						unit_count@(2) = int(temp(2))
+						unit_count@(3) = int(temp(3))
+					}
 					if(param_name == "show_status") :show_status_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_deadzone") :check_deadzone_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_exhausted") :check_exhausted_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
@@ -179,6 +187,7 @@
 					if(param_name == "browser_front_flg") :browser_front_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "shortcut_command_flg") :shortcut_command_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "old_getpos_flg") :old_getpos_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_ver_type") :check_ver_type@ = limit(int(param_value), 0, 2) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -323,6 +332,8 @@
 			;
 			text_buffer += "browser_offset=" + browser_offset_x@ + "," + browser_offset_y@ + "\n"
 			;
+			text_buffer += "unit_count=" + unit_count@(0) + "," + unit_count@(1) + "," + unit_count@(2) + "," + unit_count@(3) + "\n"
+			;
 			text_buffer += "show_status=" + show_status_flg@ + "\n"
 			text_buffer += "check_deadzone=" + check_deadzone_flg@ + "\n"
 			text_buffer += "check_exhausted=" + check_exhausted_flg@ + "\n"
@@ -337,6 +348,7 @@
 			text_buffer += "browser_front_flg=" + browser_front_flg@ + "\n"
 			text_buffer += "shortcut_command_flg=" + shortcut_command_flg@ + "\n"
 			text_buffer += "old_getpos_flg=" + old_getpos_flg@ + "\n"
+			text_buffer += "check_ver_type=" + check_ver_type@ + "\n"
 			notesel text_buffer
 			notesave exe_path@ + "\\save\\setting.ini"
 			// pngファイルを保存
@@ -354,15 +366,11 @@
 				cvsave exe_path@ + "\\save\\buffer.png", kCVSaveBufferID
 			}
 			// ソフトのログを保存
-			//保存先フォルダが存在するかを判定
-			dirlist x, exe_path@ + "\\log", 5
-			if(stat == 0) :mkdir exe_path@ + "\\log"
-			//ログを保存する
-			notesel soft_log@
-			notesave exe_path@ + "\\log\\soft(" + NowTime() + ").log"
+			SaveLog
 
 			if(flg) :PutLog "保存完了"
 		return
+		// 
 		// データ読み込み
 		#deffunc LoadSystemData
 			// 記録するシーン一覧
