@@ -34,6 +34,7 @@
 				auto_count_flg@(k) = TRUE
 				count_num@(k) = 0
 			next
+			check_ver_type@ = 0
 			// iniファイルを読み込んで設定を反映する
 			exist exe_path@ + "\\save\\setting.ini"
 			if(strsize != -1){
@@ -186,6 +187,7 @@
 					if(param_name == "browser_front_flg") :browser_front_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "shortcut_command_flg") :shortcut_command_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "old_getpos_flg") :old_getpos_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_ver_type") :check_ver_type@ = limit(int(param_value), 0, 2) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -346,6 +348,7 @@
 			text_buffer += "browser_front_flg=" + browser_front_flg@ + "\n"
 			text_buffer += "shortcut_command_flg=" + shortcut_command_flg@ + "\n"
 			text_buffer += "old_getpos_flg=" + old_getpos_flg@ + "\n"
+			text_buffer += "check_ver_type=" + check_ver_type@ + "\n"
 			notesel text_buffer
 			notesave exe_path@ + "\\save\\setting.ini"
 			// pngファイルを保存
