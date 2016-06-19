@@ -71,21 +71,13 @@
 //*ŠÍ‚±‚ê
 *reset_url
 	browser_url = kKanColleURL
-	if(browser_front_flg){
-		gsel kBrowserWindowID, 2
-	}else{
-		gsel kBrowserWindowID, 1
-	}
+	gsel kBrowserWindowID
 	objprm 0, browser_url
 return
 
 //*’†‰›
 *scroll_browser
-	if(browser_front_flg){
-		gsel kBrowserWindowID, 2
-	}else{
-		gsel kBrowserWindowID, 1
-	}
+	gsel kBrowserWindowID
 	repeat
 		wait 20
 		if(ie("busy") == 0) && (ie("ReadyState") == 4) :break
@@ -111,11 +103,7 @@ return
 
 //*’†‰›‰ğœ
 *unscroll_browser
-	if(browser_front_flg){
-		gsel kBrowserWindowID, 2
-	}else{
-		gsel kBrowserWindowID, 1
-	}
+	gsel kBrowserWindowID
 	repeat
 		wait 20
 		if(ie("busy") == 0) && (ie("ReadyState") == 4) :break
@@ -137,11 +125,7 @@ return
 
 //*ˆÚ“®
 *move_browser
-	if(browser_front_flg){
-		gsel kBrowserWindowID, 2
-	}else{
-		gsel kBrowserWindowID, 1
-	}
+	gsel kBrowserWindowID
 	ie->"Navigate" browser_url
 return
 

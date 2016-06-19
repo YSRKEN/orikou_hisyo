@@ -23,7 +23,7 @@ return
 	next
 	// 結果を反映する
 	if(auto_calc_flg){
-		gsel kCondMeterWindowID, 2
+		gsel kCondMeterWindowID
 		for k, 0, kUnitNum
 			objprm cond_id + k, cond(k)
 			objprm cond_msg_id + k, cond_msg(k)
@@ -33,7 +33,7 @@ return
 
 //*オブジェクトの状態を変更する
 *cond_enable
-	gsel kCondMeterWindowID, 2
+	gsel kCondMeterWindowID
 	switch cond_step
 		case 0
 			for k, 0, 3

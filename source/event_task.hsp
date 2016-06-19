@@ -38,7 +38,7 @@ return
 		if(count >= kMaxTasks) :_break
 	next
 	// •`‰æ‚·‚é
-	gsel kTaskWindowID, 2
+	gsel kTaskWindowID
 	redraw 0
 		color 255, 255, 255 :boxf
 		for y, 0, count

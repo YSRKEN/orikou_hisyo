@@ -459,7 +459,7 @@ return
 		next
 	next
 	// ”½‰f
-	gsel kFleetInfoWindowID, 2
+	gsel kFleetInfoWindowID
 	objprm 0, fleetinfo_output
 	fleetinfo_flg = TRUE
 return

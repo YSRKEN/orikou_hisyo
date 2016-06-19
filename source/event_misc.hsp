@@ -13,7 +13,7 @@
 		dim level_temp, kUnitNum
 		// 画像から練度を読み取る
 		for k, 0, kUnitNum
-			gsel kMainBufferID, 2
+			gsel kMainBufferID
 			x = k \ 2
 			y = k / 2
 			pget 342 * x + 256, 113 * y + 153
@@ -294,7 +294,7 @@ return
 //*サブ画面下の表示を更新する
 *redraw_status_bar
 	if(show_status_flg == FALSE) :return
-	gsel kSubWindowID, 2
+	gsel kSubWindowID
 	redraw 0
 		// 消去する
 		color $FF, $FF, $FF
@@ -336,7 +336,7 @@ return
 //*画像の保存パスを指定する
 *browse_pic
 	selfolder pic_save_path(1),"保存先フォルダ"
-	gsel kOptionWindowID, 2
+	gsel kOptionWindowID
 	objprm pic_save_path_id, pic_save_path(1)
 return
 
@@ -466,14 +466,14 @@ return
 			locker_type = CheckLockerType()
 			switch locker_type
 				case kLockerKammusu
-					gsel kLockerWindowID, 2
+					gsel kLockerWindowID
 					pos 0, 0
 					gcopy kMainBufferID, 737, 154, 40, 280
 					color 255, 0, 0
 					DrawLargeSquare 0, 0, 40 - 1, 280 - 1
 				swbreak
 				case kLockerWeapon
-					gsel kLockerWindowID, 2
+					gsel kLockerWindowID
 					pos 0, 0
 					gcopy kMainBufferID, 770, 132, 30, 300
 					color 255, 0, 0

@@ -35,7 +35,7 @@ return
 		counter_output += "y‚¢†(–¢’B¬)z\n"
 	}
 	counter_output += "‹ó•êŒnŒ‚’¾F" + count_num(5) + " / 20‰ñ"
-	gsel kCounterWindowID, 2
+	gsel kCounterWindowID
 	objprm 0, counter_output
 return
 

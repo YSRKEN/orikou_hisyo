@@ -162,7 +162,7 @@
 		return
 		// ƒTƒu‰æ–Ê‚É‰æ‘œ‚ð•\Ž¦‚·‚é
 		#deffunc SetSubWindow
-			gsel kSubWindowID, 2
+			gsel kSubWindowID
 			pos 0, 0
 			gzoom sub_window_size_x@(sub_window_size_index@), sub_window_size_y@(sub_window_size_index@), kSubBufferID, 0, 0, kFlashWX, kFlashWY, 1
 		return
