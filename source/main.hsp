@@ -101,22 +101,38 @@
 	main_width_index_ = main_width_index
 	khHook *shortcut
 	// バージョンチェック
-	PutLog "【更新チェック】"
-	latest_ver = GetLatestVer()
-	if(kVersion != latest_ver){
-		if(latest_ver != ""){
-			PutLog "更新が見つかりました。"
-			PutLog "現在版：" + kVersion
-			PutLog "最新版：" + latest_ver
-			dialog "現在版：" + kVersion + "\n最新版：" + latest_ver + "\n配布サイトを開きますか？", 2, kSoftName
-			if(stat == 6){
-				exec "https://github.com/YSRKEN/orikou_hisyo/releases/latest", , "open"
+	latest_ver = ""
+	if(check_ver_type == 0){
+		// 初めてバージョンチェックするので確認を取る
+		dialog "今後起動時に更新チェックを行いますか？", 2, kSoftName
+		if(stat == 6){
+			check_ver_type = 1
+		}else{
+			check_ver_type = 2
+		}
+		gsel kOptionWindowID
+		objprm check_ver_index_id, check_ver_type
+		gsel kMainWindowID
+	}
+	if(check_ver_type == 1){
+		// 更新チェックを行う
+		PutLog "【更新チェック】"
+		latest_ver = GetLatestVer()
+		if(kVersion != latest_ver){
+			if(latest_ver != ""){
+				PutLog "更新が見つかりました。"
+				PutLog "現在版：" + kVersion
+				PutLog "最新版：" + latest_ver
+				dialog "現在版：" + kVersion + "\n最新版：" + latest_ver + "\n配布サイトを開きますか？", 2, kSoftName
+				if(stat == 6){
+					exec "https://github.com/YSRKEN/orikou_hisyo/releases/latest", , "open"
+				}
+			}else{
+				PutLog "チェックできませんでした。"
 			}
 		}else{
-			PutLog "チェックできませんでした。"
+			PutLog "現在版が最新です。"
 		}
-	}else{
-		PutLog "現在版が最新です。"
 	}
 	// メインループ
 	repeat
@@ -352,8 +368,8 @@
 	if((wparam == kMainWindowID) || (wparam == kSubWindowID)){
 		dialog "終了しますか？", 2, kSoftName
 		if(stat == 6){
-;			exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
-;			SaveSoftData TRUE
+			exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
+			SaveSoftData TRUE
 			gsel kMainWindowID
 			TasktrayDel
 			exit_flg = TRUE
