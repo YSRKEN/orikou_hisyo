@@ -523,13 +523,12 @@
 	sdim scene_result, 64, kPosDim
 	save_buffer_turn = 10	;セーブデータにおける縦の最大枚数
 	dim hwnd_window, kSelectWindowID	;マウスで動かせるようにするウィンドウのハンドル
-	dim show_window, kSavePositions	;ウィンドウの表示可否
+	dim show_window, kSavePositions		;ウィンドウの表示可否
 	sub_window_posx = 0 :sub_window_posy = 0	;サブ画面だけ特別扱い
 	dim unit_count, kFleetNum			;各艦隊の艦娘数
 	sdim status_bar_str, 1024			;ステータスバーに表示する文字列
 	dim battle_index, kBattleType		;各画面のインデックス
-	show_mascot_area_flg = FALSE
-	shortcut_save_flg = FALSE
-	sdim soft_log_file_name, 256
-	soft_log_year = ""
-	soft_log_month = ""
+	show_mascot_area_flg = FALSE		;マスコットのクリック範囲を表示するかどうか
+	shortcut_save_flg = FALSE			;ショートカットによる画像保存が機能するかどうか
+	sdim soft_log_file_name, 256		;ログのファイル名
+	check_ver_type = 0					;0→更新チェックの選択が不明、1→更新チェックする、2→更新チェックしない

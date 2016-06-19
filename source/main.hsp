@@ -28,12 +28,14 @@
 	#include "a2d.hsp"
 	#include "hspcv.as"
 	#include "hspext.as"
+	#include "hspinet.as"
 	#include "module_lwm2.hsp"
 	#include "keyhook.hsp"
 	#include "clipboard.as"
 	// 自作
 	#include "const.hsp"
 	#include "module_api.hsp"
+	#include "module_chkver.hsp"
 	#include "module_misc.hsp"
 	#include "module_file.hsp"
 	#include "module_ocr.hsp"
@@ -98,6 +100,40 @@
 	mascot_index_ = mascot_index
 	main_width_index_ = main_width_index
 	khHook *shortcut
+	// バージョンチェック
+	latest_ver = ""
+	if(check_ver_type == 0){
+		// 初めてバージョンチェックするので確認を取る
+		dialog "今後起動時に更新チェックを行いますか？", 2, kSoftName
+		if(stat == 6){
+			check_ver_type = 1
+		}else{
+			check_ver_type = 2
+		}
+		gsel kOptionWindowID
+		objprm check_ver_index_id, check_ver_type
+		gsel kMainWindowID
+	}
+	if(check_ver_type == 1){
+		// 更新チェックを行う
+		PutLog "【更新チェック】"
+		latest_ver = GetLatestVer()
+		if(kVersion != latest_ver){
+			if(latest_ver != ""){
+				PutLog "更新が見つかりました。"
+				PutLog "現在版：" + kVersion
+				PutLog "最新版：" + latest_ver
+				dialog "現在版：" + kVersion + "\n最新版：" + latest_ver + "\n配布サイトを開きますか？", 2, kSoftName
+				if(stat == 6){
+					exec "https://github.com/YSRKEN/orikou_hisyo/releases/latest", , "open"
+				}
+			}else{
+				PutLog "チェックできませんでした。"
+			}
+		}else{
+			PutLog "現在版が最新です。"
+		}
+	}
 	// メインループ
 	repeat
 		if(exit_flg) :end
