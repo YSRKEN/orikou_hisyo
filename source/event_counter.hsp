@@ -17,9 +17,9 @@ return
 	if(count_num(0) >= 36) :counter_output += "(OK)"
 	counter_output += "\nボス到達：" + count_num(1) + " / 24回"
 	if(count_num(1) >= 24) :counter_output += "(OK)"
-	counter_output += "\nボス勝利" + count_num(2) + " / 12回"
+	counter_output += "\nボス勝利：" + count_num(2) + " / 12回"
 	if(count_num(2) >= 12) :counter_output += "(OK)"
-	counter_output += "\nS勝利判定" + count_num(3) + " / 6回"
+	counter_output += "\nS勝利判定：" + count_num(3) + " / 6回"
 	if(count_num(3) >= 6) :counter_output += "(OK)"
 
 	if(count_num(4) >= 50){
@@ -54,7 +54,7 @@ return
 *counter_reset_5 :count_num(4) = 0 :redraw_counter_flg = TRUE :return
 *counter_reset_6 :count_num(5) = 0 :redraw_counter_flg = TRUE :return
 
-//*カウンターの自動更新処理
+//*カウンタの自動更新処理
 *counter_auto
 	//海域出撃カウント
 	if((pre_scene_type == "海域出撃") && (pre_scene_name == "艦隊選択") && (scene_result(1) == "出撃画面")){

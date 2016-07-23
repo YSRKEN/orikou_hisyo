@@ -68,7 +68,7 @@
 	#const kSpace 8
 	#const global kStatusBarY 48
 	;各種画面のサイズ
-	#const kTimerWX 250
+	#const kTimerWX 200
 	#const kTimerWY 300
 	#const kFleetInfoWX 250
 	#const kFleetInfoWY 500
@@ -162,7 +162,7 @@
 	#const kSort2WY2 30			;取得する際の縦幅(装備)
 	#const kSort2WY3 30			;クロップする際の縦幅(装備)
 	#const kSortType 19			;艦種の種類数
-	#const kSortStrLength 40	;艦種データの長さ
+	#const kSortStrLength 35	;艦種データの長さ
 	#const kUnitMarkLength1 8 * 5	;艦名データ(編成画面)の長さ 入力
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
 	#const kMaxSort3Pages 3	;ソート一覧(基地)の最大ページ数
