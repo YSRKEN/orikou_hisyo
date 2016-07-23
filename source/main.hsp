@@ -1,7 +1,7 @@
 /*
 * SoftWareName(Jp) : おりこうさんな秘書
 * SoftWareName(En) : orikou_hisyo
-* Version          : 3.3.2
+* Version          : 3.3.3
 * Author           : YSR
 * License          : MIT
 * Copyright(C) 2015 YSR
@@ -10,9 +10,9 @@
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.3.2"
-	#define kVerString  "332"
-	#define kLastUpdate "2016/06/19"
+	#define kVersion    "Ver.3.3.3 dev"
+	#define kVerString  "333"
+	#define kLastUpdate "2016/06/"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -112,7 +112,7 @@
 		}
 		gsel kOptionWindowID
 		objprm check_ver_index_id, check_ver_type
-		gsel kMainWindowID
+		gsel kMainWindowID, 2
 	}
 	if(check_ver_type == 1){
 		// 更新チェックを行う
@@ -202,13 +202,13 @@
 			if(show_battle_flg){
 				if(scene_list_index != battle_index(0) + 1){
 					if(scene_result(1) == "昼戦画面"){
-						gsel kMainWindowID
+						gsel kMainWindowID, 2
 						objprm scene_list_id, battle_index(0) + 1
 					}
 				}
 				if(scene_list_index != battle_index(1) + 1){
 					if(scene_result(1) == "夜戦画面"){
-						gsel kMainWindowID
+						gsel kMainWindowID, 2
 						objprm scene_list_id, battle_index(1) + 1
 					}
 				}
@@ -299,14 +299,14 @@
 		//「戦闘画面」チェックに関する処理
 		if(show_battle_flg_ != show_battle_flg){
 			if(show_battle_flg == FALSE){
-				gsel kMainWindowID
+				gsel kMainWindowID, 2
 				objprm scene_list_id, 0
 			}else{
 				if(show_scene_list_time(battle_index(0)) > show_scene_list_time(battle_index(1))){
-					gsel kMainWindowID
+					gsel kMainWindowID, 2
 					objprm scene_list_id, battle_index(0) + 1
 				}else{
-					gsel kMainWindowID
+					gsel kMainWindowID, 2
 					objprm scene_list_id, battle_index(1) + 1
 				}
 			}

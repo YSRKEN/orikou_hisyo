@@ -176,7 +176,7 @@ return
 					dock_finish_flg(k) = TRUE
 					PutLog "【終了通知】"
 					PutLog "入渠―第" + (k + 1) + "ドック"
-					gsel kMainWindowID
+					gsel kMainWindowID, 2
 					TasktrayPopup2 "第" + (k + 1) + "ドックの\n入渠がまもなく完了します。", kSoftName, 1, 1000
 					if(sound_alert_flg) :PlayAlert kAlertDck
 				}
@@ -198,7 +198,7 @@ return
 					dock_finish_flg(k + kDocks) = TRUE
 					PutLog "【終了通知】"
 					PutLog "建造―第" + (k + 1) + "ドック"
-					gsel kMainWindowID
+					gsel kMainWindowID, 2
 					TasktrayPopup2 "第" + (k + 1) + "ドックの\n建造がまもなく完了します。", kSoftName, 1, 1000
 					if(sound_alert_flg) :PlayAlert kAlertBld
 				}
@@ -224,7 +224,7 @@ return
 					}else{
 						PutLog "遠征―第" + (k + 2) + "艦隊"
 					}
-					gsel kMainWindowID
+					gsel kMainWindowID, 2
 					TasktrayPopup2 "第" + (k + 2) + "艦隊の\n遠征がまもなく完了します。", kSoftName, 1, 1000
 					if(sound_alert_flg) :PlayAlert kAlertExp
 				}
@@ -255,7 +255,7 @@ return
 		}else{
 			PutLog "【回復通知】"
 			PutLog "艦隊の疲労が回復しました。"
-			gsel kMainWindowID
+			gsel kMainWindowID, 2
 			TasktrayPopup2 "艦隊の疲労が\n回復しました", kSoftName, 1, 1000
 			if(sound_alert_flg) :PlayAlert kAlertExp
 			fatigue_timer_flg = FALSE
