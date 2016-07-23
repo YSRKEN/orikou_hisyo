@@ -19,13 +19,14 @@
 			}
 			// 各桁の数字を読み取って、配列に代入する
 			dock_finish_time(k) = 0.0
-			dock_finish_flg(k) = FALSE
 			dim number, 6
 			ReadNumber number, 6, dck_pos_x, dck_pos_y(k) + 25, 11, 16, 170, FALSE
 			// 正規化して、終了時刻を代入する
 			NormalizeTime number
 			d_time = CnvFloatSec(number(0) * 10 + number(1), number(2) * 10 + number(3), number(4) * 10 + number(5), 0)
 			dock_finish_time(k) = GetFloatTime() + d_time
+			time_diff = dock_finish_time(k) - now_time
+			if((dock_finish_time(k) != 0.0) && (time_diff > 1.0 / 24 / 60)) :dock_finish_flg(k) = FALSE
 			// 入渠艦のレベルを更新する
 			dim number2, 3
 			gsel kMainBufferID
@@ -48,7 +49,6 @@
 			gsel kMainBufferID
 			if(NearColor(730, bld_pos_y(k), 204, 128, 73) == FALSE){
 				dock_finish_time(k + kDocks) = 0.0
-				dock_finish_flg(k + kDocks) = FALSE
 				_continue
 			}
 			// 各桁の数字を読み取って、配列に代入する
@@ -58,6 +58,8 @@
 			NormalizeTime number
 			d_time = CnvFloatSec(number(0) * 10 + number(1), number(2) * 10 + number(3), number(4) * 10 + number(5), 0)
 			dock_finish_time(k + kDocks) = GetFloatTime() + d_time
+			time_diff = dock_finish_time(k + kDocks) - now_time
+			if((dock_finish_time(k + kDocks) != 0.0) && (time_diff > 1.0 / 24 / 60)) :dock_finish_flg(k + kDocks) = FALSE
 		next
 	}
 	// 遠征画面
@@ -95,7 +97,6 @@
 			if(unit_number == 0) :_continue
 			// 各桁の数字を読み取って、配列に代入する
 			dock_finish_time(unit_number - 1 + kDocks * 2) = 0.0
-			dock_finish_flg(unit_number - 1 + kDocks * 2) = FALSE
 			expedition_kind(unit_number - 1) = -1
 			dim number, 6
 			ReadNumber number, 6, exp_pos_x, exp_pos_y, 9, 13, 190, FALSE
@@ -103,6 +104,8 @@
 			NormalizeTime number
 			d_time = CnvFloatSec(number(0) * 10 + number(1), number(2) * 10 + number(3), number(4) * 10 + number(5), 0)
 			dock_finish_time(unit_number - 1 + kDocks * 2) = GetFloatTime() + d_time
+			time_diff = dock_finish_time(unit_number - 1 + kDocks * 2) - now_time
+			if((dock_finish_time(unit_number - 1 + kDocks * 2) != 0.0) && (time_diff > 1.0 / 24 / 60)) :dock_finish_flg(unit_number - 1 + kDocks * 2) = FALSE
 			if(exp_small_name == exp_large_name){
 				expedition_kind(unit_number - 1) = exp_small_name
 			}

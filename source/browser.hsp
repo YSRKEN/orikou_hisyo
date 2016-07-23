@@ -38,6 +38,9 @@
 		pos 0, 0
 			input browser_url
 	objsize kObjX, kObjY
+		pos kBrowserX - kObjX * 6, 0
+			chkbox "scroll", scroll_bar_flg
+				scroll_bar_flg_id = stat
 		pos kBrowserX - kObjX * 5, 0
 			chkbox "最前面", browser_front_flg
 				browser_front_id = stat
@@ -55,6 +58,7 @@
 
 	onexit gosub *exit
 	browser_front_flg_ = browser_front_flg
+	scroll_bar_flg_ = scroll_bar_flg
 	repeat
 		if(exit_flg) :end
 		if(browser_front_flg != browser_front_flg_){
@@ -64,6 +68,38 @@
 				gsel kBrowserWindowID, 1
 			}
 			browser_front_flg_ = browser_front_flg
+		}
+		if(scroll_bar_flg != scroll_bar_flg_){
+			if(scroll_bar_flg){
+				gsel kBrowserWindowID
+				pDoc = ie("Document")
+				comres pBody
+				pDoc->"getElementsByTagName" "body"
+				if(pBody("length")){
+					pBodyItem = pBody("item", 0)
+					pBodyItemStyle = pBodyItem("style")
+					pBodyItemStyle("overflow") = "scroll"
+					delcom pBodyItemStyle
+					delcom pBodyItem
+				}
+				delcom pBody
+				delcom pDoc
+			}else{
+				gsel kBrowserWindowID
+				pDoc = ie("Document")
+				comres pBody
+				pDoc->"getElementsByTagName" "body"
+				if(pBody("length")){
+					pBodyItem = pBody("item", 0)
+					pBodyItemStyle = pBodyItem("style")
+					pBodyItemStyle("overflow") = "hidden"
+					delcom pBodyItemStyle
+					delcom pBodyItem
+				}
+				delcom pBody
+				delcom pDoc
+			}
+			scroll_bar_flg_ = scroll_bar_flg
 		}
 		wait 5
 	loop
@@ -78,10 +114,10 @@ return
 //*中央
 *scroll_browser
 	gsel kBrowserWindowID
-	repeat
+	/*repeat
 		wait 20
 		if(ie("busy") == 0) && (ie("ReadyState") == 4) :break
-	loop
+	loop*/
 	pDoc = ie("Document")
 	;スクロール
 	pPW = pDoc("parentWindow")
@@ -104,10 +140,10 @@ return
 //*中央解除
 *unscroll_browser
 	gsel kBrowserWindowID
-	repeat
+	/*repeat
 		wait 20
 		if(ie("busy") == 0) && (ie("ReadyState") == 4) :break
-	loop
+	loop*/
 	pDoc = ie("Document")
 	;スクロールバーを復活させる
 	comres pBody
