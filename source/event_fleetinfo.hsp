@@ -182,7 +182,7 @@ return
 			case "艦上爆撃機"
 			case "艦上偵察機"
 			case "水上爆撃機"
-			//case "水上偵察機"	//デッキビルダーが現状無視しているため
+			case "水上偵察機"
 			case "多用途水上機/水上戦闘機"
 				// Max(>>)
 				if(NearColor(508, 176 + 33 * w, 214, 159, 21)){
@@ -465,6 +465,7 @@ return
 return
 
 //*艦隊情報からデッキビルダー用の形式に変換する
+//*2016/7/2にデータ構造に変更があった
 //*(ダミーデータ：吹雪、しばふ砲)
 *copy_deck_format
 	if(fleetinfo_flg != TRUE) :return
@@ -495,23 +496,10 @@ return
 			}else{
 				deck_output += "\"id\":" + weapon_id(wid) + ","
 			}
-			deck_output += "\"rf\":"
-			switch(weapon_type(wid))
-			case "オートジャイロ"
-			case "艦上攻撃機"
-			case "艦上戦闘機"
-			case "艦上偵察機"
-			case "艦上爆撃機"
-			//case "水上偵察機"
-			case "水上爆撃機"
-			case "多用途水上機/水上戦闘機"
-			case "対潜哨戒機"
-			case "大型飛行艇"
-				deck_output += target_weapon_level_v(n, w)
-			default
-				deck_output += target_weapon_level_g(n, w)
-			swend
-			deck_output += "}"
+			;装備改修度
+			deck_output += "\"rf\":" + target_weapon_level_g(n, w) + ","
+			;艦載機熟練度
+			deck_output += "\"mas\":" + target_weapon_level_v(n, w) + "}"
 		next
 		deck_output += "}}"
 	next
