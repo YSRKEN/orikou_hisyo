@@ -12,7 +12,7 @@
 	#define global kSoftName   "‚¨‚è‚±‚¤‚³‚ñ‚È”é‘"
 	#define kVersion    "Ver.3.3.3 dev"
 	#define kVerString  "333"
-	#define kLastUpdate "2016/06/"
+	#define kLastUpdate "2016/07/"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"

@@ -68,7 +68,7 @@
 	#const kSpace 8
 	#const global kStatusBarY 48
 	;各種画面のサイズ
-	#const kTimerWX 250
+	#const kTimerWX 200
 	#const kTimerWY 300
 	#const kFleetInfoWX 250
 	#const kFleetInfoWY 500
