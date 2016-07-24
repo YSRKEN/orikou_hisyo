@@ -30,6 +30,7 @@
 	browser_offset_y = 90
 	exit_flg = FALSE
 	browser_front_flg = FALSE
+	scroll_bar_flg = TRUE
 
 // 本体の処理
 	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "外蔵ブラウザ"
