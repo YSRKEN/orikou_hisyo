@@ -94,8 +94,12 @@ return
 	if(command_str == "cond値メータ")   :gosub *show_cond_meter
 	if(command_str == "BGM機能")        :gosub *show_bgm_window
 	if(command_str == "内蔵ブラウザ")   :gosub *show_browser
+	if(command_str == "外蔵ブラウザ")   :gosub *show_browser
 	if(command_str == "戦闘画面")       :gosub *show_battle_flg_change
 	if(command_str == "各種情報")       :gosub *about
+
+	if(command_str == "艦隊画像")       :gosub *save_fleet
+	if(command_str == "艦隊情報")       :gosub *show_fleetinfo_window
 return
 
 *show_battle_flg_change

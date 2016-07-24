@@ -12,7 +12,7 @@
 		return param_2
 		// オブジェクトの状態を読み込んだ状態に合わせて変更する
 		#deffunc ResetObjParam
-			gsel kMainWindowID
+			GselMain
 			objprm get_pos_mode_id@, get_pos_mode@
 			gsel kOptionWindowID
 			objprm sub_window_size_id@, sub_window_size_index@
@@ -30,6 +30,7 @@
 			objprm sound_alert_id@, sound_alert_flg@
 			objprm position_save_id@, position_save_flg@
 			objprm old_getpos_id@, old_getpos_flg@
+			objprm desktop_mascot_id@, desktop_mascot_flg@
 
 			objprm main_width_index_id@, main_width_index@
 			objprm check_special_id@, check_special_flg@
@@ -66,7 +67,7 @@
 				soft_log_month@ = fuga(1)
 			}
 			soft_log@ += NowTimeMini() + " " + message + "\n"
-			gsel kMainWindowID, 2
+			GselMain
 			objprm 0, soft_log@
 			sendmsg hMesBox@, EM_SCROLL, SB_BOTTOM, 0
 		return
@@ -76,6 +77,10 @@
 		// アラートを鳴らす
 		#deffunc PlayAlert int alert_name_index
 			if(alert_flg@(alert_name_index)) :mmplay alert_name_index + 1
+		return
+		// 「gsel kMainWindowID」の置き換え
+		#deffunc GselMain
+			if(desktop_mascot_flg@) :gsel kMainWindowID, -1 :else :gsel kMainWindowID, 2
 		return
 	#global
 

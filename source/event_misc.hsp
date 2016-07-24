@@ -48,8 +48,9 @@ return
 		}else{
 			screen kMainWindowID, POS_X(3), POS_Y(9)
 		}
+		if(desktop_mascot_flg) :gsel kMainWindowID, -1
 		title kSoftName
-		gsel kMainWindowID, 2
+		GselMain
 		if(main_pulldown_flg){
 			POS_XY 0, 8
 		}else{
@@ -119,7 +120,7 @@ return
 			screen kMainWindowID, POS_X(2), POS_Y(11)
 		}
 		title kSoftName
-		gsel kMainWindowID, 2
+		GselMain
 		if(main_pulldown_flg){
 			POS_XY 0, 11
 		}else{
