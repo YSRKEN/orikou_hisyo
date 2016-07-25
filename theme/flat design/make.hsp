@@ -2,7 +2,7 @@
 #include "hspcv.as"
 
 // 生成用パラメータ
-s = 10 :b = 50 :w = 3 :h = 5 :bs = b + s
+s = 10 :b = 40 :w = 3 :h = 6 :bs = b + s
 
 notesel buf :noteload "make.txt"
 size = notemax - 1
@@ -24,6 +24,7 @@ color :boxf :color $FF, $FF, $FF :boxf 1, 1, bs * w + s - 2, bs * h + s - 2
 for y, 0, h
 	for x, 0, w
 		k = y * w + x
+		if(k >= size) :_continue
 		color icon_r(k), icon_g(k), icon_b(k)
 		boxf bs * x + s, bs * y + s, bs * (x + 1), bs * (y + 1)
 	next
@@ -35,6 +36,7 @@ color $FF, $FF, $FF
 for y, 0, h
 	for x, 0, w
 		k = y * w + x
+		if(k >= size) :_continue
 		pos bs * x + s + 2, bs * y + s :mes icon_str(k)
 	next
 next
@@ -50,6 +52,7 @@ config = "左上X,左上Y,右下X,右下Y,種類,内容\n"
 for y, 0, h
 	for x, 0, w
 		k = y * w + x
+		if(k >= size) :_continue
 		config += "" + (bs * x + s) + ","
 		config += "" + (bs * y + s) + ","
 		config += "" + (bs * (x + 1)) + ","

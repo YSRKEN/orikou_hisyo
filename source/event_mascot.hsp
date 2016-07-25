@@ -100,6 +100,7 @@ return
 
 	if(command_str == "ŠÍ‘à‰æ‘œ")       :gosub *save_fleet
 	if(command_str == "ŠÍ‘àî•ñ")       :gosub *show_fleetinfo_window
+	if(command_str == "”C–±ˆê——")       :gosub *show_task_window
 return
 
 *show_battle_flg_change
