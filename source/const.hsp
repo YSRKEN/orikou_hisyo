@@ -3,20 +3,20 @@
 /* ウィンドウ・バッファ */
 	// 画面ID
 	//ウィンドウ
-	#enum global kMainWindowID = 0	;メイン画面のID
-	#enum global kSubWindowID		;サブ画面のID
-	#enum global kOptionWindowID	;オプション画面のID
-	#enum global kTimerWindowID		;各種タイマー画面のID
-	#enum global kSortListWindowID	;ソート一覧画面のID
+	#enum global kMainWindowID = 0		;メイン画面のID
+	#enum global kSubWindowID			;サブ画面のID
+	#enum global kOptionWindowID		;オプション画面のID
+	#enum global kTimerWindowID			;各種タイマー画面のID
+	#enum global kSortListWindowID		;ソート一覧画面のID
 	#enum global kSupplyGraphWindowID	;資材グラフ画面のID
-	#enum global kExpCalcWindowID	;経験値計算機のID
-	#enum global kCounterWindowID	;○号カウンタのID
-	#enum global kCondMeterWindowID	;cond値メータのID
-	#enum global kBgmWindowID		;BGM機能のID
-	#enum global kTaskWindowID		;任務一覧用のID
+	#enum global kExpCalcWindowID		;経験値計算機のID
+	#enum global kCounterWindowID		;○号カウンタのID
+	#enum global kCondMeterWindowID		;cond値メータのID
+	#enum global kBgmWindowID			;BGM機能のID
+	#enum global kTaskWindowID			;任務一覧用のID
 	#enum global kFleetInfoWindowID		;艦隊情報画面のID
-	#enum kMascotWindowID			;マスコット表示用ID
-	#enum kSupplyFileWindowID		;資材管理用のID
+	#enum global kMascotWindowID		;マスコット表示用ID
+	#enum global kSupplyFileWindowID	;資材管理用のID
 	;↑マウスで動かせるのはここまで
 	#enum kSelectWindowID			;選択画面のID
 	#enum global kStopperWindowID	;進撃/出撃ストッパー画面用ID
@@ -183,7 +183,7 @@
 	#const kWeapons 4			;最大装備可能数
 	#const kWeaponMarkLen 108	;装備のマーク長
 	// その他
-	#const global kSavePositions kMascotWindowID
+	#const global kSavePositions kSupplyFileWindowID + 1
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
 	#const global kMaxSelectScenes 10	;1カテゴリにおける最大シーン数
 	#const global kFleetNum 4	;艦隊数

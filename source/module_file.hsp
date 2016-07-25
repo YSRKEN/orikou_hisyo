@@ -145,7 +145,13 @@
 						wx2 = int(temp(1))
 						show_flg = limit(int(temp(2)), FALSE, TRUE)
 						if(position_save_flg@){
-							if(id != kSubWindowID){
+							if(id == kSubWindowID){
+								sub_window_posx@ = wx1
+								sub_window_posy@ = wx2
+							}else:if(id == kMascotWindowID){
+								mascot_window_posx@ = wx1
+								mascot_window_posy@ = wx2
+							}else{
 								gsel id
 								width ,,wx1, wx2
 								if(show_flg){
@@ -155,9 +161,6 @@
 									gsel id, -1
 									show_window@(id) = FALSE
 								}
-							}else{
-								sub_window_posx@ = wx1
-								sub_window_posy@ = wx2
 							}
 						}
 					}

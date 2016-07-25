@@ -29,7 +29,7 @@
 		mascot_str(cnt - 1) = temp(5)
 	loop
 	// ウィンドウを表示する
-	bgscr kMascotWindowID, px, py
+	bgscr kMascotWindowID, px, py, , mascot_window_posx, mascot_window_posy
 	gsel kMascotWindowID, 2
 	hwnd_window(kMascotWindowID) = hwnd
 	gosub *redraw_mascot
