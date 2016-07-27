@@ -160,7 +160,7 @@
 /* 資材グラフ */
 	max_value_1 = 30000 :min_value_1 = 1000 :max_value_2 = 500 :min_value_2 = 0
 	min_time = "2014/01/01" :max_time = "2015/01/01" :graph_scale_index = 2
-	screen kSupplyGraphWindowID, POS_X(kGraphWX + 2), POS_Y(kGraphWY + 1), 4 :title "資材グラフ"
+	screen kSupplyGraphWindowID, POS_X(kGraphWX + 2), POS_Y(kGraphWY + 1) + kGraphDiffY, 4 :title "資材グラフ"
 	gsel kSupplyGraphWindowID, -1
 	color :DrawLargeSquare POS_X(1), POS_Y(0), kGraphWX2, kGraphWY2
 	font msgothic, kSmallFontSize, 1
@@ -191,6 +191,11 @@
 			input max_time :max_time_id = stat :objenable stat, 0
 		POS_XY kGraphWX / 2 + 1, kGraphWY
 			combox graph_scale_index,,"1日\n1週間\n2週間\n1ヶ月\n2ヶ月\n3ヶ月\n半年\n1年"
+	font msgothic, 14
+	objmode 2
+	pos 0, POS_Y(kGraphWY + 1)
+		mesbox day_diff_text, POS_X(kGraphWX + 2), kGraphDiffY, 4
+			day_diff_text_id = stat
 	hwnd_window(kSupplyGraphWindowID) = hwnd
 	show_window(kSupplyGraphWindowID) = FALSE
 

@@ -121,6 +121,7 @@
 	#const kGraphWX2 SIZE_X(kGraphWX)
 	#const kGraphWY2 SIZE_Y(kGraphWY)
 	#const kSupplyLogKinds 7
+	#const kGraphDiffY 200
 	;
 	#const kLargeFontSize 30
 	#const kSmallFontSize 12
@@ -438,6 +439,7 @@
 	supply_kind_name.5 = "高速修復材 バケツ"                   
 	supply_kind_name.6 = "開発資材 ツルハシ 歯車"              
 	supply_kind_name.7 = "司令部レベル しれぇレベル 提督レベル"
+	sdim day_diff_text, 32000	;差分表示用
 	// BGM機能
 	dim bgm_index, kBgmKinds
 	for k, 0, kBgmKinds

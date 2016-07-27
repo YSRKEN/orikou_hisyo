@@ -45,6 +45,7 @@
 	#include "interface.hsp"
 	LoadSoftData
 	gosub *make_main_window
+	gosub *draw_supply_graph
 	onexit gosub *exit
 	onclick gosub *move
 	goto *main
