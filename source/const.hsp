@@ -167,15 +167,18 @@
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
 	#const kMaxSort3Pages 3	;ソート一覧(基地)の最大ページ数
 	// 任務一覧
-	#const kTaskColumnWX1 49
+	#const kTaskColumnWX1  49
 	#const kTaskColumnWX2 251	;本来なら491だが、あえて短めにしている
-	#const kTaskColumnWY 18
-	#const kTaskColumnPX1 7
-	#const kTaskColumnPY1 36
-	#const kTaskColumnPX2 72
-	#const kTaskColumnPY2 -1
+	#const kTaskColumnWX3  50
+	#const kTaskColumnWY   18
+	#const kTaskColumnPX1   7
+	#const kTaskColumnPY1  36
+	#const kTaskColumnPX2  72
+	#const kTaskColumnPY2  -1
+	#const kTaskColumnPX3 506
+	#const kTaskColumnPY3  22
 	#const kMaxTasks 6
-	#const kTaskWindowX kTaskColumnWX1 + kTaskColumnWX2
+	#const kTaskWindowX kTaskColumnWX1 + kTaskColumnWX2 + kTaskColumnWX3
 	#const kTaskWindowY kTaskColumnWY * kMaxTasks
 	#const kTaskInterval 1.0 / 24 / 60 / 60	;任務一覧の更新時間「1秒」
 	// 艦隊情報

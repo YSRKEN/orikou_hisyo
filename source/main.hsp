@@ -71,7 +71,7 @@
 	gosub *redraw_counter
 	gosub *redraw_bgm_window
 	gosub *redraw_task_window
-	gsel kMainWindowID, 2
+	GselMain
 	if(mascot_index_id >= 0){
 		if(desktop_mascot_flg){
 			gsel kMainWindowID, -1
