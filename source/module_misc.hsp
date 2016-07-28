@@ -69,7 +69,7 @@
 			soft_log@ += NowTimeMini() + " " + message + "\n"
 			GselMain
 			objprm 0, soft_log@
-			sendmsg hMesBox@, EM_SCROLL, SB_BOTTOM, 0
+			if(desktop_mascot_flg@ == FALSE) :sendmsg hMesBox@, EM_SCROLL, SB_BOTTOM, 0
 		return
 		// 改装画面のバッファIDを算出
 		#defcfunc GetUnitID int fleet_num, int unit_num

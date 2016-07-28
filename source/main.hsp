@@ -141,7 +141,6 @@
 			PutLog "現在版が最新です。"
 		}
 	}
-	assert
 	// メインループ
 	repeat
 		if(exit_flg) :end
@@ -323,12 +322,11 @@
 		// マスコット表示に切り替えるかのフラグ
 		if(desktop_mascot_flg_ != desktop_mascot_flg){
 			if(mascot_index_id >= 0){
+				GselMain
 				if(desktop_mascot_flg){
-					gsel kMainWindowID, -1
 					gosub *show_mascot
 				}else{
 					gsel kMascotWindowID, -1
-					gsel kMainWindowID, 2
 				}
 			}
 			desktop_mascot_flg_ = desktop_mascot_flg
@@ -366,6 +364,10 @@
 		if(fleetinfo_number_index_ != fleetinfo_number_index){
 			gosub *get_fleetinfo
 			fleetinfo_number_index_ = fleetinfo_number_index
+		}
+		if(time2 != gettime(6)){
+			time2 = gettime(6)
+			if(desktop_mascot_flg@) :gsel kMainWindowID, -1	//ヤケクソ
 		}
 		// ウェイト
 		await 1000 / capture_fps(capture_fps_index)
