@@ -3,20 +3,20 @@
 /* ウィンドウ・バッファ */
 	// 画面ID
 	//ウィンドウ
-	#enum global kMainWindowID = 0		;メイン画面のID
-	#enum global kSubWindowID			;サブ画面のID
-	#enum global kOptionWindowID		;オプション画面のID
-	#enum global kTimerWindowID			;各種タイマー画面のID
-	#enum global kSortListWindowID		;ソート一覧画面のID
-	#enum global kSupplyGraphWindowID	;資材グラフ画面のID
-	#enum global kExpCalcWindowID		;経験値計算機のID
-	#enum global kCounterWindowID		;○号カウンタのID
-	#enum global kCondMeterWindowID		;cond値メータのID
-	#enum global kBgmWindowID			;BGM機能のID
-	#enum global kTaskWindowID			;任務一覧用のID
-	#enum global kFleetInfoWindowID		;艦隊情報画面のID
-	#enum global kMascotWindowID		;マスコット表示用ID
-	#enum global kSupplyFileWindowID	;資材管理用のID
+	#enum global kMainWindowID = 0		;0;メイン画面のID
+	#enum global kSubWindowID			;1;サブ画面のID
+	#enum global kOptionWindowID		;2;オプション画面のID
+	#enum global kTimerWindowID			;3;各種タイマー画面のID
+	#enum global kSortListWindowID		;4;ソート一覧画面のID
+	#enum global kSupplyGraphWindowID	;5;資材グラフ画面のID
+	#enum global kExpCalcWindowID		;6;経験値計算機のID
+	#enum global kCounterWindowID		;7;○号カウンタのID
+	#enum global kCondMeterWindowID		;8;cond値メータのID
+	#enum global kBgmWindowID			;9;BGM機能のID
+	#enum global kTaskWindowID			;10;任務一覧用のID
+	#enum global kFleetInfoWindowID		;11;艦隊情報画面のID
+	#enum global kMascotWindowID		;12;マスコット表示用ID
+	#enum global kSupplyFileWindowID	;13;資材管理用のID
 	;↑マウスで動かせるのはここまで
 	#enum kSelectWindowID			;選択画面のID
 	#enum global kStopperWindowID	;進撃/出撃ストッパー画面用ID

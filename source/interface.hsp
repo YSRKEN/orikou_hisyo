@@ -14,6 +14,7 @@
 	next
 	buffer kNumGetBufferID, kMatchSize, kMatchSize
 	cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
+	bgscr kMascotWindowID, 1, 1 :gsel kMascotWindowID, -1
 
 	screen kStopperWindowID, 10, 10 :gsel kStopperWindowID, -1
 	screen kLockerWindowID, 10, 10 :gsel kLockerWindowID, -1

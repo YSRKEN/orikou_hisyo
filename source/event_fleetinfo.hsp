@@ -152,7 +152,7 @@ return
 				case "‘Îö£‰ú‹@"
 				case "‘åŒ^”òs’ø"
 					dim airs_num, 2
-					ReadNumber airs_num, 2, airs_pos_x, 169 + w * 33, 8, 12, 200, FALSE
+					ReadNumber airs_num, 2, airs_pos_x, 169 + w * 33, 8, 12, 170, FALSE
 					if(airs_num(1) != 10){
 						target_weapon_airs(n, w) = limit(airs_num(1), 0, 9)
 						if(airs_num(0) != 10) :target_weapon_airs(n, w) += limit(airs_num(0), 1, 9) * 10
