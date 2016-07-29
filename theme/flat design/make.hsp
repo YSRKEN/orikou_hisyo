@@ -1,0 +1,65 @@
+/* 自動生成用スクリプト */
+#include "hspcv.as"
+
+// 生成用パラメータ
+s = 10 :b = 40 :w = 3 :h = 6 :bs = b + s
+
+notesel buf :noteload "make.txt"
+size = notemax - 1
+dim icon_r, size :dim icon_g, size :dim icon_b, size
+dim icon_str, size :dim icon_mean, size
+for k, 0, size
+	noteget get, k + 1
+	split get, ",", temp
+	icon_r(k) = int(temp(0))
+	icon_g(k) = int(temp(1))
+	icon_b(k) = int(temp(2))
+	icon_str(k) =   temp(3)
+	icon_mean(k) =  temp(4)
+next
+
+// 背景及びボタンの配置
+buffer 1, bs * w + s, bs * h + s
+color :boxf :color $FF, $FF, $FF :boxf 1, 1, bs * w + s - 2, bs * h + s - 2
+for y, 0, h
+	for x, 0, w
+		k = y * w + x
+		if(k >= size) :_continue
+		color icon_r(k), icon_g(k), icon_b(k)
+		boxf bs * x + s, bs * y + s, bs * (x + 1), bs * (y + 1)
+	next
+next
+
+// 各ボタンのアイコン描画
+font "游ゴシック", 0.9 * b
+color $FF, $FF, $FF
+for y, 0, h
+	for x, 0, w
+		k = y * w + x
+		if(k >= size) :_continue
+		pos bs * x + s + 2, bs * y + s :mes icon_str(k)
+	next
+next
+
+// 画像ファイルを保存
+cvbuffer 0, bs * w + s, bs * h + s
+cvputimg 0
+cvsave "picture.png"
+
+// 設定ファイルの自動生成
+sdim config, 1024
+config = "左上X,左上Y,右下X,右下Y,種類,内容\n"
+for y, 0, h
+	for x, 0, w
+		k = y * w + x
+		if(k >= size) :_continue
+		config += "" + (bs * x + s) + ","
+		config += "" + (bs * y + s) + ","
+		config += "" + (bs * (x + 1)) + ","
+		config += "" + (bs * (y + 1)) + ","
+		config += "コマンド," + icon_mean(k) + "\n"
+	next
+next
+notesel config
+notesave "config.csv"
+end

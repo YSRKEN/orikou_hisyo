@@ -29,6 +29,7 @@ return
 			if(flg) :return
 		}
 		for k, 0, 5
+			// uis’†vƒ{ƒ^ƒ“‚ª•t‚¢‚Ä‚¢‚éê‡‚É‚Ì‚İ”½‰‚·‚é
 			if (NearColor(task_pos_x + 581, task_pos_y(k) + 38, 255, 132, 49) != TRUE) :_continue
 			task_list_index(count) = index
 			task_list_column(count) = k
@@ -40,12 +41,19 @@ return
 	// •`‰æ‚·‚é
 	gsel kTaskWindowID
 	redraw 0
+		// ‰æ–ÊÁ‹
 		color 255, 255, 255 :boxf
+		// Ä•`‰æ
 		for y, 0, count
+			// ”C–±‚Ìí—Ş kTaskColumnPX1,kTaskColumnPY1 kTaskColumnWX1~kTaskColumnWY
 			pos 0, y * kTaskColumnWY
 			gcopy kSceneBufferID + task_list_index(y), task_pos_x + kTaskColumnPX1, task_pos_y(task_list_column(y)) + kTaskColumnPY1, kTaskColumnWX1, kTaskColumnWY
+			// ”C–±–¼ kTaskColumnPX2,kTaskColumnPY2 kTaskColumnWX2~kTaskColumnWY
 			pos kTaskColumnWX1, y * kTaskColumnWY
 			gcopy kSceneBufferID + task_list_index(y), task_pos_x + kTaskColumnPX2, task_pos_y(task_list_column(y)) + kTaskColumnPY2, kTaskColumnWX2, kTaskColumnWY
+			// ”C–±’B¬“x kTaskColumnPX3,kTaskColumnPY3 kTaskColumnWX3~kTaskColumnWY
+			pos kTaskColumnWX1 + kTaskColumnWX2, y * kTaskColumnWY
+			gcopy kSceneBufferID + task_list_index(y), task_pos_x + kTaskColumnPX3, task_pos_y(task_list_column(y)) + kTaskColumnPY3, kTaskColumnWX3, kTaskColumnWY
 		next
 	redraw 1
 return

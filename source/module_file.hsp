@@ -25,6 +25,7 @@
 			position_save_flg@     = FALSE
 			main_pulldown_flg@     = TRUE
 			browser_front_flg@     = FALSE
+			desktop_mascot_flg@    = FALSE
 			sub_window_size_index@ = 3
 			main_width_index@      = 0
 			check_special_index@   = 0
@@ -144,7 +145,13 @@
 						wx2 = int(temp(1))
 						show_flg = limit(int(temp(2)), FALSE, TRUE)
 						if(position_save_flg@){
-							if(id != kSubWindowID){
+							if(id == kSubWindowID){
+								sub_window_posx@ = wx1
+								sub_window_posy@ = wx2
+							}else:if(id == kMascotWindowID){
+								mascot_window_posx@ = wx1
+								mascot_window_posy@ = wx2
+							}else{
 								gsel id
 								width ,,wx1, wx2
 								if(show_flg){
@@ -154,9 +161,6 @@
 									gsel id, -1
 									show_window@(id) = FALSE
 								}
-							}else{
-								sub_window_posx@ = wx1
-								sub_window_posy@ = wx2
 							}
 						}
 					}
@@ -188,6 +192,7 @@
 					if(param_name == "shortcut_command_flg") :shortcut_command_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "old_getpos_flg") :old_getpos_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_ver_type") :check_ver_type@ = limit(int(param_value), 0, 2) :_continue
+					if(param_name == "desktop_mascot_flg") :desktop_mascot_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -253,6 +258,7 @@
 			if(mascot_list_size@ == 0){
 				gsel kOptionWindowID
 				objenable desktop_mascot_id@, 0
+				desktop_mascot_flg@ = 0
 				objenable mascot_index_id@, 0
 			}else{
 				gsel kOptionWindowID
@@ -349,6 +355,7 @@
 			text_buffer += "shortcut_command_flg=" + shortcut_command_flg@ + "\n"
 			text_buffer += "old_getpos_flg=" + old_getpos_flg@ + "\n"
 			text_buffer += "check_ver_type=" + check_ver_type@ + "\n"
+			text_buffer += "desktop_mascot_flg=" + desktop_mascot_flg@ + "\n"
 			notesel text_buffer
 			notesave exe_path@ + "\\save\\setting.ini"
 			// pngƒtƒ@ƒCƒ‹‚ð•Û‘¶

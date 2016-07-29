@@ -287,6 +287,36 @@ return
 			next
 		next
 	}
+	// 各日付毎の資源量変化を計算する
+	sdim day_diff_text, 32000
+	if(supply_log_size > 2){
+		day_diff_text = "日付          燃料    弾薬    鋼材  ボーキ  バケツ    開発\n"
+		day_count = 0
+		day1_idx = supply_log_size - 1
+		day1 = int(supply_time(day1_idx))
+		for i, supply_log_size - 2, -1, -1
+			day2 = int(supply_time(i))
+			if(day1 != day2){
+				// 差分を記録する
+				day_diff_text += CnvStrDay(day1) + " "
+				day_diff_text += strf("%7d", supply_value(0, day1_idx) - supply_value(0, i)) + " "
+				day_diff_text += strf("%7d", supply_value(1, day1_idx) - supply_value(1, i)) + " "
+				day_diff_text += strf("%7d", supply_value(2, day1_idx) - supply_value(2, i)) + " "
+				day_diff_text += strf("%7d", supply_value(3, day1_idx) - supply_value(3, i)) + " "
+				day_diff_text += strf("%7d", supply_value(4, day1_idx) - supply_value(4, i)) + " "
+				day_diff_text += strf("%7d", supply_value(5, day1_idx) - supply_value(5, i)) + "\n"
+				day_count++
+				day1_idx = i
+				day1 = day2
+				// break用分岐
+				if(day_count >= int(graph_scale_interval(graph_scale_index))) :_break
+			}
+		next
+		// day_diff_textを出力する
+		gsel kSupplyGraphWindowID
+		objprm day_diff_text_id, day_diff_text
+		gsel kMainWindowID
+	}
 return
 
 //*資材管理ウィンドウを表示する
@@ -405,20 +435,20 @@ return
 	gsel kSupplyGraphWindowID
 	// まず普通にグラフ画像を表示する
 	redraw 0
-		pos POS_X(1), POS_Y(0)
+		pos (POS_X(1)), POS_Y(0)
 		gcopy kGraphBufferID, 0, 0, kGraphWX2, kGraphWY2
-		color :DrawLargeSquare POS_X(1), POS_Y(0), kGraphWX2, kGraphWY2
+		color :DrawLargeSquare (POS_X(1)), POS_Y(0), kGraphWX2, kGraphWY2
 	redraw 1
 	// 次に、マウスをかざした位置を線で描画する
 	// 最後に、その位置における時刻・資材量を表示する
-	if(mousex != limit(mousex, POS_X(1) + 1,POS_X(1) + kGraphWX2 - 1)) :return
+	if(mousex != limit(mousex, (POS_X(1)) + 1,POS_X(1) + kGraphWX2 - 1)) :return
 	if(mousey != limit(mousey, POS_Y(0) + 1,POS_Y(0) + kGraphWY2 - 1)) :return
 	redraw 0
 		// 線
 		color 0, 255, 255
 		line mousex, POS_Y(0) + kGraphWY2 - 1, mousex, POS_Y(0) + 1
 		// 時刻計算
-		per = 1.0 * (mousex - POS_X(1)) / kGraphWX2
+		per = 1.0 * (mousex - (POS_X(1))) / kGraphWX2
 		point_time = per * last_time + (1.0 - per) * first_time
 		// 資材量計算
 		//近傍の資材量を引っ張ってくる

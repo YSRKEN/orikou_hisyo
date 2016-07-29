@@ -3,20 +3,20 @@
 /* ウィンドウ・バッファ */
 	// 画面ID
 	//ウィンドウ
-	#enum global kMainWindowID = 0	;メイン画面のID
-	#enum global kSubWindowID		;サブ画面のID
-	#enum global kOptionWindowID	;オプション画面のID
-	#enum global kTimerWindowID		;各種タイマー画面のID
-	#enum global kSortListWindowID	;ソート一覧画面のID
-	#enum global kSupplyGraphWindowID	;資材グラフ画面のID
-	#enum global kExpCalcWindowID	;経験値計算機のID
-	#enum global kCounterWindowID	;○号カウンタのID
-	#enum global kCondMeterWindowID	;cond値メータのID
-	#enum global kBgmWindowID		;BGM機能のID
-	#enum global kTaskWindowID		;任務一覧用のID
-	#enum global kFleetInfoWindowID		;艦隊情報画面のID
-	#enum kMascotWindowID			;マスコット表示用ID
-	#enum kSupplyFileWindowID		;資材管理用のID
+	#enum global kMainWindowID = 0		;0;メイン画面のID
+	#enum global kSubWindowID			;1;サブ画面のID
+	#enum global kOptionWindowID		;2;オプション画面のID
+	#enum global kTimerWindowID			;3;各種タイマー画面のID
+	#enum global kSortListWindowID		;4;ソート一覧画面のID
+	#enum global kSupplyGraphWindowID	;5;資材グラフ画面のID
+	#enum global kExpCalcWindowID		;6;経験値計算機のID
+	#enum global kCounterWindowID		;7;○号カウンタのID
+	#enum global kCondMeterWindowID		;8;cond値メータのID
+	#enum global kBgmWindowID			;9;BGM機能のID
+	#enum global kTaskWindowID			;10;任務一覧用のID
+	#enum global kFleetInfoWindowID		;11;艦隊情報画面のID
+	#enum global kMascotWindowID		;12;マスコット表示用ID
+	#enum global kSupplyFileWindowID	;13;資材管理用のID
 	;↑マウスで動かせるのはここまで
 	#enum kSelectWindowID			;選択画面のID
 	#enum global kStopperWindowID	;進撃/出撃ストッパー画面用ID
@@ -121,6 +121,7 @@
 	#const kGraphWX2 SIZE_X(kGraphWX)
 	#const kGraphWY2 SIZE_Y(kGraphWY)
 	#const kSupplyLogKinds 7
+	#const kGraphDiffY 200
 	;
 	#const kLargeFontSize 30
 	#const kSmallFontSize 12
@@ -167,15 +168,18 @@
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
 	#const kMaxSort3Pages 3	;ソート一覧(基地)の最大ページ数
 	// 任務一覧
-	#const kTaskColumnWX1 49
+	#const kTaskColumnWX1  49
 	#const kTaskColumnWX2 251	;本来なら491だが、あえて短めにしている
-	#const kTaskColumnWY 18
-	#const kTaskColumnPX1 7
-	#const kTaskColumnPY1 36
-	#const kTaskColumnPX2 72
-	#const kTaskColumnPY2 -1
+	#const kTaskColumnWX3  50
+	#const kTaskColumnWY   18
+	#const kTaskColumnPX1   7
+	#const kTaskColumnPY1  36
+	#const kTaskColumnPX2  72
+	#const kTaskColumnPY2  -1
+	#const kTaskColumnPX3 506
+	#const kTaskColumnPY3  22
 	#const kMaxTasks 6
-	#const kTaskWindowX kTaskColumnWX1 + kTaskColumnWX2
+	#const kTaskWindowX kTaskColumnWX1 + kTaskColumnWX2 + kTaskColumnWX3
 	#const kTaskWindowY kTaskColumnWY * kMaxTasks
 	#const kTaskInterval 1.0 / 24 / 60 / 60	;任務一覧の更新時間「1秒」
 	// 艦隊情報
@@ -183,7 +187,7 @@
 	#const kWeapons 4			;最大装備可能数
 	#const kWeaponMarkLen 108	;装備のマーク長
 	// その他
-	#const global kSavePositions kMascotWindowID
+	#const global kSavePositions kSupplyFileWindowID + 1
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
 	#const global kMaxSelectScenes 10	;1カテゴリにおける最大シーン数
 	#const global kFleetNum 4	;艦隊数
@@ -435,6 +439,7 @@
 	supply_kind_name.5 = "高速修復材 バケツ"                   
 	supply_kind_name.6 = "開発資材 ツルハシ 歯車"              
 	supply_kind_name.7 = "司令部レベル しれぇレベル 提督レベル"
+	sdim day_diff_text, 32000	;差分表示用
 	// BGM機能
 	dim bgm_index, kBgmKinds
 	for k, 0, kBgmKinds

@@ -30,6 +30,7 @@
 	browser_offset_y = 90
 	exit_flg = FALSE
 	browser_front_flg = FALSE
+	scroll_bar_flg = TRUE
 
 // 本体の処理
 	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "外蔵ブラウザ"
@@ -135,6 +136,12 @@ return
 	}
 	delcom pBody
 	delcom pDoc
+	;scrollチェックを変化させる
+	if(scroll_bar_flg){
+		scroll_bar_flg = FALSE
+		gsel kBrowserWindowID
+		objprm scroll_bar_flg_id, FALSE
+	}
 return
 
 //*中央解除
@@ -157,6 +164,12 @@ return
 	}
 	delcom pBody
 	delcom pDoc
+	;scrollチェックを変化させる
+	if(scroll_bar_flg == FALSE){
+		scroll_bar_flg = TRUE
+		gsel kBrowserWindowID
+		objprm scroll_bar_flg_id, TRUE
+	}
 return
 
 //*移動

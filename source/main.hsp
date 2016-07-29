@@ -1,7 +1,7 @@
 /*
 * SoftWareName(Jp) : おりこうさんな秘書
 * SoftWareName(En) : orikou_hisyo
-* Version          : 3.3.3
+* Version          : 3.3.4
 * Author           : YSR
 * License          : MIT
 * Copyright(C) 2015 YSR
@@ -10,9 +10,9 @@
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.3.3"
-	#define kVerString  "333"
-	#define kLastUpdate "2016/07/23"
+	#define kVersion    "Ver.3.3.4"
+	#define kVerString  "334"
+	#define kLastUpdate "2016/07/"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -45,6 +45,7 @@
 	#include "interface.hsp"
 	LoadSoftData
 	gosub *make_main_window
+	gosub *draw_supply_graph
 	onexit gosub *exit
 	onclick gosub *move
 	goto *main
@@ -71,7 +72,13 @@
 	gosub *redraw_counter
 	gosub *redraw_bgm_window
 	gosub *redraw_task_window
-	gsel kMainWindowID, 2
+	GselMain
+	if(mascot_index_id >= 0){
+		if(desktop_mascot_flg){
+			gsel kMainWindowID, -1
+			gosub *show_mascot
+		}
+	}
 	// 状態変化検出用変数
 	sub_window_size_index_ = sub_window_size_index	//サブ画面のサイズを変えたか否か
 	show_status_flg_ = show_status_flg	//ステータスを表示するか否か
@@ -112,7 +119,7 @@
 		}
 		gsel kOptionWindowID
 		objprm check_ver_index_id, check_ver_type
-		gsel kMainWindowID, 2
+		GselMain
 	}
 	if(check_ver_type == 1){
 		// 更新チェックを行う
@@ -202,13 +209,13 @@
 			if(show_battle_flg){
 				if(scene_list_index != battle_index(0) + 1){
 					if(scene_result(1) == "昼戦画面"){
-						gsel kMainWindowID, 2
+						GselMain
 						objprm scene_list_id, battle_index(0) + 1
 					}
 				}
 				if(scene_list_index != battle_index(1) + 1){
 					if(scene_result(1) == "夜戦画面"){
-						gsel kMainWindowID, 2
+						GselMain
 						objprm scene_list_id, battle_index(1) + 1
 					}
 				}
@@ -299,14 +306,14 @@
 		//「戦闘画面」チェックに関する処理
 		if(show_battle_flg_ != show_battle_flg){
 			if(show_battle_flg == FALSE){
-				gsel kMainWindowID, 2
+				GselMain
 				objprm scene_list_id, 0
 			}else{
 				if(show_scene_list_time(battle_index(0)) > show_scene_list_time(battle_index(1))){
-					gsel kMainWindowID, 2
+					GselMain
 					objprm scene_list_id, battle_index(0) + 1
 				}else{
-					gsel kMainWindowID, 2
+					GselMain
 					objprm scene_list_id, battle_index(1) + 1
 				}
 			}
@@ -315,12 +322,11 @@
 		// マスコット表示に切り替えるかのフラグ
 		if(desktop_mascot_flg_ != desktop_mascot_flg){
 			if(mascot_index_id >= 0){
+				GselMain
 				if(desktop_mascot_flg){
-					gsel kMainWindowID, -1
 					gosub *show_mascot
 				}else{
 					gsel kMascotWindowID, -1
-					gsel kMainWindowID, 2
 				}
 			}
 			desktop_mascot_flg_ = desktop_mascot_flg
@@ -359,6 +365,10 @@
 			gosub *get_fleetinfo
 			fleetinfo_number_index_ = fleetinfo_number_index
 		}
+		if(time2 != gettime(6)){
+			time2 = gettime(6)
+			if(desktop_mascot_flg@) :gsel kMainWindowID, -1	//ヤケクソ
+		}
 		// ウェイト
 		await 1000 / capture_fps(capture_fps_index)
 	loop
@@ -370,7 +380,7 @@
 		if(stat == 6){
 			exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
 			SaveSoftData TRUE
-			gsel kMainWindowID
+			GselMain
 			TasktrayDel
 			exit_flg = TRUE
 		}
