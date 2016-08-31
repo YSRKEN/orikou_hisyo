@@ -1,7 +1,7 @@
 /*
 * SoftWareName(Jp) : おりこうさんな秘書
 * SoftWareName(En) : orikou_hisyo
-* Version          : 3.3.4
+* Version          : 3.3.5
 * Author           : YSR
 * License          : MIT
 * Copyright(C) 2015 YSR
@@ -10,9 +10,9 @@
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.3.4"
-	#define kVerString  "334"
-	#define kLastUpdate "2016/07/29"
+	#define kVersion    "Ver.3.3.5"
+	#define kVerString  "335"
+	#define kLastUpdate "2016/09/01"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "show_scene.csv"
@@ -327,6 +327,9 @@
 					gosub *show_mascot
 				}else{
 					gsel kMascotWindowID, -1
+					gsel kMainWindowID, 2
+					objprm show_battle_id, show_battle_flg
+					gsel kMainWindowID, 2
 				}
 			}
 			desktop_mascot_flg_ = desktop_mascot_flg
@@ -379,7 +382,7 @@
 		dialog "終了しますか？", 2, kSoftName
 		if(stat == 6){
 			exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
-			SaveSoftData TRUE
+			//SaveSoftData TRUE
 			GselMain
 			TasktrayDel
 			exit_flg = TRUE

@@ -76,6 +76,7 @@ return
 				button gosub "【艦隊画像】", *save_fleet
 			POS_XY 1, 3
 				chkbox "戦闘画面", show_battle_flg
+					show_battle_id = stat
 			POS_XY 2, 3
 				button gosub "各種情報", *about
 			if(main_pulldown_flg){
@@ -146,6 +147,7 @@ return
 				button gosub "オプション...", *show_option
 			POS_XY 1, 4
 				chkbox "戦闘画面", show_battle_flg
+					show_battle_id = stat
 			POS_XY 1, 5
 				button gosub "各種情報", *about
 			if(main_pulldown_flg){
