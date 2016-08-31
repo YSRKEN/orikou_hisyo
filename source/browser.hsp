@@ -26,8 +26,8 @@
 
 // •Ï”‰Šú‰»
 	sdim browser_url, 512 :browser_url = kKanColleURL
-	browser_offset_x = 105
-	browser_offset_y = 90
+	browser_offset_x = 98
+	browser_offset_y = 84
 	exit_flg = FALSE
 	browser_front_flg = FALSE
 	scroll_bar_flg = TRUE
