@@ -382,7 +382,7 @@
 		dialog "終了しますか？", 2, kSoftName
 		if(stat == 6){
 			exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
-			//SaveSoftData TRUE
+			SaveSoftData TRUE
 			GselMain
 			TasktrayDel
 			exit_flg = TRUE

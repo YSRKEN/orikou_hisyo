@@ -131,11 +131,10 @@
 						}
 					}
 				next
-				// 数字の点灯が判別できなかった場合は、判定不能とする
+				// 数字の点灯が判別できなかった場合は、1ページ目として扱う
 				if(position == -1){
-					n = scene_list_size@
-					scene_result(0) = "不明"
-					scene_result(1) = "不明"
+					scene_result(0) = "任務画面"
+					scene_result(1) = "１ページ目"
 					return n
 				}
 				// 数字が点灯していた場合、その位置における数字を読み込む

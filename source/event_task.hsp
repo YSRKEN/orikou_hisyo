@@ -28,6 +28,13 @@ return
 			next
 			if(flg) :return
 		}
+		// 「任務がありません」表示ならカウントを打ち切る
+		if (NearColor(392, 258, 137, 131, 125)){
+			if(NearColor(346, 259, 137, 131, 125)){
+				count = 0
+				_break
+			}
+		}
 		for k, 0, 5
 			// 「進行中」ボタンが付いている場合にのみ反応する
 			if (NearColor(task_pos_x + 581, task_pos_y(k) + 38, 255, 132, 49) != TRUE) :_continue
