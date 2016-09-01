@@ -82,6 +82,15 @@
 		#deffunc GselMain
 			if(desktop_mascot_flg@) :gsel kMainWindowID, -1 :else :gsel kMainWindowID, 2
 		return
+		// •¶š—ñ‚Æ•¶š—ñ‚ğ”äŠr‚µ‚ÄAˆÙ‚È‚é•¶š”‚ğ”‚¦‚é
+		#defcfunc compareBit str a, str b
+			a_ = a
+			b_ = b
+			count = 0
+			for k, 0, strlen(a_)
+				if(strmid(a_, k, 1) != strmid(b_, k, 1)) :count++
+			next
+		return count
 	#global
 
 	#module dtm
