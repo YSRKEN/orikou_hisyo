@@ -476,6 +476,9 @@
 	// 任務一覧
 	task_pos_x = 144
 	task_pos_y = 110, 178, 246, 314, 382
+	check_ago_flg = FALSE
+	check_rogo_flg = FALSE
+	check_igo_flg = FALSE
 	// 艦隊情報
 	sdim fleetinfo_output, 4096	;各種タイマーを表示するためのバッファ
 	unit_level_pos_x.0 = 492, 503, 514	;練度

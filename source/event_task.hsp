@@ -63,4 +63,29 @@ return
 			gcopy kSceneBufferID + task_list_index(y), task_pos_x + kTaskColumnPX3, task_pos_y(task_list_column(y)) + kTaskColumnPY3, kTaskColumnWX3, kTaskColumnWY
 		next
 	redraw 1
+	// あ号・い号・ろ号がチェックされているかを確認する
+	gsel kTaskWindowID
+	check_ago_flg = FALSE
+	check_rogo_flg = FALSE
+	check_igo_flg = FALSE
+	for y, 0, count
+		temp_task_str = ""
+		for k, 0, 60
+			pget kTaskColumnWX1 + k, y * kTaskColumnWY + 11
+			if(ginfo_r < 210){
+				temp_task_str += "1"
+			}else{
+				temp_task_str += "0"
+			}
+		next
+		//logmes "" + (y) + " |> " + temp_task_str
+		if(compareBit(temp_task_str, "001111101101100000110000000001011000110000011111110111100000") < 2){
+			check_ago_flg = TRUE
+		}else: if(compareBit(temp_task_str, "000111000011000000110000000001010000110000011111110111100000") < 2){
+			check_rogo_flg = TRUE
+		}else :if(compareBit(temp_task_str, "001100000000110000110000000001011000110000011111110111100000") < 2){
+			check_igo_flg = TRUE
+		}
+	next
+	//logmes "" + check_ago_flg + " " + check_rogo_flg + " " + check_igo_flg
 return
