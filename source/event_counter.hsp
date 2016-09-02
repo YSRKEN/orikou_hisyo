@@ -84,7 +84,7 @@ return
 	if(scene_result(0) == "母港画面"){
 		boss_battle_flg = FALSE
 	}
-	if(scene_result(1) == "戦果報告"){
+	if(scene_result(1) == "戦果報告" && win_judge_window_id != -1){
 		//ボス勝利カウント
 		if((boss_battle_flg) && (battle_rank < kBattleRankC)){
 			if(exercises_flg == FALSE){
