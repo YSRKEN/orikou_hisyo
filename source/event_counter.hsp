@@ -106,53 +106,55 @@ return
 		}
 	}
 	if(scene_result(1) == "交戦結果"){
-		// 最後の戦闘が昼戦か夜戦かを、最終更新日時で判断する
-		if(show_scene_list_time(battle_index(0)) > show_scene_list_time(battle_index(1))){
-			gsel kSceneBufferID + battle_index(0)
-		}else{
-			gsel kSceneBufferID + battle_index(1)
+		if(battle_index(0) != -1 && battle_index(1) != -1){
+			// 最後の戦闘が昼戦か夜戦かを、最終更新日時で判断する
+			if(show_scene_list_time(battle_index(0)) > show_scene_list_time(battle_index(1))){
+				gsel kSceneBufferID + battle_index(0)
+			}else{
+				gsel kSceneBufferID + battle_index(1)
+			}
+			//輸送船撃沈カウント
+			for k, 0, kUnitNum
+				if(NearColor(767,173 + 45 * k,77,166,223)){
+					if(NearColor(669,178 + 45 * k,254,254,254)){
+						if(NearColor(649,157 + 45 * k,133,133,133)){
+							if(exercises_flg == FALSE){
+								if(auto_count_flg(4) || (check_rogo_flg && auto_count_rogo_flg)){
+									count_num(4)++
+									redraw_counter_flg = TRUE
+								}
+							}
+						}
+					}
+				}
+			next
+			//空母系撃沈カウント
+			for k, 0, kUnitNum
+				if(NearColor(767,173 + 45 * k,77,166,223)){
+					;正規空母
+					if(NearColor(670,176 + 45 * k,167,167,167)){
+						if(NearColor(671,157 + 45 * k,215,215,215)){
+							if(exercises_flg == FALSE){
+								if(auto_count_flg(5) || (check_igo_flg && auto_count_igo_flg)){
+									count_num(5)++
+									redraw_counter_flg = TRUE
+								}
+							}
+						}
+					}
+					;軽空母
+					if(NearColor(667,177 + 45 * k,183,183,183)){
+						if(NearColor(664,170 + 45 * k,252,252,252)){
+							if(exercises_flg == FALSE){
+								if(auto_count_flg(5) || (check_igo_flg && auto_count_igo_flg)){
+									count_num(5)++
+									redraw_counter_flg = TRUE
+								}
+							}
+						}
+					}
+				}
+			next
 		}
-		//輸送船撃沈カウント
-		for k, 0, kUnitNum
-			if(NearColor(767,173 + 45 * k,77,166,223)){
-				if(NearColor(669,178 + 45 * k,254,254,254)){
-					if(NearColor(649,157 + 45 * k,133,133,133)){
-						if(exercises_flg == FALSE){
-							if(auto_count_flg(4) || (check_rogo_flg && auto_count_rogo_flg)){
-								count_num(4)++
-								redraw_counter_flg = TRUE
-							}
-						}
-					}
-				}
-			}
-		next
-		//空母系撃沈カウント
-		for k, 0, kUnitNum
-			if(NearColor(767,173 + 45 * k,77,166,223)){
-				;正規空母
-				if(NearColor(670,176 + 45 * k,167,167,167)){
-					if(NearColor(671,157 + 45 * k,215,215,215)){
-						if(exercises_flg == FALSE){
-							if(auto_count_flg(5) || (check_igo_flg && auto_count_igo_flg)){
-								count_num(5)++
-								redraw_counter_flg = TRUE
-							}
-						}
-					}
-				}
-				;軽空母
-				if(NearColor(667,177 + 45 * k,183,183,183)){
-					if(NearColor(664,170 + 45 * k,252,252,252)){
-						if(exercises_flg == FALSE){
-							if(auto_count_flg(5) || (check_igo_flg && auto_count_igo_flg)){
-								count_num(5)++
-								redraw_counter_flg = TRUE
-							}
-						}
-					}
-				}
-			}
-		next
 	}
 return

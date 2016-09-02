@@ -186,7 +186,7 @@
 		// 記録された画像から艦隊数を取得する
 		#deffunc GetUnits array unit_count
 			// 改装画面
-			if((scene_result@(0) == "改装画面") && (strmid(scene_result@(1), 0, 2) == "第")){
+			if((scene_result@(0) == "改装画面") && (strmid(scene_result@(1), 0, 2) == "第") && scene_fleet_offset@ != -1){
 				gsel kMainBufferID
 				for k, kUnitNum - 1, -1, -1
 					if(NearColor(119, 164 + 54 * k, 25, 20, 4) == FALSE){
@@ -196,7 +196,7 @@
 				next
 			}
 			// 編成画面
-			if((scene_result@(0) == "編成画面") && (strmid(scene_result@(1), 0, 2) == "第")){
+			if((scene_result@(0) == "編成画面") && (strmid(scene_result@(1), 0, 2) == "第") && scene_unit_offset@ != -1){
 				gsel kMainBufferID
 				for k, kUnitNum - 1, -1, -1
 					x = k \ 2 :y = k / 2
@@ -386,6 +386,7 @@
 		return
 		// ボスマスに自艦隊があるかを判定する
 		#defcfunc CheckBossOfAeraMap
+			if(area_map_window_id@ == -1) :return FALSE
 			gsel area_map_window_id@
 			cvputimg kBossJudgeBufferID3
 			cvmatch boss_icon_x,  boss_icon_y,  CV_TM_SQDIFF, kBossJudgeBufferID1, kBossJudgeBufferID3

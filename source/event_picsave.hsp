@@ -80,6 +80,7 @@ return
 
 //*ŠÍ‘à‰æ‘œ‚ğ•Û‘¶
 *save_fleet
+	if(scene_fleet_offset == -1) :return
 	PutLog "yŠÍ‘à‰æ‘œz"
 	if(save_fleet_index < kFleetNum){
 		// ’ÊíŠÍ‘à‚ğ•Û‘¶

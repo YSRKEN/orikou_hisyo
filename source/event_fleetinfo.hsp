@@ -8,6 +8,7 @@ return
 
 //*ŠÍ‘àî•ñ‚ğŒvZ‚µ‚Äo—Í‚·‚é
 *get_fleetinfo
+	if(scene_fleet_offset == -1) :return
 	// î•ñ“Ç‚İæ‚è
 	master_level = GetMasterLevel()		;i—ß•”ƒŒƒxƒ‹
 	target_unit_count = unit_count(fleetinfo_number_index)	;ŠÍ‘à‚ÌŠÍ–º”
