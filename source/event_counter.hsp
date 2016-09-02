@@ -56,6 +56,7 @@ return
 
 //*カウンタの自動更新処理
 *counter_auto
+	//check_ago_flg = TRUE :check_rogo_flg = TRUE :check_igo_flg = TRUE
 	//海域出撃カウント
 	if((pre_scene_type == "海域出撃") && (pre_scene_name == "艦隊選択") && (scene_result(1) == "出撃画面")){
 		if(exercises_flg == FALSE){

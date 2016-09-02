@@ -78,11 +78,12 @@ return
 				temp_task_str += "0"
 			}
 		next
+		//logmes "" + (y) + " |> " + temp_task_str
 		if(compareBit(temp_task_str, "001111101101100000110000000001011000110000011111110111100000") < 2){
 			check_ago_flg = TRUE
-		}else: if(compareBit(temp_task_str, "001100000000110000110000000001011000110000011111110111100000") < 2){
+		}else: if(compareBit(temp_task_str, "000111000011000000110000000001010000110000011111110111100000") < 2){
 			check_rogo_flg = TRUE
-		}else :if(compareBit(temp_task_str, "000111000011000000110000000001010000110000011111110111100000") < 2){
+		}else :if(compareBit(temp_task_str, "001100000000110000110000000001011000110000011111110111100000") < 2){
 			check_igo_flg = TRUE
 		}
 	next
