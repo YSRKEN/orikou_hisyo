@@ -15,7 +15,7 @@
 	#define kLastUpdate "2016/09/02"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
-	#pack "show_scene.csv"
+	//#pack "show_scene.csv"
 	#pack "expedition.csv"
 	#pack "exp_table.csv"
 	#pack "sort_type.csv"
