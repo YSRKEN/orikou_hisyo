@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<link rev="made" href="mailto:ysr.ken@gmail.com">
+		<link rel="index" href="./index.html">
+		<title>おりこうさんな秘書 ヘルプ(追加事項)</title>
+		<style type="text/css">
+			<!-- .underline{text-decoration: underline;}
+			img{border: none;}
+			div{border-style: solid; border-width: 1px; padding: 5px 5px 5px 5px;}-->
+		</style>
+	</head>
+	<body>
+	<h1>表示モードの弄り方教室</h1>
+	<p>　show_scene.csvを編集することによって、<a href="./index.html#showmode">表示モード</a>における表示項目の順序・種類を自在に変更できます。<br>
+	　ただし、編集時には細かな注意事項がありますので、以下の内容にはよく目を通して下さい。</p>
+		<ul>
+			<li><strong>編集によって起きたトラブルについては責任を持ちません。</strong></li>
+			<li>show_scene.csvは、Shift-JIS形式・改行はCR+LFです。</li>
+			<li>『CSVファイル』ですが、項目は""(ダブルクォーテーション)で囲わないようにしてください。</li>
+			<li>各項目ですが、<a href="./all_scene.csv">all_scene.csv</a>の行をコピペしてご利用下さい。</li>
+			<li>次の項目は、様々な機能で用いますので、show_scene.csvに含めることを推奨します。<ul>
+				<li>『編成画面,第１艦隊』～『編成画面,第４艦隊』<br>→艦隊の艦娘数取得機能</li>
+				<li>『改装画面,第１艦隊　１番艦』～『改装画面,第４艦隊　６番艦』<br>→艦隊の艦娘数取得機能、艦隊情報取得機能、艦隊画像保存機能</li>
+				<li>『出撃経過,昼戦画面』と『出撃経過,夜戦画面』<br>→○号カウンタ自動記録機能における輸送船・空母撃沈カウント、「戦闘画面」チェックによる場面切り替え</li>
+				<li>『海域出撃,海域マップ』<br>→○号カウンタ自動記録機能におけるボス到達・ボス勝利カウント</li>
+				<li>『出撃経過,戦闘判定』<br>→○号カウンタ自動記録機能におけるボス勝利・S勝利判定カウント、疲労回復タイマー</li>
+			</ul></li>
+			<li>次の項目については、『連続する項目全てをその順番でコピペ』してください。<ul>
+				<li>『編成画面,第１艦隊』～『編成画面,第４艦隊』</li>
+				<li>『改装画面,第１艦隊　１番艦』～『改装画面,第４艦隊　６番艦』</li>
+			</ul></li>
+			<li>show_scene.csvにコピペした項目は、この順番で<a href="./index.html#main_window">メイン画面</a>のコンボボックスに表示されます。</li>
+			<li>show_scene.csvにコピペした項目は、セーブデータに記憶されます。<br>
+			編集してから初めて起動する際、<strong>編集後にもある項目だけ</strong>バッファ画像・最終更新日時が引き継がれます。</li>
+		</ul>
+	</body>
+</html>
