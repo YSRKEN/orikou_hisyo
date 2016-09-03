@@ -193,6 +193,9 @@
 					if(param_name == "old_getpos_flg") :old_getpos_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_ver_type") :check_ver_type@ = limit(int(param_value), 0, 2) :_continue
 					if(param_name == "desktop_mascot_flg") :desktop_mascot_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "auto_count_ago_flg") :auto_count_ago_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "auto_count_rogo_flg") :auto_count_rogo_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "auto_count_igo_flg") :auto_count_igo_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -356,6 +359,10 @@
 			text_buffer += "old_getpos_flg=" + old_getpos_flg@ + "\n"
 			text_buffer += "check_ver_type=" + check_ver_type@ + "\n"
 			text_buffer += "desktop_mascot_flg=" + desktop_mascot_flg@ + "\n"
+			text_buffer += "auto_count_ago_flg=" + auto_count_ago_flg@ + "\n"
+			text_buffer += "auto_count_rogo_flg=" + auto_count_rogo_flg@ + "\n"
+			text_buffer += "auto_count_igo_flg=" + auto_count_igo_flg@ + "\n"
+			
 			notesel text_buffer
 			notesave exe_path@ + "\\save\\setting.ini"
 			// pngƒtƒ@ƒCƒ‹‚ð•Û‘¶
