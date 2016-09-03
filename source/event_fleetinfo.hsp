@@ -8,6 +8,7 @@ return
 
 //*艦隊情報を計算して出力する
 *get_fleetinfo
+	if(scene_fleet_offset == -1) :return
 	// 情報読み取り
 	master_level = GetMasterLevel()		;司令部レベル
 	target_unit_count = unit_count(fleetinfo_number_index)	;艦隊の艦娘数
@@ -56,7 +57,7 @@ return
 			target_unit_level(n) = 99
 		}else{
 			dim level_num, 3
-			ReadNumber level_num, 3, unit_level_pos_x, 112, 10, 14, 170, FALSE
+			ReadNumber level_num, 3, unit_level_pos_x, 112, 10, 15, 170, FALSE
 			if(level_num(0) == 9){
 				target_unit_level(n) = 99	;Lv99用の特別な処理なんだけど、f**kな仕様すぎる……
 			}else{

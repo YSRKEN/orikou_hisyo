@@ -193,6 +193,9 @@
 					if(param_name == "old_getpos_flg") :old_getpos_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_ver_type") :check_ver_type@ = limit(int(param_value), 0, 2) :_continue
 					if(param_name == "desktop_mascot_flg") :desktop_mascot_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "auto_count_ago_flg") :auto_count_ago_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "auto_count_rogo_flg") :auto_count_rogo_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "auto_count_igo_flg") :auto_count_igo_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 				next
 				for i, 0, kBgmKinds
 					notesel bgm_list@(i)
@@ -356,6 +359,10 @@
 			text_buffer += "old_getpos_flg=" + old_getpos_flg@ + "\n"
 			text_buffer += "check_ver_type=" + check_ver_type@ + "\n"
 			text_buffer += "desktop_mascot_flg=" + desktop_mascot_flg@ + "\n"
+			text_buffer += "auto_count_ago_flg=" + auto_count_ago_flg@ + "\n"
+			text_buffer += "auto_count_rogo_flg=" + auto_count_rogo_flg@ + "\n"
+			text_buffer += "auto_count_igo_flg=" + auto_count_igo_flg@ + "\n"
+			
 			notesel text_buffer
 			notesave exe_path@ + "\\save\\setting.ini"
 			// pngファイルを保存
@@ -389,6 +396,12 @@
 			sdim show_scene_list_category@, 64, show_scene_list_size@
 			sdim show_scene_list_name@,     64, show_scene_list_size@
 			ddim show_scene_list_time@, show_scene_list_size@
+			scene_fleet_offset@ = -1
+			scene_unit_offset@ = -1
+			battle_index@(0) = -1
+			battle_index@(1) = -1
+			area_map_window_id@ = -1
+			win_judge_window_id@ = -1
 			for n, 0, show_scene_list_size@
 				noteget get, n + 1
 				split get, ",", temp
@@ -415,6 +428,26 @@
 				}
 			next
 			battle_index@(2) = -1
+			;引き出したインデックスが正常に動作することを保証する
+			for k, 0, kFleetNum
+				noteget get, scene_unit_offset@ + k + 1
+				split get, ",", temp
+				if(temp(1) != "第" + fleet_2byte_arr@(k) + "艦隊"){
+					scene_unit_offset@ = -1
+					_break
+				}
+			next
+			for i, 0, kFleetNum
+				for j, 0, kUnitNum
+					noteget get, scene_fleet_offset@ + (i * kUnitNum + j) + 1
+					split get, ",", temp
+					if(temp(1) != "第" + fleet_2byte_arr@(i) + "艦隊　" + fleet_2byte_arr@(j) + "番艦"){
+						scene_fleet_offset@ = -1
+						_break
+					}
+				next
+				if(scene_fleet_offset@ == -1) :_break
+			next
 			//表示用のカタログを生成する
 			sdim scene_list_str@, 32000
 			scene_list_str@ = "現在画面\n"

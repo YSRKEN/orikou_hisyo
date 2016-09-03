@@ -14,3 +14,8 @@ source/*.wav
 source/theme/
 theme/flat design/hsptmp
 theme/flat design/obj
+*.exe
+*.dll
+source/log/
+README.txt
+theme/大淀/

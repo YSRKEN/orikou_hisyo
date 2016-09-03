@@ -476,12 +476,15 @@
 	// 任務一覧
 	task_pos_x = 144
 	task_pos_y = 110, 178, 246, 314, 382
+	check_ago_flg = FALSE
+	check_rogo_flg = FALSE
+	check_igo_flg = FALSE
 	// 艦隊情報
 	sdim fleetinfo_output, 4096	;各種タイマーを表示するためのバッファ
 	unit_level_pos_x.0 = 492, 503, 514	;練度
 	airs_pos_x.0 = 330, 338			;搭載数
 	search_pos_x.0 = 514, 522, 530	;索敵値
-	fleet_2byte_arr = "１", "２", "３", "４"	;艦隊番号
+	fleet_2byte_arr = "１", "２", "３", "４", "５", "６"	;艦隊番号
 	afwf_bonus.0 = 0,0,2,5,9,14,14,22	;艦戦・水戦制空ボーナス
 	wb_bonus.0 = 0,0,1,1,1,3,3,6		;水爆制空ボーナス
 	all_bonus.0 = 0,1,1,2,2,2,2,3		;外部熟練ボーナス

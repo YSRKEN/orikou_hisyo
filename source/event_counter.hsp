@@ -56,11 +56,14 @@ return
 
 //*カウンタの自動更新処理
 *counter_auto
+	//check_ago_flg = TRUE :check_rogo_flg = TRUE :check_igo_flg = TRUE
 	//海域出撃カウント
 	if((pre_scene_type == "海域出撃") && (pre_scene_name == "艦隊選択") && (scene_result(1) == "出撃画面")){
-		if(auto_count_flg(0) && (exercises_flg == FALSE)){
-			count_num(0)++
-			redraw_counter_flg = TRUE
+		if(exercises_flg == FALSE){
+			if(auto_count_flg(0) || (check_ago_flg && auto_count_ago_flg)){
+				count_num(0)++
+				redraw_counter_flg = TRUE
+			}
 		}
 	}
 	//ボス到達カウント
@@ -69,9 +72,11 @@ return
 		// こうして処理を分けないとpre_scene_name != "海域マップ"でも
 		// CheckBossOfAeraMap()が実行されてしまう
 		if(CheckBossOfAeraMap()){
-			if(auto_count_flg(1) && (exercises_flg == FALSE)){
-				count_num(1)++
-				redraw_counter_flg = TRUE
+			if(exercises_flg == FALSE){
+				if(auto_count_flg(1) || (check_ago_flg && auto_count_ago_flg)){
+					count_num(1)++
+					redraw_counter_flg = TRUE
+				}
 			}
 			boss_battle_flg = TRUE
 		}
@@ -79,65 +84,77 @@ return
 	if(scene_result(0) == "母港画面"){
 		boss_battle_flg = FALSE
 	}
-	if(scene_result(1) == "戦果報告"){
+	if(scene_result(1) == "戦果報告" && win_judge_window_id != -1){
 		//ボス勝利カウント
 		if((boss_battle_flg) && (battle_rank < kBattleRankC)){
-			if(auto_count_flg(2) && (exercises_flg == FALSE)){
-				count_num(2)++
-				redraw_counter_flg = TRUE
+			if(exercises_flg == FALSE){
+				if(auto_count_flg(2) || (check_ago_flg && auto_count_ago_flg)){
+					count_num(2)++
+					redraw_counter_flg = TRUE
+				}
 			}
 			boss_battle_flg = FALSE
 		}
 		//S勝利判定カウント
 		if(battle_rank == kBattleRankS){
-			if(auto_count_flg(3) && (exercises_flg == FALSE)){
-				count_num(3)++
-				redraw_counter_flg = TRUE
+			if(exercises_flg == FALSE){
+				if(auto_count_flg(3) || (check_ago_flg && auto_count_ago_flg)){
+					count_num(3)++
+					redraw_counter_flg = TRUE
+				}
 			}
 		}
 	}
 	if(scene_result(1) == "交戦結果"){
-		// 最後の戦闘が昼戦か夜戦かを、最終更新日時で判断する
-		if(show_scene_list_time(battle_index(0)) > show_scene_list_time(battle_index(1))){
-			gsel kSceneBufferID + battle_index(0)
-		}else{
-			gsel kSceneBufferID + battle_index(1)
+		if(battle_index(0) != -1 && battle_index(1) != -1){
+			// 最後の戦闘が昼戦か夜戦かを、最終更新日時で判断する
+			if(show_scene_list_time(battle_index(0)) > show_scene_list_time(battle_index(1))){
+				gsel kSceneBufferID + battle_index(0)
+			}else{
+				gsel kSceneBufferID + battle_index(1)
+			}
+			//輸送船撃沈カウント
+			for k, 0, kUnitNum
+				if(NearColor(767,173 + 45 * k,77,166,223)){
+					if(NearColor(669,178 + 45 * k,254,254,254)){
+						if(NearColor(649,157 + 45 * k,133,133,133)){
+							if(exercises_flg == FALSE){
+								if(auto_count_flg(4) || (check_rogo_flg && auto_count_rogo_flg)){
+									count_num(4)++
+									redraw_counter_flg = TRUE
+								}
+							}
+						}
+					}
+				}
+			next
+			//空母系撃沈カウント
+			for k, 0, kUnitNum
+				if(NearColor(767,173 + 45 * k,77,166,223)){
+					;正規空母
+					if(NearColor(670,176 + 45 * k,167,167,167)){
+						if(NearColor(671,157 + 45 * k,215,215,215)){
+							if(exercises_flg == FALSE){
+								if(auto_count_flg(5) || (check_igo_flg && auto_count_igo_flg)){
+									count_num(5)++
+									redraw_counter_flg = TRUE
+								}
+							}
+						}
+					}
+					;軽空母
+					if(NearColor(667,177 + 45 * k,183,183,183)){
+						if(NearColor(664,170 + 45 * k,252,252,252)){
+							if(exercises_flg == FALSE){
+								if(auto_count_flg(5) || (check_igo_flg && auto_count_igo_flg)){
+									count_num(5)++
+									redraw_counter_flg = TRUE
+								}
+							}
+						}
+					}
+				}
+			next
 		}
-		//輸送船撃沈カウント
-		for k, 0, kUnitNum
-			if(NearColor(767,173 + 45 * k,77,166,223)){
-				if(NearColor(669,178 + 45 * k,254,254,254)){
-					if(NearColor(649,157 + 45 * k,133,133,133)){
-						if(auto_count_flg(4) && (exercises_flg == FALSE)){
-							count_num(4)++
-							redraw_counter_flg = TRUE
-						}
-					}
-				}
-			}
-		next
-		//空母系撃沈カウント
-		for k, 0, kUnitNum
-			if(NearColor(767,173 + 45 * k,77,166,223)){
-				;正規空母
-				if(NearColor(670,176 + 45 * k,167,167,167)){
-					if(NearColor(671,157 + 45 * k,215,215,215)){
-						if(auto_count_flg(5) && (exercises_flg == FALSE)){
-							count_num(5)++
-							redraw_counter_flg = TRUE
-						}
-					}
-				}
-				;軽空母
-				if(NearColor(667,177 + 45 * k,183,183,183)){
-					if(NearColor(664,170 + 45 * k,252,252,252)){
-						if(auto_count_flg(5) && (exercises_flg == FALSE)){
-							count_num(5)++
-							redraw_counter_flg = TRUE
-						}
-					}
-				}
-			}
-		next
 	}
 return

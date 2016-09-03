@@ -76,6 +76,7 @@ return
 				button gosub "【艦隊画像】", *save_fleet
 			POS_XY 1, 3
 				chkbox "戦闘画面", show_battle_flg
+					show_battle_id = stat
 			POS_XY 2, 3
 				button gosub "各種情報", *about
 			if(main_pulldown_flg){
@@ -146,6 +147,7 @@ return
 				button gosub "オプション...", *show_option
 			POS_XY 1, 4
 				chkbox "戦闘画面", show_battle_flg
+					show_battle_id = stat
 			POS_XY 1, 5
 				button gosub "各種情報", *about
 			if(main_pulldown_flg){
@@ -220,43 +222,45 @@ return
 		last_preset_time = flash_time
 	}
 	// 疲労回復タイマー周りの処理
-	//帰投時にcond値-15(便宜上出撃時にタイマー開始)
-	if((pre_scene_type == "海域出撃") && (pre_scene_name == "艦隊選択") && (scene_result(1) == "出撃画面")){
-		if(exercises_flg == FALSE){
-			// 疲労回復タイマースタート
-			fatigue_timer_start_time = GetFloatTime()
-			fatigue_timer_flg = TRUE
-			fatigue_timer_done_interval = limit(fatigue_timer_done_interval + kFatigueInterval, 0, 49)	//Cond値0未満はありえないので
+	if(win_judge_window_id != -1){
+		//帰投時にcond値-15(便宜上出撃時にタイマー開始)
+		if((pre_scene_type == "海域出撃") && (pre_scene_name == "艦隊選択") && (scene_result(1) == "出撃画面")){
+			if(exercises_flg == FALSE){
+				// 疲労回復タイマースタート
+				fatigue_timer_start_time = GetFloatTime()
+				fatigue_timer_flg = TRUE
+				fatigue_timer_done_interval = limit(fatigue_timer_done_interval + kFatigueInterval, 0, 49)	//Cond値0未満はありえないので
+			}
 		}
-	}
-	//昼戦突入時はcond値-3
-	if((pre_scene_name == "海域マップ") && (scene_result(1) == "昼戦画面")){
-		fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 3, 0, 49)
-	}
-	//夜戦突入時はcond値-2
-	if((pre_scene_name == "海域マップ") && (scene_result(1) == "夜戦画面")){
-		fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 2, 0, 49)
-	}
-	if((pre_scene_name == "夜戦確認") && (scene_result(1) == "夜戦画面")){
-		fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 2, 0, 49)
-	}
-	logmes "" + pre_scene_name + "->" + scene_result(1)
-	if((pre_scene_name == "戦闘判定") && (scene_result(1) == "戦果報告")){
-		//S勝利時はcond値+4
-		if(battle_rank == kBattleRankS){
-			fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 4, 0, 49)
+		//昼戦突入時はcond値-3
+		if((pre_scene_name == "海域マップ") && (scene_result(1) == "昼戦画面")){
+			fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 3, 0, 49)
 		}
-		//A勝利時はcond値+3
-		if(battle_rank == kBattleRankA){
-			fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 3, 0, 49)
+		//夜戦突入時はcond値-2
+		if((pre_scene_name == "海域マップ") && (scene_result(1) == "夜戦画面")){
+			fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 2, 0, 49)
 		}
-		//B勝利時はcond値+2
-		if(battle_rank == kBattleRankB){
-			fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 2, 0, 49)
+		if((pre_scene_name == "夜戦確認") && (scene_result(1) == "夜戦画面")){
+			fatigue_timer_done_interval = limit(fatigue_timer_done_interval + 2, 0, 49)
 		}
-		//C勝利時はcond値+1
-		if(battle_rank == kBattleRankC){
-			fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 1, 0, 49)
+		logmes "" + pre_scene_name + "->" + scene_result(1)
+		if((pre_scene_name == "戦闘判定") && (scene_result(1) == "戦果報告")){
+			//S勝利時はcond値+4
+			if(battle_rank == kBattleRankS){
+				fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 4, 0, 49)
+			}
+			//A勝利時はcond値+3
+			if(battle_rank == kBattleRankA){
+				fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 3, 0, 49)
+			}
+			//B勝利時はcond値+2
+			if(battle_rank == kBattleRankB){
+				fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 2, 0, 49)
+			}
+			//C勝利時はcond値+1
+			if(battle_rank == kBattleRankC){
+				fatigue_timer_done_interval = limit(fatigue_timer_done_interval - 1, 0, 49)
+			}
 		}
 	}
 	// 音声通知

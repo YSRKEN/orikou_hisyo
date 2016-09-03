@@ -1,7 +1,7 @@
 /*
 * SoftWareName(Jp) : おりこうさんな秘書
 * SoftWareName(En) : orikou_hisyo
-* Version          : 3.3.4
+* Version          : 3.3.5
 * Author           : YSR
 * License          : MIT
 * Copyright(C) 2015 YSR
@@ -10,12 +10,12 @@
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.3.4"
-	#define kVerString  "334"
-	#define kLastUpdate "2016/07/29"
+	#define kVersion    "Ver.3.3.5"
+	#define kVerString  "335"
+	#define kLastUpdate "2016/09/03"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
-	#pack "show_scene.csv"
+	//#pack "show_scene.csv"
 	#pack "expedition.csv"
 	#pack "exp_table.csv"
 	#pack "sort_type.csv"
@@ -177,12 +177,14 @@
 			gosub *redraw_sort_preview
 			// 精度面の問題から、勝利判定は常時行うようにする
 			// (判定できない＝D以下と判定されるので、最大評価を取る)
-			if(scene_result(1) == "戦闘判定"){
-				battle_rank_ = JudgeBattleRank()
-				if(battle_rank > battle_rank_) :battle_rank = battle_rank_
-			}else{
-				if((scene_result(1) != "戦果報告") && (scene_result(1) != "不明")){
-					battle_rank = kBattleRankD
+			if(win_judge_window_id != -1){
+				if(scene_result(1) == "戦闘判定"){
+					battle_rank_ = JudgeBattleRank()
+					if(battle_rank > battle_rank_) :battle_rank = battle_rank_
+				}else{
+					if((scene_result(1) != "戦果報告") && (scene_result(1) != "不明")){
+						battle_rank = kBattleRankD
+					}
 				}
 			}
 			// 資材ログ機能
@@ -206,7 +208,7 @@
 				bgm_type_now_ = bgm_type_now
 			}
 			// 「戦闘画面」にチェックが入っている際は自動切り替え
-			if(show_battle_flg){
+			if(show_battle_flg && battle_index(0) != -1 && battle_index(1) != -1){
 				if(scene_list_index != battle_index(0) + 1){
 					if(scene_result(1) == "昼戦画面"){
 						GselMain
@@ -304,7 +306,7 @@
 		}
 		gosub *draw_supply_num
 		//「戦闘画面」チェックに関する処理
-		if(show_battle_flg_ != show_battle_flg){
+		if(show_battle_flg_ != show_battle_flg && battle_index(0) != -1 && battle_index(1) != -1){
 			if(show_battle_flg == FALSE){
 				GselMain
 				objprm scene_list_id, 0
@@ -327,6 +329,9 @@
 					gosub *show_mascot
 				}else{
 					gsel kMascotWindowID, -1
+					gsel kMainWindowID, 2
+					objprm show_battle_id, show_battle_flg
+					gsel kMainWindowID, 2
 				}
 			}
 			desktop_mascot_flg_ = desktop_mascot_flg

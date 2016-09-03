@@ -260,10 +260,10 @@
 	gosub *exp_calc
 
 /* ○号カウンタ */
-	screen kCounterWindowID, POS_X(5), POS_Y(6), 4 :title "○号カウンタ"
+	screen kCounterWindowID, POS_X(5), POS_Y(7), 4 :title "○号カウンタ"
 	gsel kCounterWindowID, -1
 	POS_XY 3, 0
-		mesbox counter_output, SIZE_X(2), SIZE_Y(6), 4
+		mesbox counter_output, SIZE_X(2), SIZE_Y(7), 4
 		counter_output_id = stat
 	objsize SIZE_X(1), SIZE_Y(1)
 		POS_XY 0, 0 :button gosub "海域出撃",   *counter_type_1 :counter_type_id = stat
@@ -283,6 +283,10 @@
 		POS_XY 2, 3 :button gosub "リセット", *counter_reset_4
 		POS_XY 2, 4 :button gosub "リセット", *counter_reset_5
 		POS_XY 2, 5 :button gosub "リセット", *counter_reset_6
+		;
+		POS_XY 0, 6 :chkbox "あ号カウント", auto_count_ago_flg
+		POS_XY 1, 6 :chkbox "ろ号カウント", auto_count_rogo_flg
+		POS_XY 2, 6 :chkbox "い号カウント", auto_count_igo_flg
 	hwnd_window(kCounterWindowID) = hwnd
 	show_window(kCounterWindowID) = FALSE
 

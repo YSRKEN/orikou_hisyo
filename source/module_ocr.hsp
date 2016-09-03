@@ -31,7 +31,7 @@
 				// バッファ2にバッファ1を拡大コピーする
 				gsel kNumGetBufferID
 				pos 0, 0 :gzoom kMatchSize, kMatchSize, kTempBufferID, 0, 0, glyph_x, glyph_y, 1
-				//if(n@ == 0) :bmpsave "" + threshold + "-" + n + "-" + w@ +"-1.bmp"
+				//bmpsave "" + threshold + "-" + n + "-1.bmp"
 				// CVバッファにバッファ2をコピー。反転フラグが立っている場合は反転させる
 				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
 				cvputimg kCVTempBufferID
@@ -55,7 +55,7 @@
 				}
 				// 数字をバッファ2全体に拡大して、CVバッファに再びコピーする
 				pos 0, 0 :gzoom kMatchSize, kMatchSize, kNumGetBufferID, px, py, wx, wy
-				//if(n@ == 0) :bmpsave "" + threshold + "-" + n + "-" + w@ +"-2.bmp"
+				//bmpsave "" + threshold + "-" + n + "-2.bmp"
 				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
 				cvputimg kCVTempBufferID
 				cvconvert 0, kCVTempBufferID
@@ -63,7 +63,7 @@
 				cvthreshold CV_THRESH_OTSU, 0, 255, kCVTempBufferID
 				cvgetimg kCVTempBufferID, 1
 				DrawCharSquare 0, 0
-				//if(n@ == 0) :bmpsave "" + threshold + "-" + n + "-" + w@ +"-3.bmp"
+				//bmpsave "" + threshold + "-" + n + "-3.bmp"
 				cvbuffer kCVTempBufferID, kMatchSize, kMatchSize
 				cvputimg kCVTempBufferID
 				// テンプレートとのマッチングを行い、結果を認識結果として返す
