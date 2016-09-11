@@ -52,10 +52,12 @@ return
 	// 読み込み処理
 	notesel text_buffer
 	noteload refstr
+	//! テキストデータを、改行コード部分でsplitする
+	split text_buffer, "\n", text_buffer_line
 	//1行目を読み込んで、どの列がどの項目に該当するかをチェックする
 	//例えば入力データで、2行目として出力したい燃料が4列目にあった場合、
 	//「column_index(1) = 3」となる(存在しない場合は-1)
-	noteget get, 0
+	get = text_buffer_line(0)
 	split get, ",", temp
 	cols = stat
 	dim column_index, kSupplyLogKinds + 1
@@ -74,15 +76,16 @@ return
 	}
 	//1行づつ読み込んで、ログを再構築する
 	PutLog "【資材ログ】"
-	sdim supply_log_, notemax * kSupplyLogBlockSize
+	notemax_ = notemax
+	sdim supply_log_, notemax_ * kSupplyLogBlockSize
 	p = 0 :supply_log_size = 0
-	for k, 1, notemax
+	for k, 1, notemax_
 		if(time != gettime(6)){
-			PutLog "読み込み率：" + strf("%.1f", 100.0 * (k + 1) / notemax) + "％"
+			PutLog "読み込み率：" + strf("%.1f", 100.0 * (k + 1) / notemax_) + "％"
 			wait 5
 			time = gettime(6)
 		}
-		noteget get, k
+		get = text_buffer_line(k)
 		split get, ",", temp
 		if(stat != cols) :_continue
 		// 日付
