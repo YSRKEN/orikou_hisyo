@@ -176,8 +176,10 @@
 	#const kTaskColumnPY1  36
 	#const kTaskColumnPX2  72
 	#const kTaskColumnPY2  -1
-	#const kTaskColumnPX3 506
-	#const kTaskColumnPY3  22
+//	#const kTaskColumnPX3 506
+//	#const kTaskColumnPY3  22
+	#const kTaskColumnPX3 476
+	#const kTaskColumnPY3  46
 	#const kMaxTasks 6
 	#const kTaskWindowX kTaskColumnWX1 + kTaskColumnWX2 + kTaskColumnWX3
 	#const kTaskWindowY kTaskColumnWY * kMaxTasks
