@@ -233,10 +233,6 @@ return
 	max_value_1 = (max_value_1 / 1000 + 1) * 1000
 	min_value_2 = (min_value_2 / 100) * 100
 	max_value_2 = (max_value_2 / 100 + 1) * 100
-	if(autoscale_min_flg == FALSE){
-		min_value_1 = 0
-		min_value_2 = 0
-	}
 	diff_value_1 = max_value_1 - min_value_1
 	diff_value_2 = max_value_2 - min_value_2
 	diff_time = supply_time(supply_log_size - 1) - supply_time(first_index)

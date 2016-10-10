@@ -92,7 +92,6 @@
 	sort_kind_ = sort_kind
 	next_level_flg_ = next_level_flg
 	fleetinfo_number_index_ = fleetinfo_number_index
-	autoscale_min_flg_ = autoscale_min_flg
 	dim cond_, kUnitNum
 	for k, 0, kUnitNum
 		cond_(k) = cond(k)
@@ -304,10 +303,6 @@
 		if(graph_scale_index_ != graph_scale_index){
 			gosub *draw_supply_graph
 			graph_scale_index_ = graph_scale_index
-		}
-		if(autoscale_min_flg_ != autoscale_min_flg){
-			gosub *draw_supply_graph
-			autoscale_min_flg_ = autoscale_min_flg
 		}
 		gosub *draw_supply_num
 		//「戦闘画面」チェックに関する処理

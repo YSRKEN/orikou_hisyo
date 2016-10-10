@@ -192,8 +192,6 @@
 			input max_time :max_time_id = stat :objenable stat, 0
 		POS_XY kGraphWX / 2 + 1, kGraphWY
 			combox graph_scale_index,,"1“ú\n1TŠÔ\n2TŠÔ\n1ƒ–Œ\n2ƒ–Œ\n3ƒ–Œ\n”¼”N\n1”N"
-		POS_XY kGraphWX / 2, kGraphWY
-			chkbox "‰ºŒÀ‚à•Ï‰»", autoscale_min_flg
 	font msgothic, 14
 	objmode 2
 	pos 0, POS_Y(kGraphWY + 1)
