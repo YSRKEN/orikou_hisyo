@@ -215,10 +215,10 @@ return
 		}
 	next
 	// 範囲内における上下スケールを自動で算出する
-	min_value_1 = supply_value(0, 0)
-	max_value_1 = supply_value(0, 0)
-	min_value_2 = supply_value(4, 0)
-	max_value_2 = supply_value(4, 0)
+	min_value_1 = supply_value(0, first_index)
+	max_value_1 = supply_value(0, first_index)
+	min_value_2 = supply_value(4, first_index)
+	max_value_2 = supply_value(4, first_index)
 	for i, first_index, supply_log_size
 		for j, 0, 4
 			if(min_value_1 > supply_value(j, i)) :min_value_1 = supply_value(j, i)
