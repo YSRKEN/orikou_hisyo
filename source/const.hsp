@@ -162,7 +162,7 @@
 	#const kSort2ListHeight 10	;ソート一覧(装備)の縦サイズ
 	#const kSort2WY2 30			;取得する際の縦幅(装備)
 	#const kSort2WY3 30			;クロップする際の縦幅(装備)
-	#const kSortType 19			;艦種の種類数
+	#const kSortType 20			;艦種の種類数
 	#const kSortStrLength 35	;艦種データの長さ
 	#const kUnitMarkLength1 8 * 5	;艦名データ(編成画面)の長さ 入力
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
