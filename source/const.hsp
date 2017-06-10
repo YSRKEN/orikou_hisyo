@@ -361,7 +361,7 @@
 		sort_type_str(k) = temp(0)
 		sort_type_name(k) = temp(1)
 	next
-	sort_pos_x.0 = 163, 172
+	sort_pos_x.0 = 171, 180
 	sort_pos_y.0 = 0, 28, 55, 83, 111, 139, 167, 195, 223, 251
 	// É\Å[ÉgàÍóó
 	sdim sort_list, 1024, 3
