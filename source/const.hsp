@@ -91,9 +91,9 @@
 	#const kUnitPX2 116
 	#const kUnitPY2 95
 	;ソート画面のサイズ・オフセット座標
-	#const kSortWX 194
+	#const kSortWX 202
 	#const kSortWY 279
-	#const kSortPX 398
+	#const kSortPX 390
 	#const kSortPY 154
 	#const kSort2WX 198
 	#const kSort2WY 300
