@@ -136,18 +136,31 @@ return
 					list_type(kammusues) = best_type
 					// レベルを読み取る
 					//ケッコンしているかを判定(指輪ではなく純粋に100の位を見ている)
-					pget i * kSortWX + 158, kSortWY2 * j + 12
-					if(ginfo_r < 150){
+					pget i * kSortWX + 166, kSortWY2 * j + 12
+					if(ginfo_r < 230){
 						list_level(kammusues) = 100
 					}else{
 						list_level(kammusues) = 0
 					}
+
 					//数字部分は文字認識で判定
 					sort_pos_x_.0 = i * kSortWX + sort_pos_x(0), i * kSortWX + sort_pos_x(1)
+					//まず、しきい値190で読み取る
 					dim number, 2
 					ReadNumber number, 2, sort_pos_x_, kSortWY2 * j + 8, 8, 12, 190, FALSE
 					NormalizeLevel number
-					list_level(kammusues) += number(0) * 10 + number(1)
+					level_a = number(0) * 10 + number(1)
+					//次に、しきい値220で読み取る
+					gsel kSortListBufferID
+					ReadNumber number, 2, sort_pos_x_, kSortWY2 * j + 8, 8, 12, 220, FALSE
+					NormalizeLevel number
+					level_b = number(0) * 10 + number(1)
+					//レベル50～79まではlevel_b、それ以外はlevel_aを信用したい
+					if(limit(level_b, 50, 79) == level_b){
+						list_level(kammusues) += level_b
+					}else{
+						list_level(kammusues) += level_a
+					}
 					kammusues++
 				next
 			next

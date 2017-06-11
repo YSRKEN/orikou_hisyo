@@ -91,9 +91,9 @@
 	#const kUnitPX2 116
 	#const kUnitPY2 95
 	;ソート画面のサイズ・オフセット座標
-	#const kSortWX 194
+	#const kSortWX 202
 	#const kSortWY 279
-	#const kSortPX 398
+	#const kSortPX 390
 	#const kSortPY 154
 	#const kSort2WX 198
 	#const kSort2WY 300
@@ -162,7 +162,7 @@
 	#const kSort2ListHeight 10	;ソート一覧(装備)の縦サイズ
 	#const kSort2WY2 30			;取得する際の縦幅(装備)
 	#const kSort2WY3 30			;クロップする際の縦幅(装備)
-	#const kSortType 19			;艦種の種類数
+	#const kSortType 20			;艦種の種類数
 	#const kSortStrLength 35	;艦種データの長さ
 	#const kUnitMarkLength1 8 * 5	;艦名データ(編成画面)の長さ 入力
 	#const kUnitMarkLength2 2 * 5	;艦名データ(編成画面)の長さ 出力
@@ -361,7 +361,7 @@
 		sort_type_str(k) = temp(0)
 		sort_type_name(k) = temp(1)
 	next
-	sort_pos_x.0 = 163, 172
+	sort_pos_x.0 = 171, 180
 	sort_pos_y.0 = 0, 28, 55, 83, 111, 139, 167, 195, 223, 251
 	// ソート一覧
 	sdim sort_list, 1024, 3
