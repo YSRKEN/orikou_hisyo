@@ -91,6 +91,18 @@
 				if(strmid(a_, k, 1) != strmid(b_, k, 1)) :count++
 			next
 		return count
+		// 艦娘名→コード変換
+		#defcfunc GetCodeFromKammusuName str name_
+			for k, 0, kammusu_data_size@
+				if(kammusu_name@(k) == name_) :return kammusu_id@(k)
+			next
+		return -1
+		// コード→艦娘名変換
+		#defcfunc GetNameFromKammusuCode int code_
+			for k, 0, kammusu_data_size@
+				if(kammusu_id@(k) == code_) :return kammusu_name@(k)
+			next
+		return ""
 	#global
 
 	#module dtm

@@ -32,43 +32,45 @@ return
 		target_unit_id(n) = -1
 		for k, 0, kammusu_data_size
 			if(kammusu_mark(k) == kammusu_mark_temp){
-				target_unit_id(n) = k
+				target_unit_id(n) = kammusu_id(k)
 				_break
 			}
 		next
+		kammusu_name_temp = GetNameFromKammusuCode(target_unit_id(n))
+		fleetinfo_output = ""
 		;ŠÍ–º–¼‚É‚Â‚¢‚Ä‚Ì“Áê•â³
 		if(target_unit_id(n) != -1){
 			// (Graf Zeppelin)
-			if(instr(kammusu_name(target_unit_id(n)),,"Graf") != -1){
+			if(instr(kammusu_name_temp,,"Graf") != -1){
 				gsel GetUnitID(fleetinfo_number_index, n)
 				if(NearColor(546, 174 + 33 * 3, 27, 173, 176)){
 					;Graf Zeppelin‰ü
-					target_unit_id(n) = 334
+					target_unit_id(n) = GetCodeFromKammusuName("Graf Zeppelin‰ü")
 				}else{
 					;Graf Zeppelin
-					target_unit_id(n) = 379
+					target_unit_id(n) = GetCodeFromKammusuName("Graf Zeppelin")
 				}
 			}
 			// („C„p„~„s„…„„)
-			if(instr(kammusu_name(target_unit_id(n)),,"„C„p„~„s„…„„") != -1){
+			if(instr(kammusu_name_temp,,"„C„p„~„s„…„„") != -1){
 				gsel GetUnitID(fleetinfo_number_index, n)
 				if(NearColor(692, 257, 192, 122, 91)){
 					;„C„p„~„s„…„„ „t„r„p
-					target_unit_id(n) = 513
+					target_unit_id(n) = GetCodeFromKammusuName("„C„p„~„s„…„„ „t„r„p")
 				}else{
 					;„C„p„~„s„…„„
-					target_unit_id(n) = 511
+					target_unit_id(n) = GetCodeFromKammusuName("„C„p„~„s„…„„")
 				}
 			}
 			// (Commandant Teste)
-			if(instr(kammusu_name(target_unit_id(n)),,"Commandant") != -1){
+			if(instr(kammusu_name_temp,,"Commandant") != -1){
 				gsel GetUnitID(fleetinfo_number_index, n)
 				if(NearColor(546, 174 + 33 * 3, 27, 173, 176)){
 					;Commandant Teste‰ü
-					target_unit_id(n) = 372
+					target_unit_id(n) = GetCodeFromKammusuName("Commandant Teste‰ü")
 				}else{
 					;Commandant Teste
-					target_unit_id(n) = 491
+					target_unit_id(n) = GetCodeFromKammusuName("Commandant Teste")
 				}
 			}
 		}
@@ -438,7 +440,6 @@ return
 	next
 	all_search_power33 += 2.0 * (6 - target_unit_count)
 	// Œ‹‰Ê‘‚«o‚µ
-	fleetinfo_output = ""
 	fleetinfo_output += "i—ß•”ƒŒƒxƒ‹F" + master_level + "\n"
 	fleetinfo_output += "§‹ó’lF" + all_anti_air + "\n"
 	fleetinfo_output += "õ“G’l(2-5®H)F" + strf("%.1f", all_search_power) + "\n"
@@ -448,7 +449,7 @@ return
 		if(target_unit_id(n) == -1){
 			fleetinfo_output += "•s–¾"
 		}else{
-			fleetinfo_output += kammusu_name(target_unit_id(n)) + " Lv." + target_unit_level(n)
+			fleetinfo_output += GetNameFromKammusuCode(target_unit_id(n)) + " Lv." + target_unit_level(n)
 		}
 		fleetinfo_output += " [‘•”õ”F" + target_weapon_count(n) + "] [‘fõ“GF" + target_unit_search(n) + "]\n"
 		for w, 0, target_weapon_count(n)
@@ -501,7 +502,7 @@ return
 		if(kid < 0){
 			deck_output += "\"id\":\"9\","
 		}else{
-			deck_output += "\"id\":\"" + kammusu_id(kid) + "\","
+			deck_output += "\"id\":\"" + kid + "\","
 		}
 		;‘¼‚Ì€–Ú
 		deck_output += "\"lv\":" + limit(target_unit_level(n), 1, kMaxKammusuLevel) + ","
