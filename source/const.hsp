@@ -221,7 +221,7 @@
 	#enum kMascotTypeCmd = 0	;マスコットにおけるコマンドの種類
 	#enum kMascotTypeTalk
 	#const kCheckPosInterval 1.0 / 24 / 60 / 60	;ズレチェックの更新時間「1秒」
-	#const kMaxKammusuLevel 155	;最大練度
+	#const kMaxKammusuLevel 165	;最大練度
 
 /* 初期設定 */
 	// 座標設定
