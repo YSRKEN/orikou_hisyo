@@ -36,8 +36,9 @@ return
 				_break
 			}
 		next
-		;艦娘名についての特殊補正(Graf Zeppelin)
+		;艦娘名についての特殊補正
 		if(target_unit_id(n) != -1){
+			// (Graf Zeppelin)
 			if(instr(kammusu_name(target_unit_id(n)),,"Graf") != -1){
 				gsel GetUnitID(fleetinfo_number_index, n)
 				if(NearColor(546, 174 + 33 * 3, 27, 173, 176)){
@@ -48,6 +49,8 @@ return
 					target_unit_id(n) = 379
 				}
 			}
+			// (Гангут)
+			
 		}
 		;艦娘の練度を取得する
 		gsel GetUnitID(fleetinfo_number_index, n)
@@ -86,9 +89,6 @@ return
 			gsel GetUnitID(fleetinfo_number_index, n)
 			;装備欄なし、および未装備の場合はそれ以降読み込まない
 			if(NearColor(546, 174 + 33 * w, 27, 173, 176) == FALSE){
-				_break
-			}
-			if(NearColor(362, 175 + 33 * w, 39, 64, 46) && NearColor(361, 173 + 33 * w, 41, 63, 46)){
 				_break
 			}
 			;装備のマークを読み取り、判定を行う
