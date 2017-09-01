@@ -121,14 +121,15 @@ return
 			next
 			for k, 0, weapon_data_size
 				if(weapon_mark(k) == weapon_mark_temp){
-					target_weapon_id(n, w) = k
+					target_weapon_id(n, w) = weapon_id(k)
 					_break
 				}
 			next
+			target_weapon_name_temp = GetNameFromWeaponCode(target_weapon_id(n, w))
 			;装備名についての特殊補正
 			if(target_weapon_id(n, w) != -1){
 				;(381mm/50 三連装砲)
-				if(instr(weapon_name(target_weapon_id(n, w)),,"381mm") != -1){
+				if(instr(target_weapon_name_temp,,"381mm") != -1){
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(515, 171 + 33 * w, 189, 177, 163)){
 						;381mm/50 三連装砲改
@@ -139,7 +140,7 @@ return
 					}
 				}
 				;(25mm三連装機銃)
-				if(instr(weapon_name(target_weapon_id(n, w)),,"25mm三連装機銃") != -1){
+				if(instr(target_weapon_name_temp,,"25mm三連装機銃") != -1){
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(496, 176 + 33 * w, 92, 87, 80)){
 						;25mm三連装機銃 集中配備
@@ -150,7 +151,7 @@ return
 					}
 				}
 				;(12.7cm連装高角砲)
-				if(instr(weapon_name(target_weapon_id(n, w)),,"12.7cm連装高角砲") != -1){
+				if(instr(target_weapon_name_temp,,"12.7cm連装高角砲") != -1){
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(497, 177 + 33 * w, 92, 86, 80)){
 						;12.7cm連装高角砲(後期型)
@@ -163,7 +164,8 @@ return
 			}
 			;搭載数を読み取る
 			if(target_weapon_id(n, w) != -1){
-				switch(weapon_type(target_weapon_id(n, w)))
+				temp_type = GetTypeFromWeaponCode(target_weapon_id(n, w))
+				switch(temp_type)
 				case "オートジャイロ"
 				case "艦上攻撃機"
 				case "艦上戦闘機"
@@ -186,20 +188,23 @@ return
 			target_weapon_count(n)++
 		next
 	next
+//	assert
 	// 装備から、索敵値に補正を入れる
 	for n, 0, target_unit_count
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
-			target_unit_search(n) -= weapon_search(target_weapon_id(n, w))
+			target_unit_search(n) -= GetSearchValueFromWeaponCode(target_weapon_id(n, w))
 		next
 	next
+//	assert
 	// 艦載機熟練度を読み取る
 	for n, 0, target_unit_count
 		gsel GetUnitID(fleetinfo_number_index, n)
 		for w, 0, target_weapon_count(n)
 			id = target_weapon_id(n, w)
 			if(id == -1) :_continue
-			switch(weapon_type(id))
+			temp_type = GetTypeFromWeaponCode(target_weapon_id(n, w))
+			switch(temp_type)
 			case "艦上攻撃機"
 			case "艦上戦闘機"
 			case "艦上爆撃機"
@@ -244,6 +249,7 @@ return
 			swend
 		next
 	next
+//	assert
 	// 装備改修度を読み取る
 	for n, 0, target_unit_count
 		gsel GetUnitID(fleetinfo_number_index, n)
@@ -322,13 +328,15 @@ return
 			}
 		next
 	next
+//	assert
 	// 制空値を計算する(艦載機熟練度対応)
 	all_anti_air = 0
 	for n, 0, target_unit_count
 		for w, 0, target_weapon_count(n)
 			wid = target_weapon_id(n, w)
 			if(wid == -1) :_continue
-			wtype = weapon_type(wid)
+			wtype = GetTypeFromWeaponCode(target_weapon_id(n, w))
+			wair = GetAntiAirFromWeaponCode(target_weapon_id(n, w))
 			switch(wtype)
 			case "艦上攻撃機"
 			case "艦上戦闘機"
@@ -336,7 +344,7 @@ return
 			case "水上爆撃機"
 			case "多用途水上機/水上戦闘機"
 				;対空と搭載数に基づいた制空値
-				all_anti_air += int(sqrt(target_weapon_airs(n, w)) * weapon_antiair(wid))
+				all_anti_air += int(sqrt(target_weapon_airs(n, w)) * wair)
 				;艦載機熟練度ボーナス
 				wlevel = target_weapon_level_v(n, w)
 				all_anti_air += all_bonus(wlevel)
@@ -350,6 +358,7 @@ return
 			swend
 		next
 	next
+//	assert
 	// 索敵値を計算する(2-5式秋、33式)
 	;2-5式秋
 	if(master_level \ 5 == 0){
@@ -361,37 +370,40 @@ return
 		all_search_power += 1.6841056 * sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
-			switch(weapon_type(target_weapon_id(n, w)))
+			wtype = GetTypeFromWeaponCode(target_weapon_id(n, w))
+			wsearch = GetSearchValueFromWeaponCode(target_weapon_id(n, w))
+			switch(wtype)
 			case "艦上爆撃機"
-				all_search_power += 1.0376255 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.0376255 * wsearch
 				swbreak
 			case "艦上攻撃機"
-				all_search_power += 1.3677954 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.3677954 * wsearch
 				swbreak
 			case "艦上偵察機"
-				all_search_power += 1.6592780 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.6592780 * wsearch
 				swbreak
 			case "水上偵察機"
-				all_search_power += 2.0000000 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 2.0000000 * wsearch
 				swbreak
 			case "水上爆撃機"
-				all_search_power += 1.7787282 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.7787282 * wsearch
 				swbreak
 			case "小型電探"
-				all_search_power += 1.0045358 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.0045358 * wsearch
 				swbreak
 			case "大型電探"
-				all_search_power += 0.9906638 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 0.9906638 * wsearch
 				swbreak
 			case "探照灯"
-				all_search_power += 0.9067950 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 0.9067950 * wsearch
 				swbreak
 			case "大型探照灯"
-				all_search_power += 0.9067950 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 0.9067950 * wsearch
 				swbreak
 			swend
 		next
 	next
+//	assert
 	;33式
 	if(4 * master_level \ 10 != 0){
 		;ceil関数の実装が面倒だったので場合分け
@@ -403,8 +415,9 @@ return
 		all_search_power33 += sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
-			search_value = weapon_search(target_weapon_id(n, w))
-			switch(weapon_type(target_weapon_id(n, w)))
+			search_value = GetSearchValueFromWeaponCode(target_weapon_id(n, w))
+			wtype = GetTypeFromWeaponCode(target_weapon_id(n, w))
+			switch(wtype)
 			case "艦上戦闘機"
 			case "艦上爆撃機"
 				all_search_power33 += 0.6 * search_value
@@ -457,7 +470,8 @@ return
 				fleetinfo_output += "　不明\n"
 			}else{
 				wid = target_weapon_id(n, w)
-				switch(weapon_type(wid))
+				wtype = GetTypeFromWeaponCode(wid)
+				switch(wtype)
 				case "オートジャイロ"
 				case "艦上攻撃機"
 				case "艦上戦闘機"
@@ -468,10 +482,10 @@ return
 				case "多用途水上機/水上戦闘機"
 				case "対潜哨戒機"
 				case "大型飛行艇"
-					fleetinfo_output += "　[" + target_weapon_airs(n, w) + "] " + weapon_name(wid)
+					fleetinfo_output += "　[" + target_weapon_airs(n, w) + "] " + GetNameFromWeaponCode(wid)
 					swbreak
 				default
-					fleetinfo_output += "　" + weapon_name(wid)
+					fleetinfo_output += "　" + GetNameFromWeaponCode(wid)
 					swbreak
 				swend
 				if(target_weapon_level_v(n, w) != 0) :fleetinfo_output += " ☆" + target_weapon_level_v(n, w)
@@ -516,7 +530,7 @@ return
 			if(wid < 0){
 				deck_output += "\"id\":2,"
 			}else{
-				deck_output += "\"id\":" + weapon_id(wid) + ","
+				deck_output += "\"id\":" + wid + ","
 			}
 			;装備改修度
 			deck_output += "\"rf\":" + target_weapon_level_g(n, w) + ","
