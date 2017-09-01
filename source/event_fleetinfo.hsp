@@ -50,7 +50,27 @@ return
 				}
 			}
 			// („C„p„~„s„…„„)
-			
+			if(instr(kammusu_name(target_unit_id(n)),,"„C„p„~„s„…„„") != -1){
+				gsel GetUnitID(fleetinfo_number_index, n)
+				if(NearColor(692, 257, 192, 122, 91)){
+					;„C„p„~„s„…„„ „t„r„p
+					target_unit_id(n) = 513
+				}else{
+					;„C„p„~„s„…„„
+					target_unit_id(n) = 511
+				}
+			}
+			// (Commandant Teste)
+			if(instr(kammusu_name(target_unit_id(n)),,"Commandant") != -1){
+				gsel GetUnitID(fleetinfo_number_index, n)
+				if(NearColor(546, 174 + 33 * 3, 27, 173, 176)){
+					;Commandant Teste‰ü
+					target_unit_id(n) = 372
+				}else{
+					;Commandant Teste
+					target_unit_id(n) = 491
+				}
+			}
 		}
 		;ŠÍ–º‚Ì—û“x‚ðŽæ“¾‚·‚é
 		gsel GetUnitID(fleetinfo_number_index, n)
