@@ -15,12 +15,9 @@
 	#define kLastUpdate "2017/09/02"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
-	//#pack "show_scene.csv"
 	#pack "expedition.csv"
 	#pack "exp_table.csv"
 	#pack "sort_type.csv"
-	#pack "kmms_data.csv"
-	#pack "wpn_data.csv"
 	#cmpopt ppout 1
 
 /* ライブラリ・サブルーチン */
