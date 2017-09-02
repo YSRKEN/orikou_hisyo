@@ -137,7 +137,7 @@
 // 分析モジュール
 	#module Research
 		// 定数
-		#const MAX_WPN_COUNT 4
+		#const global MAX_WPN_COUNT 4
 		// 色判定を行う
 		#defcfunc local is_near_color int nc_x, int nc_y, int nc_r, int nc_g, int nc_b
 			pget nc_x, nc_y
@@ -212,7 +212,7 @@
 			gsel buffer_id
 			raw_wpn_count = 0
 			repeat MAX_WPN_COUNT
-				if(is_near_color(546, 174 + 33 * w, 27, 173, 176) == FALSE) :break
+				if(is_near_color(546, 174 + 33 * cnt, 27, 173, 176) == FALSE) :break
 				raw_wpn_count++
 			loop
 		return raw_wpn_count
@@ -252,18 +252,16 @@
 				}
 			}
 		return raw_wpn_index
+		// 改装画面かを判定する
+		#defcfunc is_refit_scene int buffer_id
+		gsel buffer_id
+		if(is_near_color(300,172,241,191,119) == FALSE) :return FALSE
+		if(is_near_color(462,454,255,244,243) == FALSE) :return FALSE
+		return TRUE
 		// 艦娘のデータを取得する
 		#defcfunc get_kmms_info int buffer_id
 			sdim output, 32000
-			// まず改装画面かを判定する
-			gsel buffer_id
-			if(is_near_color(300,172,241,191,119) == FALSE){
-				return "分析結果：改装画面ではありません\n"
-			}
-			if(is_near_color(462,454,255,244,243) == FALSE){
-				return "分析結果：改装画面ではありません\n"
-			}
-			// 次に艦名を読み取る
+			// まず艦名を読み取る
 			kmms_index = get_kmms_index_from_buffer(buffer_id)
 			// 次に装備名を読み取る
 			wpn_count = get_wpn_count_from_buffer(buffer_id)
@@ -278,6 +276,20 @@
 				output += "装備" + (wi + 1) + "：" + get_wpn_name_from_index(wpn_index(wi)) + "\n"
 			next
 		return output
+		// 艦娘のデータを取得する(詳細)
+		// [艦idx, 艦hash, 装備数, 装備idx1, 装備hash1, ..., 装備idx4, 装備hash4]
+		#deffunc get_kmms_info_detail int buffer_id, array kmms_info
+			sdim kmms_info, 256, (MAX_WPN_COUNT + 1) * 2 + 1
+			kmms_info(0) = "" + get_kmms_index_from_buffer(buffer_id)
+			gsel buffer_id
+			kmms_info(1) = get_kmms_hash_from_buffer()
+			kmms_info(2) = "" + get_wpn_count_from_buffer(buffer_id)
+			for wi, 0, MAX_WPN_COUNT
+				kmms_info(3 + wi * 2) = "" + get_wpn_index_from_buffer(buffer_id, wi)
+				gsel buffer_id
+				kmms_info(4 + wi * 2) = get_wpn_hash_from_buffer(wi)
+			next
+		return
 	#global
 
 // GUIモジュール
@@ -293,9 +305,43 @@
 		#const PICTURE_BUFFER_ID 1
 		// 初期化
 		#deffunc local initialize
-			screen MAIN_WINDOW_ID, 300, 300
+			// ウィンドウ
+			screen MAIN_WINDOW_ID, 500, 360
 			title "艦娘・装備データエディタ"
 			gsel MAIN_WINDOW_ID, 2
+			// 艦娘欄
+			sdim input_kmms_hash, KMMS_HASH_SIZE
+			sdim input_kmms_name, 64
+			sdim input_kmms_id, 64
+			pos 10, 12 :mes "艦ハッシュ："
+			pos 110, 10 :input input_kmms_hash,380,24,KMMS_HASH_SIZE :input_kmms_hash_id = stat
+			pos 10, 47 :mes "艦名："
+			pos 60, 45 :input input_kmms_name,220,24,64 :input_kmms_name_id = stat
+			pos 290, 47 :mes "艦船ID："
+			pos 355, 45 :input input_kmms_id,60,24,64 :input_kmms_id_id = stat
+			// 装備欄
+			sdim input_wpn_hash, WPN_HASH_SIZE, MAX_WPN_COUNT
+			sdim input_wpn_name, 64, MAX_WPN_COUNT
+			sdim input_wpn_id, 64, MAX_WPN_COUNT
+			dim input_wpn_hash_id, MAX_WPN_COUNT
+			dim input_wpn_name_id, MAX_WPN_COUNT
+			dim input_wpn_id_id, MAX_WPN_COUNT
+			for wi, 0, MAX_WPN_COUNT
+				pos 10, 77 + wi * 70 :mes "装備ハッシュ" + (wi + 1) + "："
+				pos 130, 75 + wi * 70 :input input_wpn_hash(wi),360,24,WPN_HASH_SIZE :input_wpn_hash_id(wi) = stat
+				pos 10, 112 + wi * 70 :mes "装備名" + (wi + 1) + "："
+				pos 80, 110 + wi * 70 :input input_wpn_name(wi),190,24,64 :input_wpn_name_id(wi) = stat
+				pos 280, 112 + wi * 70 :mes "装備ID" + (wi + 1) + "："
+				pos 355, 110 + wi * 70 :input input_wpn_id(wi),60,24,64 :input_wpn_id_id(wi) = stat
+			next
+			// 修正ボタン
+			pos 425, 45 :button gosub "修正", *fix_kmms_name
+			fix_kmms_button_id = stat
+			dim fix_wpn_button_id, MAX_WPN_COUNT
+			pos 425, 110 :button gosub "修正", *fix_wpn1_name :fix_wpn_button_id(0) = stat
+			pos 425, 180 :button gosub "修正", *fix_wpn2_name :fix_wpn_button_id(1) = stat
+			pos 425, 250 :button gosub "修正", *fix_wpn3_name :fix_wpn_button_id(2) = stat
+			pos 425, 320 :button gosub "修正", *fix_wpn4_name :fix_wpn_button_id(3) = stat
 			oncmd gosub *OnDropFiles,WM_DROPFILES
 			DragAcceptFiles hwnd, 1
 		return
@@ -316,8 +362,44 @@
 	// ファイルを読み込み、情報を取得する
 	buffer PICTURE_BUFFER_ID
 	picload file_name
-	info = get_kmms_info(PICTURE_BUFFER_ID)
-	gsel 0 :cls :pos 0, 0 :mes info
+	if(is_refit_scene(PICTURE_BUFFER_ID) == FALSE) :return
+	info_output = get_kmms_info(PICTURE_BUFFER_ID)
+	sdim kmms_info, 256, (MAX_WPN_COUNT + 1) * 2 + 1
+	get_kmms_info_detail PICTURE_BUFFER_ID, kmms_info
+	// 結果を画面に表示する
+	gsel MAIN_WINDOW_ID
+	objprm input_kmms_hash_id, kmms_info(1)
+	objprm input_kmms_name_id, get_kmms_name_from_index(int(kmms_info(0)))
+	objprm input_kmms_id_id, kmms_info(0)
+	for wi, 0, MAX_WPN_COUNT
+		objprm input_wpn_hash_id(wi), kmms_info(4 + wi * 2)
+		objprm input_wpn_name_id(wi), get_wpn_name_from_index(int(kmms_info(3 + wi * 2)))
+		objprm input_wpn_id_id(wi), kmms_info(3 + wi * 2)
+	next
+	hoge = get_wpn_count_from_buffer(PICTURE_BUFFER_ID)
+	gsel MAIN_WINDOW_ID
+	for wi, 0, int(kmms_info(2))
+		objenable input_wpn_hash_id(wi), 1
+		objenable input_wpn_name_id(wi), 1
+		objenable input_wpn_id_id(wi), 1
+		objenable fix_wpn_button_id(wi), 1
+	next
+	for wi, int(kmms_info(2)), MAX_WPN_COUNT
+		objenable input_wpn_hash_id(wi), 0
+		objenable input_wpn_name_id(wi), 0
+		objenable input_wpn_id_id(wi), 0
+		objenable fix_wpn_button_id(wi), 0
+	next
+return
+*fix_kmms_name
+return
+*fix_wpn1_name
+return
+*fix_wpn2_name
+return
+*fix_wpn3_name
+return
+*fix_wpn4_name
 return
 	#global
 
