@@ -54,6 +54,13 @@ return
 *counter_reset_5 :count_num(4) = 0 :redraw_counter_flg = TRUE :return
 *counter_reset_6 :count_num(5) = 0 :redraw_counter_flg = TRUE :return
 
+*counter_dec_1 :count_num(0)-- :redraw_counter_flg = TRUE :return
+*counter_dec_2 :count_num(1)-- :redraw_counter_flg = TRUE :return
+*counter_dec_3 :count_num(2)-- :redraw_counter_flg = TRUE :return
+*counter_dec_4 :count_num(3)-- :redraw_counter_flg = TRUE :return
+*counter_dec_5 :count_num(4)-- :redraw_counter_flg = TRUE :return
+*counter_dec_6 :count_num(5)-- :redraw_counter_flg = TRUE :return
+
 //*カウンタの自動更新処理
 *counter_auto
 	//check_ago_flg = TRUE :check_rogo_flg = TRUE :check_igo_flg = TRUE

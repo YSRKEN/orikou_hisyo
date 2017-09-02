@@ -277,16 +277,24 @@
 			chkbox "自動カウント", auto_count_flg(k)
 			if(k == 0) :auto_count_flg_id = stat
 		next
-		POS_XY 2, 0 :button gosub "リセット", *counter_reset_1 :counter_reset_id = stat
-		POS_XY 2, 1 :button gosub "リセット", *counter_reset_2
-		POS_XY 2, 2 :button gosub "リセット", *counter_reset_3
-		POS_XY 2, 3 :button gosub "リセット", *counter_reset_4
-		POS_XY 2, 4 :button gosub "リセット", *counter_reset_5
-		POS_XY 2, 5 :button gosub "リセット", *counter_reset_6
 		;
 		POS_XY 0, 6 :chkbox "あ号カウント", auto_count_ago_flg
 		POS_XY 1, 6 :chkbox "ろ号カウント", auto_count_rogo_flg
 		POS_XY 2, 6 :chkbox "い号カウント", auto_count_igo_flg
+	objsize kObjSmaillX, kObjY
+		pos POS_X(2) + (kObjX - kObjSmaillX), POS_Y(0) :button gosub "リセット", *counter_reset_1 :counter_reset_id = stat
+		pos POS_X(2) + (kObjX - kObjSmaillX), POS_Y(1) :button gosub "リセット", *counter_reset_2
+		pos POS_X(2) + (kObjX - kObjSmaillX), POS_Y(2) :button gosub "リセット", *counter_reset_3
+		pos POS_X(2) + (kObjX - kObjSmaillX), POS_Y(3) :button gosub "リセット", *counter_reset_4
+		pos POS_X(2) + (kObjX - kObjSmaillX), POS_Y(4) :button gosub "リセット", *counter_reset_5
+		pos POS_X(2) + (kObjX - kObjSmaillX), POS_Y(5) :button gosub "リセット", *counter_reset_6
+	objsize kObjX - kObjSmaillX, kObjY
+		pos POS_X(2), POS_Y(0) :button gosub "-1", *counter_dec_1 :counter_dec_id = stat
+		pos POS_X(2), POS_Y(1) :button gosub "-1", *counter_dec_2
+		pos POS_X(2), POS_Y(2) :button gosub "-1", *counter_dec_3
+		pos POS_X(2), POS_Y(3) :button gosub "-1", *counter_dec_4
+		pos POS_X(2), POS_Y(4) :button gosub "-1", *counter_dec_5
+		pos POS_X(2), POS_Y(5) :button gosub "-1", *counter_dec_6
 	hwnd_window(kCounterWindowID) = hwnd
 	show_window(kCounterWindowID) = FALSE
 
