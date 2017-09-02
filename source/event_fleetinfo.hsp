@@ -121,11 +121,13 @@ return
 			next
 			for k, 0, weapon_data_size
 				if(weapon_mark(k) == weapon_mark_temp){
+					//if(n == 1) :assert :logmes weapon_mark_temp :logmes "" + k : logmes weapon_id(k)
 					target_weapon_id(n, w) = weapon_id(k)
 					_break
 				}
 			next
 			target_weapon_name_temp = GetNameFromWeaponCode(target_weapon_id(n, w))
+			if(n == 1) :logmes target_weapon_name_temp
 			;装備名についての特殊補正
 			if(target_weapon_id(n, w) != -1){
 				;(381mm/50 三連装砲)
@@ -133,10 +135,10 @@ return
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(515, 171 + 33 * w, 189, 177, 163)){
 						;381mm/50 三連装砲改
-						target_weapon_id(n, w) = 136
+						target_weapon_id(n, w) = GetCodeFromWeaponName("381mm/50 三連装砲改")
 					}else{
 						;381mm/50 三連装砲
-						target_weapon_id(n, w) = 132
+						target_weapon_id(n, w) = GetCodeFromWeaponName("381mm/50 三連装砲")
 					}
 				}
 				;(25mm三連装機銃)
@@ -144,10 +146,10 @@ return
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(496, 176 + 33 * w, 92, 87, 80)){
 						;25mm三連装機銃 集中配備
-						target_weapon_id(n, w) = 130
+						target_weapon_id(n, w) = GetCodeFromWeaponName("25mm三連装機銃 集中配備")
 					}else{
 						;25mm三連装機銃
-						target_weapon_id(n, w) = 39
+						target_weapon_id(n, w) = GetCodeFromWeaponName("25mm三連装機銃")
 					}
 				}
 				;(12.7cm連装高角砲)
@@ -155,10 +157,10 @@ return
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(497, 177 + 33 * w, 92, 86, 80)){
 						;12.7cm連装高角砲(後期型)
-						target_weapon_id(n, w) = 90
+						target_weapon_id(n, w) = GetCodeFromWeaponName("12.7cm連装高角砲(後期型)")
 					}else{
 						;12.7cm連装高角砲
-						target_weapon_id(n, w) = 9
+						target_weapon_id(n, w) = GetCodeFromWeaponName("12.7cm連装高角砲")
 					}
 				}
 			}
@@ -470,6 +472,8 @@ return
 				fleetinfo_output += "　不明\n"
 			}else{
 				wid = target_weapon_id(n, w)
+				logmes GetNameFromWeaponCode(wid)
+				logmes GetTypeFromWeaponCode(wid)
 				wtype = GetTypeFromWeaponCode(wid)
 				switch(wtype)
 				case "オートジャイロ"
