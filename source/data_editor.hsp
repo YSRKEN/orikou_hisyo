@@ -2,6 +2,7 @@
 
 	#packopt name "data_editor"
 
+	#define global SOFT_NAME "艦娘・装備データエディタ"
 	#const global TRUE  1
 	#const global FALSE 0
 
@@ -32,13 +33,22 @@
 				if(stat < 3) :continue
 				if(int(temp(0)) <= 0) :continue
 				if(strlen(temp(1)) == 0) :continue
-				if(strlen(temp(2)) != KMMS_HASH_SIZE) :continue
+				//if(strlen(temp(2)) != KMMS_HASH_SIZE) :continue
 				// 入力
 				kmms_id(kmms_data_size) = int(temp(0))
 				kmms_name(kmms_data_size) = temp(1)
 				kmms_hash(kmms_data_size) = temp(2)
 				kmms_data_size++
 			loop
+		return
+		// 艦娘データを書き込む
+		#deffunc save_kmms_data
+			sdim text_buffer, 32000
+			text_buffer = "艦船ID,名称,マーク\n"
+			repeat kmms_data_size
+				text_buffer += "" + kmms_id(cnt) + "," + kmms_name(cnt) + "," + kmms_hash(cnt) + "\n"
+			loop
+			notesave "kmms_data.csv"
 		return
 		// 装備データを読み込む
 		#deffunc local load_wpn_data
@@ -66,7 +76,7 @@
 				if(int(temp(0)) <= 0) :continue
 				if(strlen(temp(1)) == 0) :continue
 				if(strlen(temp(2)) == 0) :continue
-				if(strlen(temp(5)) != WPN_HASH_SIZE) :continue
+				//if(strlen(temp(5)) != WPN_HASH_SIZE) :continue
 				// 入力
 				wpn_id(wpn_data_size) = int(temp(0))
 				wpn_name(wpn_data_size) = temp(1)
@@ -76,6 +86,16 @@
 				wpn_hash(wpn_data_size) = temp(5)
 				wpn_data_size++
 			loop
+		return
+		// 装備データを書き込む
+		#deffunc save_wpn_data
+			sdim text_buffer, 32000
+			text_buffer = "装備ID,装備名,種別,対空,索敵,マーク\n"
+			repeat wpn_data_size
+				text_buffer += "" + wpn_id(cnt) + "," + wpn_name(cnt) + "," + wpn_type(cnt)
+				text_buffer += "," + wpn_aa(cnt) + "," + wpn_srch(cnt) + "," + wpn_hash(cnt) + "\n"
+			loop
+			notesave "wpn_data.csv"
 		return
 		// 初期化
 		#deffunc local initialize
@@ -132,6 +152,85 @@
 		#defcfunc get_wpn_name_from_index int raw_wpn_index
 			if(raw_wpn_index < 0) :return ""
 		return wpn_name(raw_wpn_index)
+		#defcfunc get_kmms_id_from_index int raw_kmms_index
+			if(raw_kmms_index < 0) :return -1
+		return kmms_id(raw_kmms_index)
+		#defcfunc get_wpn_id_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return -1
+		return wpn_id(raw_wpn_index)
+		#defcfunc get_kmms_index_from_id int raw_kmms_id
+			kmms_index = -1
+			repeat kmms_data_size
+				if(kmms_id(cnt) == raw_kmms_id){
+					kmms_index = cnt
+					break
+				}
+			loop
+		return kmms_index
+		#defcfunc get_wpn_index_from_id int raw_wpn_id
+			wpn_index = -1
+			repeat wpn_data_size
+				if(wpn_id(cnt) == raw_wpn_id){
+					wpn_index = cnt
+					break
+				}
+			loop
+		return wpn_index
+		#defcfunc has_kmms_id_in_db int raw_kmms_id
+			kmms_flg = FALSE
+			repeat kmms_data_size
+				if(kmms_id(cnt) == raw_kmms_id){
+					kmms_flg = TRUE
+					break
+				}
+			loop
+		return kmms_flg
+		#deffunc replace_kmms_data int raw_kmms_id, str raw_kmms_name, str raw_kmms_hash
+			repeat kmms_data_size
+				if(kmms_id(cnt) == raw_kmms_id){
+					kmms_name(cnt) = raw_kmms_name
+					kmms_hash(cnt) = raw_kmms_hash
+					break
+				}
+			loop
+			save_kmms_data
+		return
+		#deffunc add_kmms_data int raw_kmms_id, str raw_kmms_name, str raw_kmms_hash
+			kmms_id(kmms_data_size) = raw_kmms_id
+			kmms_name(kmms_data_size) = raw_kmms_name
+			kmms_hash(kmms_data_size) = raw_kmms_hash
+			kmms_data_size++
+			save_kmms_data
+		return
+		#defcfunc has_wpn_id_in_db int raw_wpn_id
+			wpn_flg = FALSE
+			repeat wpn_data_size
+				if(wpn_id(cnt) == raw_wpn_id){
+					wpn_flg = TRUE
+					break
+				}
+			loop
+		return wpn_flg
+		#deffunc replace_wpn_data int raw_wpn_id, str raw_wpn_name, str raw_wpn_hash
+			repeat wpn_data_size
+				if(wpn_id(cnt) == raw_wpn_id){
+					wpn_name(cnt) = raw_wpn_name
+					wpn_hash(cnt) = raw_wpn_hash
+					break
+				}
+			loop
+			save_wpn_data
+		return
+		#deffunc add_wpn_data int raw_wpn_id, str raw_wpn_name, str raw_wpn_hash
+			wpn_id(wpn_data_size) = raw_wpn_id
+			wpn_name(wpn_data_size) = raw_wpn_name
+			wpn_type(wpn_data_size) = ""
+			wpn_aa(wpn_data_size) = 0
+			wpn_srch(wpn_data_size) = 0
+			wpn_hash(wpn_data_size) = raw_wpn_hash
+			wpn_data_size++
+			save_wpn_data
+		return
 	#global
 
 // 分析モジュール
@@ -280,12 +379,12 @@
 		// [艦idx, 艦hash, 装備数, 装備idx1, 装備hash1, ..., 装備idx4, 装備hash4]
 		#deffunc get_kmms_info_detail int buffer_id, array kmms_info
 			sdim kmms_info, 256, (MAX_WPN_COUNT + 1) * 2 + 1
-			kmms_info(0) = "" + get_kmms_index_from_buffer(buffer_id)
+			kmms_info(0) = "" + get_kmms_id_from_index(get_kmms_index_from_buffer(buffer_id))
 			gsel buffer_id
 			kmms_info(1) = get_kmms_hash_from_buffer()
 			kmms_info(2) = "" + get_wpn_count_from_buffer(buffer_id)
 			for wi, 0, MAX_WPN_COUNT
-				kmms_info(3 + wi * 2) = "" + get_wpn_index_from_buffer(buffer_id, wi)
+				kmms_info(3 + wi * 2) = "" + get_wpn_id_from_index(get_wpn_index_from_buffer(buffer_id, wi))
 				gsel buffer_id
 				kmms_info(4 + wi * 2) = get_wpn_hash_from_buffer(wi)
 			next
@@ -307,7 +406,7 @@
 		#deffunc local initialize
 			// ウィンドウ
 			screen MAIN_WINDOW_ID, 500, 360
-			title "艦娘・装備データエディタ"
+			title SOFT_NAME
 			gsel MAIN_WINDOW_ID, 2
 			// 艦娘欄
 			sdim input_kmms_hash, KMMS_HASH_SIZE
@@ -369,11 +468,11 @@
 	// 結果を画面に表示する
 	gsel MAIN_WINDOW_ID
 	objprm input_kmms_hash_id, kmms_info(1)
-	objprm input_kmms_name_id, get_kmms_name_from_index(int(kmms_info(0)))
+	objprm input_kmms_name_id, get_kmms_name_from_index(get_kmms_index_from_id(int(kmms_info(0))))
 	objprm input_kmms_id_id, kmms_info(0)
 	for wi, 0, MAX_WPN_COUNT
 		objprm input_wpn_hash_id(wi), kmms_info(4 + wi * 2)
-		objprm input_wpn_name_id(wi), get_wpn_name_from_index(int(kmms_info(3 + wi * 2)))
+		objprm input_wpn_name_id(wi), get_wpn_name_from_index(get_wpn_index_from_id(int(kmms_info(3 + wi * 2))))
 		objprm input_wpn_id_id(wi), kmms_info(3 + wi * 2)
 	next
 	hoge = get_wpn_count_from_buffer(PICTURE_BUFFER_ID)
@@ -392,14 +491,46 @@
 	next
 return
 *fix_kmms_name
+	// IDが既存なら「修正」、それ以外なら「追加」と考える
+	if(input_kmms_name == "") :dialog "艦名が空です！", 1, SOFT_NAME :return
+	if(strlen(input_kmms_hash) != KMMS_HASH_SIZE) :dialog "艦ハッシュ値がおかしいです！", 1, SOFT_NAME :return
+	if(int(input_kmms_id) == 0) :dialog "艦船IDがおかしいです！", 1, SOFT_NAME :return
+	if(has_kmms_id_in_db(int(input_kmms_id))){
+		// 修正
+		dialog "艦船ID" + input_kmms_id + "に対し、次の内容で修正を行います。\nよろしいですか？\n艦名：" + input_kmms_name + "\n艦ハッシュ：" + input_kmms_hash, 2, SOFT_NAME
+		if(stat == 6){
+			replace_kmms_data int(input_kmms_id), input_kmms_name, input_kmms_hash
+		}
+	}else{
+		// 追加
+		dialog "次の艦娘を追加します。よろしいですか？\n艦船ID：" + input_kmms_id + "\n艦名：" + input_kmms_name + "\n艦ハッシュ：" + input_kmms_hash, 2, SOFT_NAME
+		if(stat == 6){
+			add_kmms_data int(input_kmms_id), input_kmms_name, input_kmms_hash
+		}
+	}
 return
-*fix_wpn1_name
-return
-*fix_wpn2_name
-return
-*fix_wpn3_name
-return
-*fix_wpn4_name
+*fix_wpn1_name :fix_index = 0 :gosub *fix_wpn_name :return
+*fix_wpn2_name :fix_index = 1 :gosub *fix_wpn_name :return
+*fix_wpn3_name :fix_index = 2 :gosub *fix_wpn_name :return
+*fix_wpn4_name :fix_index = 3 :gosub *fix_wpn_name :return
+*fix_wpn_name
+	// IDが既存なら「修正」、それ以外なら「追加」と考える
+	if(input_wpn_name(fix_index) == "") :dialog "装備名が空です！", 1, SOFT_NAME :return
+	if(strlen(input_wpn_hash(fix_index)) != WPN_HASH_SIZE) :dialog "装備ハッシュ値がおかしいです！", 1, SOFT_NAME :return
+	if(int(input_wpn_id(fix_index)) == 0) :dialog "装備IDがおかしいです！", 1, SOFT_NAME :return
+	if(has_wpn_id_in_db(int(input_wpn_id(fix_index)))){
+		// 修正
+		dialog "装備ID" + input_wpn_id(fix_index) + "に対し、次の内容で修正を行います。\nよろしいですか？\n装備名：" + input_wpn_name(fix_index) + "\n装備ハッシュ：" + input_wpn_hash(fix_index), 2, SOFT_NAME
+		if(stat == 6){
+			replace_wpn_data int(input_wpn_id(fix_index)), input_wpn_name(fix_index), input_wpn_hash(fix_index)
+		}
+	}else{
+		// 追加
+		dialog "次の装備を追加します。よろしいですか？\n装備ID：" + input_wpn_id(fix_index) + "\n装備名：" + input_wpn_name(fix_index) + "\n装備ハッシュ：" + input_wpn_hash(fix_index), 2, SOFT_NAME
+		if(stat == 6){
+			add_wpn_data int(input_wpn_id(fix_index)), input_wpn_name(fix_index), input_wpn_hash(fix_index)
+		}
+	}
 return
 	#global
 
