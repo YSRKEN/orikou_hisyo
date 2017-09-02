@@ -346,7 +346,12 @@ return
 			case "水上爆撃機"
 			case "多用途水上機/水上戦闘機"
 				;対空と搭載数に基づいた制空値
-				all_anti_air += int(sqrt(target_weapon_airs(n, w)) * wair)
+				if(wtype == "艦上戦闘機" || wtype == "多用途水上機/水上戦闘機"){
+					coeff = 0.2
+				}else{
+					coeff = 0.25
+				}
+				all_anti_air += int(sqrt(target_weapon_airs(n, w)) * (coeff * target_weapon_level_g(n, w) + 1.0 * wair))
 				;艦載機熟練度ボーナス
 				wlevel = target_weapon_level_v(n, w)
 				all_anti_air += all_bonus(wlevel)
