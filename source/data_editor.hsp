@@ -158,6 +158,15 @@
 		#defcfunc get_wpn_id_from_index int raw_wpn_index
 			if(raw_wpn_index < 0) :return -1
 		return wpn_id(raw_wpn_index)
+		#defcfunc get_wpn_type_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return -1
+		return wpn_type(raw_wpn_index)
+		#defcfunc get_wpn_aa_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return -1
+		return wpn_aa(raw_wpn_index)
+		#defcfunc get_wpn_srch_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return -1
+		return wpn_srch(raw_wpn_index)
 		#defcfunc get_kmms_index_from_id int raw_kmms_id
 			kmms_index = -1
 			repeat kmms_data_size
@@ -211,22 +220,25 @@
 				}
 			loop
 		return wpn_flg
-		#deffunc replace_wpn_data int raw_wpn_id, str raw_wpn_name, str raw_wpn_hash
+		#deffunc replace_wpn_data int raw_wpn_id, str raw_wpn_name, str raw_wpn_hash, str raw_wpn_type, int raw_wpn_aa, int raw_wpn_srch
 			repeat wpn_data_size
 				if(wpn_id(cnt) == raw_wpn_id){
 					wpn_name(cnt) = raw_wpn_name
 					wpn_hash(cnt) = raw_wpn_hash
+					wpn_type(cnt) = raw_wpn_type
+					wpn_aa(cnt) = raw_wpn_aa
+					wpn_srch(cnt) = raw_wpn_srch
 					break
 				}
 			loop
 			save_wpn_data
 		return
-		#deffunc add_wpn_data int raw_wpn_id, str raw_wpn_name, str raw_wpn_hash
+		#deffunc add_wpn_data int raw_wpn_id, str raw_wpn_name, str raw_wpn_hash, str raw_wpn_type, int raw_wpn_aa, int raw_wpn_srch
 			wpn_id(wpn_data_size) = raw_wpn_id
 			wpn_name(wpn_data_size) = raw_wpn_name
-			wpn_type(wpn_data_size) = ""
-			wpn_aa(wpn_data_size) = 0
-			wpn_srch(wpn_data_size) = 0
+			wpn_type(wpn_data_size) = raw_wpn_type
+			wpn_aa(wpn_data_size) = raw_wpn_aa
+			wpn_srch(wpn_data_size) = raw_wpn_srch
 			wpn_hash(wpn_data_size) = raw_wpn_hash
 			wpn_data_size++
 			save_wpn_data
@@ -405,7 +417,7 @@
 		// 初期化
 		#deffunc local initialize
 			// ウィンドウ
-			screen MAIN_WINDOW_ID, 500, 360
+			screen MAIN_WINDOW_ID, 500, 500
 			title SOFT_NAME
 			gsel MAIN_WINDOW_ID, 2
 			// 艦娘欄
@@ -422,25 +434,37 @@
 			sdim input_wpn_hash, WPN_HASH_SIZE, MAX_WPN_COUNT
 			sdim input_wpn_name, 64, MAX_WPN_COUNT
 			sdim input_wpn_id, 64, MAX_WPN_COUNT
+			sdim input_wpn_type, 64, MAX_WPN_COUNT
+			sdim input_wpn_aa, 64, MAX_WPN_COUNT
+			sdim input_wpn_srch, 64, MAX_WPN_COUNT
 			dim input_wpn_hash_id, MAX_WPN_COUNT
 			dim input_wpn_name_id, MAX_WPN_COUNT
 			dim input_wpn_id_id, MAX_WPN_COUNT
+			dim input_wpn_type_id, MAX_WPN_COUNT
+			dim input_wpn_aa_id, MAX_WPN_COUNT
+			dim input_wpn_srch_id, MAX_WPN_COUNT
 			for wi, 0, MAX_WPN_COUNT
-				pos 10, 77 + wi * 70 :mes "装備ハッシュ" + (wi + 1) + "："
-				pos 130, 75 + wi * 70 :input input_wpn_hash(wi),360,24,WPN_HASH_SIZE :input_wpn_hash_id(wi) = stat
-				pos 10, 112 + wi * 70 :mes "装備名" + (wi + 1) + "："
-				pos 80, 110 + wi * 70 :input input_wpn_name(wi),190,24,64 :input_wpn_name_id(wi) = stat
-				pos 280, 112 + wi * 70 :mes "装備ID" + (wi + 1) + "："
-				pos 355, 110 + wi * 70 :input input_wpn_id(wi),60,24,64 :input_wpn_id_id(wi) = stat
+				pos 10, 77 + wi * 105 :mes "装備ハッシュ" + (wi + 1) + "："
+				pos 130, 75 + wi * 105 :input input_wpn_hash(wi),360,24,WPN_HASH_SIZE :input_wpn_hash_id(wi) = stat
+				pos 10, 112 + wi * 105 :mes "装備名" + (wi + 1) + "："
+				pos 80, 110 + wi * 105 :input input_wpn_name(wi),190,24,64 :input_wpn_name_id(wi) = stat
+				pos 280, 112 + wi * 105 :mes "装備ID" + (wi + 1) + "："
+				pos 355, 110 + wi * 105 :input input_wpn_id(wi),60,24,64 :input_wpn_id_id(wi) = stat
+				pos 10, 147 + wi * 105 :mes "装備種" + (wi + 1) + "："
+				pos 80, 145 + wi * 105 :input input_wpn_type(wi),70,24,64 :input_wpn_type_id(wi) = stat
+				pos 160, 147 + wi * 105 :mes "対空" + (wi + 1) + "："
+				pos 220, 145 + wi * 105 :input input_wpn_aa(wi),60,24,64 :input_wpn_aa_id(wi) = stat
+				pos 290, 147 + wi * 105 :mes "索敵" + (wi + 1) + "："
+				pos 350, 145 + wi * 105 :input input_wpn_srch(wi),60,24,64 :input_wpn_srch_id(wi) = stat
 			next
 			// 修正ボタン
 			pos 425, 45 :button gosub "修正", *fix_kmms_name
 			fix_kmms_button_id = stat
 			dim fix_wpn_button_id, MAX_WPN_COUNT
-			pos 425, 110 :button gosub "修正", *fix_wpn1_name :fix_wpn_button_id(0) = stat
-			pos 425, 180 :button gosub "修正", *fix_wpn2_name :fix_wpn_button_id(1) = stat
-			pos 425, 250 :button gosub "修正", *fix_wpn3_name :fix_wpn_button_id(2) = stat
-			pos 425, 320 :button gosub "修正", *fix_wpn4_name :fix_wpn_button_id(3) = stat
+			pos 425, 145 :button gosub "修正", *fix_wpn1_name :fix_wpn_button_id(0) = stat
+			pos 425, 250 :button gosub "修正", *fix_wpn2_name :fix_wpn_button_id(1) = stat
+			pos 425, 355 :button gosub "修正", *fix_wpn3_name :fix_wpn_button_id(2) = stat
+			pos 425, 460 :button gosub "修正", *fix_wpn4_name :fix_wpn_button_id(3) = stat
 			oncmd gosub *OnDropFiles,WM_DROPFILES
 			DragAcceptFiles hwnd, 1
 		return
@@ -472,8 +496,12 @@
 	objprm input_kmms_id_id, kmms_info(0)
 	for wi, 0, MAX_WPN_COUNT
 		objprm input_wpn_hash_id(wi), kmms_info(4 + wi * 2)
-		objprm input_wpn_name_id(wi), get_wpn_name_from_index(get_wpn_index_from_id(int(kmms_info(3 + wi * 2))))
+		wpn_index = get_wpn_index_from_id(int(kmms_info(3 + wi * 2)))
+		objprm input_wpn_name_id(wi), get_wpn_name_from_index(wpn_index)
 		objprm input_wpn_id_id(wi), kmms_info(3 + wi * 2)
+		objprm input_wpn_type_id(wi), get_wpn_type_from_index(wpn_index)
+		objprm input_wpn_aa_id(wi), get_wpn_aa_from_index(wpn_index)
+		objprm input_wpn_srch_id(wi), get_wpn_srch_from_index(wpn_index)
 	next
 	hoge = get_wpn_count_from_buffer(PICTURE_BUFFER_ID)
 	gsel MAIN_WINDOW_ID
@@ -481,12 +509,18 @@
 		objenable input_wpn_hash_id(wi), 1
 		objenable input_wpn_name_id(wi), 1
 		objenable input_wpn_id_id(wi), 1
+		objenable input_wpn_type_id(wi), 1
+		objenable input_wpn_aa_id(wi), 1
+		objenable input_wpn_srch_id(wi), 1
 		objenable fix_wpn_button_id(wi), 1
 	next
 	for wi, int(kmms_info(2)), MAX_WPN_COUNT
 		objenable input_wpn_hash_id(wi), 0
 		objenable input_wpn_name_id(wi), 0
 		objenable input_wpn_id_id(wi), 0
+		objenable input_wpn_type_id(wi), 0
+		objenable input_wpn_aa_id(wi), 0
+		objenable input_wpn_srch_id(wi), 0
 		objenable fix_wpn_button_id(wi), 0
 	next
 return
@@ -518,17 +552,18 @@ return
 	if(input_wpn_name(fix_index) == "") :dialog "装備名が空です！", 1, SOFT_NAME :return
 	if(strlen(input_wpn_hash(fix_index)) != WPN_HASH_SIZE) :dialog "装備ハッシュ値がおかしいです！", 1, SOFT_NAME :return
 	if(int(input_wpn_id(fix_index)) == 0) :dialog "装備IDがおかしいです！", 1, SOFT_NAME :return
+	if(input_wpn_type(fix_index) == "") :dialog "装備種が空です！", 1, SOFT_NAME :return
 	if(has_wpn_id_in_db(int(input_wpn_id(fix_index)))){
 		// 修正
-		dialog "装備ID" + input_wpn_id(fix_index) + "に対し、次の内容で修正を行います。\nよろしいですか？\n装備名：" + input_wpn_name(fix_index) + "\n装備ハッシュ：" + input_wpn_hash(fix_index), 2, SOFT_NAME
+		dialog "装備ID" + input_wpn_id(fix_index) + "に対し、次の内容で修正を行います。\nよろしいですか？\n装備名：" + input_wpn_name(fix_index) + "\n装備種：" + input_wpn_type(fix_index) + "\n対空値：" + input_wpn_aa(fix_index) + "\n索敵値：" + input_wpn_srch(fix_index) + "\n装備ハッシュ：" + input_wpn_hash(fix_index), 2, SOFT_NAME
 		if(stat == 6){
-			replace_wpn_data int(input_wpn_id(fix_index)), input_wpn_name(fix_index), input_wpn_hash(fix_index)
+			replace_wpn_data int(input_wpn_id(fix_index)), input_wpn_name(fix_index), input_wpn_hash(fix_index), input_wpn_type(fix_index), int(input_wpn_aa(fix_index)), int(input_wpn_srch(fix_index))
 		}
 	}else{
 		// 追加
-		dialog "次の装備を追加します。よろしいですか？\n装備ID：" + input_wpn_id(fix_index) + "\n装備名：" + input_wpn_name(fix_index) + "\n装備ハッシュ：" + input_wpn_hash(fix_index), 2, SOFT_NAME
+		dialog "次の装備を追加します。よろしいですか？\n装備ID：" + input_wpn_id(fix_index) + "\n装備名：" + input_wpn_name(fix_index) + "\n装備種：" + input_wpn_type(fix_index) + "\n対空値：" + input_wpn_aa(fix_index) + "\n索敵値：" + input_wpn_srch(fix_index) + "\n装備ハッシュ：" + input_wpn_hash(fix_index), 2, SOFT_NAME
 		if(stat == 6){
-			add_wpn_data int(input_wpn_id(fix_index)), input_wpn_name(fix_index), input_wpn_hash(fix_index)
+			add_wpn_data int(input_wpn_id(fix_index)), input_wpn_name(fix_index), input_wpn_hash(fix_index), input_wpn_type(fix_index), int(input_wpn_aa(fix_index)), int(input_wpn_srch(fix_index))
 		}
 	}
 return
