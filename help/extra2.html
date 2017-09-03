@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<link rev="made" href="mailto:ysr.ken@gmail.com">
+		<link rel="index" href="./index.html">
+		<title>おりこうさんな秘書 ヘルプ(追加事項2)</title>
+		<style type="text/css">
+			<!-- .underline{text-decoration: underline;}
+			img{border: none;}
+			div{border-style: solid; border-width: 1px; padding: 5px 5px 5px 5px;}-->
+		</style>
+	</head>
+	<body>
+	<h1>登録ツールの使い方</h1>
+	<p>　data_editor.exeを起動しますと、次のようなウィンドウが出現します。</p>
+	<img src="./images/data_editor_1.png">
+	<p>　実はこのソフトでは、艦娘については「ID」「名前」「ハッシュ」の3データが、<br>
+	装備についてはそれに加え「種類」「対空値」「索敵値」が登録されています。<br>
+	　kmms_data.csvとwpn_data.csvを<strong>読めば項目の意味がお分かりいただける</strong>かと思いますが、<br>
+	各データを手作業で編集するのは意外に面倒なものです。<br>
+	　そこで、まず「認識できない艦娘 or 装備」が写っている、改装画面画像(800x480・png形式)をウィンドウに<br>
+	ドラッグ＆ドロップします。すると、改装画面と判定できた場合に限り、次のように判定結果が表示されます。</p>
+	<img src="./images/data_editor_2.png">
+	<p>　艦名が認識できなければ、もちろん艦名は空になります(装備名も同様)。<br>
+	　また、艦船IDや装備IDも分かりませんので、画像のように「-1」と表示されます。<br>
+	　そこで、各項目をちまちまと埋めていきます。<br>
+	(装備ID＝図鑑番号ですが、艦船ID≠図鑑番号です。どうやって決めているかって？砂井裏鍵さんなどに聞いてください)</p>
+	<img src="./images/data_editor_3.png">
+	<p>　ここで「艦ハッシュ」や「装備ハッシュ」の言葉の意味ですが、ざっくり言えば<br>
+	「画像の一部を読み取って二値化し、黒＝b、白＝wとしたもの」となります。<br>
+	　艦ハッシュで128文字、装備ハッシュで108文字です。<br>
+	　また、装備種は、wpn_data.csvを眺めながら付けることを推奨します。<br>
+	　編集後は「修正」ボタンを押せば、それぞれ艦娘・装備の情報が追加/更新されます。<br>
+	(艦船IDや装備IDが、それぞれkmms_data.csvやwpn_data.csvに載っているものなら「更新」、そうでないなら「追加」する挙動を見せます)<br>
+	<br>
+	　ちなみに追加/修正した結果は、「おりこうさんな秘書」を再起動しないと反映されません。</p>
+	</body>
+</html>

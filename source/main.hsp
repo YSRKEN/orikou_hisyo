@@ -10,9 +10,9 @@
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.4.0b"
+	#define kVersion    "Ver.3.4.0"
 	#define kVerString  "340"
-	#define kLastUpdate "2017/09/02"
+	#define kLastUpdate "2017/09/03"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "expedition.csv"
