@@ -1,0 +1,584 @@
+// kmms_data.csvとwpn_data.csvを編集する
+
+	#packopt name "data_editor"
+
+	#define global SOFT_NAME "艦娘・装備データエディタ"
+	#const global TRUE  1
+	#const global FALSE 0
+
+// データベースモジュール
+	#module DB
+		// 定数
+		#const global KMMS_HASH_SIZE 128
+		#const global WPN_HASH_SIZE  108
+		// 艦娘データを読み込む
+		#deffunc local load_kmms_data
+			// ファイルの存在をチェック
+			exist "kmms_data.csv"
+			if(strsize < 0) :end
+			// ファイルを読み込む
+			notesel text_buffer
+			noteload "kmms_data.csv"
+			// データ保存用の配列を初期化
+			kmms_data_size = 0
+			dim kmms_id, 5
+			sdim kmms_name, 64, 5
+			sdim kmms_hash, KMMS_HASH_SIZE, 5
+			// 読み込み開始
+			repeat notemax
+				// 1行読み取り、カンマで区切る
+				noteget getline, cnt
+				split getline, ",", temp
+				// 入力値のバリデーションチェック
+				if(stat < 3) :continue
+				if(int(temp(0)) <= 0) :continue
+				if(strlen(temp(1)) == 0) :continue
+				//if(strlen(temp(2)) != KMMS_HASH_SIZE) :continue
+				// 入力
+				kmms_id(kmms_data_size) = int(temp(0))
+				kmms_name(kmms_data_size) = temp(1)
+				kmms_hash(kmms_data_size) = temp(2)
+				kmms_data_size++
+			loop
+		return
+		// 艦娘データを書き込む
+		#deffunc save_kmms_data
+			sdim text_buffer, 32000
+			text_buffer = "艦船ID,名称,マーク\n"
+			repeat kmms_data_size
+				text_buffer += "" + kmms_id(cnt) + "," + kmms_name(cnt) + "," + kmms_hash(cnt) + "\n"
+			loop
+			notesave "kmms_data.csv"
+		return
+		// 装備データを読み込む
+		#deffunc local load_wpn_data
+			// ファイルの存在をチェック
+			exist "wpn_data.csv"
+			if(strsize < 0) :end
+			// ファイルを読み込む
+			notesel text_buffer
+			noteload "wpn_data.csv"
+			// データ保存用の配列を初期化
+			wpn_data_size = 0
+			dim wpn_id, 5
+			sdim wpn_name, 64, 5
+			sdim wpn_type, 64, 5
+			dim wpn_aa, 5
+			dim wpn_srch, 5
+			sdim wpn_hash, WPN_HASH_SIZE, 5
+			// 読み込み開始
+			repeat notemax
+				// 1行読み取り、カンマで区切る
+				noteget getline, cnt
+				split getline, ",", temp
+				// 入力値のバリデーションチェック
+				if(stat < 6) :continue
+				if(int(temp(0)) <= 0) :continue
+				if(strlen(temp(1)) == 0) :continue
+				if(strlen(temp(2)) == 0) :continue
+				//if(strlen(temp(5)) != WPN_HASH_SIZE) :continue
+				// 入力
+				wpn_id(wpn_data_size) = int(temp(0))
+				wpn_name(wpn_data_size) = temp(1)
+				wpn_type(wpn_data_size) = temp(2)
+				wpn_aa(wpn_data_size) = int(temp(3))
+				wpn_srch(wpn_data_size) = int(temp(4))
+				wpn_hash(wpn_data_size) = temp(5)
+				wpn_data_size++
+			loop
+		return
+		// 装備データを書き込む
+		#deffunc save_wpn_data
+			sdim text_buffer, 32000
+			text_buffer = "装備ID,装備名,種別,対空,索敵,マーク\n"
+			repeat wpn_data_size
+				text_buffer += "" + wpn_id(cnt) + "," + wpn_name(cnt) + "," + wpn_type(cnt)
+				text_buffer += "," + wpn_aa(cnt) + "," + wpn_srch(cnt) + "," + wpn_hash(cnt) + "\n"
+			loop
+			notesave "wpn_data.csv"
+		return
+		// 初期化
+		#deffunc local initialize
+			// 艦娘データを読み込む
+			load_kmms_data
+			// 装備データを読み込む
+			load_wpn_data
+		return
+		// 艦インデックスをハッシュ値から検索する
+		#defcfunc get_kmms_index_from_hash str raw_kmms_hash
+			kmms_index = -1
+			repeat kmms_data_size
+				if(kmms_hash(cnt) == raw_kmms_hash){
+					kmms_index = cnt
+					break
+				}
+			loop
+		return kmms_index
+		// 艦インデックスを艦名から検索する
+		#defcfunc get_kmms_index_from_name str raw_kmms_name
+			kmms_index = -1
+			repeat kmms_data_size
+				if(kmms_name(cnt) == raw_kmms_name){
+					kmms_index = cnt
+					break
+				}
+			loop
+		return kmms_index
+		// 艦名を艦インデックスから取得する
+		#defcfunc get_kmms_name_from_index int raw_kmms_index
+			if(raw_kmms_index < 0) :return ""
+		return kmms_name(raw_kmms_index)
+		// 装備インデックスをハッシュ値から検索する
+		#defcfunc get_wpn_index_from_hash str raw_wpn_hash
+			wpn_index = -1
+			repeat wpn_data_size
+				if(wpn_hash(cnt) == raw_wpn_hash){
+					wpn_index = cnt
+					break
+				}
+			loop
+		return wpn_index
+		// 装備インデックスを装備名から検索する
+		#defcfunc get_wpn_index_from_name str raw_wpn_name
+			wpn_index = -1
+			repeat wpn_data_size
+				if(wpn_name(cnt) == raw_wpn_name){
+					wpn_index = cnt
+					break
+				}
+			loop
+		return wpn_index
+		// 装備名を装備インデックスから取得する
+		#defcfunc get_wpn_name_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return ""
+		return wpn_name(raw_wpn_index)
+		#defcfunc get_kmms_id_from_index int raw_kmms_index
+			if(raw_kmms_index < 0) :return -1
+		return kmms_id(raw_kmms_index)
+		#defcfunc get_wpn_id_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return -1
+		return wpn_id(raw_wpn_index)
+		#defcfunc get_wpn_type_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return -1
+		return wpn_type(raw_wpn_index)
+		#defcfunc get_wpn_aa_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return -1
+		return wpn_aa(raw_wpn_index)
+		#defcfunc get_wpn_srch_from_index int raw_wpn_index
+			if(raw_wpn_index < 0) :return -1
+		return wpn_srch(raw_wpn_index)
+		#defcfunc get_kmms_index_from_id int raw_kmms_id
+			kmms_index = -1
+			repeat kmms_data_size
+				if(kmms_id(cnt) == raw_kmms_id){
+					kmms_index = cnt
+					break
+				}
+			loop
+		return kmms_index
+		#defcfunc get_wpn_index_from_id int raw_wpn_id
+			wpn_index = -1
+			repeat wpn_data_size
+				if(wpn_id(cnt) == raw_wpn_id){
+					wpn_index = cnt
+					break
+				}
+			loop
+		return wpn_index
+		#defcfunc has_kmms_id_in_db int raw_kmms_id
+			kmms_flg = FALSE
+			repeat kmms_data_size
+				if(kmms_id(cnt) == raw_kmms_id){
+					kmms_flg = TRUE
+					break
+				}
+			loop
+		return kmms_flg
+		#deffunc replace_kmms_data int raw_kmms_id, str raw_kmms_name, str raw_kmms_hash
+			repeat kmms_data_size
+				if(kmms_id(cnt) == raw_kmms_id){
+					kmms_name(cnt) = raw_kmms_name
+					kmms_hash(cnt) = raw_kmms_hash
+					break
+				}
+			loop
+			save_kmms_data
+		return
+		#deffunc add_kmms_data int raw_kmms_id, str raw_kmms_name, str raw_kmms_hash
+			kmms_id(kmms_data_size) = raw_kmms_id
+			kmms_name(kmms_data_size) = raw_kmms_name
+			kmms_hash(kmms_data_size) = raw_kmms_hash
+			kmms_data_size++
+			save_kmms_data
+		return
+		#defcfunc has_wpn_id_in_db int raw_wpn_id
+			wpn_flg = FALSE
+			repeat wpn_data_size
+				if(wpn_id(cnt) == raw_wpn_id){
+					wpn_flg = TRUE
+					break
+				}
+			loop
+		return wpn_flg
+		#deffunc replace_wpn_data int raw_wpn_id, str raw_wpn_name, str raw_wpn_hash, str raw_wpn_type, int raw_wpn_aa, int raw_wpn_srch
+			repeat wpn_data_size
+				if(wpn_id(cnt) == raw_wpn_id){
+					wpn_name(cnt) = raw_wpn_name
+					wpn_hash(cnt) = raw_wpn_hash
+					wpn_type(cnt) = raw_wpn_type
+					wpn_aa(cnt) = raw_wpn_aa
+					wpn_srch(cnt) = raw_wpn_srch
+					break
+				}
+			loop
+			save_wpn_data
+		return
+		#deffunc add_wpn_data int raw_wpn_id, str raw_wpn_name, str raw_wpn_hash, str raw_wpn_type, int raw_wpn_aa, int raw_wpn_srch
+			wpn_id(wpn_data_size) = raw_wpn_id
+			wpn_name(wpn_data_size) = raw_wpn_name
+			wpn_type(wpn_data_size) = raw_wpn_type
+			wpn_aa(wpn_data_size) = raw_wpn_aa
+			wpn_srch(wpn_data_size) = raw_wpn_srch
+			wpn_hash(wpn_data_size) = raw_wpn_hash
+			wpn_data_size++
+			save_wpn_data
+		return
+	#global
+
+// 分析モジュール
+	#module Research
+		// 定数
+		#const global MAX_WPN_COUNT 4
+		// 色判定を行う
+		#defcfunc local is_near_color int nc_x, int nc_y, int nc_r, int nc_g, int nc_b
+			pget nc_x, nc_y
+			diff_r = ginfo_r - nc_r
+			diff_g = ginfo_g - nc_g
+			diff_b = ginfo_b - nc_b
+			diff = diff_r * diff_r + diff_g * diff_g + diff_b * diff_b
+			if(diff > 500) :return FALSE
+		return TRUE
+		// 艦名のハッシュを取得する
+		#defcfunc local get_kmms_hash_from_buffer
+			sdim temp_kmms_hash, KMMS_HASH_SIZE
+			repeat KMMS_HASH_SIZE
+				pget 339 + cnt, 122
+				if(ginfo_r < 210){
+					temp_kmms_hash += "b"
+				}else{
+					temp_kmms_hash += "w"
+				}
+			loop
+		return temp_kmms_hash
+		// 装備名のハッシュを取得する
+		#defcfunc local get_wpn_hash_from_buffer int weapon_index
+			sdim temp_wpn_hash, WPN_HASH_SIZE
+			repeat WPN_HASH_SIZE
+				pget 379 + cnt, 176 + 33 * weapon_index
+				if(ginfo_r < 210){
+					temp_wpn_hash += "b"
+				}else{
+					temp_wpn_hash += "w"
+				}
+			loop
+		return temp_wpn_hash
+		// 艦インデックスを取得する
+		#defcfunc local get_kmms_index_from_buffer int buffer_id
+			// まずはざっくりと取得する
+			gsel buffer_id
+			raw_kmms_hash = get_kmms_hash_from_buffer()
+			raw_kmms_index = get_kmms_index_from_hash(raw_kmms_hash)
+			raw_kmms_name = get_kmms_name_from_index(raw_kmms_index)
+			// 細かいケースを判定する
+			if(instr(raw_kmms_name,,"Graf Zeppelin") != -1){
+				// 艦名補正1
+				gsel buffer_id
+				if(is_near_color(546,273,27,173,176)){
+					raw_kmms_index = get_kmms_index_from_name("Graf Zeppelin改")
+				}else{
+					raw_kmms_index = get_kmms_index_from_name("Graf Zeppelin")
+				}
+			}
+			if(instr(raw_kmms_name,,"Гангут") != -1){
+				// 艦名補正2
+				gsel buffer_id
+				if(is_near_color(692,257,192,122,91)){
+					raw_kmms_index = get_kmms_index_from_name("Гангут два")
+				}else{
+					raw_kmms_index = get_kmms_index_from_name("Гангут")
+				}
+			}
+			if(instr(raw_kmms_name,,"Commandant Teste") != -1){
+				// 艦名補正3
+				gsel buffer_id
+				if(is_near_color(546,273,27,173,176)){
+					raw_kmms_index = get_kmms_index_from_name("Commandant Teste改")
+				}else{
+					raw_kmms_index = get_kmms_index_from_name("Commandant Teste")
+				}
+			}
+		return raw_kmms_index
+		// 艦の装備数を取得する
+		#defcfunc get_wpn_count_from_buffer int buffer_id
+			gsel buffer_id
+			raw_wpn_count = 0
+			repeat MAX_WPN_COUNT
+				if(is_near_color(546, 174 + 33 * cnt, 27, 173, 176) == FALSE) :break
+				raw_wpn_count++
+			loop
+		return raw_wpn_count
+		// 装備インデックスを取得する
+		#defcfunc local get_wpn_index_from_buffer int buffer_id, int weapon_index
+			// まずはざっくりと取得する
+			gsel buffer_id
+			raw_wpn_hash = get_wpn_hash_from_buffer(weapon_index)
+			raw_wpn_index = get_wpn_index_from_hash(raw_wpn_hash)
+			raw_wpn_name = get_wpn_name_from_index(raw_wpn_index)
+			// 細かいケースを判定する
+			if(instr(raw_wpn_name,,"381mm/50 三連装砲") != -1){
+				// 装備名補正1
+				gsel buffer_id
+				if(is_near_color(515, 171 + 33 * weapon_index, 189, 177, 163)){
+					raw_wpn_index = get_wpn_index_from_name("381mm/50 三連装砲改")
+				}else{
+					raw_wpn_index = get_wpn_index_from_name("381mm/50 三連装砲")
+				}
+			}
+			if(instr(raw_wpn_name,,"25mm三連装機銃") != -1){
+				// 装備名補正2
+				gsel buffer_id
+				if(is_near_color(496, 176 + 33 * weapon_index, 92, 87, 80)){
+					raw_wpn_index = get_wpn_index_from_name("25mm三連装機銃 集中配備")
+				}else{
+					raw_wpn_index = get_wpn_index_from_name("25mm三連装機銃")
+				}
+			}
+			if(instr(raw_wpn_name,,"12.7cm連装高角砲") != -1){
+				// 装備名補正3
+				gsel buffer_id
+				if(is_near_color(497, 177 + 33 * weapon_index, 92, 86, 80)){
+					raw_wpn_index = get_wpn_index_from_name("12.7cm連装高角砲(後期型)")
+				}else{
+					raw_wpn_index = get_wpn_index_from_name("12.7cm連装高角砲")
+				}
+			}
+		return raw_wpn_index
+		// 改装画面かを判定する
+		#defcfunc is_refit_scene int buffer_id
+		gsel buffer_id
+		if(is_near_color(300,172,241,191,119) == FALSE) :return FALSE
+		if(is_near_color(462,454,255,244,243) == FALSE) :return FALSE
+		return TRUE
+		// 艦娘のデータを取得する
+		#defcfunc get_kmms_info int buffer_id
+			sdim output, 32000
+			// まず艦名を読み取る
+			kmms_index = get_kmms_index_from_buffer(buffer_id)
+			// 次に装備名を読み取る
+			wpn_count = get_wpn_count_from_buffer(buffer_id)
+			dim wpn_index, wpn_count
+			for wi, 0, wpn_count
+				wpn_index(wi) = get_wpn_index_from_buffer(buffer_id, wi)
+			next
+			// 結果を出力する
+			output = "分析結果：改装画面\n"
+			output += "艦名：" + get_kmms_name_from_index(kmms_index) + "\n"
+			for wi, 0, wpn_count
+				output += "装備" + (wi + 1) + "：" + get_wpn_name_from_index(wpn_index(wi)) + "\n"
+			next
+		return output
+		// 艦娘のデータを取得する(詳細)
+		// [艦idx, 艦hash, 装備数, 装備idx1, 装備hash1, ..., 装備idx4, 装備hash4]
+		#deffunc get_kmms_info_detail int buffer_id, array kmms_info
+			sdim kmms_info, 256, (MAX_WPN_COUNT + 1) * 2 + 1
+			kmms_info(0) = "" + get_kmms_id_from_index(get_kmms_index_from_buffer(buffer_id))
+			gsel buffer_id
+			kmms_info(1) = get_kmms_hash_from_buffer()
+			kmms_info(2) = "" + get_wpn_count_from_buffer(buffer_id)
+			for wi, 0, MAX_WPN_COUNT
+				kmms_info(3 + wi * 2) = "" + get_wpn_id_from_index(get_wpn_index_from_buffer(buffer_id, wi))
+				gsel buffer_id
+				kmms_info(4 + wi * 2) = get_wpn_hash_from_buffer(wi)
+			next
+		return
+	#global
+
+// GUIモジュール
+	#module GUI
+		// DLL宣言
+		#uselib "shell32.dll"
+			#func DragAcceptFiles "DragAcceptFiles" int,int
+			#func DragQueryFile "DragQueryFileA" int,int,int,int
+			#func DragFinish "DragFinish" int
+		// 各種定数
+		#const WM_DROPFILES 0x0233
+		#const MAIN_WINDOW_ID 0
+		#const PICTURE_BUFFER_ID 1
+		// 初期化
+		#deffunc local initialize
+			// ウィンドウ
+			screen MAIN_WINDOW_ID, 500, 500
+			title SOFT_NAME
+			gsel MAIN_WINDOW_ID, 2
+			// 艦娘欄
+			sdim input_kmms_hash, KMMS_HASH_SIZE
+			sdim input_kmms_name, 64
+			sdim input_kmms_id, 64
+			pos 10, 12 :mes "艦ハッシュ："
+			pos 110, 10 :input input_kmms_hash,380,24,KMMS_HASH_SIZE :input_kmms_hash_id = stat
+			pos 10, 47 :mes "艦名："
+			pos 60, 45 :input input_kmms_name,220,24,64 :input_kmms_name_id = stat
+			pos 290, 47 :mes "艦船ID："
+			pos 355, 45 :input input_kmms_id,60,24,64 :input_kmms_id_id = stat
+			// 装備欄
+			sdim input_wpn_hash, WPN_HASH_SIZE, MAX_WPN_COUNT
+			sdim input_wpn_name, 64, MAX_WPN_COUNT
+			sdim input_wpn_id, 64, MAX_WPN_COUNT
+			sdim input_wpn_type, 64, MAX_WPN_COUNT
+			sdim input_wpn_aa, 64, MAX_WPN_COUNT
+			sdim input_wpn_srch, 64, MAX_WPN_COUNT
+			dim input_wpn_hash_id, MAX_WPN_COUNT
+			dim input_wpn_name_id, MAX_WPN_COUNT
+			dim input_wpn_id_id, MAX_WPN_COUNT
+			dim input_wpn_type_id, MAX_WPN_COUNT
+			dim input_wpn_aa_id, MAX_WPN_COUNT
+			dim input_wpn_srch_id, MAX_WPN_COUNT
+			for wi, 0, MAX_WPN_COUNT
+				pos 10, 77 + wi * 105 :mes "装備ハッシュ" + (wi + 1) + "："
+				pos 130, 75 + wi * 105 :input input_wpn_hash(wi),360,24,WPN_HASH_SIZE :input_wpn_hash_id(wi) = stat
+				pos 10, 112 + wi * 105 :mes "装備名" + (wi + 1) + "："
+				pos 80, 110 + wi * 105 :input input_wpn_name(wi),190,24,64 :input_wpn_name_id(wi) = stat
+				pos 280, 112 + wi * 105 :mes "装備ID" + (wi + 1) + "："
+				pos 355, 110 + wi * 105 :input input_wpn_id(wi),60,24,64 :input_wpn_id_id(wi) = stat
+				pos 10, 147 + wi * 105 :mes "装備種" + (wi + 1) + "："
+				pos 80, 145 + wi * 105 :input input_wpn_type(wi),70,24,64 :input_wpn_type_id(wi) = stat
+				pos 160, 147 + wi * 105 :mes "対空" + (wi + 1) + "："
+				pos 220, 145 + wi * 105 :input input_wpn_aa(wi),60,24,64 :input_wpn_aa_id(wi) = stat
+				pos 290, 147 + wi * 105 :mes "索敵" + (wi + 1) + "："
+				pos 350, 145 + wi * 105 :input input_wpn_srch(wi),60,24,64 :input_wpn_srch_id(wi) = stat
+			next
+			// 修正ボタン
+			pos 425, 45 :button gosub "修正", *fix_kmms_name
+			fix_kmms_button_id = stat
+			dim fix_wpn_button_id, MAX_WPN_COUNT
+			pos 425, 145 :button gosub "修正", *fix_wpn1_name :fix_wpn_button_id(0) = stat
+			pos 425, 250 :button gosub "修正", *fix_wpn2_name :fix_wpn_button_id(1) = stat
+			pos 425, 355 :button gosub "修正", *fix_wpn3_name :fix_wpn_button_id(2) = stat
+			pos 425, 460 :button gosub "修正", *fix_wpn4_name :fix_wpn_button_id(3) = stat
+			oncmd gosub *OnDropFiles,WM_DROPFILES
+			DragAcceptFiles hwnd, 1
+		return
+*OnDropFiles
+	// ファイル名を読み込む
+	drop_handle = wparam
+	DragQueryFile drop_handle, -1, 0, 0
+	drop_count = stat
+	sdim file_name, 260
+	repeat drop_count
+		DragQueryFile drop_handle, cnt, varptr(file_name), 260
+		break
+	loop
+	DragFinish hDrop
+	// ファイルの存在を確認する
+	exist file_name
+	if(strsize < 0) :return
+	// ファイルを読み込み、情報を取得する
+	buffer PICTURE_BUFFER_ID
+	picload file_name
+	if(is_refit_scene(PICTURE_BUFFER_ID) == FALSE) :return
+	info_output = get_kmms_info(PICTURE_BUFFER_ID)
+	sdim kmms_info, 256, (MAX_WPN_COUNT + 1) * 2 + 1
+	get_kmms_info_detail PICTURE_BUFFER_ID, kmms_info
+	// 結果を画面に表示する
+	gsel MAIN_WINDOW_ID
+	objprm input_kmms_hash_id, kmms_info(1)
+	objprm input_kmms_name_id, get_kmms_name_from_index(get_kmms_index_from_id(int(kmms_info(0))))
+	objprm input_kmms_id_id, kmms_info(0)
+	for wi, 0, MAX_WPN_COUNT
+		objprm input_wpn_hash_id(wi), kmms_info(4 + wi * 2)
+		wpn_index = get_wpn_index_from_id(int(kmms_info(3 + wi * 2)))
+		objprm input_wpn_name_id(wi), get_wpn_name_from_index(wpn_index)
+		objprm input_wpn_id_id(wi), kmms_info(3 + wi * 2)
+		objprm input_wpn_type_id(wi), get_wpn_type_from_index(wpn_index)
+		objprm input_wpn_aa_id(wi), get_wpn_aa_from_index(wpn_index)
+		objprm input_wpn_srch_id(wi), get_wpn_srch_from_index(wpn_index)
+	next
+	hoge = get_wpn_count_from_buffer(PICTURE_BUFFER_ID)
+	gsel MAIN_WINDOW_ID
+	for wi, 0, int(kmms_info(2))
+		objenable input_wpn_hash_id(wi), 1
+		objenable input_wpn_name_id(wi), 1
+		objenable input_wpn_id_id(wi), 1
+		objenable input_wpn_type_id(wi), 1
+		objenable input_wpn_aa_id(wi), 1
+		objenable input_wpn_srch_id(wi), 1
+		objenable fix_wpn_button_id(wi), 1
+	next
+	for wi, int(kmms_info(2)), MAX_WPN_COUNT
+		objenable input_wpn_hash_id(wi), 0
+		objenable input_wpn_name_id(wi), 0
+		objenable input_wpn_id_id(wi), 0
+		objenable input_wpn_type_id(wi), 0
+		objenable input_wpn_aa_id(wi), 0
+		objenable input_wpn_srch_id(wi), 0
+		objenable fix_wpn_button_id(wi), 0
+	next
+return
+*fix_kmms_name
+	// IDが既存なら「修正」、それ以外なら「追加」と考える
+	if(input_kmms_name == "") :dialog "艦名が空です！", 1, SOFT_NAME :return
+	if(strlen(input_kmms_hash) != KMMS_HASH_SIZE) :dialog "艦ハッシュ値がおかしいです！", 1, SOFT_NAME :return
+	if(int(input_kmms_id) == 0) :dialog "艦船IDがおかしいです！", 1, SOFT_NAME :return
+	if(has_kmms_id_in_db(int(input_kmms_id))){
+		// 修正
+		dialog "艦船ID" + input_kmms_id + "に対し、次の内容で修正を行います。\nよろしいですか？\n艦名：" + input_kmms_name + "\n艦ハッシュ：" + input_kmms_hash, 2, SOFT_NAME
+		if(stat == 6){
+			replace_kmms_data int(input_kmms_id), input_kmms_name, input_kmms_hash
+		}
+	}else{
+		// 追加
+		dialog "次の艦娘を追加します。よろしいですか？\n艦船ID：" + input_kmms_id + "\n艦名：" + input_kmms_name + "\n艦ハッシュ：" + input_kmms_hash, 2, SOFT_NAME
+		if(stat == 6){
+			add_kmms_data int(input_kmms_id), input_kmms_name, input_kmms_hash
+		}
+	}
+return
+*fix_wpn1_name :fix_index = 0 :gosub *fix_wpn_name :return
+*fix_wpn2_name :fix_index = 1 :gosub *fix_wpn_name :return
+*fix_wpn3_name :fix_index = 2 :gosub *fix_wpn_name :return
+*fix_wpn4_name :fix_index = 3 :gosub *fix_wpn_name :return
+*fix_wpn_name
+	// IDが既存なら「修正」、それ以外なら「追加」と考える
+	if(input_wpn_name(fix_index) == "") :dialog "装備名が空です！", 1, SOFT_NAME :return
+	if(strlen(input_wpn_hash(fix_index)) != WPN_HASH_SIZE) :dialog "装備ハッシュ値がおかしいです！", 1, SOFT_NAME :return
+	if(int(input_wpn_id(fix_index)) == 0) :dialog "装備IDがおかしいです！", 1, SOFT_NAME :return
+	if(input_wpn_type(fix_index) == "") :dialog "装備種が空です！", 1, SOFT_NAME :return
+	if(has_wpn_id_in_db(int(input_wpn_id(fix_index)))){
+		// 修正
+		dialog "装備ID" + input_wpn_id(fix_index) + "に対し、次の内容で修正を行います。\nよろしいですか？\n装備名：" + input_wpn_name(fix_index) + "\n装備種：" + input_wpn_type(fix_index) + "\n対空値：" + input_wpn_aa(fix_index) + "\n索敵値：" + input_wpn_srch(fix_index) + "\n装備ハッシュ：" + input_wpn_hash(fix_index), 2, SOFT_NAME
+		if(stat == 6){
+			replace_wpn_data int(input_wpn_id(fix_index)), input_wpn_name(fix_index), input_wpn_hash(fix_index), input_wpn_type(fix_index), int(input_wpn_aa(fix_index)), int(input_wpn_srch(fix_index))
+		}
+	}else{
+		// 追加
+		dialog "次の装備を追加します。よろしいですか？\n装備ID：" + input_wpn_id(fix_index) + "\n装備名：" + input_wpn_name(fix_index) + "\n装備種：" + input_wpn_type(fix_index) + "\n対空値：" + input_wpn_aa(fix_index) + "\n索敵値：" + input_wpn_srch(fix_index) + "\n装備ハッシュ：" + input_wpn_hash(fix_index), 2, SOFT_NAME
+		if(stat == 6){
+			add_wpn_data int(input_wpn_id(fix_index)), input_wpn_name(fix_index), input_wpn_hash(fix_index), input_wpn_type(fix_index), int(input_wpn_aa(fix_index)), int(input_wpn_srch(fix_index))
+		}
+	}
+return
+	#global
+
+	#module
+		// 諸々の初期化
+		#deffunc initialize_all
+			// データベースの初期化
+			initialize@DB
+			// GUIの初期化
+			initialize@GUI
+		return
+	#global
+
+// メインルーチン
+	// 諸々の初期化
+	initialize_all

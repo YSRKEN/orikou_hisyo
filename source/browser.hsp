@@ -1,21 +1,93 @@
 /* 外蔵ブラウザ */
 
-#packopt name "browser"
+	#packopt name "browser"
 
-// 各種定数
+	// 各種定数を定義
 	#define kSoftName "外蔵ブラウザ"
 	#const kBrowserWindowID 0
-	#const TRUE 1
-	#const FALSE 0
-	// マクロ
+	#const global TRUE 1
+	#const global FALSE 0
+
+	#module save_data
+		// 設定データを初期化する
+		#deffunc local init
+			exe_path = dir_cur
+			// セーブファイルの保存フォルダを作成
+			dirlist x, exe_path + "\\save", 5
+			if(stat == 0) :mkdir exe_path + "\\save"
+			// 設定項目の初期値を代入する
+			browser_offset_x@ = 98
+			browser_offset_y@ = 84
+			auto_scroll_time@ = 500
+			browser_front_flg@ = FALSE
+			scroll_bar_flg@ = TRUE
+		return
+		// 設定データを読み込む
+		#deffunc local read
+			exist exe_path + "\\save\\browser_setting.ini"
+			if(strsize != -1){
+				// バッファに読み込む
+				notesel text_buffer
+				noteload exe_path + "\\save\\browser_setting.ini"
+				// 1行づつ読み込む
+				for k, 0, notemax
+					noteget getline, k
+					// コメントは削除する
+					p = instr(getline,,";")
+					if(p != -1) :getline = strmid(getline, 0, p)
+					// パラメータである場合のみ反映する
+					p = instr(getline,,"=")
+					if(p == -1) :_continue
+					sdim param_name, 1024
+					param_name = strmid(getline, 0, p)
+					split param_name, "_", temp
+					size = stat
+					param_name_second = int(temp(size - 1))
+					param_name_first = ""
+					for m, 0, size - 1
+						if(m != 0) :param_name_first += "_"
+						param_name_first += temp(m)
+					next
+					sdim param_value, 1024
+					param_value = strmid(getline, p + 1, strlen(getline) - p - 1)
+					//パラメータの種類によって場合分け
+					if(param_name == "browser_offset_x")  :browser_offset_x@  = int(param_value) :_continue
+					if(param_name == "browser_offset_y")  :browser_offset_y@  = int(param_value) :_continue
+					if(param_name == "auto_scroll_time")  :auto_scroll_time@  = int(param_value) :_continue
+					if(param_name == "browser_front_flg") :browser_front_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "scroll_bar_flg")    :scroll_bar_flg@    = limit(int(param_value), FALSE, TRUE) :_continue
+				next
+			}
+		return
+		// 設定データを書き込む
+		#deffunc local write
+			sdim text_buffer, 32000
+			text_buffer += "browser_offset_x="  + browser_offset_x@  + "\n"
+			text_buffer += "browser_offset_y="  + browser_offset_y@  + "\n"
+			text_buffer += "auto_scroll_time="  + auto_scroll_time@  + "\n"
+			text_buffer += "browser_front_flg=" + browser_front_flg@ + "\n"
+			text_buffer += "scroll_bar_flg="    + scroll_bar_flg@    + "\n"
+			notesel text_buffer
+			notesave exe_path + "\\save\\browser_setting.ini"
+		return
+	#global
+
+	// 設定データを初期化する
+	init@save_data
+	// 設定データを読み込む
+	read@save_data
+	// 設定データを書き込む
+	write@save_data
+
+// ウィンドウ設定用のマクロ
 	#define ctype SIZE_X(%1) (%1) * kObjX + ((%1) - 1) * kSpace
 	#define ctype SIZE_Y(%1) (%1) * kObjY + ((%1) - 1) * kSpace
 	;オブジェクトのサイズ
-	#const kObjX  80
+	#const kObjX 80
 	#const kObjY 20
 	;艦これの画面のサイズ
-	#const global kFlashWX 800
-	#const global kFlashWY 480
+	#const kFlashWX 800
+	#const kFlashWY 480
 	;ブラウザのサイズ
 	#const kBrowserX kFlashWX + 30
 	#const kBrowserY kFlashWY + 30 + kObjY
@@ -26,11 +98,6 @@
 
 // 変数初期化
 	sdim browser_url, 512 :browser_url = kKanColleURL
-	browser_offset_x = 98
-	browser_offset_y = 84
-	exit_flg = FALSE
-	browser_front_flg = FALSE
-	scroll_bar_flg = TRUE
 
 // 本体の処理
 	screen kBrowserWindowID, kBrowserX, kBrowserY, 4 :title "外蔵ブラウザ"
@@ -58,8 +125,12 @@
 	ie->"Navigate" browser_url
 
 	onexit gosub *exit
-	browser_front_flg_ = browser_front_flg
-	scroll_bar_flg_ = scroll_bar_flg
+	browser_front_flg_ = 1 - browser_front_flg
+	scroll_bar_flg_ = 1 - scroll_bar_flg
+	if(browser_offset_x != 0 || browser_offset_y != 0){
+		wait auto_scroll_time //十分な待ち時間
+		gosub *scroll_browser
+	}
 	repeat
 		if(exit_flg) :end
 		if(browser_front_flg != browser_front_flg_){
@@ -69,6 +140,7 @@
 				gsel kBrowserWindowID, 1
 			}
 			browser_front_flg_ = browser_front_flg
+			write@save_data
 		}
 		if(scroll_bar_flg != scroll_bar_flg_){
 			if(scroll_bar_flg){
@@ -101,6 +173,7 @@
 				delcom pDoc
 			}
 			scroll_bar_flg_ = scroll_bar_flg
+			write@save_data
 		}
 		wait 5
 	loop
@@ -110,15 +183,12 @@
 	browser_url = kKanColleURL
 	gsel kBrowserWindowID
 	objprm 0, browser_url
+	write@save_data
 return
 
 //*中央
 *scroll_browser
 	gsel kBrowserWindowID
-	/*repeat
-		wait 20
-		if(ie("busy") == 0) && (ie("ReadyState") == 4) :break
-	loop*/
 	pDoc = ie("Document")
 	;スクロール
 	pPW = pDoc("parentWindow")
@@ -142,15 +212,12 @@ return
 		gsel kBrowserWindowID
 		objprm scroll_bar_flg_id, FALSE
 	}
+	write@save_data
 return
 
 //*中央解除
 *unscroll_browser
 	gsel kBrowserWindowID
-	/*repeat
-		wait 20
-		if(ie("busy") == 0) && (ie("ReadyState") == 4) :break
-	loop*/
 	pDoc = ie("Document")
 	;スクロールバーを復活させる
 	comres pBody
@@ -170,16 +237,19 @@ return
 		gsel kBrowserWindowID
 		objprm scroll_bar_flg_id, TRUE
 	}
+	write@save_data
 return
 
 //*移動
 *move_browser
 	gsel kBrowserWindowID
 	ie->"Navigate" browser_url
+	write@save_data
 return
 
 //*終了確認
 *exit
 	dialog "終了しますか？", 2, kSoftName
+	write@save_data
 	if(stat == 6) :exit_flg = TRUE
 return

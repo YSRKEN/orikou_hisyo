@@ -32,20 +32,45 @@ return
 		target_unit_id(n) = -1
 		for k, 0, kammusu_data_size
 			if(kammusu_mark(k) == kammusu_mark_temp){
-				target_unit_id(n) = k
+				target_unit_id(n) = kammusu_id(k)
 				_break
 			}
 		next
-		;ŠÍ–º–¼‚É‚Â‚¢‚Ä‚Ì“Áê•â³(Graf Zeppelin)
+		kammusu_name_temp = GetNameFromKammusuCode(target_unit_id(n))
+		fleetinfo_output = ""
+		;ŠÍ–º–¼‚É‚Â‚¢‚Ä‚Ì“Áê•â³
 		if(target_unit_id(n) != -1){
-			if(instr(kammusu_name(target_unit_id(n)),,"Graf") != -1){
+			// (Graf Zeppelin)
+			if(instr(kammusu_name_temp,,"Graf") != -1){
 				gsel GetUnitID(fleetinfo_number_index, n)
 				if(NearColor(546, 174 + 33 * 3, 27, 173, 176)){
 					;Graf Zeppelin‰ü
-					target_unit_id(n) = 334
+					target_unit_id(n) = GetCodeFromKammusuName("Graf Zeppelin‰ü")
 				}else{
 					;Graf Zeppelin
-					target_unit_id(n) = 379
+					target_unit_id(n) = GetCodeFromKammusuName("Graf Zeppelin")
+				}
+			}
+			// („C„p„~„s„…„„)
+			if(instr(kammusu_name_temp,,"„C„p„~„s„…„„") != -1){
+				gsel GetUnitID(fleetinfo_number_index, n)
+				if(NearColor(692, 257, 192, 122, 91)){
+					;„C„p„~„s„…„„ „t„r„p
+					target_unit_id(n) = GetCodeFromKammusuName("„C„p„~„s„…„„ „t„r„p")
+				}else{
+					;„C„p„~„s„…„„
+					target_unit_id(n) = GetCodeFromKammusuName("„C„p„~„s„…„„")
+				}
+			}
+			// (Commandant Teste)
+			if(instr(kammusu_name_temp,,"Commandant") != -1){
+				gsel GetUnitID(fleetinfo_number_index, n)
+				if(NearColor(546, 174 + 33 * 3, 27, 173, 176)){
+					;Commandant Teste‰ü
+					target_unit_id(n) = GetCodeFromKammusuName("Commandant Teste‰ü")
+				}else{
+					;Commandant Teste
+					target_unit_id(n) = GetCodeFromKammusuName("Commandant Teste")
 				}
 			}
 		}
@@ -88,9 +113,6 @@ return
 			if(NearColor(546, 174 + 33 * w, 27, 173, 176) == FALSE){
 				_break
 			}
-			if(NearColor(362, 175 + 33 * w, 39, 64, 46) && NearColor(361, 173 + 33 * w, 41, 63, 46)){
-				_break
-			}
 			;‘•”õ‚Ìƒ}[ƒN‚ğ“Ç‚İæ‚èA”»’è‚ğs‚¤
 			sdim weapon_mark_temp, kWeaponMarkLen
 			for k, 0, kWeaponMarkLen
@@ -99,49 +121,53 @@ return
 			next
 			for k, 0, weapon_data_size
 				if(weapon_mark(k) == weapon_mark_temp){
-					target_weapon_id(n, w) = k
+					//if(n == 1) :assert :logmes weapon_mark_temp :logmes "" + k : logmes weapon_id(k)
+					target_weapon_id(n, w) = weapon_id(k)
 					_break
 				}
 			next
+			target_weapon_name_temp = GetNameFromWeaponCode(target_weapon_id(n, w))
+			if(n == 1) :logmes target_weapon_name_temp
 			;‘•”õ–¼‚É‚Â‚¢‚Ä‚Ì“Áê•â³
 			if(target_weapon_id(n, w) != -1){
 				;(381mm/50 O˜A‘•–C)
-				if(instr(weapon_name(target_weapon_id(n, w)),,"381mm") != -1){
+				if(instr(target_weapon_name_temp,,"381mm") != -1){
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(515, 171 + 33 * w, 189, 177, 163)){
 						;381mm/50 O˜A‘•–C‰ü
-						target_weapon_id(n, w) = 136
+						target_weapon_id(n, w) = GetCodeFromWeaponName("381mm/50 O˜A‘•–C‰ü")
 					}else{
 						;381mm/50 O˜A‘•–C
-						target_weapon_id(n, w) = 132
+						target_weapon_id(n, w) = GetCodeFromWeaponName("381mm/50 O˜A‘•–C")
 					}
 				}
 				;(25mmO˜A‘•‹@e)
-				if(instr(weapon_name(target_weapon_id(n, w)),,"25mmO˜A‘•‹@e") != -1){
+				if(instr(target_weapon_name_temp,,"25mmO˜A‘•‹@e") != -1){
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(496, 176 + 33 * w, 92, 87, 80)){
 						;25mmO˜A‘•‹@e W’†”z”õ
-						target_weapon_id(n, w) = 130
+						target_weapon_id(n, w) = GetCodeFromWeaponName("25mmO˜A‘•‹@e W’†”z”õ")
 					}else{
 						;25mmO˜A‘•‹@e
-						target_weapon_id(n, w) = 39
+						target_weapon_id(n, w) = GetCodeFromWeaponName("25mmO˜A‘•‹@e")
 					}
 				}
 				;(12.7cm˜A‘•‚Šp–C)
-				if(instr(weapon_name(target_weapon_id(n, w)),,"12.7cm˜A‘•‚Šp–C") != -1){
+				if(instr(target_weapon_name_temp,,"12.7cm˜A‘•‚Šp–C") != -1){
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(497, 177 + 33 * w, 92, 86, 80)){
 						;12.7cm˜A‘•‚Šp–C(ŒãŠúŒ^)
-						target_weapon_id(n, w) = 90
+						target_weapon_id(n, w) = GetCodeFromWeaponName("12.7cm˜A‘•‚Šp–C(ŒãŠúŒ^)")
 					}else{
 						;12.7cm˜A‘•‚Šp–C
-						target_weapon_id(n, w) = 9
+						target_weapon_id(n, w) = GetCodeFromWeaponName("12.7cm˜A‘•‚Šp–C")
 					}
 				}
 			}
 			;“‹Ú”‚ğ“Ç‚İæ‚é
 			if(target_weapon_id(n, w) != -1){
-				switch(weapon_type(target_weapon_id(n, w)))
+				temp_type = GetTypeFromWeaponCode(target_weapon_id(n, w))
+				switch(temp_type)
 				case "ƒI[ƒgƒWƒƒƒCƒ"
 				case "ŠÍãUŒ‚‹@"
 				case "ŠÍãí“¬‹@"
@@ -164,20 +190,23 @@ return
 			target_weapon_count(n)++
 		next
 	next
+//	assert
 	// ‘•”õ‚©‚çAõ“G’l‚É•â³‚ğ“ü‚ê‚é
 	for n, 0, target_unit_count
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
-			target_unit_search(n) -= weapon_search(target_weapon_id(n, w))
+			target_unit_search(n) -= GetSearchValueFromWeaponCode(target_weapon_id(n, w))
 		next
 	next
+//	assert
 	// ŠÍÚ‹@n—û“x‚ğ“Ç‚İæ‚é
 	for n, 0, target_unit_count
 		gsel GetUnitID(fleetinfo_number_index, n)
 		for w, 0, target_weapon_count(n)
 			id = target_weapon_id(n, w)
 			if(id == -1) :_continue
-			switch(weapon_type(id))
+			temp_type = GetTypeFromWeaponCode(target_weapon_id(n, w))
+			switch(temp_type)
 			case "ŠÍãUŒ‚‹@"
 			case "ŠÍãí“¬‹@"
 			case "ŠÍã”šŒ‚‹@"
@@ -222,6 +251,7 @@ return
 			swend
 		next
 	next
+//	assert
 	// ‘•”õ‰üC“x‚ğ“Ç‚İæ‚é
 	for n, 0, target_unit_count
 		gsel GetUnitID(fleetinfo_number_index, n)
@@ -300,13 +330,15 @@ return
 			}
 		next
 	next
+//	assert
 	// §‹ó’l‚ğŒvZ‚·‚é(ŠÍÚ‹@n—û“x‘Î‰)
 	all_anti_air = 0
 	for n, 0, target_unit_count
 		for w, 0, target_weapon_count(n)
 			wid = target_weapon_id(n, w)
 			if(wid == -1) :_continue
-			wtype = weapon_type(wid)
+			wtype = GetTypeFromWeaponCode(target_weapon_id(n, w))
+			wair = GetAntiAirFromWeaponCode(target_weapon_id(n, w))
 			switch(wtype)
 			case "ŠÍãUŒ‚‹@"
 			case "ŠÍãí“¬‹@"
@@ -314,7 +346,12 @@ return
 			case "…ã”šŒ‚‹@"
 			case "‘½—p“r…ã‹@/…ãí“¬‹@"
 				;‘Î‹ó‚Æ“‹Ú”‚ÉŠî‚Ã‚¢‚½§‹ó’l
-				all_anti_air += int(sqrt(target_weapon_airs(n, w)) * weapon_antiair(wid))
+				if(wtype == "ŠÍãí“¬‹@" || wtype == "‘½—p“r…ã‹@/…ãí“¬‹@"){
+					coeff = 0.2
+				}else{
+					coeff = 0.25
+				}
+				all_anti_air += int(sqrt(target_weapon_airs(n, w)) * (coeff * target_weapon_level_g(n, w) + 1.0 * wair))
 				;ŠÍÚ‹@n—û“xƒ{[ƒiƒX
 				wlevel = target_weapon_level_v(n, w)
 				all_anti_air += all_bonus(wlevel)
@@ -328,6 +365,7 @@ return
 			swend
 		next
 	next
+//	assert
 	// õ“G’l‚ğŒvZ‚·‚é(2-5®HA33®)
 	;2-5®H
 	if(master_level \ 5 == 0){
@@ -339,37 +377,40 @@ return
 		all_search_power += 1.6841056 * sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
-			switch(weapon_type(target_weapon_id(n, w)))
+			wtype = GetTypeFromWeaponCode(target_weapon_id(n, w))
+			wsearch = GetSearchValueFromWeaponCode(target_weapon_id(n, w))
+			switch(wtype)
 			case "ŠÍã”šŒ‚‹@"
-				all_search_power += 1.0376255 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.0376255 * wsearch
 				swbreak
 			case "ŠÍãUŒ‚‹@"
-				all_search_power += 1.3677954 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.3677954 * wsearch
 				swbreak
 			case "ŠÍã’ã@‹@"
-				all_search_power += 1.6592780 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.6592780 * wsearch
 				swbreak
 			case "…ã’ã@‹@"
-				all_search_power += 2.0000000 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 2.0000000 * wsearch
 				swbreak
 			case "…ã”šŒ‚‹@"
-				all_search_power += 1.7787282 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.7787282 * wsearch
 				swbreak
 			case "¬Œ^“d’T"
-				all_search_power += 1.0045358 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 1.0045358 * wsearch
 				swbreak
 			case "‘åŒ^“d’T"
-				all_search_power += 0.9906638 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 0.9906638 * wsearch
 				swbreak
 			case "’TÆ“”"
-				all_search_power += 0.9067950 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 0.9067950 * wsearch
 				swbreak
 			case "‘åŒ^’TÆ“”"
-				all_search_power += 0.9067950 * weapon_search(target_weapon_id(n, w))
+				all_search_power += 0.9067950 * wsearch
 				swbreak
 			swend
 		next
 	next
+//	assert
 	;33®
 	if(4 * master_level \ 10 != 0){
 		;ceilŠÖ”‚ÌÀ‘•‚ª–Ê“|‚¾‚Á‚½‚Ì‚Åê‡•ª‚¯
@@ -381,8 +422,9 @@ return
 		all_search_power33 += sqrt(target_unit_search(n))
 		for w, 0, target_weapon_count(n)
 			if(target_weapon_id(n, w) == -1) :_continue
-			search_value = weapon_search(target_weapon_id(n, w))
-			switch(weapon_type(target_weapon_id(n, w)))
+			search_value = GetSearchValueFromWeaponCode(target_weapon_id(n, w))
+			wtype = GetTypeFromWeaponCode(target_weapon_id(n, w))
+			switch(wtype)
 			case "ŠÍãí“¬‹@"
 			case "ŠÍã”šŒ‚‹@"
 				all_search_power33 += 0.6 * search_value
@@ -418,7 +460,6 @@ return
 	next
 	all_search_power33 += 2.0 * (6 - target_unit_count)
 	// Œ‹‰Ê‘‚«o‚µ
-	fleetinfo_output = ""
 	fleetinfo_output += "i—ß•”ƒŒƒxƒ‹F" + master_level + "\n"
 	fleetinfo_output += "§‹ó’lF" + all_anti_air + "\n"
 	fleetinfo_output += "õ“G’l(2-5®H)F" + strf("%.1f", all_search_power) + "\n"
@@ -428,7 +469,7 @@ return
 		if(target_unit_id(n) == -1){
 			fleetinfo_output += "•s–¾"
 		}else{
-			fleetinfo_output += kammusu_name(target_unit_id(n)) + " Lv." + target_unit_level(n)
+			fleetinfo_output += GetNameFromKammusuCode(target_unit_id(n)) + " Lv." + target_unit_level(n)
 		}
 		fleetinfo_output += " [‘•”õ”F" + target_weapon_count(n) + "] [‘fõ“GF" + target_unit_search(n) + "]\n"
 		for w, 0, target_weapon_count(n)
@@ -436,7 +477,10 @@ return
 				fleetinfo_output += "@•s–¾\n"
 			}else{
 				wid = target_weapon_id(n, w)
-				switch(weapon_type(wid))
+				logmes GetNameFromWeaponCode(wid)
+				logmes GetTypeFromWeaponCode(wid)
+				wtype = GetTypeFromWeaponCode(wid)
+				switch(wtype)
 				case "ƒI[ƒgƒWƒƒƒCƒ"
 				case "ŠÍãUŒ‚‹@"
 				case "ŠÍãí“¬‹@"
@@ -447,10 +491,10 @@ return
 				case "‘½—p“r…ã‹@/…ãí“¬‹@"
 				case "‘Îö£‰ú‹@"
 				case "‘åŒ^”òs’ø"
-					fleetinfo_output += "@[" + target_weapon_airs(n, w) + "] " + weapon_name(wid)
+					fleetinfo_output += "@[" + target_weapon_airs(n, w) + "] " + GetNameFromWeaponCode(wid)
 					swbreak
 				default
-					fleetinfo_output += "@" + weapon_name(wid)
+					fleetinfo_output += "@" + GetNameFromWeaponCode(wid)
 					swbreak
 				swend
 				if(target_weapon_level_v(n, w) != 0) :fleetinfo_output += " ™" + target_weapon_level_v(n, w)
@@ -481,7 +525,7 @@ return
 		if(kid < 0){
 			deck_output += "\"id\":\"9\","
 		}else{
-			deck_output += "\"id\":\"" + kammusu_id(kid) + "\","
+			deck_output += "\"id\":\"" + kid + "\","
 		}
 		;‘¼‚Ì€–Ú
 		deck_output += "\"lv\":" + limit(target_unit_level(n), 1, kMaxKammusuLevel) + ","
@@ -495,7 +539,7 @@ return
 			if(wid < 0){
 				deck_output += "\"id\":2,"
 			}else{
-				deck_output += "\"id\":" + weapon_id(wid) + ","
+				deck_output += "\"id\":" + wid + ","
 			}
 			;‘•”õ‰üC“x
 			deck_output += "\"rf\":" + target_weapon_level_g(n, w) + ","
