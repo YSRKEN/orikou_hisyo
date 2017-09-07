@@ -176,6 +176,7 @@ return
 				case "水上偵察機"
 				case "水上爆撃機"
 				case "多用途水上機/水上戦闘機"
+				case "水上戦闘機"
 				case "対潜哨戒機"
 				case "大型飛行艇"
 				case "噴式戦闘爆撃機"
@@ -215,6 +216,7 @@ return
 			case "水上爆撃機"
 			case "水上偵察機"
 			case "多用途水上機/水上戦闘機"
+			case "水上戦闘機"
 			case "噴式戦闘爆撃機"
 				// Max(>>)
 				if(NearColor(508, 176 + 33 * w, 214, 159, 21)){
@@ -347,9 +349,10 @@ return
 			case "艦上爆撃機"
 			case "水上爆撃機"
 			case "多用途水上機/水上戦闘機"
+			case "水上戦闘機"
 			case "噴式戦闘爆撃機"
 				;対空と搭載数に基づいた制空値
-				if(wtype == "艦上戦闘機" || wtype == "多用途水上機/水上戦闘機"){
+				if(wtype == "艦上戦闘機" || wtype == "多用途水上機/水上戦闘機" || wtype == "水上戦闘機"){
 					coeff = 0.2
 				}else{
 					coeff = 0.25
@@ -358,7 +361,7 @@ return
 				;艦載機熟練度ボーナス
 				wlevel = target_weapon_level_v(n, w)
 				all_anti_air += all_bonus(wlevel)
-				if(wtype == "艦上戦闘機" | wtype == "多用途水上機/水上戦闘機"){
+				if(wtype == "艦上戦闘機" | wtype == "多用途水上機/水上戦闘機" || wtype == "水上戦闘機"){
 					all_anti_air += afwf_bonus(wlevel)
 				}
 				if(wtype == "水上爆撃機"){
@@ -455,6 +458,7 @@ return
 			case "大型飛行艇"
 			case "大型探照灯"
 			case "多用途水上機/水上戦闘機"
+			case "水上戦闘機"
 				all_search_power33 += 0.6 * search_value
 				swbreak
 			default
@@ -492,6 +496,7 @@ return
 				case "水上偵察機"
 				case "水上爆撃機"
 				case "多用途水上機/水上戦闘機"
+				case "水上戦闘機"
 				case "対潜哨戒機"
 				case "大型飛行艇"
 				case "噴式戦闘爆撃機"
