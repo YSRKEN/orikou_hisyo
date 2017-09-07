@@ -178,6 +178,7 @@ return
 				case "多用途水上機/水上戦闘機"
 				case "対潜哨戒機"
 				case "大型飛行艇"
+				case "噴式戦闘爆撃機"
 					dim airs_num, 2
 					ReadNumber airs_num, 2, airs_pos_x, 169 + w * 33, 8, 12, 170, FALSE
 					if(airs_num(1) != 10){
@@ -214,6 +215,7 @@ return
 			case "水上爆撃機"
 			case "水上偵察機"
 			case "多用途水上機/水上戦闘機"
+			case "噴式戦闘爆撃機"
 				// Max(>>)
 				if(NearColor(508, 176 + 33 * w, 214, 159, 21)){
 					if(NearColor(502, 176 + 33 * w, 214, 159, 20)){
@@ -345,6 +347,7 @@ return
 			case "艦上爆撃機"
 			case "水上爆撃機"
 			case "多用途水上機/水上戦闘機"
+			case "噴式戦闘爆撃機"
 				;対空と搭載数に基づいた制空値
 				if(wtype == "艦上戦闘機" || wtype == "多用途水上機/水上戦闘機"){
 					coeff = 0.2
@@ -491,6 +494,7 @@ return
 				case "多用途水上機/水上戦闘機"
 				case "対潜哨戒機"
 				case "大型飛行艇"
+				case "噴式戦闘爆撃機"
 					fleetinfo_output += "　[" + target_weapon_airs(n, w) + "] " + GetNameFromWeaponCode(wid)
 					swbreak
 				default
