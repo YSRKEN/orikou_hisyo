@@ -131,7 +131,7 @@ return
 			;装備名についての特殊補正
 			if(target_weapon_id(n, w) != -1){
 				;(381mm/50 三連装砲)
-				if(instr(target_weapon_name_temp,,"381mm") != -1){
+				if(instr(target_weapon_name_temp,,"381mm/50 三連装砲") != -1){
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(515, 171 + 33 * w, 189, 177, 163)){
 						;381mm/50 三連装砲改
@@ -163,6 +163,17 @@ return
 						target_weapon_id(n, w) = GetCodeFromWeaponName("12.7cm連装高角砲")
 					}
 				}
+				;(16inch三連装砲 Mk.7)
+				if(instr(target_weapon_name_temp,,"16inch三連装砲 Mk.7") != -1){
+					gsel GetUnitID(fleetinfo_number_index, n)
+					if(NearColor(516, 176 + 33 * w, 205, 192, 177)){
+						;16inch三連装砲 Mk.7+GFCS
+						target_weapon_id(n, w) = GetCodeFromWeaponName("16inch三連装砲 Mk.7+GFCS")
+					}else{
+						;16inch三連装砲 Mk.7
+						target_weapon_id(n, w) = GetCodeFromWeaponName("16inch三連装砲 Mk.7")
+					}
+				}
 			}
 			;搭載数を読み取る
 			if(target_weapon_id(n, w) != -1){
@@ -176,6 +187,7 @@ return
 				case "水上偵察機"
 				case "水上爆撃機"
 				case "多用途水上機/水上戦闘機"
+				case "水上戦闘機"
 				case "対潜哨戒機"
 				case "大型飛行艇"
 				case "噴式戦闘爆撃機"
@@ -215,6 +227,7 @@ return
 			case "水上爆撃機"
 			case "水上偵察機"
 			case "多用途水上機/水上戦闘機"
+			case "水上戦闘機"
 			case "噴式戦闘爆撃機"
 				// Max(>>)
 				if(NearColor(508, 176 + 33 * w, 214, 159, 21)){
@@ -347,9 +360,10 @@ return
 			case "艦上爆撃機"
 			case "水上爆撃機"
 			case "多用途水上機/水上戦闘機"
+			case "水上戦闘機"
 			case "噴式戦闘爆撃機"
 				;対空と搭載数に基づいた制空値
-				if(wtype == "艦上戦闘機" || wtype == "多用途水上機/水上戦闘機"){
+				if(wtype == "艦上戦闘機" || wtype == "多用途水上機/水上戦闘機" || wtype == "水上戦闘機"){
 					coeff = 0.2
 				}else{
 					coeff = 0.25
@@ -358,7 +372,7 @@ return
 				;艦載機熟練度ボーナス
 				wlevel = target_weapon_level_v(n, w)
 				all_anti_air += all_bonus(wlevel)
-				if(wtype == "艦上戦闘機" | wtype == "多用途水上機/水上戦闘機"){
+				if(wtype == "艦上戦闘機" | wtype == "多用途水上機/水上戦闘機" || wtype == "水上戦闘機"){
 					all_anti_air += afwf_bonus(wlevel)
 				}
 				if(wtype == "水上爆撃機"){
@@ -455,6 +469,7 @@ return
 			case "大型飛行艇"
 			case "大型探照灯"
 			case "多用途水上機/水上戦闘機"
+			case "水上戦闘機"
 				all_search_power33 += 0.6 * search_value
 				swbreak
 			default
@@ -492,6 +507,7 @@ return
 				case "水上偵察機"
 				case "水上爆撃機"
 				case "多用途水上機/水上戦闘機"
+				case "水上戦闘機"
 				case "対潜哨戒機"
 				case "大型飛行艇"
 				case "噴式戦闘爆撃機"

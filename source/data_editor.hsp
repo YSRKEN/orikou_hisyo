@@ -362,6 +362,17 @@
 					raw_wpn_index = get_wpn_index_from_name("12.7cm連装高角砲")
 				}
 			}
+			;(16inch三連装砲 Mk.7)
+			if(instr(raw_wpn_name,,"16inch三連装砲 Mk.7") != -1){
+				gsel buffer_id
+				if(is_near_color(516, 176 + 33 * weapon_index, 205, 192, 177)){
+					;16inch三連装砲 Mk.7+GFCS
+					raw_wpn_index = get_wpn_index_from_name("16inch三連装砲 Mk.7+GFCS")
+				}else{
+					;16inch三連装砲 Mk.7
+					raw_wpn_index = get_wpn_index_from_name("16inch三連装砲 Mk.7")
+				}
+			}
 		return raw_wpn_index
 		// 改装画面かを判定する
 		#defcfunc is_refit_scene int buffer_id
