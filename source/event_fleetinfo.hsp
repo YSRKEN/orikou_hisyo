@@ -131,7 +131,7 @@ return
 			;装備名についての特殊補正
 			if(target_weapon_id(n, w) != -1){
 				;(381mm/50 三連装砲)
-				if(instr(target_weapon_name_temp,,"381mm") != -1){
+				if(instr(target_weapon_name_temp,,"381mm/50 三連装砲") != -1){
 					gsel GetUnitID(fleetinfo_number_index, n)
 					if(NearColor(515, 171 + 33 * w, 189, 177, 163)){
 						;381mm/50 三連装砲改
@@ -161,6 +161,17 @@ return
 					}else{
 						;12.7cm連装高角砲
 						target_weapon_id(n, w) = GetCodeFromWeaponName("12.7cm連装高角砲")
+					}
+				}
+				;(16inch三連装砲 Mk.7)
+				if(instr(target_weapon_name_temp,,"16inch三連装砲 Mk.7") != -1){
+					gsel GetUnitID(fleetinfo_number_index, n)
+					if(NearColor(516, 176 + 33 * w, 205, 192, 177)){
+						;16inch三連装砲 Mk.7+GFCS
+						target_weapon_id(n, w) = GetCodeFromWeaponName("16inch三連装砲 Mk.7+GFCS")
+					}else{
+						;16inch三連装砲 Mk.7
+						target_weapon_id(n, w) = GetCodeFromWeaponName("16inch三連装砲 Mk.7")
 					}
 				}
 			}
