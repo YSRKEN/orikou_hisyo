@@ -317,6 +317,15 @@
 					raw_kmms_index = get_kmms_index_from_name("Commandant Teste")
 				}
 			}
+			if(instr(raw_kmms_name,,"Saratoga Mk.II") != -1){
+				// ŠÍ–¼•â³4
+				gsel buffer_id
+				if(is_near_color(586,130,244,244,244)){
+					raw_kmms_index = get_kmms_index_from_name("Saratoga Mk.II")
+				}else{
+					raw_kmms_index = get_kmms_index_from_name("Saratoga Mk.II Mod.2")
+				}
+			}
 		return raw_kmms_index
 		// ŠÍ‚Ì‘•”õ”‚ğæ“¾‚·‚é
 		#defcfunc get_wpn_count_from_buffer int buffer_id

@@ -73,6 +73,17 @@ return
 					target_unit_id(n) = GetCodeFromKammusuName("Commandant Teste")
 				}
 			}
+			// (Saratoga Mk.II)
+			if(instr(kammusu_name_temp,,"Saratoga Mk.II") != -1){
+				gsel GetUnitID(fleetinfo_number_index, n)
+				if(NearColor(586,130,244,244,244)){
+					;Saratoga Mk.II Mod.2
+					target_unit_id(n) = GetCodeFromKammusuName("Saratoga Mk.II")
+				}else{
+					;Saratoga Mk.II
+					target_unit_id(n) = GetCodeFromKammusuName("Saratoga Mk.II Mod.2")
+				}
+			}
 		}
 		;ŠÍ–º‚Ì—û“x‚ðŽæ“¾‚·‚é
 		gsel GetUnitID(fleetinfo_number_index, n)
