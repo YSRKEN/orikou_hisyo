@@ -1,18 +1,24 @@
 /*
 * SoftWareName(Jp) : おりこうさんな秘書
 * SoftWareName(En) : orikou_hisyo
-* Version          : 3.4.2
+* Version          : 3.4.3
 * Author           : YSR
 * License          : MIT
 * Copyright(C) 2015 YSR
 */
 
+/* TODO:
+ * ・イベント期間中に、札チェック機能(札なし艦がイベント海域に
+     出撃しようとしたら警告を出す機能)を実装する。とりあえず、
+     「大淀の説明が強制的に表示される」クソ仕様を逆に利用する予定
+ */
+
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.4.2"
-	#define kVerString  "342"
-	#define kLastUpdate "2017/09/08"
+	#define kVersion    "Ver.3.4.3"
+	#define kVerString  "343"
+	#define kLastUpdate "2017/09/19"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "expedition.csv"
@@ -38,6 +44,7 @@
 	#include "module_ocr.hsp"
 	#include "module_pic.hsp"
 	#include "module_time.hsp"
+	#include "module_fileinfo.hsp"
 	LoadSystemData
 	#include "interface.hsp"
 	LoadSoftData

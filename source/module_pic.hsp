@@ -257,18 +257,18 @@
 						}
 					}
 					;ò”æ˜J+‘å”j
-					if(NearColor(480, 133 + 50 * k, 250, 98, 90)){
-						//if(NearColor(489, 146 + 50 * k, 180, 73, 20)){
+					if(NearColor(480, 133 + 50 * k, 251, 99, 54)){
+						if(NearColor(501, 167 + 50 * k, 252, 99, 28)){
 							flg = kStopperDeadZone
 							_break
-						//}
+						}
 					}
 					;Ô”æ˜J+‘å”j
-					if(NearColor(480, 133 + 50 * k, 250, 98, 90)){
-						//if(NearColor(489, 146 + 50 * k, 180, 22, 20)){
+					if(NearColor(480, 133 + 50 * k, 251, 58, 54)){
+						if(NearColor(501, 167 + 50 * k, 252, 30, 28)){
 							flg = kStopperDeadZone
 							_break
-						//}
+						}
 					}
 				next
 				if(flg != 0) :return flg

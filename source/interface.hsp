@@ -97,11 +97,15 @@
 			chkbox "消耗チェック", check_exhausted_flg
 				check_exhausted_id = stat
 		POS_XY 1, 7
+			chkbox "札チェック", check_fuda_flg
+				check_fuda_id = stat
+		objenable check_fuda_id, 0	//とりあえず設定
+		POS_XY 2, 7
 			chkbox "特殊チェック", check_special_flg
 				check_special_id = stat
 
-	objsize SIZE_X(2), SIZE_Y(1)
-		POS_XY 2, 7
+	objsize SIZE_X(1), SIZE_Y(1)
+		POS_XY 3, 7
 			combox check_special_index,,"A：明石が旗艦\nB：6隻で1-1\nC:A or B"
 				check_special_index_id = stat
 
@@ -419,9 +423,9 @@
 			chkbox "自動更新", auto_fleetinfo_flg
 		pos POS_X(1), kFleetInfoWY - kSpace * 2 - kObjY * 2
 			button gosub "手動更新", *get_fleetinfo
-	objsize kObjSmaillX, SIZE_Y(1)
-		pos POS_X(2), kFleetInfoWY - kSpace * 2 - kObjY * 2
-			combox fleetinfo_number_index, 0, "第1\n第2\n第3\n第4"
+	objsize kObjX, SIZE_Y(1)
+		pos kFleetInfoWX - kObjX - kSpace, kFleetInfoWY - kSpace * 2 - kObjY * 2
+			combox fleetinfo_number_index, 0, "第1艦隊\n第2艦隊\n第3艦隊\n第4艦隊"
 	objsize kFleetInfoWX - kSpace * 2, SIZE_Y(1)
 		pos POS_X(0), kFleetInfoWY - kSpace - kObjY
 			button gosub "デッキビルダー形式でコピー", *copy_deck_format

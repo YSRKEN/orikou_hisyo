@@ -70,7 +70,7 @@
 	;各種画面のサイズ
 	#const kTimerWX 200
 	#const kTimerWY 300
-	#const kFleetInfoWX 250
+	#const kFleetInfoWX 300
 	#const kFleetInfoWY 500
 	;艦これの画面のサイズ
 	#const global kFlashWX 800
@@ -497,13 +497,15 @@
 	kammusu_data_size = notemax - 1
 	dim kammusu_id, kammusu_data_size
 	sdim kammusu_name, 64, kammusu_data_size
+	sdim kammusu_type, 64, kammusu_data_size
 	sdim kammusu_mark, kKammusuMarkLen, kammusu_data_size
 	for k, 0, kammusu_data_size
 		noteget get, k + 1
 		split get, ",", temp
 		kammusu_id(k) = int(temp(0))
 		kammusu_name(k) = temp(1)
-		kammusu_mark(k) = temp(2)
+		kammusu_type(k) = temp(2)
+		kammusu_mark(k) = temp(3)
 	next
 	;
 	notesel text_buffer

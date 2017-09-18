@@ -73,6 +73,17 @@ return
 					target_unit_id(n) = GetCodeFromKammusuName("Commandant Teste")
 				}
 			}
+			// (Saratoga Mk.II)
+			if(instr(kammusu_name_temp,,"Saratoga Mk.II") != -1){
+				gsel GetUnitID(fleetinfo_number_index, n)
+				if(NearColor(586,130,244,244,244)){
+					;Saratoga Mk.II Mod.2
+					target_unit_id(n) = GetCodeFromKammusuName("Saratoga Mk.II")
+				}else{
+					;Saratoga Mk.II
+					target_unit_id(n) = GetCodeFromKammusuName("Saratoga Mk.II Mod.2")
+				}
+			}
 		}
 		;ŠÍ–º‚Ì—û“x‚ðŽæ“¾‚·‚é
 		gsel GetUnitID(fleetinfo_number_index, n)
@@ -477,11 +488,91 @@ return
 		next
 	next
 	all_search_power33 += 2.0 * (6 - target_unit_count)
+	// TP(—A‘—•¨Ž‘—Ê)‚ðŒvŽZ‚·‚é
+	tp_value_s = 0.0 :tp_value_a = 0.0
+	for n, 0, target_unit_count
+		kid = target_unit_id(n)
+		if(kid < 0) :_continue
+		ktype = GetTypeFromKammusuCode(kid)
+		switch(ktype)
+		case "‹ì’€ŠÍ"
+			tp_value_s += 5.0
+			tp_value_a += 3.5
+			swbreak
+		case "Œy„—mŠÍ"
+			tp_value_s += 2.0
+			tp_value_a += 1.4
+			// ‹S“{‰ü“ñ‚Ì‚Ý‚Ì“ÁŽê•â³
+			// (‘å”­‚ð“à‘ ‚µ‚Ä‚¢‚é‚±‚Æ‚É‚æ‚é)
+			kname = GetNameFromKammusuCode(kid)
+			if(kname == "‹S“{‰ü“ñ"){
+				tp_value_s += 8.0
+				tp_value_a += 5.6
+			}
+			swbreak
+		case "q‹ó„—mŠÍ"
+			tp_value_s += 4.0
+			tp_value_a += 2.8
+			swbreak
+		case "q‹óíŠÍ"
+			tp_value_s += 7.0
+			tp_value_a += 4.9
+			swbreak
+		case "…ã‹@•êŠÍ"
+			tp_value_s += 9.0
+			tp_value_a += 6.3
+			swbreak
+		case "—g—¤ŠÍ"
+			tp_value_s += 12.0
+			tp_value_a += 8.4
+			swbreak
+		case "ö…•êŠÍ"
+			tp_value_s += 7.0
+			tp_value_a += 4.9
+			swbreak
+		case "—ûK„—mŠÍ"
+			tp_value_s += 6.0
+			tp_value_a += 4.2
+			swbreak
+		case "•â‹‹ŠÍ"
+			tp_value_s += 15.0
+			tp_value_a += 10.5
+			swbreak
+		swend
+		for w, 0, target_weapon_count(n)
+			wid = target_weapon_id(n, w)
+			if(wid == -1) :_continue
+			wname = GetNameFromWeaponCode(wid)
+			switch(wname)
+			case "ƒhƒ‰ƒ€ŠÊ(—A‘——p)"
+				tp_value_s += 5.0
+				tp_value_a += 3.5
+				swbreak
+			case "‘å”­“®’ø"
+			case "“Á‘å”­“®’ø"
+			case "‘å”­“®’ø(”ª‹ãŽ®’†íŽÔ•—¤í‘à)"
+				tp_value_s += 8.0
+				tp_value_a += 5.6
+				swbreak
+			case "“Á“ñŽ®“à‰Î’ø"
+				tp_value_s += 2.0
+				tp_value_a += 1.4
+				swbreak
+			case "í“¬—ÆH"
+			case "H“‹›‚ÌŠÊ‹l"
+				tp_value_s += 1.0
+				tp_value_a += 0.7
+				swbreak
+			swend
+			_continue
+		next
+	next
 	// Œ‹‰Ê‘‚«o‚µ
 	fleetinfo_output += "Ži—ß•”ƒŒƒxƒ‹F" + master_level + "\n"
 	fleetinfo_output += "§‹ó’lF" + all_anti_air + "\n"
 	fleetinfo_output += "õ“G’l(2-5Ž®H)F" + strf("%.1f", all_search_power) + "\n"
 	fleetinfo_output += "õ“G’l(33Ž®)F" + strf("%.1f", all_search_power33) + "\n"
+	fleetinfo_output += "—A‘—•¨Ž‘—Ê(TP)F" + strf("%.1f(S),%.1f(A)", tp_value_s, tp_value_a) + "\n"
 	fleetinfo_output += "ŠÍ–ºE‘•”õF\n"
 	for n, 0, target_unit_count
 		if(target_unit_id(n) == -1){
@@ -552,15 +643,14 @@ return
 		deck_output += "\"luck\":-1,"
 		deck_output += "\"items\":{"
 		for w, 0, target_weapon_count(n)
-			if(w != 0) :deck_output += ","
-			deck_output += "\"i" + (w + 1) + "\":{"
-			;‘•”õID‚ª-1‚È‚çA‚Æ‚è‚ ‚¦‚¸ID=2(‚µ‚Î‚Ó–C)‚É‚µ‚Ä‚¨‚­
+			;‘•”õID‚ª-1‚È‚ç‚Æ‚è‚ ‚¦‚¸”ò‚Î‚·
 			wid = target_weapon_id(n, w)
-			if(wid < 0){
-				deck_output += "\"id\":2,"
-			}else{
-				deck_output += "\"id\":" + wid + ","
-			}
+			if(wid < 0) :_continue
+			;––”ö‚Å‚È‚¢‚È‚çƒJƒ“ƒ}•t—^
+			if(w != 0) :deck_output += ","
+			;‘•”õID
+			deck_output += "\"i" + (w + 1) + "\":{"
+			deck_output += "\"id\":" + wid + ","
 			;‘•”õ‰üC“x
 			deck_output += "\"rf\":" + target_weapon_level_g(n, w) + ","
 			;ŠÍÚ‹@n—û“x

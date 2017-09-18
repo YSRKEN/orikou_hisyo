@@ -14,7 +14,7 @@
 	</head>
 	<body>
 <!-- タイトル -->
-		<h1>おりこうさんな秘書 Ver.3.4.2</h1>
+		<h1>おりこうさんな秘書 Ver.3.4.3</h1>
 		Twitterアカウント：<a href="https://twitter.com/orikou_hisyo/">@orikou_hisyo</a>(報告用), <a href="https://twitter.com/YSRKEN/">@YSRKEN</a>(作者)<br>
 		公開ページ：<br>
 		　<a href="https://github.com/YSRKEN/orikou_hisyo/releases">GitHub</a><br>
@@ -547,9 +547,9 @@
 			　読み取る艦隊番号は右下のコンボボックスで指定できます。<br>
 			　手動更新ボタンを押しても更新できますが、自動更新にチェックを入れるとシーン切替時に自動で再計算します。<br>
 			(ただし、装備を外した際は自動更新されないので、違う艦を選択するなどする必要がある)<br>
-			　制空値および索敵値を計算できますし、<strong><a href="http://kancolle-calc.net/deckbuilder.html">デッキビルダー形式</a>でクリップボードにコピーできます！</strong><br>
+			　制空値・索敵値・輸送物資量(TP)を計算できますし、<strong><a href="http://kancolle-calc.net/deckbuilder.html">デッキビルダー形式</a>でクリップボードにコピーできます！</strong><br>
 			　なお、<a href="#faq">FAQ</a>も参照してください。</p>
-			<img src="./images/fleet_info.png" alt="艦隊情報" width="252" height="527">
+			<img src="./images/fleet_info.png" alt="艦隊情報" width="302" height="527">
 
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="save_data">セーブについて</a></h2>
@@ -838,7 +838,7 @@
 				<td>艦隊情報画面で読み取りミスが有るのですが？</td>
 				<td>Ver.3.3.2からは、艦載機熟練度だけでなく装備改修度にも対応しています。<br>
 				艦娘・装備の判定ミスも全部潰したはずですが、もしありましたらスレかTwitterまで連絡ください。<br>
-				<strong>なお、Ver.3.4.2時点では、『38.1cm Mk.I/N連装砲改』を含めた複数の装備に対応していません。<br>
+				<strong>なお、Ver.3.4.3時点では、『38.1cm Mk.I/N連装砲改』を含めた複数の装備に対応していません。<br>
 				登録が必要な方は<a href="extra2.html">登録ツールの使い方</a>を読んでください。</strong></td>
 			</tr>
 			<tr>
@@ -1011,6 +1011,15 @@
 				<th abbr="バージョン">バージョン</th>
 				<th abbr="公開日">公開日</th>
 				<th abbr="変更箇所">変更箇所</th>
+			</tr>
+			<tr>
+				<td>Ver.3.4.3</td>
+				<td>2017/09/19</td>
+				<td>・艦隊情報機能にて、輸送物資量(TP)計算も行えるようにした<br>
+				・↑に合わせてデータエディタも更新した<br>
+				・Saratoga Mk.II 2種の判別が可能になった<br>
+				・赤疲労・橙疲労時も大破出撃ブロックが働くようにした<br>
+				・その他軽微なバグを修正した</td>
 			</tr>
 			<tr>
 				<td>Ver.3.4.2</td>
@@ -1466,7 +1475,7 @@
 <!-- 著作権について -->
 		<h1><a name="copyright">著作権について</a></h1>
 		<div><dl>
-			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.4.2</dd>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.4.3</dd>
 			<dt>種別</dt><dd>フリーウェア</dd>
 			<dt>種類</dt><dd>攻略・プレイ支援</dd>
 			<dt>開発者</dt><dd>YSR</dd>
@@ -1483,7 +1492,7 @@
 
 <!-- コメント -->
 		<h1><a name="comment">コメント</a></h1>
-		<p>Ver.3.4.0で更新を辞めるつもりでしたが、重大なバグを見つけてしまい本当に申し訳ない……。</p>
+		<p>HTML5化に伴いこのツールも使えなくなるかもしれませんが、その時までよろしくお願いします。</p>
 		<p><a href="#index">↑目次へ戻る</a></p>
 		<hr>
 

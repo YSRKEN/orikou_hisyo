@@ -1,0 +1,51 @@
+/* その他色々 */
+#module fileinfo
+	// 艦娘名→コード変換
+	#defcfunc GetCodeFromKammusuName str name_
+		for k, 0, kammusu_data_size@
+			if(kammusu_name@(k) == name_) :return kammusu_id@(k)
+		next
+	return -1
+	// コード→艦娘名変換
+	#defcfunc GetNameFromKammusuCode int code_
+		for k, 0, kammusu_data_size@
+			if(kammusu_id@(k) == code_) :return kammusu_name@(k)
+		next
+	return ""
+	// コード→艦種変換
+	#defcfunc GetTypeFromKammusuCode int code_
+		for k, 0, kammusu_data_size@
+			if(kammusu_id@(k) == code_) :return kammusu_type@(k)
+		next
+	return ""
+	// 装備名→コード変換
+	#defcfunc GetCodeFromWeaponName str name_
+		for k, 0, weapon_data_size@
+			if(weapon_name@(k) == name_) :return weapon_id@(k)
+		next
+	return -1
+	// コード→装備名変換
+	#defcfunc GetNameFromWeaponCode int code_
+		for k, 0, weapon_data_size@
+			if(weapon_id@(k) == code_) :return weapon_name@(k)
+		next
+	return ""
+	// コード→装備種変換
+	#defcfunc GetTypeFromWeaponCode int code_
+		for k, 0, weapon_data_size@
+			if(weapon_id@(k) == code_) :return weapon_type@(k)
+		next
+	return ""
+	// コード→索敵値変換
+	#defcfunc GetSearchValueFromWeaponCode int code_
+		for k, 0, weapon_data_size@
+			if(weapon_id@(k) == code_) :return weapon_search@(k)
+		next
+	return 0
+	// コード→対空値変換
+	#defcfunc GetAntiAirFromWeaponCode int code_
+		for k, 0, weapon_data_size@
+			if(weapon_id@(k) == code_) :return weapon_antiair@(k)
+		next
+	return ""
+#global
