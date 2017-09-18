@@ -488,11 +488,36 @@ return
 		next
 	next
 	all_search_power33 += 2.0 * (6 - target_unit_count)
+	// TP(輸送物資量)を計算する
+	tp_value_s = 0.0 :tp_value_a = 0.0
+	for n, 0, target_unit_count
+		for w, 0, target_weapon_count(n)
+			wid = target_weapon_id(n, w)
+			if(wid == -1) :_continue
+			wname = GetNameFromWeaponCode(wid)
+			switch(wname)
+			case "ドラム缶(輸送用)"
+				tp_value_s += 5.0
+				tp_value_a += 3.5
+				swbreak
+			case "大発動艇"
+				tp_value_s += 8.0
+				tp_value_a += 5.6
+				swbreak
+			case "戦闘糧食"
+				tp_value_s += 1.0
+				tp_value_a += 0.7
+				swbreak
+			swend
+			_continue
+		next
+	next
 	// 結果書き出し
 	fleetinfo_output += "司令部レベル：" + master_level + "\n"
 	fleetinfo_output += "制空値：" + all_anti_air + "\n"
 	fleetinfo_output += "索敵値(2-5式秋)：" + strf("%.1f", all_search_power) + "\n"
 	fleetinfo_output += "索敵値(33式)：" + strf("%.1f", all_search_power33) + "\n"
+	fleetinfo_output += "輸送物資量(TP)：" + strf("%.1f(S),%.1f(A)", tp_value_s, tp_value_a) + "\n"
 	fleetinfo_output += "艦娘・装備：\n"
 	for n, 0, target_unit_count
 		if(target_unit_id(n) == -1){
