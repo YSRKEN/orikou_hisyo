@@ -70,7 +70,7 @@
 	;各種画面のサイズ
 	#const kTimerWX 200
 	#const kTimerWY 300
-	#const kFleetInfoWX 250
+	#const kFleetInfoWX 300
 	#const kFleetInfoWY 500
 	;艦これの画面のサイズ
 	#const global kFlashWX 800

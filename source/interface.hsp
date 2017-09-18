@@ -419,9 +419,9 @@
 			chkbox "自動更新", auto_fleetinfo_flg
 		pos POS_X(1), kFleetInfoWY - kSpace * 2 - kObjY * 2
 			button gosub "手動更新", *get_fleetinfo
-	objsize kObjSmaillX, SIZE_Y(1)
-		pos POS_X(2), kFleetInfoWY - kSpace * 2 - kObjY * 2
-			combox fleetinfo_number_index, 0, "第1\n第2\n第3\n第4"
+	objsize kObjX, SIZE_Y(1)
+		pos kFleetInfoWX - kObjX - kSpace, kFleetInfoWY - kSpace * 2 - kObjY * 2
+			combox fleetinfo_number_index, 0, "第1艦隊\n第2艦隊\n第3艦隊\n第4艦隊"
 	objsize kFleetInfoWX - kSpace * 2, SIZE_Y(1)
 		pos POS_X(0), kFleetInfoWY - kSpace - kObjY
 			button gosub "デッキビルダー形式でコピー", *copy_deck_format
