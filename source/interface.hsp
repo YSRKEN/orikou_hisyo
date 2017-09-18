@@ -99,6 +99,7 @@
 		POS_XY 1, 7
 			chkbox "札チェック", check_fuda_flg
 				check_fuda_id = stat
+		objenable check_fuda_id, 0	//とりあえず設定
 		POS_XY 2, 7
 			chkbox "特殊チェック", check_special_flg
 				check_special_id = stat
