@@ -643,15 +643,14 @@ return
 		deck_output += "\"luck\":-1,"
 		deck_output += "\"items\":{"
 		for w, 0, target_weapon_count(n)
-			if(w != 0) :deck_output += ","
-			deck_output += "\"i" + (w + 1) + "\":{"
-			;装備IDが-1なら、とりあえずID=2(しばふ砲)にしておく
+			;装備IDが-1ならとりあえず飛ばす
 			wid = target_weapon_id(n, w)
-			if(wid < 0){
-				deck_output += "\"id\":2,"
-			}else{
-				deck_output += "\"id\":" + wid + ","
-			}
+			if(wid < 0) :_continue
+			;末尾でないならカンマ付与
+			if(w != 0) :deck_output += ","
+			;装備ID
+			deck_output += "\"i" + (w + 1) + "\":{"
+			deck_output += "\"id\":" + wid + ","
 			;装備改修度
 			deck_output += "\"rf\":" + target_weapon_level_g(n, w) + ","
 			;艦載機熟練度
