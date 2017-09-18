@@ -491,6 +491,54 @@ return
 	// TP(—A‘—•¨‘—Ê)‚ğŒvZ‚·‚é
 	tp_value_s = 0.0 :tp_value_a = 0.0
 	for n, 0, target_unit_count
+		kid = target_unit_id(n)
+		if(kid < 0) :_continue
+		ktype = GetTypeFromKammusuCode(kid)
+		switch(ktype)
+		case "‹ì’€ŠÍ"
+			tp_value_s += 5.0
+			tp_value_a += 3.5
+			swbreak
+		case "Œy„—mŠÍ"
+			tp_value_s += 2.0
+			tp_value_a += 1.4
+			// ‹S“{‰ü“ñ‚Ì‚İ‚Ì“Áê•â³
+			// (‘å”­‚ğ“à‘ ‚µ‚Ä‚¢‚é‚±‚Æ‚É‚æ‚é)
+			kname = GetNameFromKammusuCode(kid)
+			if(kname == "‹S“{‰ü“ñ"){
+				tp_value_s += 8.0
+				tp_value_a += 5.6
+			}
+			swbreak
+		case "q‹ó„—mŠÍ"
+			tp_value_s += 4.0
+			tp_value_a += 2.8
+			swbreak
+		case "q‹óíŠÍ"
+			tp_value_s += 7.0
+			tp_value_a += 4.9
+			swbreak
+		case "…ã‹@•êŠÍ"
+			tp_value_s += 9.0
+			tp_value_a += 6.3
+			swbreak
+		case "—g—¤ŠÍ"
+			tp_value_s += 12.0
+			tp_value_a += 8.4
+			swbreak
+		case "ö…•êŠÍ"
+			tp_value_s += 7.0
+			tp_value_a += 4.9
+			swbreak
+		case "—ûK„—mŠÍ"
+			tp_value_s += 6.0
+			tp_value_a += 4.2
+			swbreak
+		case "•â‹‹ŠÍ"
+			tp_value_s += 15.0
+			tp_value_a += 10.5
+			swbreak
+		swend
 		for w, 0, target_weapon_count(n)
 			wid = target_weapon_id(n, w)
 			if(wid == -1) :_continue
@@ -501,10 +549,17 @@ return
 				tp_value_a += 3.5
 				swbreak
 			case "‘å”­“®’ø"
+			case "“Á‘å”­“®’ø"
+			case "‘å”­“®’ø(”ª‹ã®’†íÔ•—¤í‘à)"
 				tp_value_s += 8.0
 				tp_value_a += 5.6
 				swbreak
+			case "“Á“ñ®“à‰Î’ø"
+				tp_value_s += 2.0
+				tp_value_a += 1.4
+				swbreak
 			case "í“¬—ÆH"
+			case "H“‹›‚ÌŠÊ‹l"
 				tp_value_s += 1.0
 				tp_value_a += 0.7
 				swbreak

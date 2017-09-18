@@ -12,6 +12,12 @@
 			if(kammusu_id@(k) == code_) :return kammusu_name@(k)
 		next
 	return ""
+	// コード→艦種変換
+	#defcfunc GetTypeFromKammusuCode int code_
+		for k, 0, kammusu_data_size@
+			if(kammusu_id@(k) == code_) :return kammusu_type@(k)
+		next
+	return ""
 	// 装備名→コード変換
 	#defcfunc GetCodeFromWeaponName str name_
 		for k, 0, weapon_data_size@
