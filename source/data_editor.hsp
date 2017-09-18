@@ -23,6 +23,7 @@
 			kmms_data_size = 0
 			dim kmms_id, 5
 			sdim kmms_name, 64, 5
+			sdim kmms_type, 64, 5
 			sdim kmms_hash, KMMS_HASH_SIZE, 5
 			// 読み込み開始
 			repeat notemax
@@ -33,20 +34,20 @@
 				if(stat < 3) :continue
 				if(int(temp(0)) <= 0) :continue
 				if(strlen(temp(1)) == 0) :continue
-				//if(strlen(temp(2)) != KMMS_HASH_SIZE) :continue
 				// 入力
 				kmms_id(kmms_data_size) = int(temp(0))
 				kmms_name(kmms_data_size) = temp(1)
-				kmms_hash(kmms_data_size) = temp(2)
+				kmms_type(kmms_data_size) = temp(2)
+				kmms_hash(kmms_data_size) = temp(3)
 				kmms_data_size++
 			loop
 		return
 		// 艦娘データを書き込む
 		#deffunc save_kmms_data
 			sdim text_buffer, 32000
-			text_buffer = "艦船ID,名称,マーク\n"
+			text_buffer = "艦船ID,名称,艦種,マーク\n"
 			repeat kmms_data_size
-				text_buffer += "" + kmms_id(cnt) + "," + kmms_name(cnt) + "," + kmms_hash(cnt) + "\n"
+				text_buffer += "" + kmms_id(cnt) + "," + kmms_name(cnt) + "," + kmms_type(cnt) + "," + kmms_hash(cnt) + "\n"
 			loop
 			notesave "kmms_data.csv"
 		return
@@ -76,7 +77,6 @@
 				if(int(temp(0)) <= 0) :continue
 				if(strlen(temp(1)) == 0) :continue
 				if(strlen(temp(2)) == 0) :continue
-				//if(strlen(temp(5)) != WPN_HASH_SIZE) :continue
 				// 入力
 				wpn_id(wpn_data_size) = int(temp(0))
 				wpn_name(wpn_data_size) = temp(1)
@@ -128,6 +128,10 @@
 		#defcfunc get_kmms_name_from_index int raw_kmms_index
 			if(raw_kmms_index < 0) :return ""
 		return kmms_name(raw_kmms_index)
+		// 艦種を艦インデックスから取得する
+		#defcfunc get_kmms_type_from_index int raw_kmms_index
+			if(raw_kmms_index < 0) :return ""
+		return kmms_type(raw_kmms_index)
 		// 装備インデックスをハッシュ値から検索する
 		#defcfunc get_wpn_index_from_hash str raw_wpn_hash
 			wpn_index = -1
@@ -194,19 +198,21 @@
 				}
 			loop
 		return kmms_flg
-		#deffunc replace_kmms_data int raw_kmms_id, str raw_kmms_name, str raw_kmms_hash
+		#deffunc replace_kmms_data int raw_kmms_id, str raw_kmms_name, str raw_kmms_type, str raw_kmms_hash
 			repeat kmms_data_size
 				if(kmms_id(cnt) == raw_kmms_id){
 					kmms_name(cnt) = raw_kmms_name
+					kmms_type(cnt) = raw_kmms_type
 					kmms_hash(cnt) = raw_kmms_hash
 					break
 				}
 			loop
 			save_kmms_data
 		return
-		#deffunc add_kmms_data int raw_kmms_id, str raw_kmms_name, str raw_kmms_hash
+		#deffunc add_kmms_data int raw_kmms_id, str raw_kmms_name, str raw_kmms_type, str raw_kmms_hash
 			kmms_id(kmms_data_size) = raw_kmms_id
 			kmms_name(kmms_data_size) = raw_kmms_name
+			kmms_type(kmms_data_size) = raw_kmms_type
 			kmms_hash(kmms_data_size) = raw_kmms_hash
 			kmms_data_size++
 			save_kmms_data
@@ -443,11 +449,14 @@
 			// 艦娘欄
 			sdim input_kmms_hash, KMMS_HASH_SIZE
 			sdim input_kmms_name, 64
+			sdim input_kmms_type, 64
 			sdim input_kmms_id, 64
 			pos 10, 12 :mes "艦ハッシュ："
 			pos 110, 10 :input input_kmms_hash,380,24,KMMS_HASH_SIZE :input_kmms_hash_id = stat
 			pos 10, 47 :mes "艦名："
-			pos 60, 45 :input input_kmms_name,220,24,64 :input_kmms_name_id = stat
+			pos 60, 45 :input input_kmms_name,100,24,64 :input_kmms_name_id = stat
+			pos 170, 47 :mes "艦種："
+			pos 220, 45 :input input_kmms_type,60,24,64 :input_kmms_type_id = stat
 			pos 290, 47 :mes "艦船ID："
 			pos 355, 45 :input input_kmms_id,60,24,64 :input_kmms_id_id = stat
 			// 装備欄
@@ -513,6 +522,7 @@
 	gsel MAIN_WINDOW_ID
 	objprm input_kmms_hash_id, kmms_info(1)
 	objprm input_kmms_name_id, get_kmms_name_from_index(get_kmms_index_from_id(int(kmms_info(0))))
+	objprm input_kmms_type_id, get_kmms_type_from_index(get_kmms_index_from_id(int(kmms_info(0))))
 	objprm input_kmms_id_id, kmms_info(0)
 	for wi, 0, MAX_WPN_COUNT
 		objprm input_wpn_hash_id(wi), kmms_info(4 + wi * 2)
@@ -553,13 +563,13 @@ return
 		// 修正
 		dialog "艦船ID" + input_kmms_id + "に対し、次の内容で修正を行います。\nよろしいですか？\n艦名：" + input_kmms_name + "\n艦ハッシュ：" + input_kmms_hash, 2, SOFT_NAME
 		if(stat == 6){
-			replace_kmms_data int(input_kmms_id), input_kmms_name, input_kmms_hash
+			replace_kmms_data int(input_kmms_id), input_kmms_name, input_kmms_type, input_kmms_hash
 		}
 	}else{
 		// 追加
 		dialog "次の艦娘を追加します。よろしいですか？\n艦船ID：" + input_kmms_id + "\n艦名：" + input_kmms_name + "\n艦ハッシュ：" + input_kmms_hash, 2, SOFT_NAME
 		if(stat == 6){
-			add_kmms_data int(input_kmms_id), input_kmms_name, input_kmms_hash
+			add_kmms_data int(input_kmms_id), input_kmms_name, input_kmms_type, input_kmms_hash
 		}
 	}
 return
