@@ -622,12 +622,12 @@ return
 
 //*艦隊情報からデッキビルダー用の形式に変換する
 //*2016/7/2にデータ構造に変更があった
-//*(ダミーデータ：吹雪、しばふ砲)
+//*(ダミーデータ：吹雪)
 *copy_deck_format
 	if(fleetinfo_flg != TRUE) :return
 	if(target_unit_count <= 0) :return
 	sdim deck_output, 32000
-	deck_output += "{\"version\":3,\"f1\":{"
+	deck_output += "{\"version\":4,\"f1\":{"
 	for n, 0, target_unit_count
 		if(n != 0) :deck_output += ","
 		deck_output += "\"s" + (n + 1) + "\":{"
