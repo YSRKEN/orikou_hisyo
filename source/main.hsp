@@ -385,13 +385,18 @@
 /* 終了ボタンが押された際の判定 */
 *exit
 	if((wparam == kMainWindowID) || (wparam == kSubWindowID)){
-		dialog "終了しますか？", 2, kSoftName
-		if(stat == 6){
-			exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
-			SaveSoftData TRUE
-			GselMain
-			TasktrayDel
-			exit_flg = TRUE
+		if(exit_flg2 == FALSE){
+			exit_flg2 = TRUE
+			dialog "終了しますか？", 2, kSoftName
+			if(stat == 6){
+				exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
+				SaveSoftData TRUE
+				GselMain
+				TasktrayDel
+				exit_flg = TRUE
+			}else{
+				exit_flg2 = FALSE
+			}
 		}
 	}else{
 		gsel wparam, -1
