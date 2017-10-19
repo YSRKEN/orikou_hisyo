@@ -1,24 +1,27 @@
 /*
 * SoftWareName(Jp) : おりこうさんな秘書
 * SoftWareName(En) : orikou_hisyo
-* Version          : 3.4.3
+* Version          : 3.4.4
 * Author           : YSR
 * License          : MIT
 * Copyright(C) 2015 YSR
 */
 
 /* TODO:
+ * ・HSPのCOMオブジェクトに("Silent") = TRUEすることで、
+ *   外蔵ブラウザのスクリプトエラー表示を止める
+ * ・遠征出撃前に艦隊をチェックし、成功しない場合は警告する機能を追加
  * ・イベント期間中に、札チェック機能(札なし艦がイベント海域に
-     出撃しようとしたら警告を出す機能)を実装する。とりあえず、
-     「大淀の説明が強制的に表示される」クソ仕様を逆に利用する予定
+ *   出撃しようとしたら警告を出す機能)を実装する。とりあえず、
+ *   「大淀の説明が強制的に表示される」クソ仕様を逆に利用する予定
  */
 
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.4.3"
-	#define kVerString  "343"
-	#define kLastUpdate "2017/09/19"
+	#define kVersion    "Ver.3.4.4"
+	#define kVerString  "344"
+	#define kLastUpdate "2017/10/19"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "expedition.csv"
@@ -385,13 +388,18 @@
 /* 終了ボタンが押された際の判定 */
 *exit
 	if((wparam == kMainWindowID) || (wparam == kSubWindowID)){
-		dialog "終了しますか？", 2, kSoftName
-		if(stat == 6){
-			exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
-			SaveSoftData TRUE
-			GselMain
-			TasktrayDel
-			exit_flg = TRUE
+		if(exit_flg2 == FALSE){
+			exit_flg2 = TRUE
+			dialog "終了しますか？", 2, kSoftName
+			if(stat == 6){
+				exit_save_flg = TRUE :gosub *put_supply_log	//強制的にログを保存する
+				SaveSoftData TRUE
+				GselMain
+				TasktrayDel
+				exit_flg = TRUE
+			}else{
+				exit_flg2 = FALSE
+			}
 		}
 	}else{
 		gsel wparam, -1
