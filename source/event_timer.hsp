@@ -66,17 +66,13 @@
 	if(scene_result(1) == "遠征詳細"){
 		for k, 0, kExpPagePer
 			gsel kMainBufferID
-			if(NearColor(131, 172 + k * 30, 119, 190, 181)){
+			if(NearColor(126, 176 + k * 30, 119, 190, 181)){
 				exp_select_flg = TRUE
 			}else{
 				exp_select_flg = FALSE
 			}
 			// まず旗が立っているかを判別する
-			if(exp_select_flg){
-				if(NearColor(517,180 + k * 30,47,158,157) == FALSE) :_continue
-			}else{
-				if(NearColor(517,180 + k * 30,76,168,168) == FALSE) :_continue
-			}
+			if(NearColor(514,182 + k * 30,33,150,151) == FALSE) :_continue
 			// 次に、右上の遠征名とリストの遠征名が一致しているかを調べる
 			// 「名前が一致している」か「全くリスト外の新遠征である」場合のみ認識対象とする
 			exp_small_name = GetExpSmallName(k, exp_select_flg)
@@ -85,29 +81,31 @@
 			// そして、旗の番号を判別する
 			// 遠征対象が第(unit_number + 1)艦隊となることに注意
 			unit_number = 0
-			if(exp_select_flg){
-				if(NearColor(525,180 + k * 30,224,230,227) && NearColor(523,180 + k * 30, 49,164,163)) :unit_number = 1
-				if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,234,226,213)) :unit_number = 2
-				if(NearColor(525,180 + k * 30,117,188,179) && NearColor(523,180 + k * 30,117,188,178)) :unit_number = 3
-			}else{
-				if(NearColor(525,180 + k * 30,224,230,227) && NearColor(523,180 + k * 30, 84,176,174)) :unit_number = 1
-				if(NearColor(525,180 + k * 30, 47,164,165) && NearColor(523,180 + k * 30,236,228,215)) :unit_number = 2
-				if(NearColor(525,180 + k * 30,237,229,217) && NearColor(523,180 + k * 30,239,231,219)) :unit_number = 3
-			}
+			if(NearColor(521,182 + k * 30,223,230,227) && NearColor(519,182 + k * 30, 74,172,171)) :unit_number = 1
+			if(NearColor(521,182 + k * 30, 35,160,161) && NearColor(519,182 + k * 30,237,229,217)) :unit_number = 2
+			if(NearColor(521,182 + k * 30,236,228,215) && NearColor(519,182 + k * 30,237,229,217)) :unit_number = 3
 			if(unit_number == 0) :_continue
 			// 各桁の数字を読み取って、配列に代入する
 			dock_finish_time(unit_number - 1 + kDocks * 2) = 0.0
 			expedition_kind(unit_number - 1) = -1
 			dim number, 6
 			ReadNumber number, 6, exp_pos_x, exp_pos_y, 9, 13, 190, FALSE
-			// 正規化して、終了時刻を代入する
+			// 正規化して、終了時刻を算出する
 			NormalizeTime number
 			d_time = CnvFloatSec(number(0) * 10 + number(1), number(2) * 10 + number(3), number(4) * 10 + number(5), 0)
-			dock_finish_time(unit_number - 1 + kDocks * 2) = GetFloatTime() + d_time
-			time_diff = dock_finish_time(unit_number - 1 + kDocks * 2) - now_time
-			if((dock_finish_time(unit_number - 1 + kDocks * 2) != 0.0) && (time_diff > 1.0 / 24 / 60)) :dock_finish_flg(unit_number - 1 + kDocks * 2) = FALSE
+			// 遠征の種類を書き込んでおく
 			if(exp_small_name == exp_large_name){
 				expedition_kind(unit_number - 1) = exp_small_name
+			}
+			// 遠征が終了していないかを判定しておく
+			if(NearColor(643,429 + k * 30,89,89,89)){
+				// 遠征終了時はdock_finish_timeを0.0にしておく
+				dock_finish_time(unit_number - 1 + kDocks * 2) = 0.0
+			}else{
+				// そうでない場合はdock_finish_timeに終了予定時刻を書いておく
+				dock_finish_time(unit_number - 1 + kDocks * 2) = GetFloatTime() + d_time
+				time_diff = dock_finish_time(unit_number - 1 + kDocks * 2) - now_time
+				if((dock_finish_time(unit_number - 1 + kDocks * 2) != 0.0) && (time_diff > 1.0 / 24 / 60)) :dock_finish_flg(unit_number - 1 + kDocks * 2) = FALSE
 			}
 		next
 	}

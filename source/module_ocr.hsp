@@ -102,7 +102,7 @@
 			exp_small_name = -1
 			sdim temp_small_str, kExpStrLength
 			for k, 0, kExpStrLength
-				pget 151 + k, 172 + exped_index * 30
+				pget 146 + k, 176 + exped_index * 30
 				if(exp_select_flg){
 					if(ginfo_r < 210){
 						temp_small_str += "0"
