@@ -176,7 +176,7 @@
 			gosub *check_pos
 			// 記録された画像から艦隊数を取得する
 			GetUnits unit_count
-			// 大破・消耗・特殊チェック
+			// 大破・消耗・特殊・遠征チェック
 			gosub *check_stopper
 			// ロックチェック
 			gosub *check_locker

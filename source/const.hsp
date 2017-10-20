@@ -196,9 +196,10 @@
 	#const global kUnitNum  6	;艦隊毎の艦娘数
 	#const global kDocks    4	;ドック数
 	#const global kMaxYear 2099	;サポートする最大年
-	#const global kStopperDeadZone  1	;ストッパー機能
-	#const global kStopperExhausted 2
-	#const global kStopperSpecial   3
+	#const global kStopperDeadZone   1	;ストッパー機能
+	#const global kStopperExhausted  2
+	#const global kStopperSpecial    3
+	#const global kStopperExpedition 4
 	#const global kLockerKammusu 1	;ロック機能
 	#const global kLockerWeapon  2
 	#const kBattleType 2	;戦闘の種類(昼戦・夜戦)

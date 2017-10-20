@@ -247,6 +247,7 @@
 					}
 				next
 				if(flg != 0) :return flg
+
 				// 大破判定
 				for k, 0, kUnitNum
 					;大破
@@ -272,6 +273,7 @@
 					}
 				next
 				if(flg != 0) :return flg
+
 				// 特殊判定
 				//明石旗艦かを判定
 				stopper_akashi = FALSE
@@ -309,6 +311,9 @@
 					if(stopper_akashi || stopper_6units_11) :return kStopperSpecial
 					swbreak
 				swend
+
+				// 遠征判定
+				if(scene_result@(0) == "遠征出撃") :return kStopperExpedition	//スタブ
 			}
 		return 0
 		// ストッパー画面を表示する
@@ -325,7 +330,7 @@
 					show_stopper_flg2@ = TRUE
 				}
 				if((scene_result@(1) == "艦隊選択") && (scene_result@(0) != "演習出撃")){
-					bgscr kStopperWindowID, 180, 50, , window_param@(0) + flash_position@(0) + 540, window_param@(1) + flash_position@(1) + 420
+					bgscr kStopperWindowID, 200, 50, , window_param@(0) + flash_position@(0) + 520, window_param@(1) + flash_position@(1) + 420
 					gsel kStopperWindowID, 2
 					color 255, 0, 0
 					font msgothic, 32
@@ -341,6 +346,10 @@
 					swbreak
 					case kStopperSpecial
 						mes "進撃中止"
+						show_stopper_flg2@ = TRUE
+					swbreak
+					case kStopperExpedition
+						mes "遠征不可"
 						show_stopper_flg2@ = TRUE
 					swbreak
 					swend
