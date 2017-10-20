@@ -188,6 +188,8 @@
 	#const kKammusuMarkLen 128	;艦娘のマーク長
 	#const kWeapons 4			;最大装備可能数
 	#const kWeaponMarkLen 108	;装備のマーク長
+	// 遠征判定機能
+	#const global kKammusuTypeDestroyer 1
 	// その他
 	#const global kSavePositions kSupplyFileWindowID + 1
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値

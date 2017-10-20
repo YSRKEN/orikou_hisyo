@@ -313,7 +313,27 @@
 				swend
 
 				// 遠征判定
-				if(scene_result@(0) == "遠征出撃") :return kStopperExpedition	//スタブ
+				if(scene_result@(0) == "遠征出撃"){
+					// 各艦毎のドラム缶数・艦種を取得する
+					dim fleet_type, kUnitNum
+					dim drum_count, kUnitNum
+					exp_unit_count = 0
+					for ui, 0, kUnitNum
+						// ある位置に艦娘がいなければ、それ以降はセットされてないと言える
+						if(NearColor(494,139 + 50 * ui,238,238,238) == FALSE) :_break
+						if(NearColor(495,138 + 50 * ui,67,67,67) == FALSE) :_break
+						exp_unit_count++
+						// 艦種判定(仮置き)
+						fleet_type(ui) = kKammusuTypeDestroyer
+						// ドラム缶数判定
+						if(NearColor(359,145 + 50 * ui,252,43,43)) :drum_count(ui)++
+						if(NearColor(359,163 + 50 * ui,252,43,43)) :drum_count(ui)++
+						if(NearColor(346,145 + 50 * ui,252,43,43)) :drum_count(ui)++
+						if(NearColor(346,163 + 50 * ui,252,43,43)) :drum_count(ui)++
+					next
+					assert
+					return kStopperExpedition	//スタブ
+				}
 			}
 		return 0
 		// ストッパー画面を表示する
