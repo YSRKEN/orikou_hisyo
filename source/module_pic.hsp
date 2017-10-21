@@ -314,7 +314,7 @@
 
 				// 遠征判定
 				if(scene_result@(0) == "遠征出撃"){
-					// 各艦毎のドラム缶数・艦種を取得する
+					// 各艦毎のドラム缶数・艦種、全体の艦娘数を取得する
 					dim fleet_type, kUnitNum
 					dim drum_count, kUnitNum
 					exp_unit_count = 0
@@ -331,8 +331,32 @@
 						if(NearColor(346,145 + 50 * ui,252,43,43)) :drum_count(ui)++
 						if(NearColor(346,163 + 50 * ui,252,43,43)) :drum_count(ui)++
 					next
-					assert
-					return kStopperExpedition	//スタブ
+					// 選択した遠征の種類を検出する
+					exp_index = GetExpLarge2Name()
+					if(exp_index != -1){
+						// 全体の艦娘数に関するチェック
+						if(exp_unit_count < exped_min_count@(exp_index)) :return kStopperExpedition
+						// ドラム缶系遠征の場合、その配置・個数についてのチェック
+						fleet_with_drum_count = 0
+						all_drum_count = 0
+						for ui, 0, exp_unit_count
+							if(drum_count(ui) > 0){
+								fleet_with_drum_count++
+								all_drum_count += drum_count(ui)
+							}
+						next
+						switch(exped_name@(exp_index))
+						case "北方鼠輸送作戦"
+							if(fleet_with_drum_count < 3 || all_drum_count < 3) :return kStopperExpedition
+							swbreak
+						case "東京急行"
+							if(fleet_with_drum_count < 3 || all_drum_count < 4) :return kStopperExpedition
+							swbreak
+						case "東京急行（弐）"
+							if(fleet_with_drum_count < 4 || all_drum_count < 8) :return kStopperExpedition
+							swbreak
+						swend
+					}
 				}
 			}
 		return 0
