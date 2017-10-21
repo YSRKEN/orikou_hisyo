@@ -188,6 +188,8 @@
 	#const kKammusuMarkLen 128	;艦娘のマーク長
 	#const kWeapons 4			;最大装備可能数
 	#const kWeaponMarkLen 108	;装備のマーク長
+	// 遠征判定機能
+	#const global kKammusuTypeDestroyer 1
 	// その他
 	#const global kSavePositions kSupplyFileWindowID + 1
 	#const global kMaxScenePoints 6		;判定に必要な点数の最大値
@@ -196,9 +198,10 @@
 	#const global kUnitNum  6	;艦隊毎の艦娘数
 	#const global kDocks    4	;ドック数
 	#const global kMaxYear 2099	;サポートする最大年
-	#const global kStopperDeadZone  1	;ストッパー機能
-	#const global kStopperExhausted 2
-	#const global kStopperSpecial   3
+	#const global kStopperDeadZone   1	;ストッパー機能
+	#const global kStopperExhausted  2
+	#const global kStopperSpecial    3
+	#const global kStopperExpedition 4
 	#const global kLockerKammusu 1	;ロック機能
 	#const global kLockerWeapon  2
 	#const kBattleType 2	;戦闘の種類(昼戦・夜戦)
@@ -305,17 +308,21 @@
 	exp_pos_x.0 = 722, 731, 745, 754, 768, 777
 	exp_pos_y   = 387
 	//認識に使用する遠征データ
+	sdim exped_name, 64, kExpAllPage					;遠征名
 	sdim exped_small_str, kExpStrLength, kExpAllPage	;リスト内の表示
 	sdim exped_large_str, kExpStrLength, kExpAllPage	;右上の表示
-	sdim exped_name, 64, kExpAllPage					;遠征名
+	sdim exped_large2_str, kExpStrLength, kExpAllPage	;右上の表示2
+	dim exped_min_count, kExpAllPage	;最少人数
 	notesel text_buffer
 	noteload "expedition.csv"
 	for k, 0, kExpAllPage
 		noteget get, k + 1
 		split get, ",", temp
-		exped_small_str(k) = temp(0)
-		exped_large_str(k) = temp(1)
-		exped_name(k) = temp(2)
+		exped_name(k) = temp(0)
+		exped_small_str(k) = temp(1)
+		exped_large_str(k) = temp(2)
+		exped_large2_str(k) = temp(3)
+		exped_min_count(k) = int(temp(6))
 	next
 	//認識に使用するテンプレート
 	buffer kTempBufferID, kMatchSize * 23, kMatchSize	//テンプレート

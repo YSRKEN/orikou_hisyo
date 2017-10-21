@@ -25,6 +25,7 @@
 			objprm show_status_id@, show_status_flg@
 			objprm check_deadzone_id@, check_deadzone_flg@
 			objprm check_exhausted_id@, check_exhausted_flg@
+			objprm check_expedition_id@, check_expedition_flg@
 			objprm check_fuda_id@, check_fuda_flg@
 			objprm kammusu_lock_id@, kammusu_lock_flg@
 			objprm weapon_lock_id@, weapon_lock_flg@

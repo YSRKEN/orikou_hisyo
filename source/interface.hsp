@@ -20,7 +20,7 @@
 	screen kLockerWindowID, 10, 10 :gsel kLockerWindowID, -1
 
 /* オプション画面 */
-	screen kOptionWindowID, POS_X(4), POS_Y(8), 4 :title "オプション画面"
+	screen kOptionWindowID, POS_X(4), POS_Y(9), 4 :title "オプション画面"
 	gsel kOptionWindowID, -1
 	font msgothic, kSmallFontSize
 		pos POS_X(0), POS_Y(0) + kObjOffset
@@ -100,12 +100,15 @@
 			chkbox "札チェック", check_fuda_flg
 				check_fuda_id = stat
 		objenable check_fuda_id, 0	//とりあえず設定
-		POS_XY 2, 7
+		POS_XY 1, 8
 			chkbox "特殊チェック", check_special_flg
 				check_special_id = stat
+		POS_XY 0, 8
+			chkbox "遠征チェック", check_expedition_flg
+				check_expedition_id = stat
 
-	objsize SIZE_X(1), SIZE_Y(1)
-		POS_XY 3, 7
+	objsize SIZE_X(2), SIZE_Y(1)
+		POS_XY 2, 8
 			combox check_special_index,,"A：明石が旗艦\nB：6隻で1-1\nC:A or B"
 				check_special_index_id = stat
 

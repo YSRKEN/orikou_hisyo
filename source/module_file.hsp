@@ -20,6 +20,7 @@
 			check_exhausted_flg@   = TRUE
 			check_fuda_flg@        = TRUE
 			check_special_flg@     = TRUE
+			check_expedition_flg@  = FALSE
 			kammusu_lock_flg@      = TRUE
 			weapon_lock_flg@       = TRUE
 			sound_alert_flg@       = FALSE
@@ -180,6 +181,7 @@
 					if(param_name == "show_status") :show_status_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_deadzone") :check_deadzone_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_exhausted") :check_exhausted_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
+					if(param_name == "check_expedition") :check_expedition_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "check_fuda") :check_fuda_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
 					if(param_name == "sub_window_size_index") :sub_window_size_index@ = limit(int(param_value), 0, length(sub_window_size_x@) - 1) :_continue
 					if(param_name == "kammusu_lock") :kammusu_lock_flg@ = limit(int(param_value), FALSE, TRUE) :_continue
@@ -348,6 +350,7 @@
 			text_buffer += "show_status=" + show_status_flg@ + "\n"
 			text_buffer += "check_deadzone=" + check_deadzone_flg@ + "\n"
 			text_buffer += "check_exhausted=" + check_exhausted_flg@ + "\n"
+			text_buffer += "check_expedition=" + check_expedition_flg@ + "\n"
 			text_buffer += "check_fuda=" + check_fuda_flg@ + "\n"
 			text_buffer += "sub_window_size_index=" + sub_window_size_index@ + "\n"
 			text_buffer += "kammusu_lock=" + kammusu_lock_flg@ + "\n"

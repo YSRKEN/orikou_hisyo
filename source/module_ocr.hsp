@@ -143,6 +143,25 @@
 				}
 			next
 		return exp_large_name
+		// ‰“ª–¼‚ğæ“¾‚·‚é(‘å2)
+		#defcfunc GetExpLarge2Name
+			exp_large2_name = -1
+			sdim temp_large2_str, kExpStrLength
+			for k, 0, kExpStrLength
+				pget 232 + k, 115
+				if(ginfo_r < 180){
+					temp_large2_str += "1"
+				}else{
+					temp_large2_str += "0"
+				}
+			next
+			for k, 0, kExpAllPage
+				if(temp_large2_str == exped_large2_str@(k)){
+					exp_large2_name = k
+					_break
+				}
+			next
+		return exp_large2_name
 		// ‘Ş—Ê‚ğæ“¾‚·‚é
 		#deffunc GetSupply array supply_list
 			dim supnum, 6
