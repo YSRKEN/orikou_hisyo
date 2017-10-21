@@ -50,22 +50,24 @@
 			//
 			float_sec_ *= 24
 			hour_ = int(float_sec_)
-			output += strf("%02d:", hour_)
 			float_sec_ -= double(hour_)
 			//•ª
 			float_sec_ *= 60
 			minute_ = int(float_sec_)
-			output += strf("%02d:", minute_)
 			float_sec_ -= double(minute_)
 			//•b
 			float_sec_ *= 60
 			second_ = int(float_sec_)
-			output += strf("%02d.", second_)
 			float_sec_ -= double(second_)
 			//ƒ~ƒŠ•b
 			float_sec_ *= 1000
 			milli_ = int(float_sec_ + 0.5)
-			output += strf("%03d", milli_)
+			//”÷’²®
+			if(milli_ >= 1000) :second_ += milli_ / 1000 :milli_ = milli_ \ 1000
+			if(second_ >= 60) :minute_ += second_ / 60 :second_ = second_ \ 60
+			if(minute_ >= 60) :hour_ += minute_ / 60 :minute_ = minute_ \ 60
+			//
+			output += strf("%02d:%02d:%02d.%03d", hour_, minute_, second_, milli_)
 		return output
 		//u“úv‚ğ•ª•b‚É•ÏŠ·
 		#defcfunc CnvStrSec2 double float_sec
@@ -75,18 +77,20 @@
 			//
 			float_sec_ *= 24
 			hour_ = int(float_sec_)
-			output += strf("%02d:", hour_)
 			float_sec_ -= double(hour_)
 			//•ª
 			float_sec_ *= 60
 			minute_ = int(float_sec_)
-			output += strf("%02d:", minute_)
 			float_sec_ -= double(minute_)
 			//•b
 			float_sec_ *= 60
 			second_ = int(float_sec_ + 0.5)
-			output += strf("%02d", second_)
 			float_sec_ -= double(second_)
+			//”÷’²®
+			if(second_ >= 60) :minute_ += second_ / 60 :second_ = second_ \ 60
+			if(minute_ >= 60) :hour_ += minute_ / 60 :minute_ = minute_ \ 60
+			//
+			output += strf("%02d:%02d:%02d", hour_, minute_, second_)
 		return output
 		//u“úv‚ğŒ»İ‚É•ÏŠ·
 		#defcfunc CnvStrTime double float_time
@@ -134,5 +138,8 @@
 			second_ = int(float_sec_ + 0.5)
 			time_value(5) = second_
 			float_sec_ -= double(second_)
+			//”÷’²®
+			if(second_ >= 60) :minute_ += second_ / 60 :second_ = second_ \ 60
+			if(minute_ >= 60) :hour_ += minute_ / 60 :minute_ = minute_ \ 60
 		return
 	#global

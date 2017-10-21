@@ -14,7 +14,7 @@
 	</head>
 	<body>
 <!-- タイトル -->
-		<h1>おりこうさんな秘書 Ver.3.4.4</h1>
+		<h1>おりこうさんな秘書 Ver.3.4.5</h1>
 		Twitterアカウント：<a href="https://twitter.com/orikou_hisyo/">@orikou_hisyo</a>(報告用), <a href="https://twitter.com/YSRKEN/">@YSRKEN</a>(作者)<br>
 		公開ページ：<br>
 		　<a href="https://github.com/YSRKEN/orikou_hisyo/releases">GitHub</a><br>
@@ -559,7 +559,7 @@
 			　(なるべく上位互換……つまり<strong>Verの新しいものに移した際は安全</strong>なようにしています)
 			<p><a href="#howto">↑操作方法へ戻る</a></p>
 		<h2><a name="option">オプション</a></h2>
-			<img src="./images/option.png" alt="オプション画面" width="362" height="259">
+			<img src="./images/option.png" alt="オプション画面" width="362" height="287">
 			<p>　各項目について解説します。</p>
 			<table border="1" summary="オプションの各項目についての説明">
 				<tr>
@@ -648,6 +648,11 @@
 				<tr>
 					<td>消耗チェック</td>
 					<td>出撃画面(演習含む)or遠征画面の際に<strong>未補給艦が存在していた場合、出撃ボタンを白い枠で押せなくします</strong>。<br>
+					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
+				</tr>
+				<tr>
+					<td>遠征チェック</td>
+					<td>遠征画面の際に艦娘数やドラム缶数をチェックし、<strong>遠征が成功しない場合、出撃ボタンを白い枠で押せなくします</strong>。<br>
 					この枠は他のシーンに移ると消えます。また、枠をクリックすると無理やり解除も可能です。<strong>チェック推奨</strong>。</td>
 				</tr>
 				<tr>
@@ -1011,6 +1016,13 @@
 				<th abbr="バージョン">バージョン</th>
 				<th abbr="公開日">公開日</th>
 				<th abbr="変更箇所">変更箇所</th>
+			</tr>
+			<tr>
+				<td>Ver.3.4.5</td>
+				<td>2017/10/21</td>
+				<td>・遠征艦隊の艦数・ドラム缶数を取得し、遠征が成功しない際は出撃をブロックする機能を追加<br>
+				・外蔵ブラウザにて、スクリプトエラーを表示しないようにした<br>
+				・艦隊情報機能にて、索敵値の読み取りミスがあったので修正</td>
 			</tr>
 			<tr>
 				<td>Ver.3.4.4</td>
@@ -1482,7 +1494,7 @@
 <!-- 著作権について -->
 		<h1><a name="copyright">著作権について</a></h1>
 		<div><dl>
-			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.4.4</dd>
+			<dt>ソフト名</dt><dd>おりこうさんな秘書 Ver.3.4.5</dd>
 			<dt>種別</dt><dd>フリーウェア</dd>
 			<dt>種類</dt><dd>攻略・プレイ支援</dd>
 			<dt>開発者</dt><dd>YSR</dd>

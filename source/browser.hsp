@@ -122,6 +122,7 @@
 			button gosub "ˆÚ“®", *move_browser
 	pos 0, kObjY
 	axobj ie, "Shell.Explorer.2", kBrowserX, kBrowserY - kObjY
+	ie("Silent")=1
 	ie->"Navigate" browser_url
 
 	onexit gosub *exit

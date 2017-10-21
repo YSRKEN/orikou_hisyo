@@ -247,6 +247,7 @@
 					}
 				next
 				if(flg != 0) :return flg
+
 				// 大破判定
 				for k, 0, kUnitNum
 					;大破
@@ -272,6 +273,7 @@
 					}
 				next
 				if(flg != 0) :return flg
+
 				// 特殊判定
 				//明石旗艦かを判定
 				stopper_akashi = FALSE
@@ -309,6 +311,53 @@
 					if(stopper_akashi || stopper_6units_11) :return kStopperSpecial
 					swbreak
 				swend
+
+				// 遠征判定
+				if(scene_result@(0) == "遠征出撃"){
+					// 各艦毎のドラム缶数・艦種、全体の艦娘数を取得する
+					dim fleet_type, kUnitNum
+					dim drum_count, kUnitNum
+					exp_unit_count = 0
+					for ui, 0, kUnitNum
+						// ある位置に艦娘がいなければ、それ以降はセットされてないと言える
+						if(NearColor(494,139 + 50 * ui,238,238,238) == FALSE) :_break
+						if(NearColor(495,138 + 50 * ui,67,67,67) == FALSE) :_break
+						exp_unit_count++
+						// 艦種判定(仮置き)
+						fleet_type(ui) = kKammusuTypeDestroyer
+						// ドラム缶数判定
+						if(NearColor(359,145 + 50 * ui,252,43,43)) :drum_count(ui)++
+						if(NearColor(359,163 + 50 * ui,252,43,43)) :drum_count(ui)++
+						if(NearColor(346,145 + 50 * ui,252,43,43)) :drum_count(ui)++
+						if(NearColor(346,163 + 50 * ui,252,43,43)) :drum_count(ui)++
+					next
+					// 選択した遠征の種類を検出する
+					exp_index = GetExpLarge2Name()
+					if(exp_index != -1){
+						// 全体の艦娘数に関するチェック
+						if(exp_unit_count < exped_min_count@(exp_index)) :return kStopperExpedition
+						// ドラム缶系遠征の場合、その配置・個数についてのチェック
+						fleet_with_drum_count = 0
+						all_drum_count = 0
+						for ui, 0, exp_unit_count
+							if(drum_count(ui) > 0){
+								fleet_with_drum_count++
+								all_drum_count += drum_count(ui)
+							}
+						next
+						switch(exped_name@(exp_index))
+						case "北方鼠輸送作戦"
+							if(fleet_with_drum_count < 3 || all_drum_count < 3) :return kStopperExpedition
+							swbreak
+						case "東京急行"
+							if(fleet_with_drum_count < 3 || all_drum_count < 4) :return kStopperExpedition
+							swbreak
+						case "東京急行（弐）"
+							if(fleet_with_drum_count < 4 || all_drum_count < 8) :return kStopperExpedition
+							swbreak
+						swend
+					}
+				}
 			}
 		return 0
 		// ストッパー画面を表示する
@@ -325,7 +374,7 @@
 					show_stopper_flg2@ = TRUE
 				}
 				if((scene_result@(1) == "艦隊選択") && (scene_result@(0) != "演習出撃")){
-					bgscr kStopperWindowID, 180, 50, , window_param@(0) + flash_position@(0) + 540, window_param@(1) + flash_position@(1) + 420
+					bgscr kStopperWindowID, 200, 50, , window_param@(0) + flash_position@(0) + 520, window_param@(1) + flash_position@(1) + 420
 					gsel kStopperWindowID, 2
 					color 255, 0, 0
 					font msgothic, 32
@@ -341,6 +390,10 @@
 					swbreak
 					case kStopperSpecial
 						mes "進撃中止"
+						show_stopper_flg2@ = TRUE
+					swbreak
+					case kStopperExpedition
+						mes "遠征不可"
 						show_stopper_flg2@ = TRUE
 					swbreak
 					swend

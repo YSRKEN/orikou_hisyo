@@ -114,8 +114,8 @@ return
 		dim search_num, 3
 		ReadNumber search_num, 3, search_pos_x, 423, 7, 12, 170, FALSE
 		target_unit_search(n) = limit(search_num(2), 0, 9)
-		if(search_num(1) != 10) :target_unit_search(n) += limit(search_num(1), 1, 9) * 10
-		if(search_num(0) != 10) :target_unit_search(n) += limit(search_num(0), 1, 9) * 100
+		if(search_num(1) != 10) :target_unit_search(n) += limit(search_num(1), 0, 9) * 10
+		if(search_num(0) != 10) :target_unit_search(n) += limit(search_num(0), 0, 9) * 100
 		// ‘•”õî•ñ
 		for w, 0, kWeapons
 			target_weapon_id(n, w) = -1
