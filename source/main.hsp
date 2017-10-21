@@ -1,14 +1,13 @@
 /*
 * SoftWareName(Jp) : おりこうさんな秘書
 * SoftWareName(En) : orikou_hisyo
-* Version          : 3.4.4
+* Version          : 3.4.5
 * Author           : YSR
 * License          : MIT
 * Copyright(C) 2015 YSR
 */
 
 /* TODO:
- * ・遠征出撃前に艦隊をチェックし、成功しない場合は警告する機能を追加
  * ・イベント期間中に、札チェック機能(札なし艦がイベント海域に
  *   出撃しようとしたら警告を出す機能)を実装する。とりあえず、
  *   「大淀の説明が強制的に表示される」クソ仕様を逆に利用する予定
@@ -17,9 +16,9 @@
 /* ソフトウェア情報 */
 	#packopt name "orikou"
 	#define global kSoftName   "おりこうさんな秘書"
-	#define kVersion    "Ver.3.4.4"
-	#define kVerString  "344"
-	#define kLastUpdate "2017/10/19"
+	#define kVersion    "Ver.3.4.5"
+	#define kVerString  "345"
+	#define kLastUpdate "2017/10/21"
 	#pack "area_exp.csv"
 	#pack "scene_list.csv"
 	#pack "expedition.csv"
