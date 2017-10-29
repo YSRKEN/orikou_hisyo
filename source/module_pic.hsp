@@ -326,10 +326,23 @@
 						// 艦種判定(仮置き)
 						fleet_type(ui) = kKammusuTypeDestroyer
 						// ドラム缶数判定
-						if(NearColor(359,145 + 50 * ui,252,43,43)) :drum_count(ui)++
-						if(NearColor(359,163 + 50 * ui,252,43,43)) :drum_count(ui)++
-						if(NearColor(346,145 + 50 * ui,252,43,43)) :drum_count(ui)++
-						if(NearColor(346,163 + 50 * ui,252,43,43)) :drum_count(ui)++
+						d_xpos1.0 = 339, 352, 339, 352
+						d_xpos2.0 = 342, 355, 342, 355
+						d_xpos3.0 = 347, 360, 347, 360
+						d_ypos1.0 = 155, 155, 173, 173
+						d_ypos2.0 = 154, 154, 172, 172
+						d_ypos3.0 = 153, 153, 171, 171
+						for di, 0, 4
+							// 意味不明なことに、旗艦だけ左に1ピクセルズレていた
+							if(ui != 0) :d_offset = 1 : else :d_offset = 0
+							if(NearColor(d_xpos1(di) + d_offset, d_ypos1(di) + 50 * ui, 4,1,2)){
+								if(NearColor(d_xpos2(di) + d_offset, d_ypos2(di) + 50 * ui, 41,41,41)){
+									if(NearColor(d_xpos3(di) + d_offset, d_ypos3(di) + 50 * ui, 169,169,169)){
+										drum_count(ui)++
+									}
+								}
+							}
+						next
 					next
 					// 選択した遠征の種類を検出する
 					exp_index = GetExpLarge2Name()
