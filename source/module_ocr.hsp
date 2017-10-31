@@ -189,19 +189,19 @@
 			dim supnum, 4
 			// ‚‘¬C•œŞ
 			gsel kMainBufferID
-			ReadNumber supnum, 4, supply_pos_x3@, 13, 9, 12, 150, TRUE
+			ReadNumber supnum, 4, supply_pos_x3@, 12, 9, 12, 150, TRUE
 			NormalizeSupply supnum
 			supply_list(4) = CnvNumber(supnum)
 			// ŠJ”­‘Ş
 			gsel kMainBufferID
-			ReadNumber supnum, 4, supply_pos_x4@, 13, 9, 12, 150, TRUE
+			ReadNumber supnum, 4, supply_pos_x4@, 12, 9, 12, 150, TRUE
 			NormalizeSupply supnum
 			supply_list(5) = CnvNumber(supnum)
 
 			dim supnum, 3
 			// i—ß•”ƒŒƒxƒ‹
 			gsel kMainBufferID
-			ReadNumber supnum, 3, supply_pos_x5@, 14, 9, 12, 150, TRUE
+			ReadNumber supnum, 3, supply_pos_x5@, 12, 9, 12, 150, TRUE
 			if(supnum(1) == 10){
 				supply_list(6) = limit(supnum(0), 1, 9)
 			}else{
