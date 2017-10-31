@@ -196,6 +196,7 @@ return
 				case "艦上偵察機"
 				case "艦上爆撃機"
 				case "水上偵察機"
+				case "多用途水上機/水上爆撃機"
 				case "水上爆撃機"
 				case "多用途水上機/水上戦闘機"
 				case "水上戦闘機"
@@ -235,6 +236,7 @@ return
 			case "艦上戦闘機"
 			case "艦上爆撃機"
 			case "艦上偵察機"
+			case "多用途水上機/水上爆撃機"
 			case "水上爆撃機"
 			case "水上偵察機"
 			case "多用途水上機/水上戦闘機"
@@ -369,6 +371,7 @@ return
 			case "艦上攻撃機"
 			case "艦上戦闘機"
 			case "艦上爆撃機"
+			case "多用途水上機/水上爆撃機"
 			case "水上爆撃機"
 			case "多用途水上機/水上戦闘機"
 			case "水上戦闘機"
@@ -386,7 +389,7 @@ return
 				if(wtype == "艦上戦闘機" | wtype == "多用途水上機/水上戦闘機" || wtype == "水上戦闘機"){
 					all_anti_air += afwf_bonus(wlevel)
 				}
-				if(wtype == "水上爆撃機"){
+				if(wtype == "水上爆撃機" || wtype == "多用途水上機/水上爆撃機"){
 					all_anti_air+= wb_bonus(wlevel)
 				}
 				swbreak
@@ -420,6 +423,7 @@ return
 			case "水上偵察機"
 				all_search_power += 2.0000000 * wsearch
 				swbreak
+			case "多用途水上機/水上爆撃機"
 			case "水上爆撃機"
 				all_search_power += 1.7787282 * wsearch
 				swbreak
@@ -466,6 +470,7 @@ return
 			case "水上偵察機"
 				all_search_power33 += 1.2 * (1.0 * search_value + 1.2 * sqrt(target_weapon_level_g(n, w)))
 				swbreak
+			case "多用途水上機/水上爆撃機"
 			case "水上爆撃機"
 				all_search_power33 += 1.1 * search_value
 				swbreak
@@ -596,6 +601,7 @@ return
 				case "艦上偵察機"
 				case "艦上爆撃機"
 				case "水上偵察機"
+				case "多用途水上機/水上爆撃機"
 				case "水上爆撃機"
 				case "多用途水上機/水上戦闘機"
 				case "水上戦闘機"
