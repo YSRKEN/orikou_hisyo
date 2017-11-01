@@ -12,6 +12,10 @@
 			supply_last_time = flash_time
 			PutLog "【資材ログ】"
 			GetSupply supply_list
+			//assert
+			for i,0,length(supply_list)
+				logmes "" + supply_list(i)
+			next
 			// バッファを再作成してコピーする
 			sdim supply_log_, (supply_log_size + 1) * kSupplyLogBlockSize
 			memcpy supply_log_, supply_log, supply_log_size * kSupplyLogBlockSize

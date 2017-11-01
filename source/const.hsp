@@ -434,11 +434,11 @@
 	supply_log_size = 0
 	sdim supply_log, 64	;64は適当なサイズ
 	supply_last_time = 0.0
-	supply_pos_x1.0 = 680, 689, 697, 704, 712, 719	;燃料と弾薬
-	supply_pos_x2.0 = 749, 758, 766, 773, 781, 788	;鋼材とボーキ
-	supply_pos_x3.0 = 695, 704, 713, 722	;高速修復材
+	supply_pos_x1.0 = 681, 690, 698, 705, 713, 720	;燃料と弾薬
+	supply_pos_x2.0 = 750, 759, 767, 774, 782, 789	;鋼材とボーキ
+	supply_pos_x3.0 = 693, 702, 711, 720	;高速修復材
 	supply_pos_x4.0 = 760, 769, 778, 787	;開発資材
-	supply_pos_x5.0 = 395, 404, 413			;司令部レベル
+	supply_pos_x5.0 = 400, 409, 418			;司令部レベル
 	graph_scale_interval.0 = 1.0, 7.0, 14.0, 30.0, 60.0, 90.0, 180.0, 365.0
 	supply_kind_name.0 = "日付 日時 時刻 タイミング"           
 	supply_kind_name.1 = "燃料 重油 石炭"                      
