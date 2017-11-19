@@ -21,6 +21,7 @@
 			check_fuda_flg@        = TRUE
 			check_special_flg@     = TRUE
 			check_expedition_flg@  = TRUE
+			check_ofuda_flg@       = TRUE
 			kammusu_lock_flg@      = TRUE
 			weapon_lock_flg@       = TRUE
 			sound_alert_flg@       = FALSE

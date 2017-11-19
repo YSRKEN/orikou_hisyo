@@ -388,6 +388,9 @@
 						swend
 					}
 				}
+				// 札判定
+				gsel kMainBufferID
+				return kStopperOfuda
 			}
 		return 0
 		// ストッパー画面を表示する
@@ -424,6 +427,10 @@
 					swbreak
 					case kStopperExpedition
 						mes "遠征不可"
+						show_stopper_flg2@ = TRUE
+					swbreak
+					case kStopperOfuda
+						mes "札追加！？"
 						show_stopper_flg2@ = TRUE
 					swbreak
 					swend
@@ -534,4 +541,14 @@
 				}
 			next
 		return -1
+		// イベント海域における海域選択シーンかを判断する
+		#defcfunc IsSpecialAreaSelectScene int buffer_id
+			gsel buffer_id
+			if(NearColor(158,453,42,69,63) == FALSE) :return FALSE
+			if(NearColor(240,444,35,38,34) == FALSE) :return FALSE
+			if(NearColor(306,456,40,45,60) == FALSE) :return FALSE
+			if(NearColor(376,455,32,47,57) == FALSE) :return FALSE
+			if(NearColor(446,453,43,67,52) == FALSE) :return FALSE
+			if(NearColor(503,457,14,16,36) == FALSE) :return FALSE
+		return TRUE
 	#global

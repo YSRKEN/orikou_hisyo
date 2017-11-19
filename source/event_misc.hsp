@@ -203,6 +203,16 @@ return
 	if(scene_result(0) == "母港画面"){
 		exercises_flg = FALSE
 	}
+	//イベント海域の出撃用意であることを検出する
+	if(scene_result(1) == "大淀"){
+		if(scene_result(0) == "海域出撃"){
+			oyodo_flg = TRUE
+		}
+	}
+	if(scene_result(0) == "母港画面"){
+		oyodo_flg = FALSE
+		logmes "oyodo_flg=" + oyodo_flg
+	}
 	//自動カウント処理
 	gosub *counter_auto
 	// BGM機能(現在の状況を更新する)
@@ -419,6 +429,11 @@ return
 				show_stopper_flg2 = FALSE
 				gsel kStopperWindowID, -1
 			}
+			if((check_expedition_flg == FALSE) && (stopper_type == kStopperOfuda)){
+				show_stopper_flg1 = FALSE
+				show_stopper_flg2 = FALSE
+				gsel kStopperWindowID, -1
+			}
 			if((CheckStopperType() == 0) && (scene_result(1) != "進撃確認")){
 				show_stopper_flg1 = FALSE
 				show_stopper_flg2 = FALSE
@@ -437,6 +452,9 @@ return
 			if((check_expedition_flg) && (stopper_type == kStopperExpedition)){
 				ShowStopperWindow stopper_type
 			}
+			if((check_fuda_flg) && (stopper_type == kStopperOfuda)){
+				ShowStopperWindow stopper_type
+			}
 		}
 	}else{
 		// まだ表示していない場合の処理
@@ -444,7 +462,7 @@ return
 		switch stopper_type
 			case kStopperDeadZone
 				if(check_deadzone_flg){
-					PutLog "【大破・消耗・特殊・遠征チェック】"
+					PutLog "【大破・消耗・特殊・遠征・札チェック】"
 					PutLog "判定結果：大破状態"
 					TasktrayPopup2 "艦娘が大破しています", kSoftName, 2, 1000
 					show_stopper_flg1 = TRUE
@@ -452,7 +470,7 @@ return
 			swbreak
 			case kStopperExhausted
 				if(check_exhausted_flg){
-					PutLog "【大破・消耗・特殊・遠征チェック】"
+					PutLog "【大破・消耗・特殊・遠征・札チェック】"
 					PutLog "判定結果：消耗状態"
 					TasktrayPopup2 "艦娘が消耗しています", kSoftName, 2, 1000
 					show_stopper_flg1 = TRUE
@@ -460,7 +478,7 @@ return
 			swbreak
 			case kStopperSpecial
 				if(check_special_flg){
-					PutLog "【大破・消耗・特殊・遠征チェック】"
+					PutLog "【大破・消耗・特殊・遠征・札チェック】"
 					PutLog "判定結果：特殊状態"
 					TasktrayPopup2 "設定により、進撃が中止されました", kSoftName, 2, 1000
 					show_stopper_flg1 = TRUE
@@ -468,9 +486,18 @@ return
 			swbreak
 			case kStopperExpedition
 				if(check_expedition_flg){
-					PutLog "【大破・消耗・特殊・遠征チェック】"
+					PutLog "【大破・消耗・特殊・遠征・札チェック】"
 					PutLog "判定結果：遠征不可"
 					TasktrayPopup2 "この艦隊は遠征条件を満たしていません", kSoftName, 2, 1000
+					show_stopper_flg1 = TRUE
+				}
+			swbreak
+			case kStopperOfuda
+				logmes "" + check_fuda_flg + " " + oyodo_flg
+				if(check_fuda_flg && oyodo_flg){
+					PutLog "【大破・消耗・特殊・遠征・札チェック】"
+					PutLog "判定結果：札追加！？"
+					TasktrayPopup2 "新しくお札が付きますので確認ください", kSoftName, 2, 1000
 					show_stopper_flg1 = TRUE
 				}
 			swbreak

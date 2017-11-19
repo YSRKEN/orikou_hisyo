@@ -191,6 +191,12 @@
 					}
 				}
 			}
+			// 札チェックに関する判定
+			if(oyodo_flg){
+				if(scene_result(0) == "海域出撃" && scene_result(1) == "海域選択"){
+					if(IsSpecialAreaSelectScene(kMainBufferID) == FALSE) :oyodo_flg = FALSE
+				}
+			}
 			// 資材ログ機能
 			gosub *put_supply_log
 			// ソート一覧機能の切り替え操作
