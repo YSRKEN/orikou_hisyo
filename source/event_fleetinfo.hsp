@@ -367,6 +367,7 @@ return
 			if(wid == -1) :_continue
 			wtype = GetTypeFromWeaponCode(target_weapon_id(n, w))
 			wair = GetAntiAirFromWeaponCode(target_weapon_id(n, w))
+			wname = GetNameFromWeaponCode(wid)
 			switch(wtype)
 			case "艦上攻撃機"
 			case "艦上戦闘機"
@@ -379,7 +380,7 @@ return
 				;対空と搭載数に基づいた制空値
 				if(wtype == "艦上戦闘機" || wtype == "多用途水上機/水上戦闘機" || wtype == "水上戦闘機"){
 					coeff = 0.2
-				}else{
+				}else:if(instr(wname,,"爆戦") != -1){
 					coeff = 0.25
 				}
 				all_anti_air += int(sqrt(target_weapon_airs(n, w)) * (coeff * target_weapon_level_g(n, w) + 1.0 * wair))

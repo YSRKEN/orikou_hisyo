@@ -202,6 +202,7 @@
 	#const global kStopperExhausted  2
 	#const global kStopperSpecial    3
 	#const global kStopperExpedition 4
+	#const global kStopperOfuda      5
 	#const global kLockerKammusu 1	;ロック機能
 	#const global kLockerWeapon  2
 	#const kBattleType 2	;戦闘の種類(昼戦・夜戦)
@@ -407,6 +408,7 @@
 	dim count_num, kCounterType
 	sdim counter_output, 1024
 	exercises_flg = FALSE
+	oyodo_flg = FALSE
 	;ボス判定用
 	buffer kTempBufferID, 5, 5
 		color 219,24,24 :boxf
