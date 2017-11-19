@@ -390,7 +390,14 @@
 				}
 				// 札判定
 				gsel kMainBufferID
-				return kStopperOfuda
+				ofuda_flg = TRUE
+				for k, 0, kUnitNum
+					if(NearColor(394, 136 + 50 * k,   1,   0,   0) == FALSE) :ofuda_flg = FALSE :_break
+					if(NearColor(394, 137 + 50 * k, 123, 123, 124) == FALSE) :ofuda_flg = FALSE :_break
+					if(NearColor(394, 138 + 50 * k, 191, 194, 194) == FALSE) :ofuda_flg = FALSE :_break
+					if(NearColor(385, 163 + 50 * k, 195, 206, 181) == FALSE) :ofuda_flg = FALSE :_break
+				next
+				if(ofuda_flg == FALSE) :return kStopperOfuda
 			}
 		return 0
 		// ストッパー画面を表示する
