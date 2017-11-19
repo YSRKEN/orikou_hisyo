@@ -84,7 +84,7 @@ return
 	PutLog "yŠÍ‘à‰æ‘œz"
 	if(save_fleet_index < kFleetNum){
 		// ’ÊíŠÍ‘à‚ğ•Û‘¶
-		buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2
+		buffer kTempBufferID, kUnitWX * 3, kUnitWY * 2 + 30
 		count = 0
 		for y, 0, 2
 			if(count >= unit_count(save_fleet_index)) :_break
@@ -95,9 +95,14 @@ return
 				count++
 			next
 		next
+		message = kSoftName + " " + kVersion
+		pos kUnitWX * 3 - 33 * (strlen(message) + 1) / 2, kUnitWY * 2
+		font msgothic, 30, 1
+		color 0, 0, 0
+		mes message
 	}else{
 		// ˜A‡ŠÍ‘à‚©x‰‡ŠÍ‘à‚ğ•Û‘¶
-		buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3
+		buffer kTempBufferID, kUnitWX * 4, kUnitWY * 3 + 40
 		for z, 0, 2
 			count = 0
 			for y, 0, 3
@@ -110,6 +115,11 @@ return
 				next
 			next
 		next
+		message = kSoftName + " " + kVersion
+		pos kUnitWX * 4 - 44 * (strlen(message) + 1) / 2, kUnitWY * 3
+		font msgothic, 40, 1
+		color 0, 0, 0
+		mes message
 	}
 	file_name = NowTime() + ".png"
 	PicSave file_name
