@@ -405,6 +405,9 @@ return
 
 //*大破・消耗・特殊チェック
 *check_stopper
+	if(stopper_type != 0){
+		logmes "stype " + stopper_type + " / sflg " + show_stopper_flg1 + "," + show_stopper_flg2 + " / " + CheckStopperType()
+	}
 	ShowStopperWindow stopper_type	//ウィンドウ表示
 	if(show_stopper_flg1){
 		// 表示を無くすかどうかの判定
@@ -429,7 +432,7 @@ return
 				show_stopper_flg2 = FALSE
 				gsel kStopperWindowID, -1
 			}
-			if((check_expedition_flg == FALSE) && (stopper_type == kStopperOfuda)){
+			if((check_ofuda_flg == FALSE) && (stopper_type == kStopperOfuda)){
 				show_stopper_flg1 = FALSE
 				show_stopper_flg2 = FALSE
 				gsel kStopperWindowID, -1
