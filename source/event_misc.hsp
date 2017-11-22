@@ -429,7 +429,7 @@ return
 				show_stopper_flg2 = FALSE
 				gsel kStopperWindowID, -1
 			}
-			if((check_expedition_flg == FALSE) && (stopper_type == kStopperOfuda)){
+			if((check_ofuda_flg == FALSE) && (stopper_type == kStopperOfuda)){
 				show_stopper_flg1 = FALSE
 				show_stopper_flg2 = FALSE
 				gsel kStopperWindowID, -1
