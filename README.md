@@ -21,6 +21,22 @@
 
 [【艦これ】おりこうさんな秘書【スクショ】](http://anago.open2ch.net/test/read.cgi/software/1424098430/)
 
+## アップデート方法
+
+![update](https://user-images.githubusercontent.com/3734392/33214354-f776ea28-d16e-11e7-8049-d4d2d6868cfa.png)
+
+　フォルダ構成は基本的に共通ですので、新しい版のzipを展開後、orikou.exeと同じフォルダに
+picフォルダ・logフォルダ・saveフォルダをコピーして下さい。
+　自作テーマを持ち越したい場合はthemeフォルダ内のそれを同じ場所にコピーし、
+　差し替えた音声データを持ち越したい場合は5種類のalert_*.wavを同じ場所にコピーし、
+　自分で編集した表示シーン一覧を持ち越したい場合はshow_scene.csvを同じ場所に、
+　追加した艦娘・装備データを持ち越したい場合はkmms_data.csvやwpn_data.csvを上手くマージして下さい。
+
+## 詳細なヘルプ
+大規模なアプリケーションですので、現在はHTML形式で添付しております。
+zipを解凍した中のhelpフォルダに置いてますが、こちらでも確認できます。
+　https://github.com/YSRKEN/orikou_hisyo/tree/master/help
+
 ## ライセンスの勉強がんばってるね！
 
 - ソフトウェア本体はMITライセンスでち！
