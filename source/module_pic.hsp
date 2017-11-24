@@ -213,7 +213,7 @@
 			if(scene_result@(1) == "êÌâ ïÒçê"){
 				gsel kMainBufferID
 				type = 0
-				for k, 0, kUnitNum
+				for k, -1, kUnitNum
 					if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
 						type = kStopperDeadZone
 						_break
