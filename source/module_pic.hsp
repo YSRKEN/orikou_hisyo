@@ -213,7 +213,7 @@
 			if(scene_result@(1) == "êÌâ ïÒçê"){
 				gsel kMainBufferID
 				type = 0
-				for k, 0, kUnitNum
+				for k, -1, kUnitNum
 					if(NearColor(327, 191 + 45 * k, 250, 98, 90)){
 						type = kStopperDeadZone
 						_break
@@ -393,10 +393,21 @@
 					gsel kMainBufferID
 					ofuda_flg = TRUE
 					for k, 0, kUnitNum
-						if(NearColor(394, 136 + 50 * k,   1,   0,   0) == FALSE) :ofuda_flg = FALSE :logmes "(" + k + ") 1" :_break
-						if(NearColor(394, 137 + 50 * k, 123, 123, 124) == FALSE) :ofuda_flg = FALSE :logmes "(" + k + ") 2" :_break
-						if(NearColor(394, 138 + 50 * k, 191, 194, 194) == FALSE) :ofuda_flg = FALSE :logmes "(" + k + ") 3" :_break
-						//if(NearColor(385, 163 + 50 * k, 195, 206, 181) == FALSE) :ofuda_flg = FALSE :logmes "(" + k + ") 4" :_break
+						ofuda_flg1 = TRUE
+						while
+							if(NearColor(394, 136 + 50 * k,   1,   0,   0) == FALSE) :ofuda_flg1 = FALSE :_break
+							if(NearColor(394, 137 + 50 * k, 123, 123, 124) == FALSE) :ofuda_flg1 = FALSE :_break
+							if(NearColor(394, 138 + 50 * k, 191, 194, 194) == FALSE) :ofuda_flg1 = FALSE :_break
+							_break
+						wend
+						ofuda_flg2 = TRUE
+						while
+							if(NearColor(387, 171 + 50 * k,   7,   2,   5) == FALSE) :ofuda_flg2 = FALSE :_break
+							if(NearColor(387, 172 + 50 * k,  45,  45,  45) == FALSE) :ofuda_flg2 = FALSE :_break
+							if(NearColor(387, 173 + 50 * k, 222, 222, 222) == FALSE) :ofuda_flg2 = FALSE :_break
+							_break
+						wend
+						if(ofuda_flg1 == FALSE && ofuda_flg2 == FALSE) :ofuda_flg = FALSE :_break
 					next
 					if(ofuda_flg == FALSE) :return kStopperOfuda
 				}

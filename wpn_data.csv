@@ -1,3 +1,4 @@
+装備ID,装備名,種別,対空,索敵,マーク
 1,12cm単装砲,小口径主砲,1,0,wwwwwwbbwwwwwwwbbwwwbbwwwwwbbwwwbbwwwbbwwwbwwwbwwwbwwwwwwwwbwwwwwwwbbwbwbbbbwbbwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 2,12.7cm連装砲,小口径主砲,2,0,wwwwwwbbwwwwwwwbbwwwwwwwwwbbwwwwbbwwwwwbwwwwbwwwwbbwwwbwwbbbbbbbwwwwwwwbwwwwwwwbbwbwbbbbwbbwwwwwwwwwwwwwwwww
 3,10cm連装高角砲,小口径主砲,7,0,wwwwwwbbwwwwbbwwwwbbwbbwwwwwbbwwwbbwwwbwwwwbwwbbbbbbbwwwwwwwbwwwwwwwbbbbbbbbbbbwwwbwwwbwwwbwwwbbwbwbbbbwbbww
@@ -218,6 +219,7 @@
 236,41cm三連装砲改,大口径主砲,6,0,wwwbbwwbwwwwwwbwwwwwbbwwwwwbbwwwbbwwwbbwwwwwwwwwwwwwwwwbwwbbbbbbbwwwwwwwbwwwwwwwbbwbwbbbbwbbwbwwwbwbwbbwwwww
 237,瑞雲(六三四空/熟練),水上爆撃機,4,7,wwwwbwwwwbbwwwwwwwwwwwwwwwwwwbwwwwwwbbwwwbbwwwwwwwwwwwwwwwwwbwbbwwbwbbbwwbbwwwwwwwwwwwwbbwwwwwbbwwbbbbbwwbbb
 238,零式水上偵察機11型乙,水上偵察機,1,6,wwbbbbbbbbbbbbbwbbbbbbbbbwwwwwwbbwbbbwwwwwwwwwwbwwwwwwbbbwwbwwwwwbwwwbbbbbbbbbwwwbbbbbbbbbbbbwwwwbwwwwwwwwbw
+239,零式水上偵察機11型乙(熟練),水上偵察機,1,8,？
 240,22号対水上電探改四(後期調整型),小型電探,0,7,？
 241,戦闘糧食(特別なおにぎり),戦闘糧食,0,0,wwwbbbbbbwbbbbwwbbbbbbbbbbbwwbbbwwbwbwwbwwwwbwwwwwbwwwwbwwwwwwbbbbbbbbbbwwbbbbbwbwwbwwwbbwwwwbwwwwwwwwbbbbbb
 242,Swordfish,艦上攻撃機,0,1,wwwwwbbbwwbbwbwbbwbbwwbbwwwwbbwwbwwwbbwwwwbwwwbwwwbwwwbbbwwwwbwwwwbwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
@@ -239,3 +241,5 @@
 261,Type144/147 ASDIC,ソナー,0,0,？
 262,HF/DF＋Type144/147 ASDIC,ソナー,0,2,？
 266,12.7cm連装砲C型改二,小口径主砲,2,0,？
+271,紫電改四,艦上戦闘機,10,0,？
+272,遊撃部隊 艦隊司令部,艦隊司令部施設,0,1,？
