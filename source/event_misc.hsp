@@ -404,13 +404,28 @@ return
 return
 
 //*大破・消耗・特殊チェック
+// stopper_type……0なら「ストッパーを表示するべきではない」ことを表す。
+//     それ以外なら、ストッパーの表示タイプが代入されている
+// CheckStopperType()……stopper_typeを唯一書き換えられる関数。ストッパーの表示タイプを返す
+// show_stopper_flg1……進撃/出撃ストッパーの画面を出せる状態ならTRUE
+// show_stopper_flg2……進撃/出撃ストッパーの画面を出していたらTRUE
+// ShowStopperWindow stopper_type……ストッパーの画面を表示する。
+//     show_stopper_flg1がTRUEかつshow_stopper_flg2がFALSEの時、その時点での状況に
+//     応じてストッパーの画面を表示し、show_stopper_flg2をTRUEにする。
+//     ただしstopper_type＝0なら何もしない
+// gsel kStopperWindowID, -1……ストッパーの画面を非表示にする
 *check_stopper
 	if(stopper_type != 0){
 		logmes "stype " + stopper_type + " / sflg " + show_stopper_flg1 + "," + show_stopper_flg2 + " / " + CheckStopperType()
 	}
-	ShowStopperWindow stopper_type	//ウィンドウ表示
+	// ストッパーの画面を表示する
+	// show_stopper_flg1がTRUEならば、ストッパーを出せる状況だとソフトは考えている。
+	// なのでshow_stopper_flg2を見て、TRUEなら表示を消すべきか考え、
+	// FALSEなら再度表示を行うべきか考える
 	if(show_stopper_flg1){
 		// 表示を無くすかどうかの判定
+		// (オプションのチェックが外れている場合や進撃確認画面以外でCheckStopperType()が
+		// 0になっている場合、即座に非表示にする)
 		if(show_stopper_flg2){
 			if((check_deadzone_flg == FALSE) && (stopper_type == kStopperDeadZone)){
 				show_stopper_flg1 = FALSE
@@ -442,6 +457,8 @@ return
 				show_stopper_flg2 = FALSE
 				gsel kStopperWindowID, -1
 			}
+		// 表示をするべきかどうかの判定
+		// (オプションのチェックが入っている場合、即座に表示にする)
 		}else{
 			if((check_deadzone_flg) && (stopper_type == kStopperDeadZone)){
 				ShowStopperWindow stopper_type
