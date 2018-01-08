@@ -424,8 +424,14 @@ return
 	// FALSEなら再度表示を行うべきか考える
 	if(show_stopper_flg1){
 		// 表示を無くすかどうかの判定
-		// (オプションのチェックが外れている場合や進撃確認画面以外でCheckStopperType()が
-		// 0になっている場合、即座に非表示にする)
+		// (オプションのチェックが外れている場合や
+		// 進撃確認画面以外でCheckStopperType()が0になっている場合、
+		// または旗艦大破撤退だった時には即座に非表示にする)
+		if(scene_result(0) == "母港画面"){
+			show_stopper_flg1 = FALSE
+			show_stopper_flg2 = FALSE
+			gsel kStopperWindowID, -1
+		}
 		if(show_stopper_flg2){
 			if((check_deadzone_flg == FALSE) && (stopper_type == kStopperDeadZone)){
 				show_stopper_flg1 = FALSE
