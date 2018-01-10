@@ -7,8 +7,8 @@
 			dialog "ネットに接続できませんでした。", 1, kSoftName
 			return ""
 		}
-		neturl@ "http://ysrken.blog.fc2.com/"
-		netrequest_get@ "blog-entry-77.html"
+		neturl@ "https://raw.githubusercontent.com/YSRKEN/orikou_hisyo/master/"
+		netrequest_get@ "version.txt"
 		error_flg = FALSE
 		while
 			netexec@ res
@@ -23,13 +23,8 @@
 			netgetv@ html_buffer
 			sdim html_buffer2, 32000
 			nkfcnv@ html_buffer2, html_buffer, "s", -1, 32000
-			begin_str = "最新バージョン</span><br />"
-			begin_str_len = strlen(begin_str)
-			end_str = "<br />"
-			pos1 = instr(html_buffer2,,begin_str)
-			pos2 = instr(html_buffer2, pos1 + begin_str_len, end_str)
-			ver = strmid(html_buffer2, pos1 + begin_str_len, pos2)
-			return ver
+			ver = html_buffer2
+			return "Ver." + ver
 		}
 	return ""
 #global
